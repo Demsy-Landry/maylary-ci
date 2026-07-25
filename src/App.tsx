@@ -1,22 +1,41 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/sonner';
+import { AuthProvider } from '@/hooks/useAuth';
+import { CartGPProvider } from '@/hooks/useCartGP';
+import Index from '@/pages/Index';
+import CatalogueGrandPublic from '@/pages/CatalogueGrandPublic';
+import CatalogueCategorieGP from '@/pages/CatalogueCategorieGP';
+import ProduitDetailGP from '@/pages/ProduitDetailGP';
+import PanierAchat from '@/pages/PanierAchat';
+import CommandeGP from '@/pages/CommandeGP';
+import CompteGP from '@/pages/CompteGP';
+import MesCommandesGP from '@/pages/MesCommandesGP';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
-    <div className="flex min-h-svh items-center justify-center p-8">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Maylary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-sm">
-            Base du projet initialisée avec succès.
-          </p>
-          <Button className="mt-4">Continuer</Button>
-        </CardContent>
-      </Card>
-    </div>
-  )
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <CartGPProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/boutique" element={<CatalogueGrandPublic />} />
+              <Route path="/boutique/categorie/:categorieId" element={<CatalogueCategorieGP />} />
+              <Route path="/boutique/produit/:produitId" element={<ProduitDetailGP />} />
+              <Route path="/boutique/panier" element={<PanierAchat />} />
+              <Route path="/boutique/commande" element={<CommandeGP />} />
+              <Route path="/boutique/compte" element={<CompteGP />} />
+              <Route path="/boutique/mes-commandes" element={<MesCommandesGP />} />
+            </Routes>
+          </BrowserRouter>
+          <Toaster />
+        </CartGPProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
 }
 
-export default App
+export default App;
