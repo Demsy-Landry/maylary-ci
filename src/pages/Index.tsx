@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { Boxes, ShieldCheck, ClipboardList, ShoppingBag, ArrowRight, Truck, Building2 } from 'lucide-react';
 import HeroScene from '@/components/HeroScene';
-import SectorIllustration, { SECTORS } from '@/components/illustrations/SectorIllustration';
+import SectorIllustration, { SECTORS, SECTOR_PHOTOS } from '@/components/illustrations/SectorIllustration';
 
 export default function Index() {
   return (
@@ -86,22 +86,32 @@ export default function Index() {
                 key={s.key}
                 className="group flex flex-col items-center rounded-2xl border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-lg"
               >
-                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                  <SectorIllustration
-                    sector={s.key}
-                    animated
-                    className="h-12 w-12"
-                    style={
-                      {
-                        '--float-x': `${6 + (i % 3) * 3}px`,
-                        '--float-y': `${-8 - (i % 2) * 4}px`,
-                        '--float-rot-from': `${-3 - i}deg`,
-                        '--float-rot-to': `${3 + i}deg`,
-                        '--float-duration': `${7 + i}s`,
-                      } as CSSProperties
-                    }
-                  />
-                </div>
+                {SECTOR_PHOTOS[s.key] ? (
+                  <div className="h-20 w-20 overflow-hidden rounded-full border border-primary/15">
+                    <img
+                      src={SECTOR_PHOTOS[s.key]}
+                      alt={s.label}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                    <SectorIllustration
+                      sector={s.key}
+                      animated
+                      className="h-12 w-12"
+                      style={
+                        {
+                          '--float-x': `${6 + (i % 3) * 3}px`,
+                          '--float-y': `${-8 - (i % 2) * 4}px`,
+                          '--float-rot-from': `${-3 - i}deg`,
+                          '--float-rot-to': `${3 + i}deg`,
+                          '--float-duration': `${7 + i}s`,
+                        } as CSSProperties
+                      }
+                    />
+                  </div>
+                )}
                 <h3 className="font-display mt-3 text-sm font-bold text-foreground">{s.label}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">{s.description}</p>
               </div>

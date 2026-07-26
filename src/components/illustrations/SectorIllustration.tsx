@@ -16,6 +16,16 @@ export type SectorKey =
   | 'tech'
   | 'textile';
 
+/**
+ * Vraies photos (hébergées sur Supabase Storage, sourcées via Canva) qui
+ * remplacent l'illustration SVG codée en dur quand elles existent. Un
+ * secteur sans entrée ici retombe automatiquement sur son SVG.
+ */
+export const SECTOR_PHOTOS: Partial<Record<SectorKey, string>> = {
+  mobilier:
+    'https://oubowmftzxpruckjzwuq.supabase.co/storage/v1/object/public/app_e08c374bc4_produit_photos/secteurs/mobilier.png',
+};
+
 export const SECTORS: Array<{ key: SectorKey; label: string; description: string }> = [
   { key: 'boutique', label: 'Boutique', description: 'Produits tendance, sourcing international' },
   { key: 'mobilier', label: 'Mobilier', description: 'Bureaux, salons, agencement professionnel' },
