@@ -21,7 +21,7 @@ export default function Index() {
           <HeroScene />
 
           <div className="relative mx-auto max-w-screen-xl px-4 pt-16 pb-44 sm:px-6 sm:pt-24 sm:pb-56">
-            <div className="max-w-2xl motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700">
+            <div className="max-w-2xl motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-600 motion-safe:delay-[350ms] motion-safe:fill-mode-both">
               <p className="text-sm font-bold uppercase tracking-widest text-primary-emphasis">
                 Côte d'Ivoire
               </p>
@@ -34,7 +34,7 @@ export default function Index() {
               </p>
             </div>
 
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700 motion-safe:delay-150 motion-safe:fill-mode-both">
+            <div className="mt-12 grid gap-4 sm:grid-cols-2 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-600 motion-safe:delay-[500ms] motion-safe:fill-mode-both">
               <Link
                 to="/boutique"
                 className="group relative overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-lg"
