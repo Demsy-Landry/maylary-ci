@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Boxes, ShieldCheck, ClipboardList, ShoppingBag, ArrowRight, Truck, Building2 } from 'lucide-react';
+import HeroScene from '@/components/HeroScene';
 
 export default function Index() {
   return (
@@ -17,13 +18,9 @@ export default function Index() {
 
       <main>
         <section className="relative overflow-hidden">
-          {/* Formes douces en arrière-plan, dans la palette de marque */}
-          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-            <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-primary/15 blur-3xl" />
-            <div className="absolute -left-32 top-1/3 h-80 w-80 rounded-full bg-accent/15 blur-3xl" />
-          </div>
+          <HeroScene />
 
-          <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24">
+          <div className="relative mx-auto max-w-screen-xl px-4 pt-16 pb-44 sm:px-6 sm:pt-24 sm:pb-56">
             <div className="max-w-2xl motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700">
               <p className="text-sm font-bold uppercase tracking-widest text-primary">
                 Côte d'Ivoire
@@ -72,29 +69,31 @@ export default function Index() {
                 </span>
               </Link>
             </div>
+          </div>
+        </section>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-3 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700 motion-safe:delay-300 motion-safe:fill-mode-both">
-              <div className="rounded-xl border bg-card p-5 transition-shadow duration-300 hover:shadow-md">
-                <ClipboardList className="h-6 w-6 text-primary" />
-                <h3 className="font-display mt-3 font-bold text-foreground">Catalogues vérifiés</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Des produits réels, sélectionnés avec soin.
-                </p>
-              </div>
-              <div className="rounded-xl border bg-card p-5 transition-shadow duration-300 hover:shadow-md">
-                <Truck className="h-6 w-6 text-primary" />
-                <h3 className="font-display mt-3 font-bold text-foreground">Livraison suivie</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Suivez chaque commande jusqu'à la livraison.
-                </p>
-              </div>
-              <div className="rounded-xl border bg-card p-5 transition-shadow duration-300 hover:shadow-md">
-                <ShieldCheck className="h-6 w-6 text-primary" />
-                <h3 className="font-display mt-3 font-bold text-foreground">Paiement simple</h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Mobile Money ou virement, sans complication.
-                </p>
-              </div>
+        <section className="mx-auto max-w-screen-xl px-4 pt-6 pb-16 sm:px-6 sm:pt-8 sm:pb-24">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border bg-card p-5 transition-shadow duration-300 hover:shadow-md">
+              <ClipboardList className="h-6 w-6 text-primary" />
+              <h3 className="font-display mt-3 font-bold text-foreground">Catalogues vérifiés</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Des produits réels, sélectionnés avec soin.
+              </p>
+            </div>
+            <div className="rounded-xl border bg-card p-5 transition-shadow duration-300 hover:shadow-md">
+              <Truck className="h-6 w-6 text-primary" />
+              <h3 className="font-display mt-3 font-bold text-foreground">Livraison suivie</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Suivez chaque commande jusqu'à la livraison.
+              </p>
+            </div>
+            <div className="rounded-xl border bg-card p-5 transition-shadow duration-300 hover:shadow-md">
+              <ShieldCheck className="h-6 w-6 text-primary" />
+              <h3 className="font-display mt-3 font-bold text-foreground">Paiement simple</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Mobile Money ou virement, sans complication.
+              </p>
             </div>
           </div>
         </section>
