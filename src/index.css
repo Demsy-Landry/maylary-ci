@@ -1,51 +1,74 @@
 @import "tailwindcss";
+@import "@fontsource-variable/baloo-2";
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --radius: 0.9rem;
+
+  /* Marché Vivant — fond ivoire chaud, encre brun profond */
+  --background: oklch(0.97 0.02 75);
+  --foreground: oklch(0.24 0.045 40);
+
+  --card: oklch(0.995 0.008 75);
+  --card-foreground: oklch(0.24 0.045 40);
+  --popover: oklch(0.995 0.008 75);
+  --popover-foreground: oklch(0.24 0.045 40);
+
+  /* Primaire : ocre soleil */
+  --primary: oklch(0.62 0.19 45);
+  --primary-foreground: oklch(0.99 0.01 75);
+
+  /* Secondaire : ivoire un peu plus soutenu, pour les surfaces neutres */
+  --secondary: oklch(0.93 0.03 70);
+  --secondary-foreground: oklch(0.3 0.05 40);
+
+  --muted: oklch(0.93 0.025 70);
+  --muted-foreground: oklch(0.48 0.045 45);
+
+  /* Accent : émeraude profond (marché, feuillage) */
+  --accent: oklch(0.4 0.08 165);
+  --accent-foreground: oklch(0.99 0.01 75);
+
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --destructive-foreground: oklch(0.99 0.01 75);
+
+  --border: oklch(0.88 0.035 65);
+  --input: oklch(0.88 0.035 65);
+  --ring: oklch(0.62 0.19 45 / 0.5);
+
+  --font-display: "Baloo 2 Variable", ui-rounded, "Nunito Sans", system-ui, sans-serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: oklch(0.2 0.035 40);
+  --foreground: oklch(0.96 0.02 75);
+
+  --card: oklch(0.25 0.04 40);
+  --card-foreground: oklch(0.96 0.02 75);
+  --popover: oklch(0.25 0.04 40);
+  --popover-foreground: oklch(0.96 0.02 75);
+
+  --primary: oklch(0.68 0.18 45);
+  --primary-foreground: oklch(0.2 0.035 40);
+
+  --secondary: oklch(0.3 0.04 40);
+  --secondary-foreground: oklch(0.96 0.02 75);
+
+  --muted: oklch(0.3 0.04 40);
+  --muted-foreground: oklch(0.72 0.03 60);
+
+  --accent: oklch(0.55 0.09 165);
+  --accent-foreground: oklch(0.98 0.01 75);
+
   --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
+  --destructive-foreground: oklch(0.98 0.01 75);
+
+  --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.68 0.18 45 / 0.5);
 }
 
 @theme inline {
@@ -69,6 +92,9 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -81,5 +107,12 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
   }
 }
