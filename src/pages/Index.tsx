@@ -22,7 +22,7 @@ export default function Index() {
 
           <div className="relative mx-auto max-w-screen-xl px-4 pt-16 pb-44 sm:px-6 sm:pt-24 sm:pb-56">
             <div className="max-w-2xl motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700">
-              <p className="text-sm font-bold uppercase tracking-widest text-primary">
+              <p className="text-sm font-bold uppercase tracking-widest text-primary-emphasis">
                 Côte d'Ivoire
               </p>
               <h1 className="font-display mt-3 text-4xl font-extrabold leading-tight tracking-tight text-foreground text-balance sm:text-5xl">
@@ -46,7 +46,7 @@ export default function Index() {
                 <p className="mt-2 text-sm text-muted-foreground">
                   Grand public — découvrez nos produits et commandez en toute simplicité.
                 </p>
-                <span className="mt-4 inline-flex items-center text-sm font-semibold text-primary">
+                <span className="mt-4 inline-flex items-center text-sm font-semibold text-primary-emphasis">
                   Découvrir la boutique
                   <ArrowRight className="ml-1.5 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </span>

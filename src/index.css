@@ -19,6 +19,10 @@
   /* Primaire : ocre soleil */
   --primary: oklch(0.62 0.19 45);
   --primary-foreground: oklch(0.99 0.01 75);
+  /* Variante "texte" du primaire, plus foncée : le ton bouton (0.62) tombe à
+     ~3.4:1 sur fond clair une fois utilisé en petit texte, sous le seuil AA
+     (4.5:1). Réservée aux libellés/liens colorés, jamais aux fonds. */
+  --primary-emphasis: oklch(0.5 0.19 45);
 
   /* Secondaire : ivoire un peu plus soutenu, pour les surfaces neutres */
   --secondary: oklch(0.93 0.03 70);
@@ -53,6 +57,7 @@
 
   --primary: oklch(0.68 0.18 45);
   --primary-foreground: oklch(0.2 0.035 40);
+  --primary-emphasis: oklch(0.78 0.14 45);
 
   --secondary: oklch(0.3 0.04 40);
   --secondary-foreground: oklch(0.96 0.02 75);
@@ -80,6 +85,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-emphasis: var(--primary-emphasis);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
