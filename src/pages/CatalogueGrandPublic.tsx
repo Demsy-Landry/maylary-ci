@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Search, ImageOff } from 'lucide-react';
+import SectorIllustration, { guessSector } from '@/components/illustrations/SectorIllustration';
 
 export default function CatalogueGrandPublic() {
   const [categories, setCategories] = useState<CategorieGP[]>([]);
@@ -104,8 +105,8 @@ export default function CatalogueGrandPublic() {
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-muted">
-                        <ImageOff className="h-6 w-6 text-muted-foreground" />
+                      <div className="flex h-full w-full items-center justify-center bg-primary/10">
+                        <SectorIllustration sector={guessSector(c.nom)} className="h-14 w-14" />
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />

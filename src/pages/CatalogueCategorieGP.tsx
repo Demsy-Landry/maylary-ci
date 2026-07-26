@@ -4,7 +4,8 @@ import PublicHeaderGP from '@/components/PublicHeaderGP';
 import { supabase, CATEGORIES_GP_TABLE, PRODUITS_PUBLIC_VIEW, type CategorieGP, type Produit } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProductCardGP } from '@/pages/CatalogueGrandPublic';
-import { ImageOff, ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
+import SectorIllustration, { guessSector } from '@/components/illustrations/SectorIllustration';
 
 export default function CatalogueCategorieGP() {
   const { categorieId } = useParams<{ categorieId: string }>();
@@ -65,8 +66,8 @@ export default function CatalogueCategorieGP() {
                   className="h-40 w-full object-cover sm:h-52"
                 />
               ) : (
-                <div className="flex h-40 w-full items-center justify-center bg-muted sm:h-52">
-                  <ImageOff className="h-8 w-8 text-muted-foreground" />
+                <div className="flex h-40 w-full items-center justify-center bg-primary/10 sm:h-52">
+                  <SectorIllustration sector={guessSector(categorie.nom)} className="h-20 w-20" />
                 </div>
               )}
               <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/70 via-black/20 to-transparent p-5">

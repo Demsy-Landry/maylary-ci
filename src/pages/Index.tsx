@@ -1,6 +1,8 @@
+import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { Boxes, ShieldCheck, ClipboardList, ShoppingBag, ArrowRight, Truck, Building2 } from 'lucide-react';
 import HeroScene from '@/components/HeroScene';
+import SectorIllustration, { SECTORS } from '@/components/illustrations/SectorIllustration';
 
 export default function Index() {
   return (
@@ -20,7 +22,7 @@ export default function Index() {
         <section className="relative overflow-hidden">
           <HeroScene />
 
-          <div className="relative mx-auto max-w-screen-xl px-4 pt-16 pb-44 sm:px-6 sm:pt-24 sm:pb-56">
+          <div className="relative mx-auto max-w-screen-xl px-4 pt-16 pb-16 sm:px-6 sm:pt-24 sm:pb-20">
             <div className="max-w-2xl motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-600 motion-safe:delay-[350ms] motion-safe:fill-mode-both">
               <p className="text-sm font-bold uppercase tracking-widest text-primary-emphasis">
                 Côte d'Ivoire
@@ -69,6 +71,41 @@ export default function Index() {
                 </span>
               </Link>
             </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-screen-xl px-4 pb-6 sm:px-6">
+          <h2 className="font-display text-2xl font-bold text-foreground">Nos secteurs</h2>
+          <p className="mt-1 max-w-prose text-sm text-muted-foreground">
+            Les univers de boutiques et d'entreprises pour lesquels Maylary vend et livre en
+            Côte d'Ivoire.
+          </p>
+          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            {SECTORS.map((s, i) => (
+              <div
+                key={s.key}
+                className="group flex flex-col items-center rounded-2xl border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-lg"
+              >
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+                  <SectorIllustration
+                    sector={s.key}
+                    animated
+                    className="h-12 w-12"
+                    style={
+                      {
+                        '--float-x': `${6 + (i % 3) * 3}px`,
+                        '--float-y': `${-8 - (i % 2) * 4}px`,
+                        '--float-rot-from': `${-3 - i}deg`,
+                        '--float-rot-to': `${3 + i}deg`,
+                        '--float-duration': `${7 + i}s`,
+                      } as CSSProperties
+                    }
+                  />
+                </div>
+                <h3 className="font-display mt-3 text-sm font-bold text-foreground">{s.label}</h3>
+                <p className="mt-1 text-xs text-muted-foreground">{s.description}</p>
+              </div>
+            ))}
           </div>
         </section>
 
