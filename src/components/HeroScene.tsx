@@ -35,12 +35,18 @@ export default function HeroScene() {
       className="hero-scene pointer-events-none absolute inset-0 overflow-hidden"
       aria-hidden="true"
     >
-      {/* Couche 1 — skyline stylisée d'Abidjan, dérive lente en fond */}
+      {/* Couche 2 — ciel et lumière : dégradé qui dérive très lentement, façon aube sur la lagune */}
+      <div className="animate-sky-drift absolute inset-0 bg-[length:200%_200%] bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+      <div className="animate-glow-drift-a absolute -top-8 -left-16 h-72 w-72 rounded-full bg-primary/20 blur-3xl sm:h-96 sm:w-96" />
+      <div className="animate-glow-drift-b absolute top-1/4 right-0 h-64 w-64 rounded-full bg-accent/15 blur-3xl sm:h-80 sm:w-80" />
+      <div className="animate-glow-drift-c absolute top-1/3 left-1/3 h-56 w-56 rounded-full bg-primary/10 blur-3xl sm:h-72 sm:w-72" />
+
+      {/* Couche 1 — skyline stylisée d'Abidjan, dérive lente en fond (parallax) */}
       <div className="hero-skyline absolute inset-x-0 bottom-0 h-32 sm:h-44 md:h-52">
         <svg
           viewBox={`0 0 1200 ${SKYLINE_HEIGHT}`}
           preserveAspectRatio="xMidYMax slice"
-          className="h-full w-[130%] -translate-x-[8%]"
+          className="animate-skyline-parallax h-full w-[130%] -translate-x-[8%]"
         >
           <defs>
             <linearGradient id="landmark-gradient" x1="0" y1="0" x2="0" y2="1">

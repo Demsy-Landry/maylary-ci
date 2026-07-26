@@ -116,3 +116,84 @@
     font-family: var(--font-display);
   }
 }
+
+/* ---- Hero cinématique — motion design génératif (aucune couleur en dur, ---- */
+/* ---- tout référence les variables de thème via Tailwind ci-dessus)      ---- */
+
+@keyframes sky-drift {
+  0%,
+  100% {
+    background-position: 20% 30%;
+  }
+  50% {
+    background-position: 80% 60%;
+  }
+}
+@keyframes glow-drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(24px, -18px) scale(1.06);
+  }
+}
+@keyframes glow-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-30px, 16px) scale(1.08);
+  }
+}
+@keyframes glow-drift-c {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(18px, 22px) scale(0.95);
+  }
+}
+@keyframes skyline-parallax {
+  0%,
+  100% {
+    transform: translateX(-8%);
+  }
+  50% {
+    transform: translateX(-10.5%);
+  }
+}
+@keyframes float-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(var(--float-rot-from, -4deg));
+  }
+  50% {
+    transform: translate(var(--float-x, 10px), var(--float-y, -14px)) rotate(var(--float-rot-to, 4deg));
+  }
+}
+
+/* Toutes les boucles infinies sont désactivées si l'utilisateur préfère moins de mouvement : */
+/* il obtient la même composition, figée sur son état final, sans aucune animation. */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-sky-drift {
+    animation: sky-drift 28s ease-in-out infinite;
+  }
+  .animate-glow-drift-a {
+    animation: glow-drift-a 16s ease-in-out infinite;
+  }
+  .animate-glow-drift-b {
+    animation: glow-drift-b 20s ease-in-out infinite;
+  }
+  .animate-glow-drift-c {
+    animation: glow-drift-c 14s ease-in-out infinite;
+  }
+  .animate-skyline-parallax {
+    animation: skyline-parallax 40s ease-in-out infinite;
+  }
+  .animate-float-drift {
+    animation: float-drift var(--float-duration, 9s) ease-in-out infinite;
+  }
+}
