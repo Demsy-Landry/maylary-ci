@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
-import { Boxes, ShoppingCart, User, Building2 } from 'lucide-react';
+import { Boxes, ShoppingCart, User, Building2, ShieldCheck } from 'lucide-react';
 
 export default function PublicHeaderGP() {
   const { user, isAdmin } = useAuth();
@@ -39,6 +39,14 @@ export default function PublicHeaderGP() {
               )}
             </Link>
           </Button>
+          {isAdmin && (
+            <Button asChild variant="outline" size="sm">
+              <Link to="/admin/cj-dropshipping">
+                <ShieldCheck className="mr-1.5 h-4 w-4" />
+                <span className="hidden sm:inline">Admin</span>
+              </Link>
+            </Button>
+          )}
           {user && !isAdmin ? (
             <Button variant="outline" size="sm" onClick={() => navigate('/boutique/mes-commandes')}>
               <User className="mr-1.5 h-4 w-4" />
