@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/hooks/useAuth';
 import { CartGPProvider } from '@/hooks/useCartGP';
+import AdminRoute from '@/components/AdminRoute';
 import Index from '@/pages/Index';
 import CatalogueGrandPublic from '@/pages/CatalogueGrandPublic';
 import CatalogueCategorieGP from '@/pages/CatalogueCategorieGP';
@@ -11,6 +12,7 @@ import PanierAchat from '@/pages/PanierAchat';
 import CommandeGP from '@/pages/CommandeGP';
 import CompteGP from '@/pages/CompteGP';
 import MesCommandesGP from '@/pages/MesCommandesGP';
+import CjDropshippingImport from '@/pages/admin/CjDropshippingImport';
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,14 @@ function App() {
               <Route path="/boutique/commande" element={<CommandeGP />} />
               <Route path="/boutique/compte" element={<CompteGP />} />
               <Route path="/boutique/mes-commandes" element={<MesCommandesGP />} />
+              <Route
+                path="/admin/cj-dropshipping"
+                element={
+                  <AdminRoute>
+                    <CjDropshippingImport />
+                  </AdminRoute>
+                }
+              />
             </Routes>
           </BrowserRouter>
           <Toaster />
