@@ -1,3 +1,6 @@
+import type { CSSProperties } from 'react';
+import { ShoppingBag, Armchair, Package, Smartphone, Shirt } from 'lucide-react';
+
 /**
  * Scène animée du hero de la page d'accueil — motion design 100% généré en
  * code (aucune photo/vidéo). Construite en couches : ciel, skyline, éléments
@@ -28,6 +31,44 @@ const BUILDINGS: Array<{ x: number; w: number; h: number; rx?: number }> = [
 ];
 
 const SKYLINE_HEIGHT = 220;
+
+const FLOATING_ITEMS: Array<{
+  Icon: typeof ShoppingBag;
+  className: string;
+  tone: string;
+  style: CSSProperties;
+}> = [
+  {
+    Icon: ShoppingBag,
+    className: 'top-[14%] right-[10%] h-11 w-11 sm:h-14 sm:w-14',
+    tone: 'text-primary/25',
+    style: { '--float-x': '10px', '--float-y': '-16px', '--float-rot-from': '-6deg', '--float-rot-to': '4deg', '--float-duration': '10s' } as CSSProperties,
+  },
+  {
+    Icon: Shirt,
+    className: 'top-[6%] right-[30%] h-9 w-9 sm:h-11 sm:w-11',
+    tone: 'text-accent/20',
+    style: { '--float-x': '-8px', '--float-y': '12px', '--float-rot-from': '5deg', '--float-rot-to': '-3deg', '--float-duration': '12s' } as CSSProperties,
+  },
+  {
+    Icon: Smartphone,
+    className: 'top-[32%] right-[26%] h-8 w-8 sm:h-10 sm:w-10',
+    tone: 'text-primary/20',
+    style: { '--float-x': '12px', '--float-y': '10px', '--float-rot-from': '-4deg', '--float-rot-to': '6deg', '--float-duration': '9s' } as CSSProperties,
+  },
+  {
+    Icon: Armchair,
+    className: 'top-[46%] right-[6%] h-12 w-12 sm:h-16 sm:w-16',
+    tone: 'text-accent/25',
+    style: { '--float-x': '-14px', '--float-y': '-10px', '--float-rot-from': '4deg', '--float-rot-to': '-5deg', '--float-duration': '13s' } as CSSProperties,
+  },
+  {
+    Icon: Package,
+    className: 'top-[20%] right-[46%] h-9 w-9 sm:h-12 sm:w-12',
+    tone: 'text-foreground/[0.14]',
+    style: { '--float-x': '9px', '--float-y': '-11px', '--float-rot-from': '-3deg', '--float-rot-to': '5deg', '--float-duration': '11s' } as CSSProperties,
+  },
+];
 
 export default function HeroScene() {
   return (
@@ -80,6 +121,16 @@ export default function HeroScene() {
           <rect x="779" y="10" width="8" height="24" rx="3" className="fill-accent/70" />
         </svg>
       </div>
+
+      {/* Couche 3 — silhouettes de commerce qui flottent doucement, opacité subtile */}
+      {FLOATING_ITEMS.map(({ Icon, className, tone, style }, i) => (
+        <Icon
+          key={i}
+          strokeWidth={1.5}
+          className={`animate-float-drift absolute hidden sm:block ${tone} ${className}`}
+          style={style}
+        />
+      ))}
     </div>
   );
 }
