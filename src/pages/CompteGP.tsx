@@ -58,9 +58,11 @@ export default function CompteGP() {
     toast.success('Connexion réussie.');
     setLoginLoading(false);
     navigate(
-      profileData?.type_compte === 'entreprise_acheteuse'
-        ? '/catalogue/mes-devis'
-        : '/boutique/mes-commandes',
+      profileData?.type_compte === 'admin'
+        ? '/admin/cj-dropshipping'
+        : profileData?.type_compte === 'entreprise_acheteuse'
+          ? '/catalogue/mes-devis'
+          : '/boutique/mes-commandes',
     );
   };
 

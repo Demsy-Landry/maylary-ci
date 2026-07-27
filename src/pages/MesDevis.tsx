@@ -131,7 +131,15 @@ export default function MesDevis() {
         )}
       </main>
 
-      <Dialog open={!!detail || detailLoading} onOpenChange={(open) => !open && setDetail(null)}>
+      <Dialog
+        open={!!detail || detailLoading}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDetail(null);
+            setDetailLoading(false);
+          }
+        }}
+      >
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Devis {detail?.reference_publique}</DialogTitle>
