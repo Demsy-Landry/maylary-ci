@@ -2,12 +2,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
-import { Boxes, ShoppingCart, User, Building2, ShieldCheck } from 'lucide-react';
+import { Boxes, ShoppingCart, User, Building2, ShieldCheck, LogOut } from 'lucide-react';
 
 export default function PublicHeaderGP() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const { totalArticles } = useCartGP();
   const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-10 border-b bg-card">
@@ -47,7 +52,12 @@ export default function PublicHeaderGP() {
               </Link>
             </Button>
           )}
-          {user && !isAdmin ? (
+          {user && isAdmin ? (
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="mr-1.5 h-4 w-4" />
+              <span className="hidden sm:inline">Déconnexion</span>
+            </Button>
+          ) : user ? (
             <Button variant="outline" size="sm" onClick={() => navigate('/boutique/mes-commandes')}>
               <User className="mr-1.5 h-4 w-4" />
               <span className="hidden sm:inline">Mes commandes</span>

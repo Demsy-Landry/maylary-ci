@@ -2,12 +2,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
-import { Boxes, ClipboardList, User, ShoppingBag } from 'lucide-react';
+import { Boxes, ClipboardList, User, ShoppingBag, LogOut } from 'lucide-react';
 
 export default function PublicHeaderPro() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const { totalArticles } = useCart();
   const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   return (
     <header className="sticky top-0 z-10 border-b bg-card">
@@ -44,7 +49,12 @@ export default function PublicHeaderPro() {
               <Link to="/admin/cj-dropshipping">Admin</Link>
             </Button>
           )}
-          {user && !isAdmin ? (
+          {user && isAdmin ? (
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="mr-1.5 h-4 w-4" />
+              <span className="hidden sm:inline">Déconnexion</span>
+            </Button>
+          ) : user ? (
             <Button variant="outline" size="sm" onClick={() => navigate('/catalogue/mes-devis')}>
               <User className="mr-1.5 h-4 w-4" />
               <span className="hidden sm:inline">Mes devis</span>
