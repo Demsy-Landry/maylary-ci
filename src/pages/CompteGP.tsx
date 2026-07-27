@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { supabase, EDGE_FUNCTIONS_URL } from '@/lib/supabase';
+import { supabase, EDGE_FUNCTIONS_URL, PROFILES_TABLE } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2, Building2, User } from 'lucide-react';
 
@@ -40,7 +40,7 @@ export default function CompteGP() {
       return;
     }
     setLoginLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: loginEmail.trim(),
       password: loginPassword,
     });
@@ -50,9 +50,18 @@ export default function CompteGP() {
       return;
     }
     await refreshProfile();
+    const { data: profileData } = await supabase
+      .from(PROFILES_TABLE)
+      .select('type_compte')
+      .eq('user_id', data.user.id)
+      .maybeSingle();
     toast.success('Connexion réussie.');
     setLoginLoading(false);
-    navigate('/boutique/mes-commandes');
+    navigate(
+      profileData?.type_compte === 'entreprise_acheteuse'
+        ? '/catalogue/mes-devis'
+        : '/boutique/mes-commandes',
+    );
   };
 
   const handleSignup = async (e: FormEvent) => {
@@ -110,7 +119,7 @@ export default function CompteGP() {
       await refreshProfile();
       toast.success('Bienvenue sur Maylary !');
       setSignupLoading(false);
-      navigate('/boutique/mes-commandes');
+      navigate(typeCompte === 'entreprise_acheteuse' ? '/catalogue/mes-devis' : '/boutique/mes-commandes');
     } catch {
       setSignupError('Impossible de contacter le serveur. Veuillez réessayer.');
       setSignupLoading(false);
