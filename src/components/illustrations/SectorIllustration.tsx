@@ -21,9 +21,16 @@ export type SectorKey =
  * remplacent l'illustration SVG codée en dur quand elles existent. Un
  * secteur sans entrée ici retombe automatiquement sur son SVG.
  */
+const PHOTOS_BASE_URL =
+  'https://oubowmftzxpruckjzwuq.supabase.co/storage/v1/object/public/app_e08c374bc4_produit_photos/secteurs';
+
 export const SECTOR_PHOTOS: Partial<Record<SectorKey, string>> = {
-  mobilier:
-    'https://oubowmftzxpruckjzwuq.supabase.co/storage/v1/object/public/app_e08c374bc4_produit_photos/secteurs/mobilier.png',
+  boutique: `${PHOTOS_BASE_URL}/boutique.jpg`,
+  mobilier: `${PHOTOS_BASE_URL}/mobilier.png`,
+  quincaillerie: `${PHOTOS_BASE_URL}/quincaillerie.jpg`,
+  automobile: `${PHOTOS_BASE_URL}/automobile.jpg`,
+  tech: `${PHOTOS_BASE_URL}/tech.jpg`,
+  textile: `${PHOTOS_BASE_URL}/textile.jpg`,
 };
 
 export const SECTORS: Array<{ key: SectorKey; label: string; description: string }> = [
