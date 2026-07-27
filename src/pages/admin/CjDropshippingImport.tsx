@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   supabase,
@@ -7,13 +6,14 @@ import {
   CATEGORIES_GP_TABLE,
   type CategorieGP,
 } from '@/lib/supabase';
+import AdminNav from '@/components/AdminNav';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronLeft, Search, ImageOff, Loader2, PackagePlus } from 'lucide-react';
+import { Search, ImageOff, Loader2, PackagePlus } from 'lucide-react';
 
 interface CjResult {
   reference_externe: string;
@@ -103,14 +103,8 @@ export default function CjDropshippingImport() {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4 sm:px-6">
-          <div>
-            <Link
-              to="/"
-              className="mb-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-            >
-              <ChevronLeft className="h-3.5 w-3.5" />
-              Accueil
-            </Link>
+          <div className="space-y-2">
+            <AdminNav />
             <h1 className="font-display text-lg font-bold text-foreground">
               Admin — Import CJ Dropshipping
             </h1>

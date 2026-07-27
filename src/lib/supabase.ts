@@ -40,6 +40,7 @@ export const PARAMETRES_PAIEMENT_TABLE = 'app_e08c374bc4_parametres_paiement';
 export const COMMANDES_GP_TABLE = 'app_e08c374bc4_commandes_gp';
 export const LIGNES_COMMANDE_GP_TABLE = 'app_e08c374bc4_lignes_commande_gp';
 export const HISTORIQUE_COMMANDE_GP_TABLE = 'app_e08c374bc4_historique_statut_commande_gp';
+export const PROSPECTION_FOURNISSEURS_TABLE = 'app_e08c374bc4_prospection_fournisseurs';
 
 export type StockDisponible = 'en_stock' | 'sur_commande' | 'rupture';
 export type StatutDevis =
@@ -248,3 +249,26 @@ export interface ProduitFavori {
   produit_id: string;
   created_at: string;
 }
+
+export type StatutProspection = 'a_contacter' | 'contacte' | 'partenariat_signe';
+
+export interface ProspectionFournisseur {
+  id: string;
+  nom_entreprise: string;
+  secteur: string;
+  offre: string | null;
+  adresse: string | null;
+  contact: string | null;
+  site_web: string | null;
+  priorite: 1 | 2 | 3;
+  statut: StatutProspection;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const STATUT_PROSPECTION_LABELS: Record<StatutProspection, string> = {
+  a_contacter: 'À contacter',
+  contacte: 'Contacté',
+  partenariat_signe: 'Partenariat signé',
+};

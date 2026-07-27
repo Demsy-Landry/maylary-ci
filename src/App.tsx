@@ -19,6 +19,7 @@ import ProduitDetailPro from '@/pages/ProduitDetailPro';
 import PanierDevis from '@/pages/PanierDevis';
 import MesDevis from '@/pages/MesDevis';
 import CjDropshippingImport from '@/pages/admin/CjDropshippingImport';
+import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <CjDropshippingImport />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/prospection"
+                  element={
+                    <AdminRoute>
+                      <ProspectionFournisseurs />
                     </AdminRoute>
                   }
                 />
