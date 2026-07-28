@@ -49,6 +49,7 @@ export default function CjDropshippingImport() {
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
   const [results, setResults] = useState<CjResult[]>([]);
+  const [motCleTraduit, setMotCleTraduit] = useState<string | null>(null);
   const [categories, setCategories] = useState<CategorieGP[]>([]);
   const [importedRefs, setImportedRefs] = useState<Set<string>>(new Set());
 
@@ -69,14 +70,16 @@ export default function CjDropshippingImport() {
     setSearching(true);
     setSearched(true);
     try {
-      const { produits } = await callEdgeFunction<{ produits: CjResult[] }>(
-        'app_e08c374bc4_cj_dropshipping_search',
-        { keyword: keyword.trim() },
-      );
+      const { produits, mot_cle_traduit } = await callEdgeFunction<{
+        produits: CjResult[];
+        mot_cle_traduit?: string;
+      }>('app_e08c374bc4_cj_dropshipping_search', { keyword: keyword.trim() });
       setResults(produits);
+      setMotCleTraduit(mot_cle_traduit ?? null);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Recherche impossible.');
       setResults([]);
+      setMotCleTraduit(null);
     } finally {
       setSearching(false);
     }
@@ -124,6 +127,13 @@ export default function CjDropshippingImport() {
             <span className="ml-1.5 hidden sm:inline">Rechercher</span>
           </Button>
         </form>
+
+        {!searching && searched && motCleTraduit && (
+          <p className="mt-3 text-xs text-muted-foreground">
+            CJ Dropshipping recherche uniquement en anglais : traduit et cherché comme «&nbsp;
+            {motCleTraduit}&nbsp;».
+          </p>
+        )}
 
         {searching ? (
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

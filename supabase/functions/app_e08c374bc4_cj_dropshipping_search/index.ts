@@ -57,6 +57,28 @@ interface CjSearchResult {
   stock: number | null;
 }
 
+/**
+ * Le catalogue CJ Dropshipping n'est indexé qu'en anglais (champ productNameEn) :
+ * une recherche en français ne matche que des bouts de mots au hasard. On
+ * traduit donc le mot-clé avant d'interroger CJ. Si la traduction échoue,
+ * on retombe sur le mot-clé original plutôt que de bloquer la recherche.
+ */
+async function translateToEnglish(text: string): Promise<string> {
+  try {
+    const url = new URL('https://api.mymemory.translated.net/get');
+    url.searchParams.set('q', text);
+    url.searchParams.set('langpair', 'fr|en');
+
+    const res = await fetch(url);
+    const data = await res.json().catch(() => null);
+    const translated = data?.responseData?.translatedText;
+
+    return typeof translated === 'string' && translated.trim() ? translated.trim() : text;
+  } catch {
+    return text;
+  }
+}
+
 Deno.serve(async (req: Request) => {
   const requestId = crypto.randomUUID();
 
@@ -122,11 +144,13 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: tokenResult.error }, 502);
     }
 
-    // 4. Recherche produit CJ Dropshipping.
+    // 4. Traduction du mot-clé (catalogue CJ en anglais uniquement), puis recherche.
+    const keywordEn = await translateToEnglish(keyword);
+
     const searchUrl = new URL(`${CJ_BASE_URL}/product/list`);
     searchUrl.searchParams.set('pageNum', '1');
     searchUrl.searchParams.set('pageSize', '20');
-    searchUrl.searchParams.set('productNameEn', keyword);
+    searchUrl.searchParams.set('productNameEn', keywordEn);
 
     const cjRes = await fetch(searchUrl, {
       method: 'GET',
@@ -166,9 +190,11 @@ Deno.serve(async (req: Request) => {
       return { reference_externe: pid, nom, photo, prix_fournisseur_usd, stock };
     });
 
-    console.log(JSON.stringify({ requestId, step: 'search_ok', keyword, count: produits.length }));
+    console.log(
+      JSON.stringify({ requestId, step: 'search_ok', keyword, keywordEn, count: produits.length }),
+    );
 
-    return jsonResponse({ produits }, 200);
+    return jsonResponse({ produits, mot_cle_traduit: keywordEn }, 200);
   } catch (error) {
     console.log(JSON.stringify({ requestId, error: String(error) }));
     return jsonResponse({ error: 'Erreur interne du serveur.' }, 500);
