@@ -55,7 +55,7 @@ export default function PublicHeaderGP() {
           </Button>
           {isAdmin && (
             <Button asChild variant="outline" size="sm" className="text-foreground">
-              <Link to="/admin/cj-dropshipping">
+              <Link to="/admin">
                 <ShieldCheck className="mr-1.5 h-4 w-4" />
                 <span className="hidden sm:inline">Admin</span>
               </Link>

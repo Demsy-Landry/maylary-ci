@@ -60,7 +60,7 @@ export default function CompteGP() {
     setLoginLoading(false);
     navigate(
       profileData?.type_compte === 'admin'
-        ? '/admin/cj-dropshipping'
+        ? '/admin'
         : profileData?.type_compte === 'entreprise_acheteuse'
           ? '/catalogue/mes-devis'
           : '/boutique/mes-commandes',
