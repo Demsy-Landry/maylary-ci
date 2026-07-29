@@ -4,23 +4,27 @@ import {
   supabase,
   COMMANDES_GP_TABLE,
   DEMANDES_DEVIS_TABLE,
+  DEMANDES_IMPORT_TABLE,
 } from '@/lib/supabase';
 import AdminNav from '@/components/AdminNav';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ShoppingCart, ClipboardList, ArrowRight } from 'lucide-react';
+import { ShoppingCart, ClipboardList, ArrowRight, PackageSearch } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [commandesEnVerif, setCommandesEnVerif] = useState<number | null>(null);
   const [devisNouvelles, setDevisNouvelles] = useState<number | null>(null);
+  const [importsACoter, setImportsACoter] = useState<number | null>(null);
 
   useEffect(() => {
     const load = async () => {
-      const [commandesRes, devisRes] = await Promise.all([
+      const [commandesRes, devisRes, importsRes] = await Promise.all([
         supabase.from(COMMANDES_GP_TABLE).select('id').eq('statut', 'paiement_recu_verification'),
         supabase.from(DEMANDES_DEVIS_TABLE).select('id').eq('statut', 'nouvelle'),
+        supabase.from(DEMANDES_IMPORT_TABLE).select('id').in('statut', ['nouvelle', 'en_cotation']),
       ]);
       setCommandesEnVerif(commandesRes.data?.length ?? 0);
       setDevisNouvelles(devisRes.data?.length ?? 0);
+      setImportsACoter(importsRes.data?.length ?? 0);
     };
     load();
   }, []);
@@ -37,7 +41,31 @@ export default function AdminDashboard() {
       </header>
 
       <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Link
+            to="/admin/import"
+            className="group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg lg:col-span-3"
+          >
+            <div className="flex items-center gap-4">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary-emphasis">
+                <PackageSearch className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-display font-bold text-foreground">Demandes d'import</p>
+                {importsACoter === null ? (
+                  <Skeleton className="mt-1 h-4 w-32" />
+                ) : importsACoter > 0 ? (
+                  <p className="text-sm font-semibold text-primary-emphasis">
+                    {importsACoter} demande(s) à coter
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Rien à coter</p>
+                )}
+              </div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+          </Link>
+
           <Link
             to="/admin/commandes"
             className="group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
@@ -88,8 +116,7 @@ export default function AdminDashboard() {
         </div>
 
         <p className="mt-6 text-xs text-muted-foreground">
-          Notifications visibles uniquement dans cet espace admin pour l'instant (pas d'email —
-          clé Resend non configurée). Actualisez cette page pour voir les nouvelles demandes.
+          Actualisez cette page pour voir les nouvelles demandes.
         </p>
       </main>
     </div>

@@ -3,7 +3,17 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
-import { Boxes, ShoppingCart, User, Building2, ShieldCheck, LogOut, Search, MapPin } from 'lucide-react';
+import {
+  Boxes,
+  ShoppingCart,
+  User,
+  Building2,
+  ShieldCheck,
+  LogOut,
+  Search,
+  MapPin,
+  PackageSearch,
+} from 'lucide-react';
 
 export default function PublicHeaderGP() {
   const { user, isAdmin, signOut } = useAuth();
@@ -33,6 +43,12 @@ export default function PublicHeaderGP() {
           </Link>
 
           <nav className="flex shrink-0 items-center gap-1 sm:order-3 sm:gap-2">
+          <Button asChild variant="outline" size="sm" className="text-foreground">
+            <Link to="/import">
+              <PackageSearch className="mr-1.5 h-4 w-4" />
+              Import
+            </Link>
+          </Button>
           <Button asChild variant="ghost" size="sm">
             <Link to="/boutique">Boutique</Link>
           </Button>

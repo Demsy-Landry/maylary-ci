@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 
 const LINKS = [
   { to: '/admin', label: 'Tableau de bord' },
+  { to: '/admin/import', label: "Demandes d'import" },
   { to: '/admin/commandes', label: 'Commandes Boutique' },
   { to: '/admin/devis', label: 'Demandes de devis' },
-  { to: '/admin/cj-dropshipping', label: 'Import CJ Dropshipping' },
+  { to: '/admin/cj-dropshipping', label: 'Catalogue CJ Dropshipping' },
   { to: '/admin/prospection', label: 'Prospection fournisseurs' },
 ];
 
