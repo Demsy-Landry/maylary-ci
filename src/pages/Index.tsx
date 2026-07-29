@@ -1,22 +1,36 @@
 import type { CSSProperties } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Boxes, ShieldCheck, ClipboardList, ShoppingBag, ArrowRight, Truck, Building2 } from 'lucide-react';
+import { ShieldCheck, ClipboardList, ShoppingBag, ArrowRight, Truck, Building2 } from 'lucide-react';
 import HeroScene from '@/components/HeroScene';
+import PublicHeaderGP from '@/components/PublicHeaderGP';
+import SiteFooter from '@/components/SiteFooter';
 import SectorIllustration, { SECTORS, SECTOR_PHOTOS } from '@/components/illustrations/SectorIllustration';
+import { supabase, PRODUITS_PUBLIC_VIEW, type Produit } from '@/lib/supabase';
+import { ProductCardGP } from '@/pages/CatalogueGrandPublic';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Index() {
+  const [produits, setProduits] = useState<Produit[]>([]);
+  const [loadingProduits, setLoadingProduits] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase
+        .from(PRODUITS_PUBLIC_VIEW)
+        .select('*')
+        .eq('espace', 'grand_public')
+        .eq('actif', true)
+        .limit(12);
+      setProduits((data as Produit[]) ?? []);
+      setLoadingProduits(false);
+    };
+    load();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
-        <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-              <Boxes className="h-5 w-5" />
-            </div>
-            <span className="font-display text-lg font-bold tracking-tight">Maylary</span>
-          </div>
-        </div>
-      </header>
+      <PublicHeaderGP />
 
       <main>
         <section className="relative overflow-hidden">
@@ -73,6 +87,25 @@ export default function Index() {
             </div>
           </div>
         </section>
+
+        {(loadingProduits || produits.length > 0) && (
+          <section className="mx-auto max-w-screen-xl px-4 pb-10 sm:px-6">
+            <div className="flex items-end justify-between">
+              <h2 className="font-display text-2xl font-bold text-foreground">Produits tendance</h2>
+              <Link
+                to="/boutique"
+                className="text-sm font-semibold text-primary-emphasis hover:underline"
+              >
+                Voir toute la boutique
+              </Link>
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              {loadingProduits
+                ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="aspect-square w-full" />)
+                : produits.map((p) => <ProductCardGP key={p.id} produit={p} />)}
+            </div>
+          </section>
+        )}
 
         <section className="mx-auto max-w-screen-xl px-4 pb-6 sm:px-6">
           <h2 className="font-display text-2xl font-bold text-foreground">Nos secteurs</h2>
@@ -145,6 +178,8 @@ export default function Index() {
           </div>
         </section>
       </main>
+
+      <SiteFooter />
     </div>
   );
 }
