@@ -26,6 +26,9 @@ import AdminDashboard from '@/pages/admin/Dashboard';
 import AdminImportGestion from '@/pages/admin/ImportGestion';
 import NouvelleDemandeImport from '@/pages/NouvelleDemandeImport';
 import MesDemandesImport from '@/pages/MesDemandesImport';
+import AdminExportGestion from '@/pages/admin/ExportGestion';
+import NouvelleDemandeExport from '@/pages/NouvelleDemandeExport';
+import MesDemandesExport from '@/pages/MesDemandesExport';
 
 const queryClient = new QueryClient();
 
@@ -41,6 +44,9 @@ function App() {
                 <Route path="/import" element={<NouvelleDemandeImport />} />
                 <Route path="/import/nouvelle-demande" element={<NouvelleDemandeImport />} />
                 <Route path="/import/mes-demandes" element={<MesDemandesImport />} />
+                <Route path="/export" element={<NouvelleDemandeExport />} />
+                <Route path="/export/nouvelle-demande" element={<NouvelleDemandeExport />} />
+                <Route path="/export/mes-demandes" element={<MesDemandesExport />} />
                 <Route path="/boutique" element={<CatalogueGrandPublic />} />
                 <Route path="/boutique/categorie/:categorieId" element={<CatalogueCategorieGP />} />
                 <Route path="/boutique/produit/:produitId" element={<ProduitDetailGP />} />
@@ -98,6 +104,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <AdminImportGestion />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/export"
+                  element={
+                    <AdminRoute>
+                      <AdminExportGestion />
                     </AdminRoute>
                   }
                 />

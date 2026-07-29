@@ -28,6 +28,11 @@ export const IMPORT_PHOTOS_BUCKET = 'app_e08c374bc4_import_photos';
 /** Public storage bucket for transit documents (invoices, BL, customs declarations). */
 export const IMPORT_DOCUMENTS_BUCKET = 'app_e08c374bc4_import_documents';
 
+/** Public storage bucket for reference photos uploaded by clients on an export request. */
+export const EXPORT_PHOTOS_BUCKET = 'app_e08c374bc4_export_photos';
+/** Public storage bucket for export documents (commercial invoice, certificates, customs declaration). */
+export const EXPORT_DOCUMENTS_BUCKET = 'app_e08c374bc4_export_documents';
+
 export const SECTEURS_TABLE = 'app_e08c374bc4_secteurs';
 export const ENSEIGNES_TABLE = 'app_e08c374bc4_enseignes';
 export const PROFILES_TABLE = 'app_e08c374bc4_profiles';
@@ -50,6 +55,10 @@ export const PROSPECTION_FOURNISSEURS_TABLE = 'app_e08c374bc4_prospection_fourni
 export const DEMANDES_IMPORT_TABLE = 'app_e08c374bc4_demandes_import';
 export const HISTORIQUE_IMPORT_TABLE = 'app_e08c374bc4_historique_statut_import';
 export const DOCUMENTS_IMPORT_TABLE = 'app_e08c374bc4_documents_import';
+
+export const DEMANDES_EXPORT_TABLE = 'app_e08c374bc4_demandes_export';
+export const HISTORIQUE_EXPORT_TABLE = 'app_e08c374bc4_historique_statut_export';
+export const DOCUMENTS_EXPORT_TABLE = 'app_e08c374bc4_documents_export';
 
 export type StockDisponible = 'en_stock' | 'sur_commande' | 'rupture';
 export type StatutDevis =
@@ -461,4 +470,129 @@ export function estimerCoutIndicatifFcfa(params: {
   const majoration = incoterm ? MAJORATION_INCOTERM[incoterm] : 1;
   const douaneEtTransitEstimes = (valeurMarchandiseFcfa + fret) * 0.25;
   return Math.round((valeurMarchandiseFcfa + fret * majoration + douaneEtTransitEstimes) / 100) * 100;
+}
+
+export type StatutExport =
+  | 'nouvelle'
+  | 'en_cotation'
+  | 'devis_envoye'
+  | 'validee'
+  | 'collecte_effectuee'
+  | 'dedouanement_export'
+  | 'expedition_internationale'
+  | 'arrivee_destination'
+  | 'livree'
+  | 'annulee';
+
+export type TypeDocumentExport =
+  | 'facture_commerciale'
+  | 'packing_list'
+  | 'certificat_origine'
+  | 'certificat_phytosanitaire'
+  | 'declaration_exportation'
+  | 'connaissement_bl'
+  | 'lta'
+  | 'bon_livraison'
+  | 'photo_produit'
+  | 'autre';
+
+export const STATUT_EXPORT_LABELS: Record<StatutExport, string> = {
+  nouvelle: 'Nouvelle demande',
+  en_cotation: 'En cours de cotation',
+  devis_envoye: 'Devis envoyé',
+  validee: 'Devis validé',
+  collecte_effectuee: 'Collecte effectuée',
+  dedouanement_export: "Dédouanement export en cours",
+  expedition_internationale: 'Expédition internationale',
+  arrivee_destination: 'Arrivée à destination',
+  livree: 'Livrée à l’acheteur',
+  annulee: 'Annulée',
+};
+
+/** Message affiché au client pour chaque étape, dans le suivi de sa demande d'export. */
+export const STATUT_EXPORT_MESSAGES: Record<StatutExport, string> = {
+  nouvelle: 'Votre demande a bien été reçue. Notre équipe transit prépare votre cotation.',
+  en_cotation: 'Nous chiffrons votre demande (transport local, douane export, fret, certifications).',
+  devis_envoye: 'Votre devis est prêt. Consultez le détail et validez-le pour lancer votre exportation.',
+  validee: 'Devis validé, merci ! Nous organisons la collecte de votre marchandise.',
+  collecte_effectuee: 'Votre marchandise a été collectée et préparée pour l’export.',
+  dedouanement_export: 'Votre marchandise est en cours de dédouanement à l’export.',
+  expedition_internationale: 'Votre marchandise est en transport international.',
+  arrivee_destination: 'Votre marchandise est arrivée à destination.',
+  livree: 'Votre marchandise a été livrée à l’acheteur. Merci de votre confiance !',
+  annulee: 'Cette demande a été annulée. Contactez-nous si vous avez des questions.',
+};
+
+export const TYPE_DOCUMENT_EXPORT_LABELS: Record<TypeDocumentExport, string> = {
+  facture_commerciale: 'Facture commerciale',
+  packing_list: 'Packing list',
+  certificat_origine: "Certificat d'origine",
+  certificat_phytosanitaire: 'Certificat phytosanitaire',
+  declaration_exportation: "Déclaration d'exportation",
+  connaissement_bl: 'Connaissement (B/L)',
+  lta: 'Lettre de transport aérien (LTA)',
+  bon_livraison: 'Bon de livraison',
+  photo_produit: 'Photo du produit',
+  autre: 'Autre document',
+};
+
+export interface DemandeExport {
+  id: string;
+  user_id: string;
+  reference_publique: string;
+  statut: StatutExport;
+  description_produit: string;
+  pays_destination: string | null;
+  acheteur_destinataire: string | null;
+  contact_acheteur: string | null;
+  photos: string[];
+  quantite: number;
+  incoterm: Incoterm | null;
+  mode_transport: ModeTransport;
+  transporteur_souhaite: string | null;
+  delai_souhaite: string | null;
+  notes_client: string | null;
+  poids_estime_kg: number | null;
+  volume_estime_m3: number | null;
+  valeur_marchandise_estimee_fcfa: number | null;
+  estimation_indicative_fcfa: number | null;
+  transport_local_fcfa: number | null;
+  douane_export_fcfa: number | null;
+  cout_fret_fcfa: number | null;
+  assurance_fcfa: number | null;
+  frais_certification_fcfa: number | null;
+  livraison_destination_fcfa: number | null;
+  marge_fcfa: number | null;
+  montant_total_devis_fcfa: number | null;
+  commentaire_admin_devis: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HistoriqueStatutExport {
+  id: string;
+  demande_export_id: string;
+  statut: StatutExport;
+  commentaire_admin: string | null;
+  horodatage: string;
+}
+
+export interface DocumentExport {
+  id: string;
+  demande_export_id: string;
+  type_document: TypeDocumentExport;
+  nom_fichier: string;
+  url: string;
+  uploaded_by: string | null;
+  created_at: string;
+}
+
+/** Même logique d'estimation indicative que pour l'import, réutilisée pour l'export. */
+export function estimerCoutIndicatifExportFcfa(params: {
+  poidsKg: number;
+  valeurMarchandiseFcfa: number;
+  modeTransport: ModeTransport;
+  incoterm: Incoterm | null;
+}): number {
+  return estimerCoutIndicatifFcfa(params);
 }

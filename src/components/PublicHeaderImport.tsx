@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
-import { Boxes, ShieldCheck, LogOut, User, ShoppingBag, Building2, PackageSearch } from 'lucide-react';
+import { Boxes, ShieldCheck, LogOut, User, ShoppingBag, Building2, PackageSearch, Ship } from 'lucide-react';
 
 export default function PublicHeaderImport() {
   const { user, isAdmin, signOut } = useAuth();
@@ -27,9 +27,15 @@ export default function PublicHeaderImport() {
 
         <nav className="flex flex-wrap items-center gap-1 sm:gap-2">
           <Button asChild variant="ghost" size="sm">
-            <Link to="/import">
+            <Link to="/import/nouvelle-demande">
               <PackageSearch className="mr-1.5 h-4 w-4" />
               Faire importer
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/export/nouvelle-demande">
+              <Ship className="mr-1.5 h-4 w-4" />
+              Faire exporter
             </Link>
           </Button>
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">

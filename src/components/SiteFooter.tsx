@@ -3,10 +3,12 @@ import { Boxes } from 'lucide-react';
 
 const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
   {
-    title: 'Import',
+    title: 'Import / Export',
     links: [
-      { label: "Faire une demande d'import", to: '/import' },
+      { label: "Faire une demande d'import", to: '/import/nouvelle-demande' },
       { label: 'Mes demandes d’import', to: '/import/mes-demandes' },
+      { label: "Faire une demande d'export", to: '/export/nouvelle-demande' },
+      { label: 'Mes demandes d’export', to: '/export/mes-demandes' },
     ],
   },
   {
