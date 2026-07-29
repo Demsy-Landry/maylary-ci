@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeaderPro from '@/components/PublicHeaderPro';
+import SiteFooter from '@/components/SiteFooter';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -14,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ClipboardList, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import ImageWithFallback from '@/components/ImageWithFallback';
 
 export default function PanierDevis() {
   const { items, updateQuantite, removeItem, totalFcfa, clearCart } = useCart();
@@ -95,6 +97,7 @@ export default function PanierDevis() {
             </Button>
           </div>
         </main>
+        <SiteFooter />
       </div>
     );
   }
@@ -120,11 +123,12 @@ export default function PanierDevis() {
             <div className="space-y-3 lg:col-span-2">
               {items.map((item) => (
                 <div key={item.produit_id} className="flex items-center gap-3 rounded-md border p-3">
-                  {item.photo ? (
-                    <img src={item.photo} alt={item.nom} className="h-16 w-16 rounded-md border object-cover" />
-                  ) : (
-                    <div className="h-16 w-16 rounded-md border bg-muted" />
-                  )}
+                  <ImageWithFallback
+                    src={item.photo}
+                    alt={item.nom}
+                    className="h-16 w-16 rounded-md border object-cover"
+                    fallbackClassName="h-16 w-16 rounded-md border"
+                  />
                   <div className="min-w-0 flex-1">
                     {item.enseigne_nom && (
                       <p className="truncate text-xs text-muted-foreground">{item.enseigne_nom}</p>
@@ -186,6 +190,7 @@ export default function PanierDevis() {
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
+import SiteFooter from '@/components/SiteFooter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -272,6 +273,7 @@ export default function CompteGP() {
           </CardContent>
         </Card>
       </main>
+      <SiteFooter />
     </div>
   );
 }

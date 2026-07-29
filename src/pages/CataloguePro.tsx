@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PublicHeaderPro from '@/components/PublicHeaderPro';
+import SiteFooter from '@/components/SiteFooter';
 import { supabase, SECTEURS_TABLE, type Secteur } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
 import SectorIllustration, { SECTOR_PHOTOS, guessSector } from '@/components/illustrations/SectorIllustration';
@@ -80,6 +81,7 @@ export default function CataloguePro() {
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

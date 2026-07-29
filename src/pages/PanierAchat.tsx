@@ -1,8 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
+import SiteFooter from '@/components/SiteFooter';
 import { useCartGP } from '@/hooks/useCartGP';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
+import ImageWithFallback from '@/components/ImageWithFallback';
 
 export default function PanierAchat() {
   const { items, updateQuantite, removeItem, totalFcfa } = useCartGP();
@@ -29,11 +31,12 @@ export default function PanierAchat() {
             <div className="space-y-3 lg:col-span-2">
               {items.map((item) => (
                 <div key={item.produit_id} className="flex items-center gap-3 rounded-md border p-3">
-                  {item.photo ? (
-                    <img src={item.photo} alt={item.nom} className="h-16 w-16 rounded-md border object-cover" />
-                  ) : (
-                    <div className="h-16 w-16 rounded-md border bg-muted" />
-                  )}
+                  <ImageWithFallback
+                    src={item.photo}
+                    alt={item.nom}
+                    className="h-16 w-16 rounded-md border object-cover"
+                    fallbackClassName="h-16 w-16 rounded-md border"
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-foreground">{item.nom}</p>
                     <p className="text-sm font-semibold text-primary">
@@ -80,6 +83,7 @@ export default function PanierAchat() {
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

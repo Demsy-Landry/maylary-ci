@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import PublicHeaderPro from '@/components/PublicHeaderPro';
+import SiteFooter from '@/components/SiteFooter';
 import {
   supabase,
   ENSEIGNES_TABLE,
@@ -33,6 +34,7 @@ export default function ProduitDetailPro() {
   const [enseigne, setEnseigne] = useState<Enseigne | null>(null);
   const [loading, setLoading] = useState(true);
   const [activePhoto, setActivePhoto] = useState(0);
+  const [brokenPhotos, setBrokenPhotos] = useState<Set<string>>(new Set());
   const [quantite, setQuantite] = useState(1);
   const [isFavori, setIsFavori] = useState(false);
   const [favoriBusy, setFavoriBusy] = useState(false);
@@ -138,11 +140,14 @@ export default function ProduitDetailPro() {
         ) : (
           <div className="grid gap-8 sm:grid-cols-2">
             <div>
-              {produit.photos?.length > 0 ? (
+              {produit.photos?.length > 0 && !brokenPhotos.has(produit.photos[activePhoto]) ? (
                 <>
                   <img
                     src={produit.photos[activePhoto]}
                     alt={produit.nom}
+                    onError={() =>
+                      setBrokenPhotos((prev) => new Set(prev).add(produit.photos[activePhoto]))
+                    }
                     className="h-80 w-full rounded-lg border object-cover"
                   />
                   {produit.photos.length > 1 && (
@@ -219,6 +224,7 @@ export default function ProduitDetailPro() {
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

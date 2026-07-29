@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PublicHeaderPro from '@/components/PublicHeaderPro';
+import SiteFooter from '@/components/SiteFooter';
 import {
   supabase,
   SECTEURS_TABLE,
@@ -12,7 +13,8 @@ import {
 } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { ImageOff, ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
+import ImageWithFallback from '@/components/ImageWithFallback';
 
 export default function CatalogueSecteurPro() {
   const { secteurId } = useParams<{ secteurId: string }>();
@@ -94,13 +96,12 @@ export default function CatalogueSecteurPro() {
                     to={`/catalogue/produit/${p.id}`}
                     className="group overflow-hidden rounded-lg border bg-card transition-colors hover:border-primary"
                   >
-                    {p.photos?.[0] ? (
-                      <img src={p.photos[0]} alt={p.nom} className="h-36 w-full object-cover" />
-                    ) : (
-                      <div className="flex h-36 w-full items-center justify-center bg-muted">
-                        <ImageOff className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                    )}
+                    <ImageWithFallback
+                      src={p.photos?.[0]}
+                      alt={p.nom}
+                      className="h-36 w-full object-cover"
+                      fallbackClassName="h-36 w-full"
+                    />
                     <div className="p-3">
                       {enseigneNom(p.enseigne_id) && (
                         <p className="truncate text-xs text-muted-foreground">{enseigneNom(p.enseigne_id)}</p>
@@ -126,6 +127,7 @@ export default function CatalogueSecteurPro() {
           </>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

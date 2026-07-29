@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
+import SiteFooter from '@/components/SiteFooter';
 import { useAuth } from '@/hooks/useAuth';
 import {
   supabase,
@@ -205,6 +206,7 @@ export default function MesCommandesGP() {
           )}
         </DialogContent>
       </Dialog>
+      <SiteFooter />
     </div>
   );
 }
