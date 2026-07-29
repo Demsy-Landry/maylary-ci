@@ -66,7 +66,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: commande, error: commandeError } = await supabaseService
       .from('app_e08c374bc4_commandes_gp')
-      .select('id, user_id, statut')
+      .select('id, user_id, statut, reference_publique, montant_total_fcfa')
       .eq('id', body.commande_id)
       .maybeSingle();
 
@@ -100,6 +100,19 @@ Deno.serve(async (req: Request) => {
       statut: 'paiement_recu_verification',
       commentaire_admin: null,
     });
+
+    // Notifie l'admin (best-effort : n'échoue jamais la requête principale
+    // si l'email ne part pas). Attendu avant la réponse car Deno peut couper
+    // les appels réseau en arrière-plan une fois la réponse envoyée.
+    await fetch(`${supabaseUrl}/functions/v1/app_e08c374bc4_admin_notify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: authHeader },
+      body: JSON.stringify({
+        type: 'commande',
+        reference_publique: commande.reference_publique,
+        montant_fcfa: commande.montant_total_fcfa,
+      }),
+    }).catch(() => {});
 
     console.log(JSON.stringify({ requestId, step: 'ok', commandeId: commande.id }));
 

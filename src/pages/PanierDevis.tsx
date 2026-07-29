@@ -6,6 +6,7 @@ import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 import {
   supabase,
+  EDGE_FUNCTIONS_URL,
   DEMANDES_DEVIS_TABLE,
   LIGNES_DEVIS_TABLE,
   HISTORIQUE_STATUT_TABLE,
@@ -72,6 +73,22 @@ export default function PanierDevis() {
       statut: 'nouvelle',
       commentaire_admin: null,
     });
+
+    // Notifie l'admin (best-effort, ne bloque jamais la confirmation client).
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      fetch(`${EDGE_FUNCTIONS_URL}/app_e08c374bc4_admin_notify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({
+          type: 'devis',
+          reference_publique: demande.reference_publique,
+          montant_fcfa: totalFcfa,
+        }),
+      }).catch(() => {});
+    }
 
     clearCart();
     setSubmitting(false);
