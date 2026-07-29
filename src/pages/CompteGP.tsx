@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
 import { Button } from '@/components/ui/button';
@@ -270,6 +270,15 @@ export default function CompteGP() {
                 </form>
               </TabsContent>
             </Tabs>
+
+            <div className="mt-6 border-t pt-4 text-center">
+              <Link
+                to="/admin/connexion"
+                className="text-xs text-muted-foreground hover:text-foreground hover:underline"
+              >
+                Vous êtes de l'équipe Maylary ? Se connecter en tant qu'admin
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </main>

@@ -71,8 +71,11 @@ export default function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-10 border-t border-background/15 pt-6 text-xs text-background/60">
-          © {new Date().getFullYear()} Maylary. Tous droits réservés.
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-background/15 pt-6 text-xs text-background/60">
+          <span>© {new Date().getFullYear()} Maylary. Tous droits réservés.</span>
+          <Link to="/admin/connexion" className="hover:text-background hover:underline">
+            Connexion admin
+          </Link>
         </div>
       </div>
     </footer>
