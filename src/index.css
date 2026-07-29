@@ -5,42 +5,41 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --radius: 0.9rem;
+  --radius: 0.5rem;
 
-  /* Marché Vivant — fond ivoire chaud, encre brun profond */
-  --background: oklch(0.97 0.02 75);
-  --foreground: oklch(0.24 0.045 40);
+  /* Style "grosse boutique en ligne" — fond blanc, encre bleu-nuit quasi noir */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.19 0.02 250);
 
-  --card: oklch(0.995 0.008 75);
-  --card-foreground: oklch(0.24 0.045 40);
-  --popover: oklch(0.995 0.008 75);
-  --popover-foreground: oklch(0.24 0.045 40);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.19 0.02 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.19 0.02 250);
 
-  /* Primaire : ocre soleil */
-  --primary: oklch(0.62 0.19 45);
-  --primary-foreground: oklch(0.99 0.01 75);
-  /* Variante "texte" du primaire, plus foncée : le ton bouton (0.62) tombe à
-     ~3.4:1 sur fond clair une fois utilisé en petit texte, sous le seuil AA
-     (4.5:1). Réservée aux libellés/liens colorés, jamais aux fonds. */
-  --primary-emphasis: oklch(0.5 0.19 45);
+  /* Primaire : orange CTA */
+  --primary: oklch(0.78 0.16 75);
+  --primary-foreground: oklch(0.2 0.02 60);
+  /* Variante "texte" du primaire, plus foncée, utilisée pour les libellés/liens
+     colorés sur fond clair (le ton bouton est trop clair pour du petit texte). */
+  --primary-emphasis: oklch(0.52 0.17 50);
 
-  /* Secondaire : ivoire un peu plus soutenu, pour les surfaces neutres */
-  --secondary: oklch(0.93 0.03 70);
-  --secondary-foreground: oklch(0.3 0.05 40);
+  /* Secondaire : gris très clair, pour les surfaces neutres */
+  --secondary: oklch(0.96 0.003 250);
+  --secondary-foreground: oklch(0.25 0.01 250);
 
-  --muted: oklch(0.93 0.025 70);
-  --muted-foreground: oklch(0.48 0.045 45);
+  --muted: oklch(0.95 0.003 250);
+  --muted-foreground: oklch(0.48 0.01 250);
 
-  /* Accent : émeraude profond (marché, feuillage) */
-  --accent: oklch(0.4 0.08 165);
-  --accent-foreground: oklch(0.99 0.01 75);
+  /* Accent : bleu-sarcelle (liens secondaires, Espace Pro) */
+  --accent: oklch(0.5 0.09 220);
+  --accent-foreground: oklch(1 0 0);
 
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0.01 75);
 
-  --border: oklch(0.88 0.035 65);
-  --input: oklch(0.88 0.035 65);
-  --ring: oklch(0.62 0.19 45 / 0.5);
+  --border: oklch(0.87 0.004 250);
+  --input: oklch(0.87 0.004 250);
+  --ring: oklch(0.78 0.16 75 / 0.5);
 
   --font-display: "Baloo 2 Variable", ui-rounded, "Nunito Sans", system-ui, sans-serif;
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -55,17 +54,17 @@
   --popover: oklch(0.25 0.04 40);
   --popover-foreground: oklch(0.96 0.02 75);
 
-  --primary: oklch(0.68 0.18 45);
-  --primary-foreground: oklch(0.2 0.035 40);
-  --primary-emphasis: oklch(0.78 0.14 45);
+  --primary: oklch(0.72 0.16 75);
+  --primary-foreground: oklch(0.2 0.02 60);
+  --primary-emphasis: oklch(0.82 0.13 75);
 
-  --secondary: oklch(0.3 0.04 40);
+  --secondary: oklch(0.3 0.02 250);
   --secondary-foreground: oklch(0.96 0.02 75);
 
-  --muted: oklch(0.3 0.04 40);
-  --muted-foreground: oklch(0.72 0.03 60);
+  --muted: oklch(0.3 0.02 250);
+  --muted-foreground: oklch(0.72 0.01 250);
 
-  --accent: oklch(0.55 0.09 165);
+  --accent: oklch(0.6 0.09 220);
   --accent-foreground: oklch(0.98 0.01 75);
 
   --destructive: oklch(0.704 0.191 22.216);

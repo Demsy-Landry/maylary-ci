@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
+import SiteFooter from '@/components/SiteFooter';
 import { useCartGP } from '@/hooks/useCartGP';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -271,6 +272,7 @@ export default function CommandeGP() {
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

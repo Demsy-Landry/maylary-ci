@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
+import SiteFooter from '@/components/SiteFooter';
 import { supabase, CATEGORIES_GP_TABLE, PRODUITS_PUBLIC_VIEW, type CategorieGP, type Produit } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProductCardGP } from '@/pages/CatalogueGrandPublic';
@@ -90,6 +91,7 @@ export default function CatalogueCategorieGP() {
           </>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }
