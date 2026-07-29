@@ -49,7 +49,7 @@ export default function PublicHeaderPro() {
           </Button>
           {isAdmin && (
             <Button asChild variant="outline" size="sm" className="hidden text-foreground sm:inline-flex">
-              <Link to="/admin/cj-dropshipping">Admin</Link>
+              <Link to="/admin">Admin</Link>
             </Button>
           )}
           {user && isAdmin ? (

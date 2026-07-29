@@ -2,7 +2,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 
 const LINKS = [
+  { to: '/admin', label: 'Tableau de bord' },
   { to: '/admin/commandes', label: 'Commandes Boutique' },
+  { to: '/admin/devis', label: 'Demandes de devis' },
   { to: '/admin/cj-dropshipping', label: 'Import CJ Dropshipping' },
   { to: '/admin/prospection', label: 'Prospection fournisseurs' },
 ];

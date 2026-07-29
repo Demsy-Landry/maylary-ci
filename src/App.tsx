@@ -21,6 +21,8 @@ import MesDevis from '@/pages/MesDevis';
 import CjDropshippingImport from '@/pages/admin/CjDropshippingImport';
 import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
 import AdminCommandesGP from '@/pages/admin/CommandesGP';
+import AdminDevisGestion from '@/pages/admin/DevisGestion';
+import AdminDashboard from '@/pages/admin/Dashboard';
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,22 @@ function App() {
                 <Route path="/catalogue/produit/:produitId" element={<ProduitDetailPro />} />
                 <Route path="/catalogue/devis" element={<PanierDevis />} />
                 <Route path="/catalogue/mes-devis" element={<MesDevis />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <AdminDashboard />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/devis"
+                  element={
+                    <AdminRoute>
+                      <AdminDevisGestion />
+                    </AdminRoute>
+                  }
+                />
                 <Route
                   path="/admin/cj-dropshipping"
                   element={
