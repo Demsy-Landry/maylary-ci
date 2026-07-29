@@ -1,29 +1,38 @@
+import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
-import { Boxes, ShoppingCart, User, Building2, ShieldCheck, LogOut } from 'lucide-react';
+import { Boxes, ShoppingCart, User, Building2, ShieldCheck, LogOut, Search } from 'lucide-react';
 
 export default function PublicHeaderGP() {
   const { user, isAdmin, signOut } = useAuth();
   const { totalArticles } = useCartGP();
   const navigate = useNavigate();
+  const [headerSearch, setHeaderSearch] = useState('');
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
 
+  const handleHeaderSearch = (e: FormEvent) => {
+    e.preventDefault();
+    navigate(headerSearch.trim() ? `/boutique?q=${encodeURIComponent(headerSearch.trim())}` : '/boutique');
+  };
+
   return (
-    <header className="sticky top-0 z-10 border-b bg-card">
-      <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-3 sm:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Boxes className="h-5 w-5" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight text-foreground">Maylary</span>
-        </Link>
-        <nav className="flex items-center gap-1 sm:gap-2">
+    <header className="sticky top-0 z-10 bg-foreground text-background">
+      <div className="mx-auto flex max-w-screen-xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-6">
+        <div className="flex items-center justify-between gap-3 sm:contents">
+          <Link to="/" className="flex shrink-0 items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+              <Boxes className="h-5 w-5" />
+            </div>
+            <span className="hidden text-lg font-semibold tracking-tight sm:inline">Maylary</span>
+          </Link>
+
+          <nav className="flex shrink-0 items-center gap-1 sm:order-3 sm:gap-2">
           <Button asChild variant="ghost" size="sm">
             <Link to="/boutique">Boutique</Link>
           </Button>
@@ -45,7 +54,7 @@ export default function PublicHeaderGP() {
             </Link>
           </Button>
           {isAdmin && (
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline" size="sm" className="text-foreground">
               <Link to="/admin/cj-dropshipping">
                 <ShieldCheck className="mr-1.5 h-4 w-4" />
                 <span className="hidden sm:inline">Admin</span>
@@ -53,22 +62,51 @@ export default function PublicHeaderGP() {
             </Button>
           )}
           {user && isAdmin ? (
-            <Button variant="outline" size="sm" onClick={handleSignOut}>
+            <Button variant="outline" size="sm" className="text-foreground" onClick={handleSignOut}>
               <LogOut className="mr-1.5 h-4 w-4" />
               <span className="hidden sm:inline">Déconnexion</span>
             </Button>
           ) : user ? (
-            <Button variant="outline" size="sm" onClick={() => navigate('/boutique/mes-commandes')}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-foreground"
+              onClick={() => navigate('/boutique/mes-commandes')}
+            >
               <User className="mr-1.5 h-4 w-4" />
               <span className="hidden sm:inline">Mes commandes</span>
             </Button>
           ) : (
-            <Button variant="outline" size="sm" onClick={() => navigate('/boutique/compte')}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-foreground"
+              onClick={() => navigate('/boutique/compte')}
+            >
               <User className="mr-1.5 h-4 w-4" />
               <span className="hidden sm:inline">Connexion</span>
             </Button>
           )}
-        </nav>
+          </nav>
+        </div>
+
+        <form onSubmit={handleHeaderSearch} className="flex w-full min-w-0 sm:order-2 sm:flex-1">
+          <div className="flex w-full items-center rounded-md bg-background focus-within:ring-2 focus-within:ring-primary">
+            <input
+              value={headerSearch}
+              onChange={(e) => setHeaderSearch(e.target.value)}
+              placeholder="Rechercher un produit, une marque..."
+              className="min-w-0 flex-1 rounded-l-md bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+            />
+            <button
+              type="submit"
+              aria-label="Rechercher"
+              className="flex h-full items-center rounded-r-md bg-primary px-3 py-2 text-primary-foreground hover:bg-primary-emphasis"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+          </div>
+        </form>
       </div>
     </header>
   );
