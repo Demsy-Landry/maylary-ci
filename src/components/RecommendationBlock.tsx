@@ -1,6 +1,27 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ImageOff } from 'lucide-react';
 import type { Produit } from '@/lib/supabase';
+
+function Thumb({ produit }: { produit: Produit }) {
+  const [imgError, setImgError] = useState(false);
+  const photo = produit.photos?.[0];
+
+  return (
+    <div className="flex aspect-square w-full items-center justify-center overflow-hidden bg-white">
+      {photo && !imgError ? (
+        <img
+          src={photo}
+          alt={produit.nom}
+          onError={() => setImgError(true)}
+          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+        />
+      ) : (
+        <ImageOff className="h-5 w-5 text-muted-foreground" />
+      )}
+    </div>
+  );
+}
 
 export default function RecommendationBlock({
   title,
@@ -23,17 +44,7 @@ export default function RecommendationBlock({
             to={`/boutique/produit/${p.id}`}
             className="group flex flex-col items-center rounded-md p-1 text-center hover:bg-muted"
           >
-            <div className="flex aspect-square w-full items-center justify-center overflow-hidden bg-white">
-              {p.photos?.[0] ? (
-                <img
-                  src={p.photos[0]}
-                  alt={p.nom}
-                  className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                />
-              ) : (
-                <ImageOff className="h-5 w-5 text-muted-foreground" />
-              )}
-            </div>
+            <Thumb produit={p} />
             <p className="mt-1.5 line-clamp-2 text-xs text-foreground">{p.nom}</p>
           </Link>
         ))}
