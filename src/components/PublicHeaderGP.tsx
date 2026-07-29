@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
-import { Boxes, ShoppingCart, User, Building2, ShieldCheck, LogOut, Search } from 'lucide-react';
+import { Boxes, ShoppingCart, User, Building2, ShieldCheck, LogOut, Search, MapPin } from 'lucide-react';
 
 export default function PublicHeaderGP() {
   const { user, isAdmin, signOut } = useAuth();
@@ -107,6 +107,13 @@ export default function PublicHeaderGP() {
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="border-t border-background/10 bg-foreground/95">
+        <div className="mx-auto flex max-w-screen-xl items-center gap-1.5 px-4 py-1.5 text-xs text-background/80 sm:px-6">
+          <MapPin className="h-3.5 w-3.5 shrink-0" />
+          <span>Votre adresse de livraison : Côte d'Ivoire, partout dans le pays</span>
+        </div>
       </div>
     </header>
   );
