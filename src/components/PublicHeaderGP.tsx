@@ -61,12 +61,7 @@ export default function PublicHeaderGP() {
               </Link>
             </Button>
           )}
-          {user && isAdmin ? (
-            <Button variant="outline" size="sm" className="text-foreground" onClick={handleSignOut}>
-              <LogOut className="mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline">Déconnexion</span>
-            </Button>
-          ) : user ? (
+          {user && !isAdmin && (
             <Button
               variant="outline"
               size="sm"
@@ -75,6 +70,12 @@ export default function PublicHeaderGP() {
             >
               <User className="mr-1.5 h-4 w-4" />
               <span className="hidden sm:inline">Mes commandes</span>
+            </Button>
+          )}
+          {user ? (
+            <Button variant="outline" size="sm" className="text-foreground" onClick={handleSignOut}>
+              <LogOut className="mr-1.5 h-4 w-4" />
+              <span className="hidden sm:inline">Déconnexion</span>
             </Button>
           ) : (
             <Button
