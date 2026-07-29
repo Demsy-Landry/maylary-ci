@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ShoppingBag, Building2, Truck } from 'lucide-react';
 
+const STORAGE_BASE =
+  'https://oubowmftzxpruckjzwuq.supabase.co/storage/v1/object/public/app_e08c374bc4_produit_photos/accueil';
+
 interface Slide {
   eyebrow: string;
   title: string;
@@ -9,7 +12,7 @@ interface Slide {
   ctaLabel: string;
   ctaHref: string;
   icon: typeof ShoppingBag;
-  gradient: string;
+  image: string;
 }
 
 const SLIDES: Slide[] = [
@@ -20,7 +23,7 @@ const SLIDES: Slide[] = [
     ctaLabel: 'Découvrir la boutique',
     ctaHref: '/boutique',
     icon: ShoppingBag,
-    gradient: 'from-primary/25 via-primary/10 to-transparent',
+    image: `${STORAGE_BASE}/carousel-1-boutique.jpg`,
   },
   {
     eyebrow: 'Entreprises',
@@ -29,7 +32,7 @@ const SLIDES: Slide[] = [
     ctaLabel: 'Voir l’Espace Pro',
     ctaHref: '/catalogue',
     icon: Building2,
-    gradient: 'from-accent/25 via-accent/10 to-transparent',
+    image: `${STORAGE_BASE}/carousel-2-espace-pro.jpg`,
   },
   {
     eyebrow: 'Livraison',
@@ -38,12 +41,13 @@ const SLIDES: Slide[] = [
     ctaLabel: 'Comment ça marche',
     ctaHref: '/boutique',
     icon: Truck,
-    gradient: 'from-secondary via-secondary/40 to-transparent',
+    image: `${STORAGE_BASE}/carousel-3-livraison.jpg`,
   },
 ];
 
 export default function PromoCarousel() {
   const [index, setIndex] = useState(0);
+  const [brokenImages, setBrokenImages] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -59,7 +63,18 @@ export default function PromoCarousel() {
 
   return (
     <section className="relative overflow-hidden bg-secondary/40">
-      <div className={`absolute inset-0 bg-gradient-to-br ${slide.gradient}`} />
+      {!brokenImages.has(index) && (
+        <img
+          key={slide.image}
+          src={slide.image}
+          alt=""
+          onError={() => setBrokenImages((prev) => new Set(prev).add(index))}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+      {/* Voile de lisibilité : plus opaque à gauche (texte) que sur le reste de la
+          photo, contraste WCAG AA garanti quelle que soit l'image. */}
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/20" />
 
       <div className="relative mx-auto max-w-screen-xl px-4 py-14 sm:px-6 sm:py-20">
         <div
