@@ -5,6 +5,7 @@ import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
 import PromoCarousel from '@/components/PromoCarousel';
 import RecommendationBlock from '@/components/RecommendationBlock';
+import SectionBanner from '@/components/SectionBanner';
 import SectorIllustration, { SECTORS, SECTOR_PHOTOS } from '@/components/illustrations/SectorIllustration';
 import { supabase, PRODUITS_PUBLIC_VIEW, type Produit } from '@/lib/supabase';
 
@@ -43,9 +44,22 @@ export default function Index() {
       <main>
         <PromoCarousel />
 
+        <section className="mx-auto max-w-screen-xl px-4 pt-8 sm:px-6">
+          <SectionBanner
+            title="Équipez votre entreprise"
+            subtitle="Informatique, téléphonie et bureautique pour les professionnels de Côte d'Ivoire."
+            ctaLabel="Découvrir l'Espace Pro"
+            ctaHref="/catalogue"
+            image={SECTOR_PHOTOS.tech ?? ''}
+          />
+        </section>
+
         {!loadingProduits && blocs.length > 0 && (
           <section className="mx-auto max-w-screen-xl px-4 py-10 sm:px-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
+              Découvrir nos produits
+            </h2>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {blocs.map((b) => (
                 <RecommendationBlock
                   key={b.titre}
@@ -58,9 +72,21 @@ export default function Index() {
           </section>
         )}
 
+        <section className="mx-auto max-w-screen-xl px-4 pb-10 sm:px-6">
+          <SectionBanner
+            title="Mobilier & agencement pro"
+            subtitle="Bureaux, salons d'accueil, aménagement complet — livrés et installés."
+            ctaLabel="Voir le catalogue Mobilier"
+            ctaHref="/catalogue"
+            image={SECTOR_PHOTOS.mobilier ?? ''}
+          />
+        </section>
+
         <section className="mx-auto max-w-screen-xl px-4 pb-6 sm:px-6">
-          <h2 className="font-display text-2xl font-bold text-foreground">Nos secteurs</h2>
-          <p className="mt-1 max-w-prose text-sm text-muted-foreground">
+          <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
+            Nos secteurs
+          </h2>
+          <p className="mx-auto mt-1 max-w-prose text-center text-sm text-muted-foreground">
             Les univers de boutiques et d'entreprises pour lesquels Maylary vend et livre en
             Côte d'Ivoire.
           </p>
