@@ -29,6 +29,7 @@ import MesDemandesImport from '@/pages/MesDemandesImport';
 import AdminExportGestion from '@/pages/admin/ExportGestion';
 import NouvelleDemandeExport from '@/pages/NouvelleDemandeExport';
 import MesDemandesExport from '@/pages/MesDemandesExport';
+import AdminLogin from '@/pages/admin/AdminLogin';
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ function App() {
                 <Route path="/catalogue/produit/:produitId" element={<ProduitDetailPro />} />
                 <Route path="/catalogue/devis" element={<PanierDevis />} />
                 <Route path="/catalogue/mes-devis" element={<MesDevis />} />
+                <Route path="/admin/connexion" element={<AdminLogin />} />
                 <Route
                   path="/admin"
                   element={
