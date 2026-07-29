@@ -24,11 +24,22 @@ const RESEND_SANDBOX_FALLBACK = 'yaolandry67@gmail.com';
 const SUJETS: Record<string, (ref: string) => string> = {
   devis: (ref) => `Maylary — Nouvelle demande de devis ${ref}`,
   commande: (ref) => `Maylary — Paiement à vérifier : commande ${ref}`,
+  import: (ref) => `Maylary Import — Nouvelle demande à coter : ${ref}`,
+  import_valide: (ref) => `Maylary Import — Devis validé par le client : ${ref}`,
 };
 
 const LIENS: Record<string, string> = {
   devis: 'https://maylary-ci.vercel.app/admin/devis',
   commande: 'https://maylary-ci.vercel.app/admin/commandes',
+  import: 'https://maylary-ci.vercel.app/admin/import',
+  import_valide: 'https://maylary-ci.vercel.app/admin/import',
+};
+
+const MESSAGES: Record<string, string> = {
+  devis: 'Nouvelle demande de devis à traiter.',
+  commande: 'Un client indique avoir payé, vérification requise.',
+  import: "Nouvelle demande d'import à coter (marchandise, fret, douane, transit).",
+  import_valide: "Le client a validé le devis — vous pouvez lancer l'achat et le transit.",
 };
 
 Deno.serve(async (req: Request) => {
@@ -99,7 +110,7 @@ Deno.serve(async (req: Request) => {
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;">
           <h2 style="color:#b5451f;">Maylary</h2>
-          <p>${body.type === 'devis' ? 'Nouvelle demande de devis à traiter.' : 'Un client indique avoir payé, vérification requise.'}</p>
+          <p>${MESSAGES[body.type as string]}</p>
           <table style="width:100%; border-collapse: collapse; margin-top:16px;">
             <tr><td style="padding:6px 0; color:#666;">Référence</td><td style="padding:6px 0; font-weight:bold;">${body.reference_publique}</td></tr>
             ${montant ? `<tr><td style="padding:6px 0; color:#666;">Montant</td><td style="padding:6px 0; font-weight:bold;">${montant}</td></tr>` : ''}

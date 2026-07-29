@@ -3,6 +3,13 @@ import { Boxes } from 'lucide-react';
 
 const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
   {
+    title: 'Import',
+    links: [
+      { label: "Faire une demande d'import", to: '/import' },
+      { label: 'Mes demandes d’import', to: '/import/mes-demandes' },
+    ],
+  },
+  {
     title: 'Boutique',
     links: [
       { label: 'Tous les produits', to: '/boutique' },
@@ -32,7 +39,7 @@ export default function SiteFooter() {
   return (
     <footer className="border-t bg-foreground text-background">
       <div className="mx-auto max-w-screen-xl px-4 py-10 sm:px-6">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">

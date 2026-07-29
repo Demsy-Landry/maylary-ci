@@ -23,6 +23,9 @@ import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
 import AdminCommandesGP from '@/pages/admin/CommandesGP';
 import AdminDevisGestion from '@/pages/admin/DevisGestion';
 import AdminDashboard from '@/pages/admin/Dashboard';
+import AdminImportGestion from '@/pages/admin/ImportGestion';
+import NouvelleDemandeImport from '@/pages/NouvelleDemandeImport';
+import MesDemandesImport from '@/pages/MesDemandesImport';
 
 const queryClient = new QueryClient();
 
@@ -35,6 +38,9 @@ function App() {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/import" element={<NouvelleDemandeImport />} />
+                <Route path="/import/nouvelle-demande" element={<NouvelleDemandeImport />} />
+                <Route path="/import/mes-demandes" element={<MesDemandesImport />} />
                 <Route path="/boutique" element={<CatalogueGrandPublic />} />
                 <Route path="/boutique/categorie/:categorieId" element={<CatalogueCategorieGP />} />
                 <Route path="/boutique/produit/:produitId" element={<ProduitDetailGP />} />
@@ -84,6 +90,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <AdminCommandesGP />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/import"
+                  element={
+                    <AdminRoute>
+                      <AdminImportGestion />
                     </AdminRoute>
                   }
                 />

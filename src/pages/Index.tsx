@@ -1,157 +1,195 @@
-import type { CSSProperties } from 'react';
-import { useEffect, useState } from 'react';
-import { ShieldCheck, ClipboardList, Truck } from 'lucide-react';
-import PublicHeaderGP from '@/components/PublicHeaderGP';
+import { Link } from 'react-router-dom';
+import {
+  PackageSearch,
+  Calculator,
+  CheckCircle2,
+  Truck,
+  ShieldCheck,
+  Ship,
+  Plane,
+  FileCheck2,
+  ShoppingBag,
+  Building2,
+  ArrowRight,
+} from 'lucide-react';
+import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
-import PromoCarousel from '@/components/PromoCarousel';
-import RecommendationBlock from '@/components/RecommendationBlock';
-import SectionBanner from '@/components/SectionBanner';
-import SectorIllustration, { SECTORS, SECTOR_PHOTOS } from '@/components/illustrations/SectorIllustration';
-import { supabase, PRODUITS_PUBLIC_VIEW, type Produit } from '@/lib/supabase';
 
-const THEMES = ['Produits tendance', 'Meilleures ventes', 'Nouveautés'];
+const ETAPES = [
+  {
+    icon: PackageSearch,
+    title: '1. Décrivez votre besoin',
+    text: "Un produit, un lien fournisseur, une photo — chez n'importe quel fournisseur, dans n'importe quel pays.",
+  },
+  {
+    icon: Calculator,
+    title: '2. Nous chiffrons tout',
+    text: 'Marchandise, fret international, assurance, douane et transit local : un devis complet, un seul interlocuteur.',
+  },
+  {
+    icon: CheckCircle2,
+    title: '3. Vous validez',
+    text: "Vous acceptez le devis, on s'occupe de l'achat et de toute la logistique.",
+  },
+  {
+    icon: Truck,
+    title: '4. Livré chez vous',
+    text: 'Suivi en temps réel jusqu\'à la livraison dans vos locaux, partout en Côte d\'Ivoire.',
+  },
+];
+
+const ATOUTS = [
+  {
+    icon: ShieldCheck,
+    title: 'Expertise transit',
+    text: "Piloté par une équipe transitaire agréée — pas juste une place de marché, un vrai savoir-faire douane et logistique.",
+  },
+  {
+    icon: Ship,
+    title: 'Tous les modes de transport',
+    text: 'Aérien, maritime ou routier, et tous les incoterms (EXW, FOB, CIF, DDP...) selon votre besoin.',
+  },
+  {
+    icon: FileCheck2,
+    title: 'Douane gérée de bout en bout',
+    text: 'Dédouanement pris en charge, documents (factures, BL, déclarations) centralisés et accessibles.',
+  },
+  {
+    icon: Plane,
+    title: 'Particuliers & entreprises',
+    text: 'Une seule demande, que vous achetiez pour vous-même ou pour approvisionner votre entreprise.',
+  },
+];
 
 export default function Index() {
-  const [produits, setProduits] = useState<Produit[]>([]);
-  const [loadingProduits, setLoadingProduits] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase
-        .from(PRODUITS_PUBLIC_VIEW)
-        .select('*')
-        .eq('espace', 'grand_public')
-        .eq('actif', true)
-        .limit(12);
-      setProduits((data as Produit[]) ?? []);
-      setLoadingProduits(false);
-    };
-    load();
-  }, []);
-
-  // Répartition simple en 3 blocs thématiques (pas de vraie recommandation
-  // personnalisée pour l'instant, juste de quoi remplir plusieurs vitrines
-  // façon Amazon plutôt qu'une seule grande grille).
-  const blocs = THEMES.map((titre, i) => ({
-    titre,
-    produits: produits.slice(i * 4, i * 4 + 4),
-  })).filter((b) => b.produits.length > 0);
-
   return (
     <div className="min-h-screen bg-background">
-      <PublicHeaderGP />
+      <PublicHeaderImport />
 
       <main>
-        <PromoCarousel />
-
-        <section className="mx-auto max-w-screen-xl px-4 pt-8 sm:px-6">
-          <SectionBanner
-            title="Équipez votre entreprise"
-            subtitle="Informatique, téléphonie et bureautique pour les professionnels de Côte d'Ivoire."
-            ctaLabel="Découvrir l'Espace Pro"
-            ctaHref="/catalogue"
-            image={SECTOR_PHOTOS.tech ?? ''}
-          />
-        </section>
-
-        {!loadingProduits && blocs.length > 0 && (
-          <section className="mx-auto max-w-screen-xl px-4 py-10 sm:px-6">
-            <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
-              Découvrir nos produits
-            </h2>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {blocs.map((b) => (
-                <RecommendationBlock
-                  key={b.titre}
-                  title={b.titre}
-                  produits={b.produits}
-                  viewAllHref="/boutique"
-                />
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section className="mx-auto max-w-screen-xl px-4 pb-10 sm:px-6">
-          <SectionBanner
-            title="Mobilier & agencement pro"
-            subtitle="Bureaux, salons d'accueil, aménagement complet — livrés et installés."
-            ctaLabel="Voir le catalogue Mobilier"
-            ctaHref="/catalogue"
-            image={SECTOR_PHOTOS.mobilier ?? ''}
-          />
-        </section>
-
-        <section className="mx-auto max-w-screen-xl px-4 pb-6 sm:px-6">
-          <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
-            Nos secteurs
-          </h2>
-          <p className="mx-auto mt-1 max-w-prose text-center text-sm text-muted-foreground">
-            Les univers de boutiques et d'entreprises pour lesquels Maylary vend et livre en
-            Côte d'Ivoire.
-          </p>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            {SECTORS.map((s, i) => (
-              <div
-                key={s.key}
-                className="group flex flex-col items-center rounded-lg border bg-card p-4 text-center transition-all duration-300 hover:-translate-y-1 hover:border-primary hover:shadow-lg"
-              >
-                {SECTOR_PHOTOS[s.key] ? (
-                  <div className="h-20 w-20 overflow-hidden rounded-full border border-primary/15">
-                    <img
-                      src={SECTOR_PHOTOS[s.key]}
-                      alt={s.label}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    />
-                  </div>
-                ) : (
-                  <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-                    <SectorIllustration
-                      sector={s.key}
-                      animated
-                      className="h-12 w-12"
-                      style={
-                        {
-                          '--float-x': `${6 + (i % 3) * 3}px`,
-                          '--float-y': `${-8 - (i % 2) * 4}px`,
-                          '--float-rot-from': `${-3 - i}deg`,
-                          '--float-rot-to': `${3 + i}deg`,
-                          '--float-duration': `${7 + i}s`,
-                        } as CSSProperties
-                      }
-                    />
-                  </div>
-                )}
-                <h3 className="font-display mt-3 text-sm font-bold text-foreground">{s.label}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">{s.description}</p>
+        <section className="border-b bg-gradient-to-br from-foreground to-foreground/90 text-background">
+          <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
+                <PackageSearch className="h-3.5 w-3.5" />
+                Maylary Import
+              </span>
+              <h1 className="font-display mt-4 text-3xl font-extrabold leading-tight sm:text-5xl">
+                Achetez n'importe où dans le monde.
+                <br />
+                On s'occupe de tout, jusqu'à votre porte.
+              </h1>
+              <p className="mt-4 max-w-xl text-base text-background/80 sm:text-lg">
+                Sourcing, achat, fret international, douane, transit local et livraison : une
+                seule demande, un devis clair, un suivi de bout en bout — pour les particuliers
+                comme pour les entreprises de Côte d'Ivoire.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  to="/import/nouvelle-demande"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary-emphasis"
+                >
+                  Faire une demande d'import
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <a
+                  href="#comment-ca-marche"
+                  className="inline-flex items-center gap-2 rounded-md border border-background/30 px-6 py-3 text-sm font-semibold text-background hover:bg-background/10"
+                >
+                  Comment ça marche
+                </a>
               </div>
-            ))}
+            </div>
           </div>
         </section>
 
-        <section className="mx-auto max-w-screen-xl px-4 pt-6 pb-16 sm:px-6 sm:pt-8 sm:pb-24">
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg border bg-card p-5 transition-shadow duration-300 hover:shadow-md">
-              <ClipboardList className="h-6 w-6 text-primary" />
-              <h3 className="font-display mt-3 font-bold text-foreground">Catalogues vérifiés</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Des produits réels, sélectionnés avec soin.
-              </p>
+        <section id="comment-ca-marche" className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+          <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
+            Comment ça marche
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ETAPES.map((etape) => (
+              <div
+                key={etape.title}
+                className="rounded-lg border bg-card p-5 transition-shadow duration-300 hover:shadow-md"
+              >
+                <etape.icon className="h-6 w-6 text-primary" />
+                <h3 className="font-display mt-3 font-bold text-foreground">{etape.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{etape.text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link
+              to="/import/nouvelle-demande"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md transition-transform hover:-translate-y-0.5 hover:bg-primary-emphasis"
+            >
+              Commencer ma demande
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </section>
+
+        <section className="border-y bg-muted/40">
+          <div className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+            <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
+              Pourquoi Maylary Import
+            </h2>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {ATOUTS.map((atout) => (
+                <div key={atout.title} className="rounded-lg border bg-card p-5">
+                  <atout.icon className="h-6 w-6 text-primary" />
+                  <h3 className="font-display mt-3 font-bold text-foreground">{atout.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{atout.text}</p>
+                </div>
+              ))}
             </div>
-            <div className="rounded-lg border bg-card p-5 transition-shadow duration-300 hover:shadow-md">
-              <Truck className="h-6 w-6 text-primary" />
-              <h3 className="font-display mt-3 font-bold text-foreground">Livraison suivie</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Suivez chaque commande jusqu'à la livraison.
-              </p>
-            </div>
-            <div className="rounded-lg border bg-card p-5 transition-shadow duration-300 hover:shadow-md">
-              <ShieldCheck className="h-6 w-6 text-primary" />
-              <h3 className="font-display mt-3 font-bold text-foreground">Paiement simple</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Mobile Money ou virement, sans complication.
-              </p>
-            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+          <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
+            Besoin de quelque chose de plus simple et rapide ?
+          </h2>
+          <p className="mx-auto mt-1 max-w-prose text-center text-sm text-muted-foreground">
+            Pour les achats standards déjà disponibles chez nous, sans passer par une demande
+            d'import sur mesure.
+          </p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <Link
+              to="/boutique"
+              className="group flex items-center justify-between rounded-lg border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary-emphasis">
+                  <ShoppingBag className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="font-display font-bold text-foreground">Boutique</p>
+                  <p className="text-sm text-muted-foreground">
+                    Catalogue prêt à l'achat, livré rapidement en Côte d'Ivoire.
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+            </Link>
+            <Link
+              to="/catalogue"
+              className="group flex items-center justify-between rounded-lg border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/15 text-accent">
+                  <Building2 className="h-6 w-6" />
+                </div>
+                <div>
+                  <p className="font-display font-bold text-foreground">Espace Pro</p>
+                  <p className="text-sm text-muted-foreground">
+                    Catalogue professionnel et devis pour l'équipement de votre entreprise.
+                  </p>
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+            </Link>
           </div>
         </section>
       </main>

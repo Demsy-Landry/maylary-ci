@@ -23,6 +23,11 @@ export const LOGO_BUCKET = 'app_e08c374bc4_enseigne_logos';
 /** Public storage bucket for produit photos. */
 export const PRODUIT_PHOTOS_BUCKET = 'app_e08c374bc4_produit_photos';
 
+/** Public storage bucket for reference photos uploaded by clients on an import request. */
+export const IMPORT_PHOTOS_BUCKET = 'app_e08c374bc4_import_photos';
+/** Public storage bucket for transit documents (invoices, BL, customs declarations). */
+export const IMPORT_DOCUMENTS_BUCKET = 'app_e08c374bc4_import_documents';
+
 export const SECTEURS_TABLE = 'app_e08c374bc4_secteurs';
 export const ENSEIGNES_TABLE = 'app_e08c374bc4_enseignes';
 export const PROFILES_TABLE = 'app_e08c374bc4_profiles';
@@ -41,6 +46,10 @@ export const COMMANDES_GP_TABLE = 'app_e08c374bc4_commandes_gp';
 export const LIGNES_COMMANDE_GP_TABLE = 'app_e08c374bc4_lignes_commande_gp';
 export const HISTORIQUE_COMMANDE_GP_TABLE = 'app_e08c374bc4_historique_statut_commande_gp';
 export const PROSPECTION_FOURNISSEURS_TABLE = 'app_e08c374bc4_prospection_fournisseurs';
+
+export const DEMANDES_IMPORT_TABLE = 'app_e08c374bc4_demandes_import';
+export const HISTORIQUE_IMPORT_TABLE = 'app_e08c374bc4_historique_statut_import';
+export const DOCUMENTS_IMPORT_TABLE = 'app_e08c374bc4_documents_import';
 
 export type StockDisponible = 'en_stock' | 'sur_commande' | 'rupture';
 export type StatutDevis =
@@ -287,3 +296,169 @@ export const STATUT_PROSPECTION_LABELS: Record<StatutProspection, string> = {
   contacte: 'Contacté',
   partenariat_signe: 'Partenariat signé',
 };
+
+export type StatutImport =
+  | 'nouvelle'
+  | 'en_cotation'
+  | 'devis_envoye'
+  | 'validee'
+  | 'achat_effectue'
+  | 'expedition_internationale'
+  | 'arrivee_ci'
+  | 'dedouanement'
+  | 'transit_local'
+  | 'livree'
+  | 'annulee';
+
+export type Incoterm = 'EXW' | 'FCA' | 'FOB' | 'CFR' | 'CIF' | 'DAP' | 'DDP';
+export type ModeTransport = 'aerien' | 'maritime' | 'routier';
+export type TypeDocumentImport =
+  | 'facture_fournisseur'
+  | 'packing_list'
+  | 'connaissement_bl'
+  | 'lta'
+  | 'declaration_douaniere'
+  | 'bon_livraison'
+  | 'photo_produit'
+  | 'autre';
+
+export const STATUT_IMPORT_LABELS: Record<StatutImport, string> = {
+  nouvelle: 'Nouvelle demande',
+  en_cotation: 'En cours de cotation',
+  devis_envoye: 'Devis envoyé',
+  validee: 'Devis validé',
+  achat_effectue: 'Achat effectué',
+  expedition_internationale: 'Expédition internationale',
+  arrivee_ci: 'Arrivée en Côte d\'Ivoire',
+  dedouanement: 'Dédouanement en cours',
+  transit_local: 'Transit local',
+  livree: 'Livrée',
+  annulee: 'Annulée',
+};
+
+/** Message affiché au client pour chaque étape, dans le suivi de sa demande. */
+export const STATUT_IMPORT_MESSAGES: Record<StatutImport, string> = {
+  nouvelle: 'Votre demande a bien été reçue. Notre équipe transit prépare votre cotation.',
+  en_cotation: 'Nous chiffrons votre demande (marchandise, fret, douane, transit local).',
+  devis_envoye: 'Votre devis est prêt. Consultez le détail et validez-le pour lancer votre commande.',
+  validee: 'Devis validé, merci ! Nous lançons l\'achat auprès du fournisseur.',
+  achat_effectue: 'Votre commande a été passée auprès du fournisseur.',
+  expedition_internationale: 'Votre marchandise est en transport international.',
+  arrivee_ci: 'Votre marchandise est arrivée en Côte d\'Ivoire.',
+  dedouanement: 'Votre marchandise est en cours de dédouanement.',
+  transit_local: 'Votre marchandise est en transit local vers votre adresse.',
+  livree: 'Votre marchandise a été livrée. Merci de votre confiance !',
+  annulee: 'Cette demande a été annulée. Contactez-nous si vous avez des questions.',
+};
+
+export const INCOTERM_LABELS: Record<Incoterm, string> = {
+  EXW: 'EXW — Ex Works (départ usine)',
+  FCA: 'FCA — Free Carrier',
+  FOB: 'FOB — Free On Board',
+  CFR: 'CFR — Cost and Freight',
+  CIF: 'CIF — Cost, Insurance and Freight',
+  DAP: 'DAP — Delivered At Place',
+  DDP: 'DDP — Delivered Duty Paid',
+};
+
+export const MODE_TRANSPORT_LABELS: Record<ModeTransport, string> = {
+  aerien: 'Aérien',
+  maritime: 'Maritime',
+  routier: 'Routier',
+};
+
+export const TYPE_DOCUMENT_LABELS: Record<TypeDocumentImport, string> = {
+  facture_fournisseur: 'Facture fournisseur',
+  packing_list: 'Packing list',
+  connaissement_bl: 'Connaissement (B/L)',
+  lta: "Lettre de transport aérien (LTA)",
+  declaration_douaniere: 'Déclaration douanière',
+  bon_livraison: 'Bon de livraison',
+  photo_produit: 'Photo du produit',
+  autre: 'Autre document',
+};
+
+export interface DemandeImport {
+  id: string;
+  user_id: string;
+  reference_publique: string;
+  statut: StatutImport;
+  description_produit: string;
+  lien_produit: string | null;
+  photos: string[];
+  quantite: number;
+  pays_fournisseur: string | null;
+  incoterm: Incoterm | null;
+  mode_transport: ModeTransport;
+  transporteur_souhaite: string | null;
+  delai_souhaite: string | null;
+  notes_client: string | null;
+  poids_estime_kg: number | null;
+  volume_estime_m3: number | null;
+  valeur_marchandise_estimee_fcfa: number | null;
+  estimation_indicative_fcfa: number | null;
+  cout_marchandise_fcfa: number | null;
+  cout_fret_fcfa: number | null;
+  assurance_fcfa: number | null;
+  douane_estimee_fcfa: number | null;
+  transit_local_fcfa: number | null;
+  livraison_fcfa: number | null;
+  marge_fcfa: number | null;
+  montant_total_devis_fcfa: number | null;
+  commentaire_admin_devis: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HistoriqueStatutImport {
+  id: string;
+  demande_import_id: string;
+  statut: StatutImport;
+  commentaire_admin: string | null;
+  horodatage: string;
+}
+
+export interface DocumentImport {
+  id: string;
+  demande_import_id: string;
+  type_document: TypeDocumentImport;
+  nom_fichier: string;
+  url: string;
+  uploaded_by: string | null;
+  created_at: string;
+}
+
+/**
+ * Estimation indicative très grossière (avant cotation réelle) pour donner
+ * un ordre de grandeur immédiat au client. Tarifs au kilo par mode de
+ * transport + majoration selon l'incoterm choisi ; la cotation ferme de
+ * l'équipe transit prévaudra toujours sur ce chiffre.
+ */
+const TARIF_FRET_FCFA_PAR_KG: Record<ModeTransport, number> = {
+  aerien: 4500,
+  maritime: 1200,
+  routier: 2000,
+};
+
+const MAJORATION_INCOTERM: Record<Incoterm, number> = {
+  EXW: 1.15,
+  FCA: 1.1,
+  FOB: 1.05,
+  CFR: 1.0,
+  CIF: 0.95,
+  DAP: 0.85,
+  DDP: 0.75,
+};
+
+export function estimerCoutIndicatifFcfa(params: {
+  poidsKg: number;
+  valeurMarchandiseFcfa: number;
+  modeTransport: ModeTransport;
+  incoterm: Incoterm | null;
+}): number {
+  const { poidsKg, valeurMarchandiseFcfa, modeTransport, incoterm } = params;
+  const fret = poidsKg * TARIF_FRET_FCFA_PAR_KG[modeTransport];
+  const majoration = incoterm ? MAJORATION_INCOTERM[incoterm] : 1;
+  const douaneEtTransitEstimes = (valeurMarchandiseFcfa + fret) * 0.25;
+  return Math.round((valeurMarchandiseFcfa + fret * majoration + douaneEtTransitEstimes) / 100) * 100;
+}
