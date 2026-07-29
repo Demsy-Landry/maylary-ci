@@ -52,12 +52,7 @@ export default function PublicHeaderPro() {
               <Link to="/admin">Admin</Link>
             </Button>
           )}
-          {user && isAdmin ? (
-            <Button variant="outline" size="sm" className="text-foreground" onClick={handleSignOut}>
-              <LogOut className="mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline">Déconnexion</span>
-            </Button>
-          ) : user ? (
+          {user && !isAdmin && (
             <Button
               variant="outline"
               size="sm"
@@ -66,6 +61,12 @@ export default function PublicHeaderPro() {
             >
               <User className="mr-1.5 h-4 w-4" />
               <span className="hidden sm:inline">Mes devis</span>
+            </Button>
+          )}
+          {user ? (
+            <Button variant="outline" size="sm" className="text-foreground" onClick={handleSignOut}>
+              <LogOut className="mr-1.5 h-4 w-4" />
+              <span className="hidden sm:inline">Déconnexion</span>
             </Button>
           ) : (
             <Button
