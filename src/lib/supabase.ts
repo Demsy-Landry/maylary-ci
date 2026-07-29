@@ -55,6 +55,7 @@ export type Fiabilite = 'a_verifier' | 'fiable' | 'tres_fiable';
 export type ModePaiement = 'virement' | 'mobile_money';
 export type StatutCommandeGP =
   | 'en_attente_paiement'
+  | 'paiement_recu_verification'
   | 'paiement_confirme'
   | 'en_preparation'
   | 'expediee'
@@ -77,11 +78,25 @@ export const FIABILITE_LABELS: Record<Fiabilite, string> = {
 
 export const STATUT_COMMANDE_GP_LABELS: Record<StatutCommandeGP, string> = {
   en_attente_paiement: 'En attente de paiement',
+  paiement_recu_verification: 'Paiement reçu — vérification en cours',
   paiement_confirme: 'Paiement confirmé',
   en_preparation: 'En préparation',
   expediee: 'Expédiée',
   livree: 'Livrée',
   annulee: 'Annulée',
+};
+
+/** Message affiché au client pour chaque statut, dans le suivi de commande. */
+export const STATUT_COMMANDE_GP_MESSAGES: Record<StatutCommandeGP, string> = {
+  en_attente_paiement:
+    "En attente de votre paiement. Une fois réglé, cliquez sur « J'ai payé » pour nous en informer.",
+  paiement_recu_verification:
+    'Merci ! Nous vérifions la réception de votre paiement — cela peut prendre quelques heures. Vous serez notifié dès la confirmation.',
+  paiement_confirme: 'Votre paiement est confirmé, votre commande va être préparée.',
+  en_preparation: 'Votre commande est en cours de préparation.',
+  expediee: 'Votre commande a été expédiée.',
+  livree: 'Votre commande a été livrée. Merci de votre confiance !',
+  annulee: "Cette commande a été annulée. Contactez-nous si vous avez des questions.",
 };
 
 export const MODE_PAIEMENT_LABELS: Record<ModePaiement, string> = {

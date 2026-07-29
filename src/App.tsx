@@ -20,6 +20,7 @@ import PanierDevis from '@/pages/PanierDevis';
 import MesDevis from '@/pages/MesDevis';
 import CjDropshippingImport from '@/pages/admin/CjDropshippingImport';
 import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
+import AdminCommandesGP from '@/pages/admin/CommandesGP';
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <ProspectionFournisseurs />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/commandes"
+                  element={
+                    <AdminRoute>
+                      <AdminCommandesGP />
                     </AdminRoute>
                   }
                 />

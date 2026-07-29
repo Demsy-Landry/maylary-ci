@@ -128,8 +128,9 @@ export default function CommandeGP() {
               Référence : <span className="font-semibold text-foreground">{commandeCreee}</span>
             </p>
             <p className="mt-4 text-sm text-foreground">
-              Merci d'effectuer le règlement selon les instructions ci-dessous, puis nous confirmerons
-              votre paiement et préparerons votre commande.
+              Merci d'effectuer le règlement selon les instructions ci-dessous, puis rendez-vous dans
+              « Mes commandes » et cliquez sur « J'ai payé » pour nous en informer. Nous vérifierons
+              la réception avant de préparer votre commande.
             </p>
             {parametresPaiement && (
               <div className="mt-6 space-y-4 text-left">

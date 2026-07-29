@@ -5,10 +5,12 @@ import SiteFooter from '@/components/SiteFooter';
 import { useAuth } from '@/hooks/useAuth';
 import {
   supabase,
+  EDGE_FUNCTIONS_URL,
   COMMANDES_GP_TABLE,
   LIGNES_COMMANDE_GP_TABLE,
   HISTORIQUE_COMMANDE_GP_TABLE,
   STATUT_COMMANDE_GP_LABELS,
+  STATUT_COMMANDE_GP_MESSAGES,
   MODE_PAIEMENT_LABELS,
   type CommandeGP,
   type LigneCommandeGP,
@@ -24,10 +26,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Eye, Package } from 'lucide-react';
+import { Loader2, Eye, Package, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const STATUT_BADGE_VARIANT: Record<StatutCommandeGP, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   en_attente_paiement: 'secondary',
+  paiement_recu_verification: 'outline',
   paiement_confirme: 'default',
   en_preparation: 'secondary',
   expediee: 'secondary',
@@ -47,20 +51,23 @@ export default function MesCommandesGP() {
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<CommandeAvecDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [marquerPayeBusy, setMarquerPayeBusy] = useState<string | null>(null);
+
+  const loadCommandes = async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data } = await supabase
+      .from(COMMANDES_GP_TABLE)
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+    setCommandes((data as CommandeGP[]) ?? []);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    if (!user) return;
-    const load = async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from(COMMANDES_GP_TABLE)
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      setCommandes((data as CommandeGP[]) ?? []);
-      setLoading(false);
-    };
-    load();
+    loadCommandes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   if (authLoading) {
@@ -91,6 +98,39 @@ export default function MesCommandesGP() {
       historique: (historiqueRes.data as HistoriqueStatutCommandeGP[]) ?? [],
     });
     setDetailLoading(false);
+  };
+
+  const handleMarquerPaye = async (commandeId: string) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    if (!token) {
+      toast.error('Session expirée, reconnectez-vous.');
+      return;
+    }
+
+    setMarquerPayeBusy(commandeId);
+    try {
+      const res = await fetch(`${EDGE_FUNCTIONS_URL}/app_e08c374bc4_commande_gp_marquer_paye`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ commande_id: commandeId }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(json.error ?? 'Une erreur est survenue.');
+      }
+      toast.success('Merci ! Nous vérifions la réception de votre paiement.');
+      await loadCommandes();
+      if (detail?.id === commandeId) {
+        setDetail(null);
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Impossible de marquer la commande comme payée.');
+    } finally {
+      setMarquerPayeBusy(null);
+    }
   };
 
   return (
@@ -132,6 +172,20 @@ export default function MesCommandesGP() {
                   <Badge variant={STATUT_BADGE_VARIANT[c.statut]}>
                     {STATUT_COMMANDE_GP_LABELS[c.statut]}
                   </Badge>
+                  {c.statut === 'en_attente_paiement' && (
+                    <Button
+                      size="sm"
+                      onClick={() => handleMarquerPaye(c.id)}
+                      disabled={marquerPayeBusy === c.id}
+                    >
+                      {marquerPayeBusy === c.id ? (
+                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="mr-1.5 h-4 w-4" />
+                      )}
+                      J'ai payé
+                    </Button>
+                  )}
                   <Button variant="ghost" size="icon" onClick={() => openDetail(c)}>
                     <Eye className="h-4 w-4" />
                   </Button>
@@ -162,6 +216,26 @@ export default function MesCommandesGP() {
             </div>
           ) : (
             <div className="space-y-4">
+              <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+                <p className="font-medium text-foreground">{STATUT_COMMANDE_GP_LABELS[detail.statut]}</p>
+                <p className="mt-1 text-muted-foreground">{STATUT_COMMANDE_GP_MESSAGES[detail.statut]}</p>
+                {detail.statut === 'en_attente_paiement' && (
+                  <Button
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => handleMarquerPaye(detail.id)}
+                    disabled={marquerPayeBusy === detail.id}
+                  >
+                    {marquerPayeBusy === detail.id ? (
+                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="mr-1.5 h-4 w-4" />
+                    )}
+                    J'ai payé
+                  </Button>
+                )}
+              </div>
+
               <div className="rounded-md border p-3 text-sm">
                 <p className="font-medium text-foreground">{detail.nom_destinataire}</p>
                 <p className="text-muted-foreground">{detail.telephone_destinataire}</p>
