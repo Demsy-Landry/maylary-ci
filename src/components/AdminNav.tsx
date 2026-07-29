@@ -24,35 +24,35 @@ export default function AdminNav() {
   };
 
   return (
-    <div className="flex items-center justify-between gap-3">
-      <div>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
         <Link
           to="/"
-          className="mb-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Accueil
         </Link>
-        <nav className="flex flex-wrap gap-3">
-          {LINKS.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`text-sm font-medium ${
-                location.pathname === link.to
-                  ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <Button variant="outline" size="sm" onClick={handleSignOut}>
+          <LogOut className="mr-1.5 h-4 w-4" />
+          Déconnexion
+        </Button>
       </div>
-      <Button variant="outline" size="sm" onClick={handleSignOut}>
-        <LogOut className="mr-1.5 h-4 w-4" />
-        Déconnexion
-      </Button>
+      <nav className="flex flex-wrap gap-x-4 gap-y-1.5">
+        {LINKS.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            className={`text-sm font-medium ${
+              location.pathname === link.to
+                ? 'text-primary'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
     </div>
   );
 }
