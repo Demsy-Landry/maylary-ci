@@ -11,6 +11,7 @@ import {
   ShoppingBag,
   Building2,
   ArrowRight,
+  Globe,
 } from 'lucide-react';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
@@ -143,6 +144,34 @@ export default function Index() {
                   <p className="mt-1 text-sm text-muted-foreground">{atout.text}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="border-b bg-foreground text-background">
+          <div className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+            <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="max-w-xl">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
+                  <Globe className="h-3.5 w-3.5" />
+                  Maylary Export
+                </span>
+                <h2 className="font-display mt-4 text-2xl font-extrabold leading-tight sm:text-3xl">
+                  Vous produisez en Côte d'Ivoire ? Exportez vers le monde entier.
+                </h2>
+                <p className="mt-3 text-sm text-background/80 sm:text-base">
+                  Collecte, dédouanement à l'export, fret international, certifications
+                  (origine, phytosanitaire) et livraison à votre acheteur — un seul devis, un
+                  seul interlocuteur.
+                </p>
+              </div>
+              <Link
+                to="/export/nouvelle-demande"
+                className="inline-flex shrink-0 items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary-emphasis"
+              >
+                Faire une demande d'export
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </section>

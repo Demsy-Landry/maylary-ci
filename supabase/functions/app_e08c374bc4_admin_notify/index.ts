@@ -26,6 +26,8 @@ const SUJETS: Record<string, (ref: string) => string> = {
   commande: (ref) => `Maylary — Paiement à vérifier : commande ${ref}`,
   import: (ref) => `Maylary Import — Nouvelle demande à coter : ${ref}`,
   import_valide: (ref) => `Maylary Import — Devis validé par le client : ${ref}`,
+  export: (ref) => `Maylary Export — Nouvelle demande à coter : ${ref}`,
+  export_valide: (ref) => `Maylary Export — Devis validé par le client : ${ref}`,
 };
 
 const LIENS: Record<string, string> = {
@@ -33,6 +35,8 @@ const LIENS: Record<string, string> = {
   commande: 'https://maylary-ci.vercel.app/admin/commandes',
   import: 'https://maylary-ci.vercel.app/admin/import',
   import_valide: 'https://maylary-ci.vercel.app/admin/import',
+  export: 'https://maylary-ci.vercel.app/admin/export',
+  export_valide: 'https://maylary-ci.vercel.app/admin/export',
 };
 
 const MESSAGES: Record<string, string> = {
@@ -40,6 +44,8 @@ const MESSAGES: Record<string, string> = {
   commande: 'Un client indique avoir payé, vérification requise.',
   import: "Nouvelle demande d'import à coter (marchandise, fret, douane, transit).",
   import_valide: "Le client a validé le devis — vous pouvez lancer l'achat et le transit.",
+  export: "Nouvelle demande d'export à coter (transport local, douane export, fret, certifications).",
+  export_valide: "Le client a validé le devis — vous pouvez lancer la collecte et l'export.",
 };
 
 Deno.serve(async (req: Request) => {

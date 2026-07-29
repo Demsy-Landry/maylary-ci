@@ -13,6 +13,7 @@ import {
   Search,
   MapPin,
   PackageSearch,
+  Ship,
 } from 'lucide-react';
 
 export default function PublicHeaderGP() {
@@ -44,9 +45,15 @@ export default function PublicHeaderGP() {
 
           <nav className="flex shrink-0 items-center gap-1 sm:order-3 sm:gap-2">
           <Button asChild variant="outline" size="sm" className="text-foreground">
-            <Link to="/import">
+            <Link to="/import/nouvelle-demande">
               <PackageSearch className="mr-1.5 h-4 w-4" />
               Import
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="sm" className="hidden text-foreground sm:inline-flex">
+            <Link to="/export/nouvelle-demande">
+              <Ship className="mr-1.5 h-4 w-4" />
+              Export
             </Link>
           </Button>
           <Button asChild variant="ghost" size="sm">
