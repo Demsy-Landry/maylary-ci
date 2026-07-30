@@ -8,12 +8,16 @@ import {
   EDGE_FUNCTIONS_URL,
   DEMANDES_IMPORT_TABLE,
   HISTORIQUE_IMPORT_TABLE,
+  DOCUMENTS_IMPORT_TABLE,
   IMPORT_PHOTOS_BUCKET,
+  IMPORT_DOCUMENTS_BUCKET,
   INCOTERM_LABELS,
   MODE_TRANSPORT_LABELS,
+  TYPE_DOCUMENT_LABELS,
   estimerCoutIndicatifFcfa,
   type Incoterm,
   type ModeTransport,
+  type TypeDocumentImport,
 } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +25,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, ImagePlus, X, PackageSearch, Calculator } from 'lucide-react';
+import { Loader2, ImagePlus, X, PackageSearch, Calculator, FileText, FilePlus2 } from 'lucide-react';
+
+type DocumentAJoindre = { file: File; type: TypeDocumentImport };
 
 const selectClassName =
   'flex h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm';
@@ -43,6 +49,7 @@ export default function NouvelleDemandeImport() {
   const [valeurEstimee, setValeurEstimee] = useState('');
   const [notesClient, setNotesClient] = useState('');
   const [photos, setPhotos] = useState<File[]>([]);
+  const [documents, setDocuments] = useState<DocumentAJoindre[]>([]);
 
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
@@ -68,6 +75,22 @@ export default function NouvelleDemandeImport() {
 
   const removePhoto = (index: number) => {
     setPhotos((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDocumentsChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []).slice(0, 6);
+    setDocuments((prev) =>
+      [...prev, ...files.map((file) => ({ file, type: 'facture_fournisseur' as TypeDocumentImport }))].slice(0, 6),
+    );
+    e.target.value = '';
+  };
+
+  const removeDocument = (index: number) => {
+    setDocuments((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateDocumentType = (index: number, type: TypeDocumentImport) => {
+    setDocuments((prev) => prev.map((doc, i) => (i === index ? { ...doc, type } : doc)));
   };
 
   const handleSubmit = async () => {
@@ -131,6 +154,23 @@ export default function NouvelleDemandeImport() {
       statut: 'nouvelle',
       commentaire_admin: null,
     });
+
+    for (const doc of documents) {
+      const path = `${user.id}/${crypto.randomUUID()}-${doc.file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from(IMPORT_DOCUMENTS_BUCKET)
+        .upload(path, doc.file);
+      if (!uploadError) {
+        const { data: publicUrl } = supabase.storage.from(IMPORT_DOCUMENTS_BUCKET).getPublicUrl(path);
+        await supabase.from(DOCUMENTS_IMPORT_TABLE).insert({
+          demande_import_id: demande.id,
+          type_document: doc.type,
+          nom_fichier: doc.file.name,
+          url: publicUrl.publicUrl,
+          uploaded_by: user.id,
+        });
+      }
+    }
 
     const {
       data: { session },
@@ -224,6 +264,56 @@ export default function NouvelleDemandeImport() {
                 <label className="flex h-16 w-16 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed text-muted-foreground hover:bg-muted">
                   <ImagePlus className="h-5 w-5" />
                   <input type="file" accept="image/*" multiple className="hidden" onChange={handlePhotosChange} />
+                </label>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Documents (facture, bon de commande... optionnel, 6 max)</Label>
+            <p className="text-xs text-muted-foreground">
+              Vous avez déjà acheté cette marchandise et cherchez uniquement un transitaire pour le
+              transport et la douane ? Scannez ou importez votre facture ici — notre équipe s'appuiera
+              dessus pour chiffrer directement le fret, la douane et la livraison, sans repasser par l'achat.
+            </p>
+            <div className="space-y-2">
+              {documents.map((doc, i) => (
+                <div key={i} className="flex items-center gap-2 rounded-md border bg-card p-2">
+                  <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="min-w-0 flex-1 truncate text-xs text-foreground">{doc.file.name}</span>
+                  <select
+                    className="h-8 shrink-0 rounded-md border border-input bg-transparent px-2 text-xs outline-none"
+                    value={doc.type}
+                    onChange={(e) => updateDocumentType(i, e.target.value as TypeDocumentImport)}
+                  >
+                    {(Object.keys(TYPE_DOCUMENT_LABELS) as TypeDocumentImport[])
+                      .filter((t) => t !== 'photo_produit')
+                      .map((t) => (
+                        <option key={t} value={t}>
+                          {TYPE_DOCUMENT_LABELS[t]}
+                        </option>
+                      ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => removeDocument(i)}
+                    className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+              {documents.length < 6 && (
+                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed p-3 text-xs text-muted-foreground hover:bg-muted">
+                  <FilePlus2 className="h-4 w-4" />
+                  Scanner / ajouter un document (photo ou PDF)
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    multiple
+                    className="hidden"
+                    onChange={handleDocumentsChange}
+                  />
                 </label>
               )}
             </div>
