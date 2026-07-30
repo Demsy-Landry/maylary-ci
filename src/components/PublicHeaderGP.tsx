@@ -89,10 +89,10 @@ export default function PublicHeaderGP() {
               variant="outline"
               size="sm"
               className="text-foreground"
-              onClick={() => navigate('/boutique/mes-commandes')}
+              onClick={() => navigate('/mon-compte')}
             >
               <User className="mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline">Mes commandes</span>
+              <span className="hidden sm:inline">Mon compte</span>
             </Button>
           )}
           {user ? (

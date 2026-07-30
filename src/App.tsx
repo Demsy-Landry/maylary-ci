@@ -32,6 +32,8 @@ import MesDemandesExport from '@/pages/MesDemandesExport';
 import AdminLogin from '@/pages/admin/AdminLogin';
 import APropos from '@/pages/APropos';
 import MentionsLegales from '@/pages/MentionsLegales';
+import AdminParametres from '@/pages/admin/AdminParametres';
+import MonCompte from '@/pages/MonCompte';
 
 const queryClient = new QueryClient();
 
@@ -62,6 +64,7 @@ function App() {
                 <Route path="/catalogue/produit/:produitId" element={<ProduitDetailPro />} />
                 <Route path="/catalogue/devis" element={<PanierDevis />} />
                 <Route path="/catalogue/mes-devis" element={<MesDevis />} />
+                <Route path="/mon-compte" element={<MonCompte />} />
                 <Route path="/admin/connexion" element={<AdminLogin />} />
                 <Route path="/a-propos" element={<APropos />} />
                 <Route path="/mentions-legales" element={<MentionsLegales />} />
@@ -118,6 +121,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <AdminExportGestion />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/parametres"
+                  element={
+                    <AdminRoute>
+                      <AdminParametres />
                     </AdminRoute>
                   }
                 />

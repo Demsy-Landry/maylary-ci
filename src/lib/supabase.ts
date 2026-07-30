@@ -153,6 +153,7 @@ export interface Profile {
   secteur_activite_client: string | null;
   telephone: string | null;
   ville: string | null;
+  adresse_livraison_defaut: string | null;
 }
 
 /** Produit tel qu'exposé publiquement — ne contient JAMAIS le prix d'achat fournisseur. */

@@ -69,10 +69,10 @@ export default function PublicHeaderPro() {
               variant="outline"
               size="sm"
               className="text-foreground"
-              onClick={() => navigate('/catalogue/mes-devis')}
+              onClick={() => navigate('/mon-compte')}
             >
               <User className="mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline">Mes devis</span>
+              <span className="hidden sm:inline">Mon compte</span>
             </Button>
           )}
           {user ? (
