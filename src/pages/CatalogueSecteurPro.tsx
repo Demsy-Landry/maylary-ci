@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { ChevronLeft } from 'lucide-react';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import OrigineProduitBadge from '@/components/OrigineProduitBadge';
 
 export default function CatalogueSecteurPro() {
   const { secteurId } = useParams<{ secteurId: string }>();
@@ -105,6 +106,9 @@ export default function CatalogueSecteurPro() {
                     <div className="p-3">
                       {enseigneNom(p.enseigne_id) && (
                         <p className="truncate text-xs text-muted-foreground">{enseigneNom(p.enseigne_id)}</p>
+                      )}
+                      {p.origine && (
+                        <OrigineProduitBadge origine={p.origine} taille="compacte" className="mb-1" />
                       )}
                       <p className="truncate text-sm font-medium text-foreground group-hover:text-primary">
                         {p.nom}

@@ -2,14 +2,26 @@ import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
-import { supabase, CATEGORIES_GP_TABLE, PRODUITS_PUBLIC_VIEW, type CategorieGP, type Produit } from '@/lib/supabase';
+import {
+  supabase,
+  CATEGORIES_GP_TABLE,
+  PRODUITS_PUBLIC_VIEW,
+  ORIGINE_PRODUIT_LABELS,
+  type CategorieGP,
+  type OrigineProduit,
+  type Produit,
+} from '@/lib/supabase';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Search, ImageOff, ShoppingCart } from 'lucide-react';
 import SectorIllustration, { guessSector } from '@/components/illustrations/SectorIllustration';
+import OrigineProduitBadge from '@/components/OrigineProduitBadge';
 import { useCartGP } from '@/hooks/useCartGP';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+
+type FiltreOrigine = 'tous' | OrigineProduit;
 
 export default function CatalogueGrandPublic() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,6 +29,7 @@ export default function CatalogueGrandPublic() {
   const [produits, setProduits] = useState<Produit[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState(searchParams.get('q') ?? '');
+  const [filtreOrigine, setFiltreOrigine] = useState<FiltreOrigine>('tous');
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -48,11 +61,29 @@ export default function CatalogueGrandPublic() {
   const produitsCountByCategorie = (categorieId: string) =>
     produits.filter((p) => p.categorie_gp_id === categorieId).length;
 
+  /** Une catégorie encore vide n'a rien à montrer : on ne l'affiche pas. */
+  const categoriesVisibles = useMemo(
+    () => categories.filter((c) => produitsCountByCategorie(c.id) > 0),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [categories, produits],
+  );
+
+  const produitsFiltres = useMemo(
+    () => (filtreOrigine === 'tous' ? produits : produits.filter((p) => p.origine === filtreOrigine)),
+    [produits, filtreOrigine],
+  );
+
   const searchResults = useMemo(() => {
     if (!search.trim()) return [];
     const q = search.trim().toLowerCase();
-    return produits.filter((p) => p.nom.toLowerCase().includes(q));
-  }, [search, produits]);
+    return produitsFiltres.filter((p) => p.nom.toLowerCase().includes(q));
+  }, [search, produitsFiltres]);
+
+  const filtres: { valeur: FiltreOrigine; libelle: string }[] = [
+    { valeur: 'tous', libelle: 'Tous les produits' },
+    { valeur: 'local', libelle: ORIGINE_PRODUIT_LABELS.local },
+    { valeur: 'import_international', libelle: ORIGINE_PRODUIT_LABELS.import_international },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -75,6 +106,28 @@ export default function CatalogueGrandPublic() {
               className="pl-9"
             />
           </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {filtres.map((f) => (
+              <button
+                key={f.valeur}
+                type="button"
+                onClick={() => setFiltreOrigine(f.valeur)}
+                className={cn(
+                  'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                  filtreOrigine === f.valeur
+                    ? 'border-primary bg-primary text-primary-foreground'
+                    : 'bg-card text-muted-foreground hover:border-primary hover:text-foreground',
+                )}
+              >
+                {f.libelle}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Les articles « Import sur commande » sont commandés à l'étranger pour vous : le prix est
+            négocié à la source, le délai de livraison est plus long qu'un article déjà en stock local.
+          </p>
         </div>
 
         {loading ? (
@@ -103,7 +156,7 @@ export default function CatalogueGrandPublic() {
         ) : (
           <>
             <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
-              {categories.map((c) => (
+              {categoriesVisibles.map((c) => (
                 <Link
                   key={c.id}
                   to={`/boutique/categorie/${c.id}`}
@@ -124,22 +177,35 @@ export default function CatalogueGrandPublic() {
                   </span>
                 </Link>
               ))}
-              {categories.length === 0 && (
+              {categoriesVisibles.length === 0 && (
                 <p className="col-span-full rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
                   La boutique est en cours de préparation, revenez bientôt.
                 </p>
               )}
             </div>
 
-            {produits.length > 0 && (
+            {produitsFiltres.length > 0 ? (
               <div className="mt-6">
-                <h2 className="mb-4 text-lg font-semibold text-foreground">Tous les produits</h2>
+                <h2 className="mb-4 text-lg font-semibold text-foreground">
+                  {filtreOrigine === 'tous'
+                    ? 'Tous les produits'
+                    : ORIGINE_PRODUIT_LABELS[filtreOrigine]}
+                  <span className="ml-2 text-sm font-normal text-muted-foreground">
+                    ({produitsFiltres.length})
+                  </span>
+                </h2>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
-                  {produits.map((p) => (
+                  {produitsFiltres.map((p) => (
                     <ProductCardGP key={p.id} produit={p} />
                   ))}
                 </div>
               </div>
+            ) : (
+              produits.length > 0 && (
+                <p className="mt-6 rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+                  Aucun produit dans cette sélection pour le moment.
+                </p>
+              )
             )}
           </>
         )}
@@ -186,6 +252,7 @@ export function ProductCardGP({ produit }: { produit: Produit }) {
         )}
       </div>
       <div className="flex flex-1 flex-col p-3">
+        {produit.origine && <OrigineProduitBadge origine={produit.origine} taille="compacte" className="mb-1.5" />}
         <p className="line-clamp-2 text-sm text-foreground">{produit.nom}</p>
         <div className="mt-1 flex items-center gap-2">
           <span className="text-base font-bold text-foreground">

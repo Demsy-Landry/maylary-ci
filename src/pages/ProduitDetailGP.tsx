@@ -2,7 +2,16 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
-import { supabase, CATEGORIES_GP_TABLE, PRODUITS_PUBLIC_VIEW, PRODUITS_FAVORIS_TABLE, type CategorieGP, type Produit } from '@/lib/supabase';
+import {
+  supabase,
+  CATEGORIES_GP_TABLE,
+  PRODUITS_PUBLIC_VIEW,
+  PRODUITS_FAVORIS_TABLE,
+  ORIGINE_PRODUIT_DESCRIPTIONS,
+  type CategorieGP,
+  type Produit,
+} from '@/lib/supabase';
+import OrigineProduitBadge from '@/components/OrigineProduitBadge';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
 import { Button } from '@/components/ui/button';
@@ -188,7 +197,14 @@ export default function ProduitDetailGP() {
                   {STOCK_LABELS[produit.stock_disponible]}
                 </Badge>
                 {produit.categorie && <Badge variant="outline">{produit.categorie}</Badge>}
+                {produit.origine && <OrigineProduitBadge origine={produit.origine} />}
               </div>
+
+              {produit.origine && (
+                <p className="mt-3 rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
+                  {ORIGINE_PRODUIT_DESCRIPTIONS[produit.origine]}
+                </p>
+              )}
 
               {produit.delai_livraison_estime && (
                 <p className="mt-2 text-sm text-muted-foreground">

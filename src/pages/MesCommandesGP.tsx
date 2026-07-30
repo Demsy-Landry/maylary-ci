@@ -28,6 +28,15 @@ import {
 } from '@/components/ui/dialog';
 import { Loader2, Eye, Package, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import BoutonFacture from '@/components/BoutonFacture';
+
+/** Statuts à partir desquels la facture définitive est émise (paiement acquis). */
+const FACTURE_DISPONIBLE: StatutCommandeGP[] = [
+  'paiement_confirme',
+  'en_preparation',
+  'expediee',
+  'livree',
+];
 
 const STATUT_BADGE_VARIANT: Record<StatutCommandeGP, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   en_attente_paiement: 'secondary',
@@ -71,18 +80,6 @@ export default function MesCommandesGP() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  if (authLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!user || isAdmin) {
-    return <Navigate to="/boutique/compte" replace />;
-  }
-
   const openDetail = async (commande: CommandeGP) => {
     setDetailLoading(true);
     const [lignesRes, historiqueRes] = await Promise.all([
@@ -110,6 +107,21 @@ export default function MesCommandesGP() {
     if (match) openDetail(match);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [commandes, searchParams]);
+
+  // Les redirections viennent après tous les hooks : un `return` anticipé
+  // placé au-dessus changerait le nombre de hooks entre deux rendus et ferait
+  // planter React au moment où l'authentification finit de charger.
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!user || isAdmin) {
+    return <Navigate to="/boutique/compte" replace />;
+  }
 
   const handleMarquerPaye = async (commandeId: string) => {
     const {
@@ -268,6 +280,26 @@ export default function MesCommandesGP() {
                 <p className="mt-2 text-right text-sm font-semibold">
                   Total : {detail.montant_total_fcfa.toLocaleString('fr-FR')} FCFA
                 </p>
+              </div>
+
+              <div className="rounded-md border p-3">
+                <p className="text-sm font-medium text-foreground">Documents comptables</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {FACTURE_DISPONIBLE.includes(detail.statut)
+                    ? 'Votre facture définitive est disponible au téléchargement (PDF).'
+                    : 'La facture définitive sera disponible dès la confirmation de votre paiement. En attendant, vous pouvez télécharger une proforma.'}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <BoutonFacture sourceType="commande_gp" sourceId={detail.id} typeDocument="proforma" />
+                  {FACTURE_DISPONIBLE.includes(detail.statut) && (
+                    <BoutonFacture
+                      sourceType="commande_gp"
+                      sourceId={detail.id}
+                      typeDocument="facture"
+                      variant="default"
+                    />
+                  )}
+                </div>
               </div>
 
               {detail.historique.length > 0 && (

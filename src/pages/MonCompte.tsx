@@ -19,12 +19,15 @@ import {
   STATUT_COMMANDE_GP_LABELS,
   TYPE_DOCUMENT_LABELS,
   TYPE_DOCUMENT_EXPORT_LABELS,
+  FACTURES_TABLE,
+  SOURCE_FACTURE_LABELS,
   type DemandeImport,
   type DemandeExport,
   type DemandeDevis,
   type CommandeGP,
   type DocumentImport,
   type DocumentExport,
+  type Facture,
 } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,7 +36,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, User, FileText, ExternalLink, History, ArrowRight, Inbox } from 'lucide-react';
+import { Loader2, User, FileText, ExternalLink, History, ArrowRight, Inbox, Receipt, Download } from 'lucide-react';
 
 interface HistoriqueLigne {
   module: string;
@@ -64,7 +67,14 @@ export default function MonCompte() {
 
   const [historique, setHistorique] = useState<HistoriqueLigne[]>([]);
   const [documents, setDocuments] = useState<DocumentLigne[]>([]);
+  const [factures, setFactures] = useState<Facture[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+
+  /** La librairie PDF n'est téléchargée qu'au premier clic sur « Télécharger ». */
+  const telechargerFacture = async (facture: Facture) => {
+    const { telechargerFacturePdf } = await import('@/lib/facture-pdf');
+    telechargerFacturePdf(facture);
+  };
 
   useEffect(() => {
     if (profile) {
@@ -80,7 +90,7 @@ export default function MonCompte() {
     if (!user) return;
     const load = async () => {
       setLoadingData(true);
-      const [importsRes, exportsRes, devisRes, commandesRes, docsImportRes, docsExportRes] =
+      const [importsRes, exportsRes, devisRes, commandesRes, docsImportRes, docsExportRes, facturesRes] =
         await Promise.all([
           supabase
             .from(DEMANDES_IMPORT_TABLE)
@@ -104,7 +114,14 @@ export default function MonCompte() {
             .order('created_at', { ascending: false }),
           supabase.from(DOCUMENTS_IMPORT_TABLE).select('*'),
           supabase.from(DOCUMENTS_EXPORT_TABLE).select('*'),
+          supabase
+            .from(FACTURES_TABLE)
+            .select('*')
+            .eq('user_id', user.id)
+            .order('date_emission', { ascending: false }),
         ]);
+
+      setFactures((facturesRes.data as Facture[]) ?? []);
 
       const imports = (importsRes.data as DemandeImport[]) ?? [];
       const exportsList = (exportsRes.data as DemandeExport[]) ?? [];
@@ -275,6 +292,56 @@ export default function MonCompte() {
                 {savingProfile && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Enregistrer les modifications
               </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Receipt className="h-5 w-5 text-primary" />
+                <CardTitle>Mes factures</CardTitle>
+              </div>
+              <CardDescription>
+                Toutes les factures et proformas déjà émises à votre nom, téléchargeables en PDF.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingData ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : factures.length === 0 ? (
+                <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+                  Aucune facture émise pour le moment. Vos factures apparaîtront ici dès votre première
+                  commande confirmée.
+                </p>
+              ) : (
+                <div className="divide-y rounded-md border">
+                  {factures.map((f) => (
+                    <div key={f.id} className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant={f.type_document === 'facture' ? 'default' : 'outline'}>
+                            {f.type_document === 'facture' ? 'Facture' : 'Proforma'}
+                          </Badge>
+                          <span className="font-medium text-foreground">{f.numero}</span>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {SOURCE_FACTURE_LABELS[f.source_type]}
+                          {f.reference_source ? ` — ${f.reference_source}` : ''} ·{' '}
+                          {new Date(f.date_emission).toLocaleDateString('fr-FR')} ·{' '}
+                          {Number(f.montant_ttc).toLocaleString('fr-FR')} FCFA
+                        </p>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => telechargerFacture(f)}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Télécharger
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 

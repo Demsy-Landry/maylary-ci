@@ -61,6 +61,9 @@ export const DEMANDES_EXPORT_TABLE = 'app_e08c374bc4_demandes_export';
 export const HISTORIQUE_EXPORT_TABLE = 'app_e08c374bc4_historique_statut_export';
 export const DOCUMENTS_EXPORT_TABLE = 'app_e08c374bc4_documents_export';
 
+export const FACTURES_TABLE = 'app_e08c374bc4_factures';
+export const PARAMETRES_FACTURATION_TABLE = 'app_e08c374bc4_parametres_facturation';
+
 export type StockDisponible = 'en_stock' | 'sur_commande' | 'rupture';
 export type StatutDevis =
   | 'nouvelle'
@@ -70,6 +73,25 @@ export type StatutDevis =
   | 'annulee';
 
 export type Espace = 'pro' | 'grand_public';
+
+/**
+ * Provenance d'un produit du catalogue. « import_international » signale au
+ * client un article commandé à l'étranger (délai plus long) ; « local » un
+ * article déjà disponible en Côte d'Ivoire.
+ */
+export type OrigineProduit = 'import_international' | 'local';
+
+export const ORIGINE_PRODUIT_LABELS: Record<OrigineProduit, string> = {
+  import_international: 'Import sur commande',
+  local: 'Disponible localement',
+};
+
+export const ORIGINE_PRODUIT_DESCRIPTIONS: Record<OrigineProduit, string> = {
+  import_international:
+    "Article commandé à l'international par Maylary : comptez un délai de livraison plus long, mais un prix négocié à la source.",
+  local: 'Article déjà disponible en Côte d’Ivoire : livraison rapide après confirmation de votre commande.',
+};
+
 export type Fiabilite = 'a_verifier' | 'fiable' | 'tres_fiable';
 export type ModePaiement = 'virement' | 'mobile_money';
 export type StatutCommandeGP =
@@ -172,6 +194,11 @@ export interface Produit {
   actif: boolean;
   espace: Espace;
   categorie_gp_id: string | null;
+  /**
+   * Provenance du produit, exposée au client pour qu'il sache à quoi s'attendre
+   * en termes de délai. Le nom du fournisseur réel n'est jamais divulgué.
+   */
+  origine: OrigineProduit;
   created_at: string;
   updated_at: string;
 }
@@ -604,4 +631,79 @@ export function estimerCoutIndicatifExportFcfa(params: {
   incoterm: Incoterm | null;
 }): number {
   return estimerCoutIndicatifFcfa(params);
+}
+
+/* ------------------------------------------------------------------ */
+/* Facturation                                                         */
+/* ------------------------------------------------------------------ */
+
+export type TypeDocumentFacture = 'proforma' | 'facture';
+
+/** Nature du dossier à l'origine du document facturé. */
+export type SourceFacture = 'commande_gp' | 'devis_pro' | 'demande_import' | 'demande_export';
+
+export const SOURCE_FACTURE_LABELS: Record<SourceFacture, string> = {
+  commande_gp: 'Commande boutique',
+  devis_pro: 'Devis professionnel',
+  demande_import: "Dossier d'import",
+  demande_export: "Dossier d'export",
+};
+
+export interface LigneFacture {
+  designation: string;
+  quantite: number;
+  prix_unitaire: number;
+  montant: number;
+}
+
+/** Identité de l'émetteur, figée dans chaque document au moment de l'émission. */
+export interface ParametresFacturation {
+  id: number;
+  raison_sociale: string;
+  nom_commercial: string;
+  adresse: string | null;
+  ville: string;
+  pays: string;
+  telephone: string | null;
+  email: string | null;
+  site_web: string | null;
+  rccm: string | null;
+  ncc: string | null;
+  assujetti_tva: boolean;
+  taux_tva: number;
+  conditions_paiement: string | null;
+  coordonnees_paiement: string | null;
+  mentions_bas_page: string | null;
+  validite_proforma_jours: number;
+  updated_at: string;
+}
+
+/**
+ * Document émis et numéroté. Une fois créé il n'est jamais modifié : c'est la
+ * pièce comptable de référence, y compris si les tarifs changent ensuite.
+ */
+export interface Facture {
+  id: string;
+  numero: string;
+  type_document: TypeDocumentFacture;
+  source_type: SourceFacture;
+  source_id: string;
+  reference_source: string | null;
+  user_id: string;
+  client_nom: string | null;
+  client_entreprise: string | null;
+  client_telephone: string | null;
+  client_email: string | null;
+  client_adresse: string | null;
+  client_ville: string | null;
+  lignes: LigneFacture[];
+  montant_ht: number;
+  taux_tva: number;
+  montant_tva: number;
+  montant_ttc: number;
+  emetteur: Partial<ParametresFacturation>;
+  conditions_paiement: string | null;
+  date_emission: string;
+  date_echeance: string | null;
+  created_at: string;
 }
