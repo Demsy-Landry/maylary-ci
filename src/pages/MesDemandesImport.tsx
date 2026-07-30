@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
@@ -54,6 +54,7 @@ interface DemandeAvecDetail extends DemandeImport {
 
 export default function MesDemandesImport() {
   const { user, loading: authLoading, isAdmin } = useAuth();
+  const [searchParams] = useSearchParams();
 
   const [demandes, setDemandes] = useState<DemandeImport[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,6 +108,16 @@ export default function MesDemandesImport() {
     });
     setDetailLoading(false);
   };
+
+  // Ouvre automatiquement le détail si on arrive via un lien "Mon compte"
+  // pointant vers une référence précise.
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (!ref || demandes.length === 0) return;
+    const match = demandes.find((d) => d.reference_publique === ref);
+    if (match) openDetail(match);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demandes, searchParams]);
 
   const validerDevis = async () => {
     if (!detail) return;

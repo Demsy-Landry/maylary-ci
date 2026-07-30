@@ -61,10 +61,10 @@ export default function PublicHeaderImport() {
               variant="outline"
               size="sm"
               className="text-foreground"
-              onClick={() => navigate('/import/mes-demandes')}
+              onClick={() => navigate('/mon-compte')}
             >
               <User className="mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline">Mes demandes</span>
+              <span className="hidden sm:inline">Mon compte</span>
             </Button>
           )}
           {user ? (

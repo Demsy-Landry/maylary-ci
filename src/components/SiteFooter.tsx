@@ -17,7 +17,7 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
       { label: 'Tous les produits', to: '/boutique' },
       { label: 'Mes commandes', to: '/boutique/mes-commandes' },
       { label: 'Mon panier', to: '/boutique/panier' },
-      { label: 'Mon compte', to: '/boutique/compte' },
+      { label: 'Connexion', to: '/boutique/compte' },
     ],
   },
   {
@@ -30,6 +30,7 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
   {
     title: 'Aide',
     links: [
+      { label: 'Mon compte', to: '/mon-compte' },
       { label: 'Suivi de commande', to: '/boutique/mes-commandes' },
       { label: 'Paiement (Mobile Money, virement)', to: '/boutique/compte' },
       { label: 'Livraison en Côte d’Ivoire', to: '/boutique' },

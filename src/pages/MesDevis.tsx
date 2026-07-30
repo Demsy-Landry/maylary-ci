@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import PublicHeaderPro from '@/components/PublicHeaderPro';
 import SiteFooter from '@/components/SiteFooter';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,6 +35,7 @@ interface DemandeAvecDetail extends DemandeDevis {
 
 export default function MesDevis() {
   const { user, loading: authLoading, isAdmin } = useAuth();
+  const [searchParams] = useSearchParams();
 
   const [demandes, setDemandes] = useState<DemandeDevis[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,6 +86,16 @@ export default function MesDevis() {
     });
     setDetailLoading(false);
   };
+
+  // Ouvre automatiquement le détail si on arrive via un lien "Mon compte"
+  // pointant vers une référence précise.
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (!ref || demandes.length === 0) return;
+    const match = demandes.find((d) => d.reference_publique === ref);
+    if (match) openDetail(match);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demandes, searchParams]);
 
   return (
     <div className="min-h-screen bg-background">

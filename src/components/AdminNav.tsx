@@ -11,6 +11,7 @@ const LINKS = [
   { to: '/admin/devis', label: 'Demandes de devis' },
   { to: '/admin/cj-dropshipping', label: 'Catalogue CJ Dropshipping' },
   { to: '/admin/prospection', label: 'Prospection fournisseurs' },
+  { to: '/admin/parametres', label: 'Paramètres' },
 ];
 
 export default function AdminNav() {
