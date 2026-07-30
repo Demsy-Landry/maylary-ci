@@ -48,6 +48,7 @@ export const FOURNISSEURS_TABLE = 'app_e08c374bc4_fournisseurs';
 export const CATEGORIES_GP_TABLE = 'app_e08c374bc4_categories_gp';
 export const PARAMETRES_PAIEMENT_TABLE = 'app_e08c374bc4_parametres_paiement';
 export const PARAMETRES_IMPORT_TABLE = 'app_e08c374bc4_parametres_import';
+export const PARAMETRES_INCOTERM_TABLE = 'app_e08c374bc4_parametres_incoterm';
 export const COMMANDES_GP_TABLE = 'app_e08c374bc4_commandes_gp';
 export const LIGNES_COMMANDE_GP_TABLE = 'app_e08c374bc4_lignes_commande_gp';
 export const HISTORIQUE_COMMANDE_GP_TABLE = 'app_e08c374bc4_historique_statut_commande_gp';
@@ -246,6 +247,26 @@ export interface ParametresImport {
   id: number;
   taux_marge_defaut: number;
   taux_change_usd_fcfa: number;
+  /** Fret supporté pour un article, avant répartition selon l'incoterm. */
+  fret_base_article_fcfa: number;
+  /** Prix de vente minimum : empêche de vendre à perte les articles à très bas prix d'achat. */
+  prix_plancher_fcfa: number;
+  /** Taux de prime de l'assurance facultés (ex. 0.005 = 0,5 %). */
+  taux_assurance: number;
+  /** Règle des 110 % : la valeur assurée majore la valeur CIF. */
+  taux_couverture_assurance: number;
+  prime_assurance_minimum_fcfa: number;
+  incoterm_achat_defaut: Incoterm;
+  updated_at: string;
+}
+
+/** Répartition du fret et de l'assurance entre fournisseur et Maylary, par incoterm. */
+export interface ParametresIncoterm {
+  incoterm: Incoterm;
+  libelle: string;
+  part_fret: number;
+  assurance_a_charge: boolean;
+  ordre_affichage: number;
   updated_at: string;
 }
 

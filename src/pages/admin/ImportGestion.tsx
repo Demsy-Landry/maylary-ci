@@ -1,8 +1,11 @@
-import { useState, type ChangeEvent } from 'react';
+import { useMemo, useState, type ChangeEvent } from 'react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import { calculerPrimeAssurance } from '@/lib/cout-import';
 import {
   supabase,
+  PARAMETRES_IMPORT_TABLE,
+  type ParametresImport,
   IMPORT_DOCUMENTS_BUCKET,
   DEMANDES_IMPORT_TABLE,
   HISTORIQUE_IMPORT_TABLE,
@@ -86,6 +89,41 @@ export default function AdminImportGestion() {
   const [cotation, setCotation] = useState<CotationForm>(emptyCotation);
   const [docType, setDocType] = useState<TypeDocumentImport>('facture_fournisseur');
   const [uploading, setUploading] = useState(false);
+  const [parametresAssurance, setParametresAssurance] = useState<ParametresImport | null>(null);
+
+  useEffect(() => {
+    supabase
+      .from(PARAMETRES_IMPORT_TABLE)
+      .select('*')
+      .eq('id', 1)
+      .maybeSingle()
+      .then(({ data }) => setParametresAssurance(data as ParametresImport | null));
+  }, []);
+
+  /**
+   * Prime d'assurance facultés : assise sur la valeur CIF (marchandise + fret)
+   * majorée du taux de couverture, jamais sur la seule valeur marchandise.
+   */
+  const apercuAssurance = useMemo(() => {
+    if (!parametresAssurance) return null;
+    const marchandise = parseFloat(cotation.cout_marchandise_fcfa);
+    if (!Number.isFinite(marchandise) || marchandise <= 0) return null;
+    return calculerPrimeAssurance({
+      valeurMarchandiseFcfa: marchandise,
+      coutFretFcfa: parseFloat(cotation.cout_fret_fcfa) || 0,
+      tauxAssurance: Number(parametresAssurance.taux_assurance),
+      tauxCouverture: Number(parametresAssurance.taux_couverture_assurance),
+      primeMinimumFcfa: Number(parametresAssurance.prime_assurance_minimum_fcfa),
+    });
+  }, [cotation.cout_marchandise_fcfa, cotation.cout_fret_fcfa, parametresAssurance]);
+
+  const calculerAssurance = () => {
+    if (!apercuAssurance) {
+      toast.error("Renseignez d'abord la valeur de la marchandise.");
+      return;
+    }
+    setCotation((c) => ({ ...c, assurance_fcfa: String(apercuAssurance.prime_fcfa) }));
+  };
 
   const loadDemandes = async () => {
     setLoading(true);
@@ -389,12 +427,28 @@ export default function AdminImportGestion() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Assurance (FCFA)</Label>
+                      <div className="flex items-center justify-between gap-2">
+                        <Label className="text-xs">Assurance (FCFA)</Label>
+                        <button
+                          type="button"
+                          onClick={calculerAssurance}
+                          className="text-[11px] font-medium text-primary hover:underline"
+                        >
+                          Calculer
+                        </button>
+                      </div>
                       <Input
                         type="number"
                         value={cotation.assurance_fcfa}
                         onChange={(e) => setCotation((c) => ({ ...c, assurance_fcfa: e.target.value }))}
                       />
+                      {apercuAssurance && (
+                        <p className="text-[11px] text-muted-foreground">
+                          Valeur assurée {apercuAssurance.valeur_assuree_fcfa.toLocaleString('fr-FR')} FCFA
+                          {' '}(CIF × {Math.round(Number(parametresAssurance?.taux_couverture_assurance ?? 1.1) * 100)} %) →
+                          prime {apercuAssurance.prime_fcfa.toLocaleString('fr-FR')} FCFA
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs">Douane estimée (FCFA)</Label>
