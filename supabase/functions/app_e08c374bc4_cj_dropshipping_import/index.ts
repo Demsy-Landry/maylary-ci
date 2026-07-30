@@ -22,6 +22,8 @@ interface ImportBody {
   stock?: number | null;
   /** Optionnel : remplace ponctuellement le taux de marge par défaut pour cet import. */
   taux_marge?: number;
+  /** Incoterm d'achat auprès du fournisseur ; détermine le fret restant à notre charge. */
+  incoterm?: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -86,10 +88,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // 3. Paramètres de conversion et de marge (configurables en base, jamais en dur).
+    // 3. Paramètres de coût de revient (configurables en base, jamais en dur).
     const { data: parametres, error: parametresError } = await supabaseService
       .from('app_e08c374bc4_parametres_import')
-      .select('taux_marge_defaut, taux_change_usd_fcfa')
+      .select('*')
       .eq('id', 1)
       .maybeSingle();
 
@@ -98,11 +100,45 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Impossible de lire les paramètres de marge.' }, 500);
     }
 
+    const incotermChoisi = body.incoterm ?? parametres.incoterm_achat_defaut;
+    const { data: repartition } = await supabaseService
+      .from('app_e08c374bc4_parametres_incoterm')
+      .select('incoterm, part_fret, assurance_a_charge')
+      .eq('incoterm', incotermChoisi)
+      .maybeSingle();
+
+    if (!repartition) {
+      return jsonResponse({ error: `Incoterm inconnu : ${incotermChoisi}.` }, 400);
+    }
+
+    // Chaîne de coût : achat → fret (part selon incoterm) → valeur CIF →
+    // assurance facultés sur la valeur CIF majorée (règle des 110 %) →
+    // coût de revient → marge → prix plancher.
+    // ⚠️ Formule dupliquée dans src/lib/cout-import.ts (aperçu admin) : toute
+    // évolution doit être reportée aux deux endroits.
     const tauxMarge = body.taux_marge ?? Number(parametres.taux_marge_defaut);
     const tauxChange = Number(parametres.taux_change_usd_fcfa);
 
     const prix_achat_fcfa = Math.round(prix_fournisseur_usd * tauxChange);
-    const prix_unitaire_fcfa = Math.round(prix_achat_fcfa * (1 + tauxMarge));
+    const cout_fret_fcfa = Math.round(
+      Number(parametres.fret_base_article_fcfa) * Number(repartition.part_fret),
+    );
+    const valeur_cif_fcfa = prix_achat_fcfa + cout_fret_fcfa;
+
+    const valeur_assuree_fcfa = repartition.assurance_a_charge
+      ? Math.round(valeur_cif_fcfa * Number(parametres.taux_couverture_assurance))
+      : 0;
+    const cout_assurance_fcfa = repartition.assurance_a_charge
+      ? Math.max(
+          Math.round(valeur_assuree_fcfa * Number(parametres.taux_assurance)),
+          Number(parametres.prime_assurance_minimum_fcfa),
+        )
+      : 0;
+
+    const cout_revient_fcfa = prix_achat_fcfa + cout_fret_fcfa + cout_assurance_fcfa;
+    const prix_avant_plancher_fcfa = Math.round(cout_revient_fcfa * (1 + tauxMarge));
+    const prix_plancher_fcfa = Number(parametres.prix_plancher_fcfa);
+    const prix_unitaire_fcfa = Math.max(prix_avant_plancher_fcfa, prix_plancher_fcfa);
 
     // 4. Insertion du produit.
     const { data: produit, error: insertError } = await supabaseService
@@ -113,6 +149,9 @@ Deno.serve(async (req: Request) => {
         photos: body.photos ?? [],
         prix_achat_fcfa,
         prix_unitaire_fcfa,
+        cout_fret_fcfa,
+        cout_assurance_fcfa,
+        incoterm_achat: incotermChoisi,
         categorie_gp_id: body.categorie_gp_id ?? null,
         espace: 'grand_public',
         stock_disponible: (body.stock ?? 0) > 0 ? 'en_stock' : 'sur_commande',
@@ -120,7 +159,7 @@ Deno.serve(async (req: Request) => {
         source_donnee: 'import_cj_dropshipping',
         reference_externe,
       })
-      .select('id, nom, prix_achat_fcfa, prix_unitaire_fcfa')
+      .select('id, nom, prix_achat_fcfa, cout_fret_fcfa, cout_assurance_fcfa, prix_unitaire_fcfa, incoterm_achat')
       .single();
 
     if (insertError) {
@@ -133,7 +172,26 @@ Deno.serve(async (req: Request) => {
 
     console.log(JSON.stringify({ requestId, step: 'import_ok', produitId: produit.id }));
 
-    return jsonResponse({ success: true, produit, taux_marge_applique: tauxMarge }, 200);
+    return jsonResponse(
+      {
+        success: true,
+        produit,
+        taux_marge_applique: tauxMarge,
+        detail_cout: {
+          prix_achat_fcfa,
+          cout_fret_fcfa,
+          valeur_cif_fcfa,
+          valeur_assuree_fcfa,
+          cout_assurance_fcfa,
+          cout_revient_fcfa,
+          prix_avant_plancher_fcfa,
+          prix_unitaire_fcfa,
+          plancher_applique: prix_unitaire_fcfa > prix_avant_plancher_fcfa,
+          incoterm: incotermChoisi,
+        },
+      },
+      200,
+    );
   } catch (error) {
     console.log(JSON.stringify({ requestId, error: String(error) }));
     return jsonResponse({ error: 'Erreur interne du serveur.' }, 500);
