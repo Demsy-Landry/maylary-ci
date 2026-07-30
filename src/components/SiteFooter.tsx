@@ -33,6 +33,8 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
       { label: 'Suivi de commande', to: '/boutique/mes-commandes' },
       { label: 'Paiement (Mobile Money, virement)', to: '/boutique/compte' },
       { label: 'Livraison en Côte d’Ivoire', to: '/boutique' },
+      { label: 'À propos', to: '/a-propos' },
+      { label: 'Mentions légales', to: '/mentions-legales' },
     ],
   },
 ];

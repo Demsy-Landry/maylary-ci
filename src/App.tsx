@@ -30,6 +30,8 @@ import AdminExportGestion from '@/pages/admin/ExportGestion';
 import NouvelleDemandeExport from '@/pages/NouvelleDemandeExport';
 import MesDemandesExport from '@/pages/MesDemandesExport';
 import AdminLogin from '@/pages/admin/AdminLogin';
+import APropos from '@/pages/APropos';
+import MentionsLegales from '@/pages/MentionsLegales';
 
 const queryClient = new QueryClient();
 
@@ -61,6 +63,8 @@ function App() {
                 <Route path="/catalogue/devis" element={<PanierDevis />} />
                 <Route path="/catalogue/mes-devis" element={<MesDevis />} />
                 <Route path="/admin/connexion" element={<AdminLogin />} />
+                <Route path="/a-propos" element={<APropos />} />
+                <Route path="/mentions-legales" element={<MentionsLegales />} />
                 <Route
                   path="/admin"
                   element={
