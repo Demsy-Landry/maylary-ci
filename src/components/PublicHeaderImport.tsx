@@ -20,22 +20,19 @@ export default function PublicHeaderImport() {
             <Boxes className="h-5 w-5" />
           </div>
           <span className="text-lg font-semibold tracking-tight">Maylary</span>
-          <span className="hidden rounded-full bg-background/10 px-2 py-0.5 text-xs font-medium sm:inline">
-            Import
-          </span>
         </Link>
 
         <nav className="flex flex-wrap items-center gap-1 sm:gap-2">
           <Button asChild variant="ghost" size="sm">
             <Link to="/import/nouvelle-demande">
               <PackageSearch className="mr-1.5 h-4 w-4" />
-              Faire importer
+              Importer
             </Link>
           </Button>
           <Button asChild variant="ghost" size="sm">
             <Link to="/export/nouvelle-demande">
               <Ship className="mr-1.5 h-4 w-4" />
-              Faire exporter
+              Exporter
             </Link>
           </Button>
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">

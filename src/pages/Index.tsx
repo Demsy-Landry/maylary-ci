@@ -12,11 +12,25 @@ import {
   Building2,
   ArrowRight,
   Globe,
+  ClipboardList,
+  Send,
 } from 'lucide-react';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
 
-const ETAPES = [
+const STORAGE_BASE =
+  'https://oubowmftzxpruckjzwuq.supabase.co/storage/v1/object/public/app_e08c374bc4_produit_photos/accueil';
+
+const HERO_IMPORT_IMAGE = `${STORAGE_BASE}/hero-import-maritime.jpg`;
+const HERO_EXPORT_IMAGE = `${STORAGE_BASE}/hero-export-aerien.jpg`;
+
+const MODES_TRANSPORT = [
+  { key: 'aerien', label: 'Aérien', image: `${STORAGE_BASE}/mode-aerien.jpg`, icon: Plane },
+  { key: 'maritime', label: 'Maritime', image: `${STORAGE_BASE}/mode-maritime.jpg`, icon: Ship },
+  { key: 'routier', label: 'Routier', image: `${STORAGE_BASE}/mode-routier.jpg`, icon: Truck },
+];
+
+const ETAPES_IMPORT = [
   {
     icon: PackageSearch,
     title: '1. Décrivez votre besoin',
@@ -39,7 +53,7 @@ const ETAPES = [
   },
 ];
 
-const ATOUTS = [
+const ATOUTS_IMPORT = [
   {
     icon: ShieldCheck,
     title: 'Expertise transit',
@@ -62,14 +76,66 @@ const ATOUTS = [
   },
 ];
 
+const ETAPES_EXPORT = [
+  {
+    icon: ClipboardList,
+    title: '1. Décrivez votre marchandise',
+    text: 'Produit, quantité, pays de destination et acheteur si vous en avez déjà un.',
+  },
+  {
+    icon: Calculator,
+    title: '2. Nous chiffrons tout',
+    text: 'Transport local, douane export, fret international, assurance et certifications.',
+  },
+  {
+    icon: CheckCircle2,
+    title: '3. Vous validez',
+    text: 'Vous acceptez le devis, on lance la collecte de votre marchandise.',
+  },
+  {
+    icon: Send,
+    title: '4. Livré à votre acheteur',
+    text: "Suivi jusqu'à la livraison à destination, où que soit votre acheteur.",
+  },
+];
+
+const ATOUTS_EXPORT = [
+  {
+    icon: Globe,
+    title: 'Accès aux marchés mondiaux',
+    text: "Exportez sans avoir besoin d'un réseau international existant — on s'occupe de la logistique jusqu'à l'acheteur.",
+  },
+  {
+    icon: FileCheck2,
+    title: 'Certifications gérées',
+    text: "Certificat d'origine, certificat phytosanitaire, déclaration d'exportation — pris en charge de bout en bout.",
+  },
+  {
+    icon: Ship,
+    title: 'Tous les modes de transport',
+    text: 'Aérien, maritime ou routier selon la nature et la destination de votre marchandise.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Expertise transit',
+    text: 'Même équipe transitaire agréée que pour vos imports — un seul partenaire pour tout votre commerce international.',
+  },
+];
+
 export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
 
       <main>
-        <section className="border-b bg-gradient-to-br from-foreground to-foreground/90 text-background">
-          <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24">
+        <section className="relative overflow-hidden border-b text-background">
+          <img
+            src={HERO_IMPORT_IMAGE}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/50" />
+          <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24">
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
                 <PackageSearch className="h-3.5 w-3.5" />
@@ -109,7 +175,7 @@ export default function Index() {
             Comment ça marche
           </h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {ETAPES.map((etape) => (
+            {ETAPES_IMPORT.map((etape) => (
               <div
                 key={etape.title}
                 className="rounded-lg border bg-card p-5 transition-shadow duration-300 hover:shadow-md"
@@ -137,7 +203,7 @@ export default function Index() {
               Pourquoi Maylary Import
             </h2>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {ATOUTS.map((atout) => (
+              {ATOUTS_IMPORT.map((atout) => (
                 <div key={atout.title} className="rounded-lg border bg-card p-5">
                   <atout.icon className="h-6 w-6 text-primary" />
                   <h3 className="font-display mt-3 font-bold text-foreground">{atout.title}</h3>
@@ -148,28 +214,113 @@ export default function Index() {
           </div>
         </section>
 
-        <section className="border-b bg-foreground text-background">
-          <div className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
-            <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="max-w-xl">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
-                  <Globe className="h-3.5 w-3.5" />
-                  Maylary Export
-                </span>
-                <h2 className="font-display mt-4 text-2xl font-extrabold leading-tight sm:text-3xl">
-                  Vous produisez en Côte d'Ivoire ? Exportez vers le monde entier.
-                </h2>
-                <p className="mt-3 text-sm text-background/80 sm:text-base">
-                  Collecte, dédouanement à l'export, fret international, certifications
-                  (origine, phytosanitaire) et livraison à votre acheteur — un seul devis, un
-                  seul interlocuteur.
-                </p>
+        <section className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+          <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
+            Tous les modes de transport
+          </h2>
+          <p className="mx-auto mt-1 max-w-prose text-center text-sm text-muted-foreground">
+            Aérien, maritime ou routier — nous choisissons le mode adapté à votre marchandise, votre
+            délai et votre budget.
+          </p>
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            {MODES_TRANSPORT.map((mode) => (
+              <div
+                key={mode.key}
+                className="group relative h-56 overflow-hidden rounded-lg border shadow-sm"
+              >
+                <img
+                  src={mode.image}
+                  alt={mode.label}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/10 to-transparent" />
+                <div className="absolute bottom-4 left-4 flex items-center gap-2 text-background">
+                  <mode.icon className="h-5 w-5" />
+                  <span className="font-display text-lg font-bold">{mode.label}</span>
+                </div>
               </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden border-y text-background">
+          <img
+            src={HERO_EXPORT_IMAGE}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/50" />
+          <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
+                <Globe className="h-3.5 w-3.5" />
+                Maylary Export
+              </span>
+              <h2 className="font-display mt-4 text-3xl font-extrabold leading-tight sm:text-4xl">
+                Vous produisez en Côte d'Ivoire ? Exportez vers le monde entier.
+              </h2>
+              <p className="mt-4 max-w-xl text-base text-background/80 sm:text-lg">
+                Collecte, dédouanement à l'export, fret international, certifications (origine,
+                phytosanitaire) et livraison à votre acheteur — un seul devis, un seul
+                interlocuteur.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Link
+                  to="/export/nouvelle-demande"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary-emphasis"
+                >
+                  Faire une demande d'export
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <a
+                  href="#comment-exporter"
+                  className="inline-flex items-center gap-2 rounded-md border border-background/30 px-6 py-3 text-sm font-semibold text-background hover:bg-background/10"
+                >
+                  Comment ça marche
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="comment-exporter" className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+          <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
+            Comment exporter avec Maylary
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ETAPES_EXPORT.map((etape) => (
+              <div
+                key={etape.title}
+                className="rounded-lg border bg-card p-5 transition-shadow duration-300 hover:shadow-md"
+              >
+                <etape.icon className="h-6 w-6 text-primary" />
+                <h3 className="font-display mt-3 font-bold text-foreground">{etape.title}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{etape.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="border-y bg-muted/40">
+          <div className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+            <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
+              Pourquoi exporter avec Maylary
+            </h2>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {ATOUTS_EXPORT.map((atout) => (
+                <div key={atout.title} className="rounded-lg border bg-card p-5">
+                  <atout.icon className="h-6 w-6 text-primary" />
+                  <h3 className="font-display mt-3 font-bold text-foreground">{atout.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{atout.text}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8 text-center">
               <Link
                 to="/export/nouvelle-demande"
-                className="inline-flex shrink-0 items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary-emphasis"
+                className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-md transition-transform hover:-translate-y-0.5 hover:bg-primary-emphasis"
               >
-                Faire une demande d'export
+                Commencer ma demande d'export
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
