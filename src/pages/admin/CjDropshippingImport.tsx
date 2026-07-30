@@ -567,18 +567,38 @@ function ParametresMarge({
           </p>
           <div className="mt-3 divide-y rounded-md border text-xs">
             {incoterms.map((i) => (
-              <div key={i.incoterm} className="flex items-center justify-between gap-2 p-2">
-                <span className="font-medium text-foreground">{i.incoterm}</span>
-                <span className="flex-1 truncate text-muted-foreground">{i.libelle}</span>
-                <span className="shrink-0 text-muted-foreground">
-                  fret {Math.round(Number(i.part_fret) * 100)} %
-                </span>
-                <span className={i.assurance_a_charge ? 'shrink-0 text-foreground' : 'shrink-0 text-muted-foreground'}>
-                  {i.assurance_a_charge ? 'assurance à notre charge' : 'assuré par le fournisseur'}
-                </span>
+              <div
+                key={i.incoterm}
+                className={
+                  i.incoterm === champs.incotermDefaut ? 'bg-primary/5 p-2' : 'p-2'
+                }
+              >
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="font-semibold text-foreground">{i.incoterm}</span>
+                  <span className="text-muted-foreground">{i.libelle.replace(/^\w+ — /, '')}</span>
+                  <span className="ml-auto shrink-0 font-medium text-foreground">
+                    fret {Math.round(Number(i.part_fret) * 100)} %
+                  </span>
+                  <span
+                    className={
+                      i.assurance_a_charge
+                        ? 'shrink-0 text-foreground'
+                        : 'shrink-0 text-muted-foreground'
+                    }
+                  >
+                    · {i.assurance_a_charge ? 'assurance à notre charge' : 'assuré par le fournisseur'}
+                  </span>
+                </div>
+                {i.commentaire && (
+                  <p className="mt-1 text-[11px] leading-snug text-muted-foreground">{i.commentaire}</p>
+                )}
               </div>
             ))}
           </div>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Un incoterm ne réduit pas le coût total : il désigne qui organise et qui facture chaque
+            étape. Sous CIF ou DDP le fournisseur avance le transport, mais il l'intègre à son prix.
+          </p>
         </div>
 
         <div className="rounded-md border border-primary/30 bg-primary/5 p-3">

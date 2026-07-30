@@ -266,6 +266,8 @@ export interface ParametresIncoterm {
   libelle: string;
   part_fret: number;
   assurance_a_charge: boolean;
+  /** Explique ce que le prix fournisseur couvre déjà sous cet incoterm. */
+  commentaire: string | null;
   ordre_affichage: number;
   updated_at: string;
 }
