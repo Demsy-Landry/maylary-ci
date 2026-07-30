@@ -12,7 +12,10 @@ export default function MentionsLegales() {
           <section>
             <h2 className="font-display text-lg font-bold text-foreground">Éditeur du site</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Le site Maylary est édité par Dems'Inc, représenté par Demsy Landry, fondateur.
+              Le site Maylary est édité par Demsy Landry, développeur indépendant exerçant sous le
+              nom commercial Dems'Inc (entreprise individuelle, non immatriculée en société).
+              <br />
+              Localité : Abidjan, Côte d'Ivoire.
             </p>
           </section>
 
@@ -55,8 +58,14 @@ export default function MentionsLegales() {
           <section>
             <h2 className="font-display text-lg font-bold text-foreground">Contact</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Pour toute question relative à ce site ou à nos services, contactez-nous via votre
-              espace client.
+              Téléphone : +225 07 67 55 67 65
+              <br />
+              Email :{' '}
+              <a href="mailto:yaolandry67@gmail.com" className="text-primary hover:underline">
+                yaolandry67@gmail.com
+              </a>
+              <br />
+              Localité : Abidjan, Côte d'Ivoire
             </p>
           </section>
         </div>
