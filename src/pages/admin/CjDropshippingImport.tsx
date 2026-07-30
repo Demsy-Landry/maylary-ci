@@ -62,6 +62,12 @@ export default function CjDropshippingImport() {
   const [importedRefs, setImportedRefs] = useState<Set<string>>(new Set());
   const [importResultats, setImportResultats] = useState<Record<string, ImportResultat>>({});
   const [parametres, setParametres] = useState<ParametresImport | null>(null);
+  /**
+   * Dernière catégorie choisie : elle pré-remplit les fiches suivantes, pour
+   * enchaîner l'import d'une série d'articles d'une même famille sans
+   * resélectionner la catégorie à chaque fois.
+   */
+  const [derniereCategorie, setDerniereCategorie] = useState<string>('');
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -184,6 +190,8 @@ export default function CjDropshippingImport() {
                 key={p.reference_externe}
                 produit={p}
                 categories={categories}
+                categorieParDefaut={derniereCategorie}
+                onCategorieChoisie={setDerniereCategorie}
                 imported={importedRefs.has(p.reference_externe)}
                 resultat={importResultats[p.reference_externe] ?? null}
                 onImport={handleImport}
@@ -199,17 +207,21 @@ export default function CjDropshippingImport() {
 function ResultCard({
   produit,
   categories,
+  categorieParDefaut,
+  onCategorieChoisie,
   imported,
   resultat,
   onImport,
 }: {
   produit: CjResult;
   categories: CategorieGP[];
+  categorieParDefaut: string;
+  onCategorieChoisie: (id: string) => void;
   imported: boolean;
   resultat: ImportResultat | null;
   onImport: (produit: CjResult, categorieId: string | null) => Promise<void>;
 }) {
-  const [categorieId, setCategorieId] = useState<string>('');
+  const [categorieId, setCategorieId] = useState<string>(categorieParDefaut);
   const [importing, setImporting] = useState(false);
 
   const submit = async () => {
@@ -277,7 +289,10 @@ function ResultCard({
               <select
                 id={`cat-${produit.reference_externe}`}
                 value={categorieId}
-                onChange={(e) => setCategorieId(e.target.value)}
+                onChange={(e) => {
+                  setCategorieId(e.target.value);
+                  if (e.target.value) onCategorieChoisie(e.target.value);
+                }}
                 className="border-input flex h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs"
               >
                 <option value="">Choisir une catégorie…</option>

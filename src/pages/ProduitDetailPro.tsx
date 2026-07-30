@@ -7,9 +7,11 @@ import {
   ENSEIGNES_TABLE,
   PRODUITS_PUBLIC_VIEW,
   PRODUITS_FAVORIS_TABLE,
+  ORIGINE_PRODUIT_DESCRIPTIONS,
   type Enseigne,
   type Produit,
 } from '@/lib/supabase';
+import OrigineProduitBadge from '@/components/OrigineProduitBadge';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { Button } from '@/components/ui/button';
@@ -185,7 +187,14 @@ export default function ProduitDetailPro() {
                   {STOCK_LABELS[produit.stock_disponible]}
                 </Badge>
                 {produit.categorie && <Badge variant="outline">{produit.categorie}</Badge>}
+                {produit.origine && <OrigineProduitBadge origine={produit.origine} />}
               </div>
+
+              {produit.origine && (
+                <p className="mt-3 rounded-md border bg-muted/40 p-3 text-xs text-muted-foreground">
+                  {ORIGINE_PRODUIT_DESCRIPTIONS[produit.origine]}
+                </p>
+              )}
 
               {produit.delai_livraison_estime && (
                 <p className="mt-2 text-sm text-muted-foreground">

@@ -23,6 +23,18 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2, Eye, PackageSearch, FileText, ExternalLink } from 'lucide-react';
+import BoutonFacture from '@/components/BoutonFacture';
+
+/** Statuts à partir desquels le dossier est engagé : la facture est émise. */
+const FACTURE_IMPORT_DISPONIBLE: StatutImport[] = [
+  'validee',
+  'achat_effectue',
+  'expedition_internationale',
+  'arrivee_ci',
+  'dedouanement',
+  'transit_local',
+  'livree',
+];
 
 const STATUT_BADGE_VARIANT: Record<StatutImport, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   nouvelle: 'outline',
@@ -79,18 +91,6 @@ export default function MesDemandesImport() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  if (authLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!user || isAdmin) {
-    return <Navigate to="/boutique/compte" replace />;
-  }
-
   const openDetail = async (demande: DemandeImport) => {
     setDetailLoading(true);
     const [historiqueRes, documentsRes] = await Promise.all([
@@ -118,6 +118,21 @@ export default function MesDemandesImport() {
     if (match) openDetail(match);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demandes, searchParams]);
+
+  // Les redirections viennent après tous les hooks : un `return` anticipé
+  // placé au-dessus changerait le nombre de hooks entre deux rendus et ferait
+  // planter React au moment où l'authentification finit de charger.
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!user || isAdmin) {
+    return <Navigate to="/boutique/compte" replace />;
+  }
 
   const validerDevis = async () => {
     if (!detail) return;
@@ -260,6 +275,26 @@ export default function MesDemandesImport() {
                       Valider ce devis et lancer ma commande
                     </Button>
                   )}
+
+                  <div className="mt-4 rounded-md border p-3">
+                    <p className="text-sm font-medium text-foreground">Documents comptables</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {FACTURE_IMPORT_DISPONIBLE.includes(detail.statut)
+                        ? 'Votre facture définitive est disponible au téléchargement (PDF).'
+                        : 'Téléchargez la proforma de ce devis. La facture définitive sera émise une fois le devis validé.'}
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <BoutonFacture sourceType="demande_import" sourceId={detail.id} typeDocument="proforma" />
+                      {FACTURE_IMPORT_DISPONIBLE.includes(detail.statut) && (
+                        <BoutonFacture
+                          sourceType="demande_import"
+                          sourceId={detail.id}
+                          typeDocument="facture"
+                          variant="default"
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 detail.estimation_indicative_fcfa && (

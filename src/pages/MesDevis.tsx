@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2, Eye, ClipboardList } from 'lucide-react';
+import BoutonFacture from '@/components/BoutonFacture';
 
 const STATUT_BADGE_VARIANT: Record<StatutDevis, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   nouvelle: 'secondary',
@@ -57,18 +58,6 @@ export default function MesDevis() {
     load();
   }, [user]);
 
-  if (authLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  if (!user || isAdmin) {
-    return <Navigate to="/boutique/compte" replace />;
-  }
-
   const openDetail = async (demande: DemandeDevis) => {
     setDetailLoading(true);
     const [lignesRes, historiqueRes] = await Promise.all([
@@ -96,6 +85,21 @@ export default function MesDevis() {
     if (match) openDetail(match);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demandes, searchParams]);
+
+  // Les redirections viennent après tous les hooks : un `return` anticipé
+  // placé au-dessus changerait le nombre de hooks entre deux rendus et ferait
+  // planter React au moment où l'authentification finit de charger.
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!user || isAdmin) {
+    return <Navigate to="/boutique/compte" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -184,6 +188,28 @@ export default function MesDevis() {
                   Total estimé : {detail.montant_total_estime_fcfa.toLocaleString('fr-FR')} FCFA
                 </p>
               </div>
+
+              {(detail.statut === 'devis_envoye' || detail.statut === 'commande_confirmee') && (
+                <div className="rounded-md border p-3">
+                  <p className="text-sm font-medium text-foreground">Documents comptables</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {detail.statut === 'commande_confirmee'
+                      ? 'Votre facture définitive est disponible au téléchargement (PDF).'
+                      : 'Téléchargez la proforma de ce devis pour votre service achats ou votre banque.'}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <BoutonFacture sourceType="devis_pro" sourceId={detail.id} typeDocument="proforma" />
+                    {detail.statut === 'commande_confirmee' && (
+                      <BoutonFacture
+                        sourceType="devis_pro"
+                        sourceId={detail.id}
+                        typeDocument="facture"
+                        variant="default"
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
 
               {detail.historique.length > 0 && (
                 <div>
