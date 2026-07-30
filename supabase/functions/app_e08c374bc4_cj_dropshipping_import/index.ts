@@ -120,7 +120,7 @@ Deno.serve(async (req: Request) => {
         source_donnee: 'import_cj_dropshipping',
         reference_externe,
       })
-      .select('id, nom, prix_unitaire_fcfa')
+      .select('id, nom, prix_achat_fcfa, prix_unitaire_fcfa')
       .single();
 
     if (insertError) {
@@ -133,7 +133,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(JSON.stringify({ requestId, step: 'import_ok', produitId: produit.id }));
 
-    return jsonResponse({ success: true, produit }, 200);
+    return jsonResponse({ success: true, produit, taux_marge_applique: tauxMarge }, 200);
   } catch (error) {
     console.log(JSON.stringify({ requestId, error: String(error) }));
     return jsonResponse({ error: 'Erreur interne du serveur.' }, 500);

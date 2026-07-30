@@ -47,6 +47,7 @@ export const PRODUITS_FAVORIS_TABLE = 'app_e08c374bc4_produits_favoris';
 export const FOURNISSEURS_TABLE = 'app_e08c374bc4_fournisseurs';
 export const CATEGORIES_GP_TABLE = 'app_e08c374bc4_categories_gp';
 export const PARAMETRES_PAIEMENT_TABLE = 'app_e08c374bc4_parametres_paiement';
+export const PARAMETRES_IMPORT_TABLE = 'app_e08c374bc4_parametres_import';
 export const COMMANDES_GP_TABLE = 'app_e08c374bc4_commandes_gp';
 export const LIGNES_COMMANDE_GP_TABLE = 'app_e08c374bc4_lignes_commande_gp';
 export const HISTORIQUE_COMMANDE_GP_TABLE = 'app_e08c374bc4_historique_statut_commande_gp';
@@ -211,6 +212,13 @@ export interface ParametresPaiement {
   mobile_money_numero: string | null;
   mobile_money_titulaire: string | null;
   instructions_complementaires: string | null;
+  updated_at: string;
+}
+
+export interface ParametresImport {
+  id: number;
+  taux_marge_defaut: number;
+  taux_change_usd_fcfa: number;
   updated_at: string;
 }
 
