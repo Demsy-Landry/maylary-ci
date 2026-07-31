@@ -52,6 +52,8 @@ export default function ProduitDetailGP() {
         .maybeSingle();
       if (produitData) {
         setProduit(produitData as Produit);
+        // La quantité de départ ne peut pas être inférieure au minimum de vente.
+        setQuantite(Math.max(1, (produitData as Produit).quantite_minimum ?? 1));
         const catId = (produitData as Produit).categorie_gp_id;
         if (catId) {
           const { data: categorieData } = await supabase
@@ -216,12 +218,21 @@ export default function ProduitDetailGP() {
                 <p className="mt-4 whitespace-pre-line text-sm text-foreground">{produit.description}</p>
               )}
 
+              {produit.quantite_minimum > 1 && (
+                <p className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-foreground">
+                  Vendu par lot de <strong>{produit.quantite_minimum}</strong> minimum. Grouper les
+                  pièces dans un même envoi divise les frais de transport et d'assurance : c'est ce
+                  qui rend ce prix unitaire possible.
+                </p>
+              )}
+
               <div className="mt-6 flex items-center gap-3">
                 <div className="flex items-center rounded-md border">
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setQuantite((q) => Math.max(1, q - 1))}
+                    disabled={quantite <= produit.quantite_minimum}
+                    onClick={() => setQuantite((q) => Math.max(produit.quantite_minimum, q - 1))}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>

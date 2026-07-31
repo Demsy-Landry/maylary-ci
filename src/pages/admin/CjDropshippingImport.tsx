@@ -39,6 +39,7 @@ interface ImportResultat {
   fret_source: 'cj_reel' | 'forfait';
   fret_transporteur: string | null;
   fret_delai: string | null;
+  quantite_minimum: number;
   taux_marge_applique: number;
 }
 
@@ -141,6 +142,7 @@ export default function CjDropshippingImport() {
           fret_source: 'cj_reel' | 'forfait';
           fret_transporteur: string | null;
           fret_delai: string | null;
+          quantite_minimum: number;
         };
       }>('app_e08c374bc4_cj_dropshipping_import', {
         reference_externe: produit.reference_externe,
@@ -322,6 +324,12 @@ function ResultCard({
                     {resultat.prix_unitaire_fcfa.toLocaleString('fr-FR')} FCFA
                   </span>
                 </div>
+                {resultat.quantite_minimum > 1 && (
+                  <p className="text-[11px] text-muted-foreground">
+                    Vendu par lot de {resultat.quantite_minimum} — fret et assurance répartis sur
+                    le lot.
+                  </p>
+                )}
                 {resultat.plancher_applique && (
                   <p className="text-amber-700 dark:text-amber-500">
                     Prix plancher appliqué (la marge seule donnait un prix inférieur au minimum).

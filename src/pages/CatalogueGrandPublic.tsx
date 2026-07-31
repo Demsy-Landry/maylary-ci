@@ -223,13 +223,20 @@ export function ProductCardGP({ produit }: { produit: Produit }) {
   const handleQuickAdd = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem({
-      produit_id: produit.id,
-      nom: produit.nom,
-      prix_unitaire_fcfa: produit.prix_unitaire_fcfa,
-      photo: produit.photos?.[0] ?? null,
-    });
-    toast.success('Ajouté à votre panier.');
+    // Les articles vendus par lot entrent au panier à leur quantité minimum.
+    const quantite = Math.max(1, produit.quantite_minimum ?? 1);
+    addItem(
+      {
+        produit_id: produit.id,
+        nom: produit.nom,
+        prix_unitaire_fcfa: produit.prix_unitaire_fcfa,
+        photo: produit.photos?.[0] ?? null,
+      },
+      quantite,
+    );
+    toast.success(
+      quantite > 1 ? `Lot de ${quantite} ajouté à votre panier.` : 'Ajouté à votre panier.',
+    );
   };
 
   return (
@@ -260,6 +267,11 @@ export function ProductCardGP({ produit }: { produit: Produit }) {
           </span>
           <span className="text-xs text-muted-foreground">FCFA</span>
         </div>
+        {produit.quantite_minimum > 1 && (
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Par lot de {produit.quantite_minimum}
+          </p>
+        )}
         {enRupture && (
           <Badge variant="destructive" className="mt-1 w-fit text-[10px]">
             Rupture
