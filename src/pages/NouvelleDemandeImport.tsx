@@ -116,8 +116,9 @@ export default function NouvelleDemandeImport() {
         .from(IMPORT_PHOTOS_BUCKET)
         .upload(path, file);
       if (!uploadError) {
-        const { data } = supabase.storage.from(IMPORT_PHOTOS_BUCKET).getPublicUrl(path);
-        photoUrls.push(data.publicUrl);
+        // On garde le chemin, pas une URL : le bucket est privé, la lecture se
+        // fait par lien signé au moment de l'affichage.
+        photoUrls.push(path);
       }
     }
 
@@ -161,12 +162,11 @@ export default function NouvelleDemandeImport() {
         .from(IMPORT_DOCUMENTS_BUCKET)
         .upload(path, doc.file);
       if (!uploadError) {
-        const { data: publicUrl } = supabase.storage.from(IMPORT_DOCUMENTS_BUCKET).getPublicUrl(path);
         await supabase.from(DOCUMENTS_IMPORT_TABLE).insert({
           demande_import_id: demande.id,
           type_document: doc.type,
           nom_fichier: doc.file.name,
-          url: publicUrl.publicUrl,
+          url: path,
           uploaded_by: user.id,
         });
       }

@@ -17,7 +17,10 @@ import {
   type HistoriqueStatutExport,
   type DocumentExport,
   type StatutExport,
+  EXPORT_PHOTOS_BUCKET,
+  EXPORT_DOCUMENTS_BUCKET,
 } from '@/lib/supabase';
+import { GaleriePhotosPrivees, LienDocumentPrive } from '@/components/FichiersPrives';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -237,13 +240,7 @@ export default function MesDemandesExport() {
               <div>
                 <p className="text-sm font-medium text-foreground">Marchandise à exporter</p>
                 <p className="mt-1 text-sm text-muted-foreground">{detail.description_produit}</p>
-                {detail.photos.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {detail.photos.map((url, i) => (
-                      <img key={i} src={url} alt="" className="h-16 w-16 rounded-md border object-cover" />
-                    ))}
-                  </div>
-                )}
+                <GaleriePhotosPrivees bucket={EXPORT_PHOTOS_BUCKET} valeurs={detail.photos} />
               </div>
 
               {detail.montant_total_devis_fcfa ? (
@@ -308,19 +305,18 @@ export default function MesDemandesExport() {
                   <p className="text-sm font-medium text-foreground">Documents</p>
                   <div className="mt-2 space-y-1.5">
                     {detail.documents.map((doc) => (
-                      <a
+                      <LienDocumentPrive
                         key={doc.id}
-                        href={doc.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-between rounded-md border p-2 text-sm hover:bg-muted"
+                        bucket={EXPORT_DOCUMENTS_BUCKET}
+                        valeur={doc.url}
+                        className="flex w-full items-center justify-between rounded-md border p-2 text-sm hover:bg-muted"
                       >
                         <span className="flex items-center gap-2">
                           <FileText className="h-4 w-4 text-muted-foreground" />
                           {TYPE_DOCUMENT_EXPORT_LABELS[doc.type_document]}
                         </span>
                         <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-                      </a>
+                      </LienDocumentPrive>
                     ))}
                   </div>
                 </div>

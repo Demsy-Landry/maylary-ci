@@ -28,7 +28,10 @@ import {
   type DocumentImport,
   type DocumentExport,
   type Facture,
+  IMPORT_DOCUMENTS_BUCKET,
+  EXPORT_DOCUMENTS_BUCKET,
 } from '@/lib/supabase';
+import { GaleriePhotosPrivees, LienDocumentPrive } from '@/components/FichiersPrives';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -368,12 +371,11 @@ export default function MonCompte() {
               ) : (
                 <div className="divide-y rounded-md border">
                   {documents.map((doc, i) => (
-                    <a
+                    <LienDocumentPrive
                       key={i}
-                      href={doc.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex flex-wrap items-center justify-between gap-2 p-3 text-sm hover:bg-muted"
+                      bucket={doc.module === 'Import' ? IMPORT_DOCUMENTS_BUCKET : EXPORT_DOCUMENTS_BUCKET}
+                      valeur={doc.url}
+                      className="flex w-full flex-wrap items-center justify-between gap-2 p-3 text-sm hover:bg-muted"
                     >
                       <div className="flex items-center gap-2">
                         <Badge variant="outline">{doc.module}</Badge>
@@ -384,7 +386,7 @@ export default function MonCompte() {
                         <span className="text-xs">{new Date(doc.date).toLocaleDateString('fr-FR')}</span>
                         <ExternalLink className="h-3.5 w-3.5" />
                       </div>
-                    </a>
+                    </LienDocumentPrive>
                   ))}
                 </div>
               )}

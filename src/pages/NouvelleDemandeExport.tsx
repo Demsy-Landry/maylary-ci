@@ -115,8 +115,9 @@ export default function NouvelleDemandeExport() {
       const path = `${user.id}/${crypto.randomUUID()}-${file.name}`;
       const { error: uploadError } = await supabase.storage.from(EXPORT_PHOTOS_BUCKET).upload(path, file);
       if (!uploadError) {
-        const { data } = supabase.storage.from(EXPORT_PHOTOS_BUCKET).getPublicUrl(path);
-        photoUrls.push(data.publicUrl);
+        // On garde le chemin, pas une URL : le bucket est privé, la lecture se
+        // fait par lien signé au moment de l'affichage.
+        photoUrls.push(path);
       }
     }
 
@@ -161,12 +162,11 @@ export default function NouvelleDemandeExport() {
         .from(EXPORT_DOCUMENTS_BUCKET)
         .upload(path, doc.file);
       if (!uploadError) {
-        const { data: publicUrl } = supabase.storage.from(EXPORT_DOCUMENTS_BUCKET).getPublicUrl(path);
         await supabase.from(DOCUMENTS_EXPORT_TABLE).insert({
           demande_export_id: demande.id,
           type_document: doc.type,
           nom_fichier: doc.file.name,
-          url: publicUrl.publicUrl,
+          url: path,
           uploaded_by: user.id,
         });
       }
