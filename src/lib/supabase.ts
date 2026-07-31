@@ -257,6 +257,10 @@ export interface ParametresImport {
   taux_couverture_assurance: number;
   prime_assurance_minimum_fcfa: number;
   incoterm_achat_defaut: Incoterm;
+  /** Interroger CJ pour le coût de transport exact plutôt que d'appliquer le forfait. */
+  utiliser_fret_reel_cj: boolean;
+  /** Pays de livraison servant à demander le devis de transport (code ISO). */
+  pays_destination_code: string;
   updated_at: string;
 }
 

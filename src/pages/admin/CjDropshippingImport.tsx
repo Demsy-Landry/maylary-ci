@@ -36,6 +36,9 @@ interface ImportResultat {
   prix_unitaire_fcfa: number;
   plancher_applique: boolean;
   incoterm: string;
+  fret_source: 'cj_reel' | 'forfait';
+  fret_transporteur: string | null;
+  fret_delai: string | null;
   taux_marge_applique: number;
 }
 
@@ -135,6 +138,9 @@ export default function CjDropshippingImport() {
           prix_unitaire_fcfa: number;
           plancher_applique: boolean;
           incoterm: string;
+          fret_source: 'cj_reel' | 'forfait';
+          fret_transporteur: string | null;
+          fret_delai: string | null;
         };
       }>('app_e08c374bc4_cj_dropshipping_import', {
         reference_externe: produit.reference_externe,
@@ -285,9 +291,23 @@ function ResultCard({
               <div className="space-y-1 rounded-md border border-primary/30 bg-primary/5 p-2 text-xs">
                 <Ligne libelle="Prix d'achat" valeur={resultat.prix_achat_fcfa.toLocaleString('fr-FR')} />
                 <Ligne
-                  libelle={`Fret (${resultat.incoterm})`}
+                  libelle={
+                    resultat.fret_source === 'cj_reel'
+                      ? 'Fret réel CJ'
+                      : `Fret forfaitaire (${resultat.incoterm})`
+                  }
                   valeur={resultat.cout_fret_fcfa.toLocaleString('fr-FR')}
                 />
+                {resultat.fret_source === 'cj_reel' ? (
+                  <p className="text-[11px] text-muted-foreground">
+                    {resultat.fret_transporteur}
+                    {resultat.fret_delai ? ` — ${resultat.fret_delai} jours` : ''}
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-amber-700 dark:text-amber-500">
+                    CJ n'a pas renvoyé de devis : forfait appliqué.
+                  </p>
+                )}
                 <Ligne libelle="Assurance" valeur={resultat.cout_assurance_fcfa.toLocaleString('fr-FR')} />
                 <Ligne
                   libelle="Coût de revient"
@@ -366,7 +386,9 @@ function ParametresMarge({
     couverturePourcent: '',
     primeMinimum: '',
     incotermDefaut: 'FOB',
+    paysDestination: 'CI',
   });
+  const [fretReelActif, setFretReelActif] = useState(true);
   const [saving, setSaving] = useState(false);
   const [simulationUsd, setSimulationUsd] = useState('10');
 
@@ -381,7 +403,9 @@ function ParametresMarge({
       couverturePourcent: String(Math.round(Number(parametres.taux_couverture_assurance) * 100)),
       primeMinimum: String(Number(parametres.prime_assurance_minimum_fcfa)),
       incotermDefaut: parametres.incoterm_achat_defaut,
+      paysDestination: parametres.pays_destination_code,
     });
+    setFretReelActif(parametres.utiliser_fret_reel_cj);
   }, [parametres]);
 
   const maj = (cle: keyof typeof champs, valeur: string) =>
@@ -444,6 +468,8 @@ function ParametresMarge({
         taux_couverture_assurance: parseFloat(champs.couverturePourcent) / 100,
         prime_assurance_minimum_fcfa: parseFloat(champs.primeMinimum),
         incoterm_achat_defaut: champs.incotermDefaut,
+        utiliser_fret_reel_cj: fretReelActif,
+        pays_destination_code: champs.paysDestination.trim().toUpperCase(),
       })
       .eq('id', 1);
     if (error) {
@@ -500,9 +526,39 @@ function ParametresMarge({
         </div>
 
         <div className="rounded-md border p-3">
+          <label className="flex items-start gap-2 text-sm font-medium text-foreground">
+            <input
+              type="checkbox"
+              checked={fretReelActif}
+              onChange={(e) => setFretReelActif(e.target.checked)}
+              className="mt-0.5 h-4 w-4"
+            />
+            Demander à CJ le coût de transport réel
+          </label>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Le tarif exact du transporteur remplace le forfait, et son délai devient le délai
+            affiché au client. L'import est un peu plus lent (CJ limite à un appel par seconde) ;
+            si CJ ne répond pas, le forfait s'applique automatiquement.
+          </p>
+          {fretReelActif && (
+            <div className="mt-3 max-w-[12rem] space-y-1.5">
+              <Label htmlFor="pays-destination">Pays de livraison (code ISO)</Label>
+              <Input
+                id="pays-destination"
+                maxLength={2}
+                value={champs.paysDestination}
+                onChange={(e) => maj('paysDestination', e.target.value.toUpperCase())}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-md border p-3">
           <div className="flex items-center gap-2">
             <Truck className="h-4 w-4 text-primary" />
-            <p className="text-sm font-medium text-foreground">Fret et prix plancher</p>
+            <p className="text-sm font-medium text-foreground">
+              Fret de repli et prix plancher
+            </p>
           </div>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
