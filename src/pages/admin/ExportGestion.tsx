@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { calculerPrimeAssurance } from '@/lib/cout-import';
 import { PARAMETRES_IMPORT_TABLE, type ParametresImport } from '@/lib/supabase';
+import { GaleriePhotosPrivees, LienDocumentPrive } from '@/components/FichiersPrives';
 import {
   supabase,
   EXPORT_DOCUMENTS_BUCKET,
@@ -19,6 +20,7 @@ import {
   type StatutExport,
   type TypeDocumentExport,
   type Profile,
+  EXPORT_PHOTOS_BUCKET,
 } from '@/lib/supabase';
 import AdminNav from '@/components/AdminNav';
 import { Badge } from '@/components/ui/badge';
@@ -268,7 +270,6 @@ export default function AdminExportGestion() {
       setUploading(false);
       return;
     }
-    const { data: publicUrl } = supabase.storage.from(EXPORT_DOCUMENTS_BUCKET).getPublicUrl(path);
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -279,7 +280,7 @@ export default function AdminExportGestion() {
         demande_export_id: gestion.id,
         type_document: docType,
         nom_fichier: file.name,
-        url: publicUrl.publicUrl,
+        url: path,
         uploaded_by: user?.id ?? null,
       })
       .select('*')
@@ -365,13 +366,7 @@ export default function AdminExportGestion() {
                   <span className="font-medium text-foreground">{STATUT_EXPORT_LABELS[gestion.statut]}</span>
                 </p>
                 <p className="mt-2 font-medium text-foreground">{gestion.description_produit}</p>
-                {gestion.photos.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {gestion.photos.map((url, i) => (
-                      <img key={i} src={url} alt="" className="h-16 w-16 rounded-md border object-cover" />
-                    ))}
-                  </div>
-                )}
+                <GaleriePhotosPrivees bucket={EXPORT_PHOTOS_BUCKET} valeurs={gestion.photos} />
                 <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground sm:grid-cols-3">
                   <span>Quantité : {gestion.quantite}</span>
                   <span>Destination : {gestion.pays_destination ?? '—'}</span>
@@ -547,19 +542,18 @@ export default function AdminExportGestion() {
                 <p className="text-sm font-medium text-foreground">Documents</p>
                 <div className="space-y-1.5">
                   {documents.map((doc) => (
-                    <a
+                    <LienDocumentPrive
                       key={doc.id}
-                      href={doc.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center justify-between rounded-md border p-2 text-sm hover:bg-muted"
+                      bucket={EXPORT_DOCUMENTS_BUCKET}
+                      valeur={doc.url}
+                      className="flex w-full items-center justify-between rounded-md border p-2 text-sm hover:bg-muted"
                     >
                       <span className="flex items-center gap-2">
                         <FileText className="h-4 w-4 text-muted-foreground" />
                         {TYPE_DOCUMENT_EXPORT_LABELS[doc.type_document]} — {doc.nom_fichier}
                       </span>
                       <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-                    </a>
+                    </LienDocumentPrive>
                   ))}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
