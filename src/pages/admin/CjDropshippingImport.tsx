@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, ImageOff, Loader2, PackagePlus, Settings, Calculator, Truck, ShieldCheck } from 'lucide-react';
+import { Search, ImageOff, Loader2, PackagePlus, Settings, Calculator, Truck, ShieldCheck, Boxes } from 'lucide-react';
 
 interface CjResult {
   reference_externe: string;
@@ -40,6 +40,7 @@ interface ImportResultat {
   fret_transporteur: string | null;
   fret_delai: string | null;
   quantite_minimum: number;
+  petit_article: boolean;
   taux_marge_applique: number;
 }
 
@@ -143,6 +144,7 @@ export default function CjDropshippingImport() {
           fret_transporteur: string | null;
           fret_delai: string | null;
           quantite_minimum: number;
+          petit_article: boolean;
         };
       }>('app_e08c374bc4_cj_dropshipping_import', {
         reference_externe: produit.reference_externe,
@@ -324,11 +326,13 @@ function ResultCard({
                     {resultat.prix_unitaire_fcfa.toLocaleString('fr-FR')} FCFA
                   </span>
                 </div>
-                {resultat.quantite_minimum > 1 && (
+                {resultat.quantite_minimum > 1 ? (
                   <p className="text-[11px] text-muted-foreground">
-                    Vendu par lot de {resultat.quantite_minimum} — fret et assurance répartis sur
-                    le lot.
+                    Petit article : vendu par lot de {resultat.quantite_minimum}, fret et assurance
+                    répartis sur le lot.
                   </p>
+                ) : (
+                  <p className="text-[11px] text-muted-foreground">Vendu à l'unité.</p>
                 )}
                 {resultat.plancher_applique && (
                   <p className="text-amber-700 dark:text-amber-500">
@@ -395,6 +399,8 @@ function ParametresMarge({
     primeMinimum: '',
     incotermDefaut: 'FOB',
     paysDestination: 'CI',
+    seuilPetitArticle: '',
+    lotPetitArticle: '',
   });
   const [fretReelActif, setFretReelActif] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -412,6 +418,8 @@ function ParametresMarge({
       primeMinimum: String(Number(parametres.prime_assurance_minimum_fcfa)),
       incotermDefaut: parametres.incoterm_achat_defaut,
       paysDestination: parametres.pays_destination_code,
+      seuilPetitArticle: String(Number(parametres.seuil_petit_article_fcfa)),
+      lotPetitArticle: String(Number(parametres.quantite_minimum_defaut)),
     });
     setFretReelActif(parametres.utiliser_fret_reel_cj);
   }, [parametres]);
@@ -478,6 +486,8 @@ function ParametresMarge({
         incoterm_achat_defaut: champs.incotermDefaut,
         utiliser_fret_reel_cj: fretReelActif,
         pays_destination_code: champs.paysDestination.trim().toUpperCase(),
+        seuil_petit_article_fcfa: parseFloat(champs.seuilPetitArticle) || 0,
+        quantite_minimum_defaut: Math.max(1, parseInt(champs.lotPetitArticle, 10) || 1),
       })
       .eq('id', 1);
     if (error) {
@@ -580,13 +590,47 @@ function ParametresMarge({
               </p>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="prix-plancher">Prix de vente plancher (FCFA)</Label>
+              <Label htmlFor="prix-plancher">Valeur plancher d'une commande (FCFA)</Label>
               <Input id="prix-plancher" type="number" min={0} step={100}
                 value={champs.prixPlancher}
                 onChange={(e) => maj('prixPlancher', e.target.value)} />
               <p className="text-xs text-muted-foreground">
-                Aucun article ne sera mis en vente sous ce prix, même si la marge calculée donne
-                un montant inférieur.
+                Montant minimum d'une commande. Sur un article vendu par lot, il se répartit sur
+                les pièces du lot.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-md border p-3">
+          <div className="flex items-center gap-2">
+            <Boxes className="h-4 w-4 text-primary" />
+            <p className="text-sm font-medium text-foreground">Minimum d'achat sur les petits articles</p>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Le transport et l'assurance comportent une part fixe par colis, qui écrase les articles
+            bon marché. Les vendre par lot répartit cette part et fait chuter le prix unitaire.
+            Les articles chers restent vendus à l'unité : leur imposer un lot obligerait le client
+            à une commande minimum démesurée.
+          </p>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="seuil-petit">Seuil « petit article » (prix d'achat, FCFA)</Label>
+              <Input id="seuil-petit" type="number" min={0} step={500}
+                value={champs.seuilPetitArticle}
+                onChange={(e) => maj('seuilPetitArticle', e.target.value)} />
+              <p className="text-xs text-muted-foreground">
+                En dessous de ce prix d'achat, l'article est vendu par lot.
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="lot-petit">Taille du lot</Label>
+              <Input id="lot-petit" type="number" min={1} step={1}
+                value={champs.lotPetitArticle}
+                onChange={(e) => maj('lotPetitArticle', e.target.value)} />
+              <p className="text-xs text-muted-foreground">
+                Mesuré sur un article réel : 1 320 FCFA de fret l'unité, 690 par lot de 5,
+                572 par lot de 20.
               </p>
             </div>
           </div>
