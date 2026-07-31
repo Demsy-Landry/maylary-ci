@@ -246,14 +246,20 @@ Deno.serve(async (req: Request) => {
 
     const valeur_cif_fcfa = prix_achat_fcfa + cout_fret_fcfa;
 
-    // La prime s'applique au colis complet ; on la répartit sur les unités.
+    // Barème de l'assureur local, appliqué au colis complet puis réparti :
+    //   (FOB + fret) x couverture x taux de prime
+    //   + frais de police (une fois par expédition)
+    //   puis + taxe sur les contrats d'assurance.
     const valeur_assuree_lot_fcfa = repartition.assurance_a_charge
       ? Math.round(valeur_cif_fcfa * quantite_minimum * Number(parametres.taux_couverture_assurance))
       : 0;
+    const prime_nette_lot_fcfa = repartition.assurance_a_charge
+      ? Math.round(valeur_assuree_lot_fcfa * Number(parametres.taux_assurance))
+      : 0;
     const prime_lot_fcfa = repartition.assurance_a_charge
-      ? Math.max(
-          Math.round(valeur_assuree_lot_fcfa * Number(parametres.taux_assurance)),
-          Number(parametres.prime_assurance_minimum_fcfa),
+      ? Math.round(
+          (prime_nette_lot_fcfa + Number(parametres.frais_police_assurance_fcfa)) *
+            (1 + Number(parametres.taux_taxe_assurance)),
         )
       : 0;
 
@@ -331,6 +337,8 @@ Deno.serve(async (req: Request) => {
           fret_delai: fretReel?.delai ?? null,
           quantite_minimum,
           petit_article: estPetitArticle,
+          prime_nette_lot_fcfa,
+          prime_lot_fcfa,
         },
       },
       200,

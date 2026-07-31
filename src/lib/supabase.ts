@@ -261,7 +261,10 @@ export interface ParametresImport {
   taux_assurance: number;
   /** Règle des 110 % : la valeur assurée majore la valeur CIF. */
   taux_couverture_assurance: number;
-  prime_assurance_minimum_fcfa: number;
+  /** Frais de police, facturés une fois par expédition. */
+  frais_police_assurance_fcfa: number;
+  /** Taxe sur les contrats d'assurance, appliquée à la prime frais compris. */
+  taux_taxe_assurance: number;
   incoterm_achat_defaut: Incoterm;
   /** Interroger CJ pour le coût de transport exact plutôt que d'appliquer le forfait. */
   utiliser_fret_reel_cj: boolean;
