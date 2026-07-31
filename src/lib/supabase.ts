@@ -267,6 +267,10 @@ export interface ParametresImport {
   utiliser_fret_reel_cj: boolean;
   /** Pays de livraison servant à demander le devis de transport (code ISO). */
   pays_destination_code: string;
+  /** Lot appliqué aux articles bon marché, pour diluer les frais fixes du colis. */
+  quantite_minimum_defaut: number;
+  /** En dessous de ce prix d'achat, l'article est vendu par lot. */
+  seuil_petit_article_fcfa: number;
   updated_at: string;
 }
 

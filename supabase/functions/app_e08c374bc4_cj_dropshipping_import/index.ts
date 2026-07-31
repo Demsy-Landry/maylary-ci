@@ -208,13 +208,17 @@ Deno.serve(async (req: Request) => {
 
     const prix_achat_fcfa = Math.round(prix_fournisseur_usd * tauxChange);
 
-    // Le fret et la prime d'assurance comportent une part fixe par colis. En
-    // demandant le devis pour la quantité minimum de vente puis en la
-    // répartissant, cette part fixe est diluée : c'est ce qui rend vendables
-    // les articles à faible valeur unitaire.
+    // Le fret et la prime d'assurance comportent une part fixe par colis. La
+    // répartir sur un lot n'a de sens que pour les articles bon marché : sur un
+    // article cher, un lot imposerait au client une commande minimum absurde.
+    // Le seuil décide, l'admin peut toujours forcer une valeur à l'import.
+    const estPetitArticle = prix_achat_fcfa < Number(parametres.seuil_petit_article_fcfa);
     const quantite_minimum = Math.max(
       1,
-      Math.round(body.quantite_minimum ?? Number(parametres.quantite_minimum_defaut)),
+      Math.round(
+        body.quantite_minimum ??
+          (estPetitArticle ? Number(parametres.quantite_minimum_defaut) : 1),
+      ),
     );
 
     // Devis de transport réel auprès de CJ ; à défaut, fret forfaitaire réparti
@@ -326,6 +330,7 @@ Deno.serve(async (req: Request) => {
           fret_transporteur: fretReel?.transporteur ?? null,
           fret_delai: fretReel?.delai ?? null,
           quantite_minimum,
+          petit_article: estPetitArticle,
         },
       },
       200,
