@@ -396,7 +396,8 @@ function ParametresMarge({
     prixPlancher: '',
     tauxAssurancePourcent: '',
     couverturePourcent: '',
-    primeMinimum: '',
+    fraisPolice: '',
+    taxePourcent: '',
     incotermDefaut: 'FOB',
     paysDestination: 'CI',
     seuilPetitArticle: '',
@@ -415,7 +416,8 @@ function ParametresMarge({
       prixPlancher: String(Number(parametres.prix_plancher_fcfa)),
       tauxAssurancePourcent: String(Number(parametres.taux_assurance) * 100),
       couverturePourcent: String(Math.round(Number(parametres.taux_couverture_assurance) * 100)),
-      primeMinimum: String(Number(parametres.prime_assurance_minimum_fcfa)),
+      fraisPolice: String(Number(parametres.frais_police_assurance_fcfa)),
+      taxePourcent: String(Math.round(Number(parametres.taux_taxe_assurance) * 10000) / 100),
       incotermDefaut: parametres.incoterm_achat_defaut,
       paysDestination: parametres.pays_destination_code,
       seuilPetitArticle: String(Number(parametres.seuil_petit_article_fcfa)),
@@ -441,7 +443,8 @@ function ParametresMarge({
         prix_plancher_fcfa: parseFloat(champs.prixPlancher) || 0,
         taux_assurance: (parseFloat(champs.tauxAssurancePourcent) || 0) / 100,
         taux_couverture_assurance: (parseFloat(champs.couverturePourcent) || 100) / 100,
-        prime_assurance_minimum_fcfa: parseFloat(champs.primeMinimum) || 0,
+        frais_police_assurance_fcfa: parseFloat(champs.fraisPolice) || 0,
+        taux_taxe_assurance: (parseFloat(champs.taxePourcent) || 0) / 100,
       },
       incoterm: { part_fret: Number(incoterm.part_fret), assurance_a_charge: incoterm.assurance_a_charge },
     });
@@ -455,7 +458,8 @@ function ParametresMarge({
       ['plancher', parseFloat(champs.prixPlancher), 'Le prix plancher'],
       ['assurance', parseFloat(champs.tauxAssurancePourcent), "Le taux d'assurance"],
       ['couverture', parseFloat(champs.couverturePourcent), 'Le taux de couverture'],
-      ['prime', parseFloat(champs.primeMinimum), 'La prime minimum'],
+      ['frais', parseFloat(champs.fraisPolice), 'Les frais de police'],
+      ['taxe', parseFloat(champs.taxePourcent), "La taxe sur l'assurance"],
     ];
     for (const [, valeur, libelle] of nombres) {
       if (!Number.isFinite(valeur) || valeur < 0) {
@@ -482,7 +486,8 @@ function ParametresMarge({
         prix_plancher_fcfa: parseFloat(champs.prixPlancher),
         taux_assurance: parseFloat(champs.tauxAssurancePourcent) / 100,
         taux_couverture_assurance: parseFloat(champs.couverturePourcent) / 100,
-        prime_assurance_minimum_fcfa: parseFloat(champs.primeMinimum),
+        frais_police_assurance_fcfa: parseFloat(champs.fraisPolice),
+        taux_taxe_assurance: parseFloat(champs.taxePourcent) / 100,
         incoterm_achat_defaut: champs.incotermDefaut,
         utiliser_fret_reel_cj: fretReelActif,
         pays_destination_code: champs.paysDestination.trim().toUpperCase(),
@@ -642,9 +647,10 @@ function ParametresMarge({
             <p className="text-sm font-medium text-foreground">Assurance marchandise (facultés)</p>
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
-            Prime = valeur assurée × taux, avec valeur assurée = valeur CIF × taux de couverture
-            (usage international : 110 %). Les marchandises importées en Côte d'Ivoire doivent être
-            assurées localement.
+            Barème de l'assureur local : <strong>(FOB + fret) × couverture × taux de prime, plus les
+            frais de police, puis la taxe</strong>. Les frais de police se comptent par expédition —
+            sur un article vendu par lot, ils se répartissent sur les pièces. Les marchandises
+            importées en Côte d'Ivoire doivent être assurées localement.
           </p>
           <div className="mt-3 grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
@@ -660,10 +666,16 @@ function ParametresMarge({
                 onChange={(e) => maj('couverturePourcent', e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="prime-min">Prime minimum (FCFA)</Label>
-              <Input id="prime-min" type="number" min={0} step={100}
-                value={champs.primeMinimum}
-                onChange={(e) => maj('primeMinimum', e.target.value)} />
+              <Label htmlFor="frais-police">Frais de police (FCFA)</Label>
+              <Input id="frais-police" type="number" min={0} step={100}
+                value={champs.fraisPolice}
+                onChange={(e) => maj('fraisPolice', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="taxe-assurance">Taxe sur l'assurance (%)</Label>
+              <Input id="taxe-assurance" type="number" min={0} step={0.5}
+                value={champs.taxePourcent}
+                onChange={(e) => maj('taxePourcent', e.target.value)} />
             </div>
           </div>
         </div>

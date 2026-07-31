@@ -14,7 +14,10 @@ export interface ParametresCoutImport {
   prix_plancher_fcfa: number;
   taux_assurance: number;
   taux_couverture_assurance: number;
-  prime_assurance_minimum_fcfa: number;
+  /** Frais de police, facturés une fois par expédition. */
+  frais_police_assurance_fcfa: number;
+  /** Taxe sur les contrats d'assurance, appliquée à la prime frais compris. */
+  taux_taxe_assurance: number;
 }
 
 export interface RepartitionIncoterm {
@@ -45,8 +48,8 @@ export interface DetailCoutImport {
  *   → coût de revient → marge → prix plancher.
  *
  * L'assurance des marchandises importées doit être souscrite localement en
- * Côte d'Ivoire ; la prime est calculée sur la valeur assurée, jamais sur le
- * seul prix d'achat, et ne descend pas sous le minimum de l'assureur.
+ * Côte d'Ivoire. La prime porte sur la valeur assurée, jamais sur le seul prix
+ * d'achat, et s'augmente des frais de police puis de la taxe.
  */
 export function calculerCoutImport(params: {
   prixFournisseurUsd: number;
@@ -71,10 +74,12 @@ export function calculerCoutImport(params: {
     ? Math.round(valeur_cif_fcfa * Number(parametres.taux_couverture_assurance))
     : 0;
 
+  // Barème de l'assureur : prime nette, puis frais de police, puis taxe.
   const cout_assurance_fcfa = incoterm.assurance_a_charge
-    ? Math.max(
-        Math.round(valeur_assuree_fcfa * Number(parametres.taux_assurance)),
-        Number(parametres.prime_assurance_minimum_fcfa),
+    ? Math.round(
+        (Math.round(valeur_assuree_fcfa * Number(parametres.taux_assurance)) +
+          Number(parametres.frais_police_assurance_fcfa)) *
+          (1 + Number(parametres.taux_taxe_assurance)),
       )
     : 0;
 
@@ -98,21 +103,40 @@ export function calculerCoutImport(params: {
 }
 
 /**
- * Prime d'assurance facultés seule, réutilisée par l'atelier de cotation
- * import/export où la valeur de la marchandise est saisie à la main.
+ * Prime d'assurance facultés, selon le barème de l'assureur local :
+ *
+ *   (FOB + fret) × taux de couverture × taux de prime
+ *   + frais de police
+ *   puis + taxe sur les contrats d'assurance
+ *
+ * Réutilisée par les ateliers de cotation import/export, où la valeur de la
+ * marchandise est saisie à la main.
  */
 export function calculerPrimeAssurance(params: {
   valeurMarchandiseFcfa: number;
   coutFretFcfa?: number;
   tauxAssurance: number;
   tauxCouverture: number;
-  primeMinimumFcfa: number;
-}): { valeur_assuree_fcfa: number; prime_fcfa: number } {
+  fraisPoliceFcfa: number;
+  tauxTaxe: number;
+}): {
+  valeur_assuree_fcfa: number;
+  prime_nette_fcfa: number;
+  frais_police_fcfa: number;
+  taxe_fcfa: number;
+  prime_fcfa: number;
+} {
   const valeurCif = params.valeurMarchandiseFcfa + (params.coutFretFcfa ?? 0);
   const valeur_assuree_fcfa = Math.round(valeurCif * params.tauxCouverture);
-  const prime_fcfa = Math.max(
-    Math.round(valeur_assuree_fcfa * params.tauxAssurance),
-    params.primeMinimumFcfa,
-  );
-  return { valeur_assuree_fcfa, prime_fcfa };
+  const prime_nette_fcfa = Math.round(valeur_assuree_fcfa * params.tauxAssurance);
+  const avantTaxe = prime_nette_fcfa + params.fraisPoliceFcfa;
+  const prime_fcfa = Math.round(avantTaxe * (1 + params.tauxTaxe));
+
+  return {
+    valeur_assuree_fcfa,
+    prime_nette_fcfa,
+    frais_police_fcfa: params.fraisPoliceFcfa,
+    taxe_fcfa: prime_fcfa - avantTaxe,
+    prime_fcfa,
+  };
 }

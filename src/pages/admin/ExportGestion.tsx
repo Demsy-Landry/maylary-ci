@@ -109,7 +109,8 @@ export default function AdminExportGestion() {
       coutFretFcfa: parseFloat(cotation.cout_fret_fcfa) || 0,
       tauxAssurance: Number(parametresAssurance.taux_assurance),
       tauxCouverture: Number(parametresAssurance.taux_couverture_assurance),
-      primeMinimumFcfa: Number(parametresAssurance.prime_assurance_minimum_fcfa),
+      fraisPoliceFcfa: Number(parametresAssurance.frais_police_assurance_fcfa),
+      tauxTaxe: Number(parametresAssurance.taux_taxe_assurance),
     });
   }, [gestion, cotation.cout_fret_fcfa, parametresAssurance]);
 
@@ -441,10 +442,16 @@ export default function AdminExportGestion() {
                         onChange={(e) => setCotation((c) => ({ ...c, assurance_fcfa: e.target.value }))}
                       />
                       {apercuAssurance && (
-                        <p className="text-[11px] text-muted-foreground">
-                          Valeur assurée {apercuAssurance.valeur_assuree_fcfa.toLocaleString('fr-FR')} FCFA
-                          {' '}(valeur déclarée + fret, × {Math.round(Number(parametresAssurance?.taux_couverture_assurance ?? 1.1) * 100)} %) →
-                          prime {apercuAssurance.prime_fcfa.toLocaleString('fr-FR')} FCFA
+                        <p className="text-[11px] leading-relaxed text-muted-foreground">
+                          Valeur assurée {apercuAssurance.valeur_assuree_fcfa.toLocaleString('fr-FR')} (valeur
+                          déclarée + fret, ×{' '}
+                          {Math.round(Number(parametresAssurance?.taux_couverture_assurance ?? 1.1) * 100)} %) ·
+                          prime nette {apercuAssurance.prime_nette_fcfa.toLocaleString('fr-FR')} · frais de police{' '}
+                          {apercuAssurance.frais_police_fcfa.toLocaleString('fr-FR')} · taxe{' '}
+                          {apercuAssurance.taxe_fcfa.toLocaleString('fr-FR')} →{' '}
+                          <strong className="text-foreground">
+                            {apercuAssurance.prime_fcfa.toLocaleString('fr-FR')} FCFA
+                          </strong>
                         </p>
                       )}
                     </div>
