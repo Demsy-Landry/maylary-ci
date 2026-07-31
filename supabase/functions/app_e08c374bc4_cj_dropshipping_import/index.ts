@@ -258,7 +258,13 @@ Deno.serve(async (req: Request) => {
 
     const cout_revient_fcfa = prix_achat_fcfa + cout_fret_fcfa + cout_assurance_fcfa;
     const prix_avant_plancher_fcfa = Math.round(cout_revient_fcfa * (1 + tauxMarge));
-    const prix_plancher_fcfa = Number(parametres.prix_plancher_fcfa);
+
+    // Le plancher protège la valeur d'une commande, pas celle d'une pièce :
+    // sur un lot il se répartit, sinon imposer un minimum par unité annulerait
+    // l'intérêt du lot pour le client.
+    const prix_plancher_fcfa = Math.round(
+      Number(parametres.prix_plancher_fcfa) / quantite_minimum,
+    );
     const prix_unitaire_fcfa = Math.max(prix_avant_plancher_fcfa, prix_plancher_fcfa);
 
     // 4. Insertion du produit.
