@@ -5,6 +5,91 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': '*',
 };
 
+const CJ_BASE_URL = 'https://developers.cjdropshipping.com/api2.0/v1';
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Copie de getCjAccessToken() de app_e08c374bc4_cj_dropshipping_search : les
+ * edge functions Deno ne partagent pas de module commun. Toute correction doit
+ * être reportée dans les deux fonctions.
+ */
+async function getCjAccessToken(): Promise<string | null> {
+  const email = Deno.env.get('CJ_DROPSHIPPING_EMAIL');
+  const apiKey = Deno.env.get('CJ_DROPSHIPPING_API_KEY');
+  if (!email || !apiKey) return null;
+
+  const res = await fetch(`${CJ_BASE_URL}/authentication/getAccessToken`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: apiKey }),
+  });
+  const data = await res.json().catch(() => null);
+  return data?.data?.accessToken ?? null;
+}
+
+interface FretReel {
+  prix_usd: number;
+  transporteur: string;
+  delai: string | null;
+}
+
+/**
+ * Coût de transport réel d'un article, du dépôt chinois jusqu'au pays du
+ * client. On retient l'option la moins chère.
+ *
+ * Renvoie null à la moindre difficulté (produit sans variante, quota CJ
+ * dépassé, réseau) : l'import doit aboutir même sans devis, quitte à retomber
+ * sur le fret forfaitaire.
+ */
+async function obtenirFretReelCj(
+  pid: string,
+  token: string,
+  paysDestination: string,
+  requestId: string,
+): Promise<FretReel | null> {
+  try {
+    const urlVariantes = new URL(`${CJ_BASE_URL}/product/query`);
+    urlVariantes.searchParams.set('pid', pid);
+    const detail = await (
+      await fetch(urlVariantes, { headers: { 'CJ-Access-Token': token } })
+    ).json().catch(() => null);
+
+    const vid = detail?.data?.variants?.[0]?.vid;
+    if (!vid) return null;
+
+    // CJ plafonne à 1 appel par seconde : sans cette pause, le devis part en 429.
+    await pause(1100);
+
+    const res = await fetch(`${CJ_BASE_URL}/logistic/freightCalculate`, {
+      method: 'POST',
+      headers: { 'CJ-Access-Token': token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        startCountryCode: 'CN',
+        endCountryCode: paysDestination,
+        products: [{ quantity: 1, vid }],
+      }),
+    });
+    const data = await res.json().catch(() => null);
+    const options = Array.isArray(data?.data) ? data.data : [];
+    if (options.length === 0) return null;
+
+    const moinsChere = options.reduce((a: Record<string, unknown>, b: Record<string, unknown>) =>
+      Number(a.logisticPrice) <= Number(b.logisticPrice) ? a : b,
+    );
+    const prix = Number(moinsChere.logisticPrice);
+    if (!Number.isFinite(prix) || prix <= 0) return null;
+
+    return {
+      prix_usd: prix,
+      transporteur: String(moinsChere.logisticName ?? 'CJ Dropshipping'),
+      delai: moinsChere.logisticAging ? String(moinsChere.logisticAging) : null,
+    };
+  } catch (error) {
+    console.log(JSON.stringify({ requestId, step: 'fret_reel', error: String(error) }));
+    return null;
+  }
+}
+
 function jsonResponse(body: unknown, status: number) {
   return new Response(JSON.stringify(body), {
     status,
@@ -111,18 +196,36 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: `Incoterm inconnu : ${incotermChoisi}.` }, 400);
     }
 
-    // Chaîne de coût : achat → fret (part selon incoterm) → valeur CIF →
-    // assurance facultés sur la valeur CIF majorée (règle des 110 %) →
-    // coût de revient → marge → prix plancher.
+    // Chaîne de coût : achat → fret → valeur CIF → assurance facultés sur la
+    // valeur CIF majorée (règle des 110 %) → coût de revient → marge → plancher.
     // ⚠️ Formule dupliquée dans src/lib/cout-import.ts (aperçu admin) : toute
     // évolution doit être reportée aux deux endroits.
     const tauxMarge = body.taux_marge ?? Number(parametres.taux_marge_defaut);
     const tauxChange = Number(parametres.taux_change_usd_fcfa);
 
     const prix_achat_fcfa = Math.round(prix_fournisseur_usd * tauxChange);
-    const cout_fret_fcfa = Math.round(
-      Number(parametres.fret_base_article_fcfa) * Number(repartition.part_fret),
-    );
+
+    // Devis de transport réel auprès de CJ ; à défaut, fret forfaitaire réparti
+    // selon l'incoterm. Le devis CJ est déjà un coût porte-à-porte complet :
+    // la part de l'incoterm ne s'y applique pas.
+    let fretReel: FretReel | null = null;
+    if (parametres.utiliser_fret_reel_cj) {
+      const token = await getCjAccessToken();
+      if (token) {
+        fretReel = await obtenirFretReelCj(
+          reference_externe,
+          token,
+          String(parametres.pays_destination_code),
+          requestId,
+        );
+      }
+    }
+
+    const cout_fret_fcfa = fretReel
+      ? Math.round(fretReel.prix_usd * tauxChange)
+      : Math.round(Number(parametres.fret_base_article_fcfa) * Number(repartition.part_fret));
+    const fret_source = fretReel ? 'cj_reel' : 'forfait';
+
     const valeur_cif_fcfa = prix_achat_fcfa + cout_fret_fcfa;
 
     const valeur_assuree_fcfa = repartition.assurance_a_charge
@@ -152,6 +255,10 @@ Deno.serve(async (req: Request) => {
         cout_fret_fcfa,
         cout_assurance_fcfa,
         incoterm_achat: incotermChoisi,
+        fret_source,
+        fret_transporteur: fretReel?.transporteur ?? null,
+        // Le délai annoncé par le transporteur devient le délai affiché au client.
+        delai_livraison_estime: fretReel?.delai ? `${fretReel.delai} jours` : null,
         categorie_gp_id: body.categorie_gp_id ?? null,
         espace: 'grand_public',
         stock_disponible: (body.stock ?? 0) > 0 ? 'en_stock' : 'sur_commande',
@@ -159,7 +266,9 @@ Deno.serve(async (req: Request) => {
         source_donnee: 'import_cj_dropshipping',
         reference_externe,
       })
-      .select('id, nom, prix_achat_fcfa, cout_fret_fcfa, cout_assurance_fcfa, prix_unitaire_fcfa, incoterm_achat')
+      .select(
+        'id, nom, prix_achat_fcfa, cout_fret_fcfa, cout_assurance_fcfa, prix_unitaire_fcfa, incoterm_achat, fret_source, fret_transporteur',
+      )
       .single();
 
     if (insertError) {
@@ -188,6 +297,9 @@ Deno.serve(async (req: Request) => {
           prix_unitaire_fcfa,
           plancher_applique: prix_unitaire_fcfa > prix_avant_plancher_fcfa,
           incoterm: incotermChoisi,
+          fret_source,
+          fret_transporteur: fretReel?.transporteur ?? null,
+          fret_delai: fretReel?.delai ?? null,
         },
       },
       200,
