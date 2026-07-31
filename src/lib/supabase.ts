@@ -196,6 +196,12 @@ export interface Produit {
   espace: Espace;
   categorie_gp_id: string | null;
   /**
+   * Quantité minimum de commande. Sur les articles importés à faible valeur
+   * unitaire, elle répartit la part fixe du fret et de l'assurance et rend le
+   * prix unitaire acceptable.
+   */
+  quantite_minimum: number;
+  /**
    * Provenance du produit, exposée au client pour qu'il sache à quoi s'attendre
    * en termes de délai. Le nom du fournisseur réel n'est jamais divulgué.
    */

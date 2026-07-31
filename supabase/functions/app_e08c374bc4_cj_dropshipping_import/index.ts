@@ -45,6 +45,7 @@ async function obtenirFretReelCj(
   pid: string,
   token: string,
   paysDestination: string,
+  quantite: number,
   requestId: string,
 ): Promise<FretReel | null> {
   try {
@@ -66,7 +67,7 @@ async function obtenirFretReelCj(
       body: JSON.stringify({
         startCountryCode: 'CN',
         endCountryCode: paysDestination,
-        products: [{ quantity: 1, vid }],
+        products: [{ quantity: quantite, vid }],
       }),
     });
     const data = await res.json().catch(() => null);
@@ -109,6 +110,8 @@ interface ImportBody {
   taux_marge?: number;
   /** Incoterm d'achat auprès du fournisseur ; détermine le fret restant à notre charge. */
   incoterm?: string;
+  /** Quantité minimum de vente : dilue la part fixe du fret et de l'assurance. */
+  quantite_minimum?: number;
 }
 
 Deno.serve(async (req: Request) => {
@@ -205,6 +208,15 @@ Deno.serve(async (req: Request) => {
 
     const prix_achat_fcfa = Math.round(prix_fournisseur_usd * tauxChange);
 
+    // Le fret et la prime d'assurance comportent une part fixe par colis. En
+    // demandant le devis pour la quantité minimum de vente puis en la
+    // répartissant, cette part fixe est diluée : c'est ce qui rend vendables
+    // les articles à faible valeur unitaire.
+    const quantite_minimum = Math.max(
+      1,
+      Math.round(body.quantite_minimum ?? Number(parametres.quantite_minimum_defaut)),
+    );
+
     // Devis de transport réel auprès de CJ ; à défaut, fret forfaitaire réparti
     // selon l'incoterm. Le devis CJ est déjà un coût porte-à-porte complet :
     // la part de l'incoterm ne s'y applique pas.
@@ -216,31 +228,43 @@ Deno.serve(async (req: Request) => {
           reference_externe,
           token,
           String(parametres.pays_destination_code),
+          quantite_minimum,
           requestId,
         );
       }
     }
 
+    // Le devis CJ porte sur le lot entier : on ramène à l'unité.
     const cout_fret_fcfa = fretReel
-      ? Math.round(fretReel.prix_usd * tauxChange)
+      ? Math.round((fretReel.prix_usd * tauxChange) / quantite_minimum)
       : Math.round(Number(parametres.fret_base_article_fcfa) * Number(repartition.part_fret));
     const fret_source = fretReel ? 'cj_reel' : 'forfait';
 
     const valeur_cif_fcfa = prix_achat_fcfa + cout_fret_fcfa;
 
-    const valeur_assuree_fcfa = repartition.assurance_a_charge
-      ? Math.round(valeur_cif_fcfa * Number(parametres.taux_couverture_assurance))
+    // La prime s'applique au colis complet ; on la répartit sur les unités.
+    const valeur_assuree_lot_fcfa = repartition.assurance_a_charge
+      ? Math.round(valeur_cif_fcfa * quantite_minimum * Number(parametres.taux_couverture_assurance))
       : 0;
-    const cout_assurance_fcfa = repartition.assurance_a_charge
+    const prime_lot_fcfa = repartition.assurance_a_charge
       ? Math.max(
-          Math.round(valeur_assuree_fcfa * Number(parametres.taux_assurance)),
+          Math.round(valeur_assuree_lot_fcfa * Number(parametres.taux_assurance)),
           Number(parametres.prime_assurance_minimum_fcfa),
         )
       : 0;
 
+    const valeur_assuree_fcfa = Math.round(valeur_assuree_lot_fcfa / quantite_minimum);
+    const cout_assurance_fcfa = Math.round(prime_lot_fcfa / quantite_minimum);
+
     const cout_revient_fcfa = prix_achat_fcfa + cout_fret_fcfa + cout_assurance_fcfa;
     const prix_avant_plancher_fcfa = Math.round(cout_revient_fcfa * (1 + tauxMarge));
-    const prix_plancher_fcfa = Number(parametres.prix_plancher_fcfa);
+
+    // Le plancher protège la valeur d'une commande, pas celle d'une pièce :
+    // sur un lot il se répartit, sinon imposer un minimum par unité annulerait
+    // l'intérêt du lot pour le client.
+    const prix_plancher_fcfa = Math.round(
+      Number(parametres.prix_plancher_fcfa) / quantite_minimum,
+    );
     const prix_unitaire_fcfa = Math.max(prix_avant_plancher_fcfa, prix_plancher_fcfa);
 
     // 4. Insertion du produit.
@@ -257,6 +281,7 @@ Deno.serve(async (req: Request) => {
         incoterm_achat: incotermChoisi,
         fret_source,
         fret_transporteur: fretReel?.transporteur ?? null,
+        quantite_minimum,
         // Le délai annoncé par le transporteur devient le délai affiché au client.
         delai_livraison_estime: fretReel?.delai ? `${fretReel.delai} jours` : null,
         categorie_gp_id: body.categorie_gp_id ?? null,
@@ -267,7 +292,7 @@ Deno.serve(async (req: Request) => {
         reference_externe,
       })
       .select(
-        'id, nom, prix_achat_fcfa, cout_fret_fcfa, cout_assurance_fcfa, prix_unitaire_fcfa, incoterm_achat, fret_source, fret_transporteur',
+        'id, nom, prix_achat_fcfa, cout_fret_fcfa, cout_assurance_fcfa, prix_unitaire_fcfa, incoterm_achat, fret_source, fret_transporteur, quantite_minimum',
       )
       .single();
 
@@ -300,6 +325,7 @@ Deno.serve(async (req: Request) => {
           fret_source,
           fret_transporteur: fretReel?.transporteur ?? null,
           fret_delai: fretReel?.delai ?? null,
+          quantite_minimum,
         },
       },
       200,
