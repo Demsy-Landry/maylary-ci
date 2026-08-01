@@ -6,7 +6,10 @@ interface AuthContextValue {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  /** Vrai tant qu'on ignore si un utilisateur est connecté. */
   loading: boolean;
+  /** Vrai tant que le profil du connecté n'est pas lu : le rôle n'est pas encore connu. */
+  profilEnCours: boolean;
   isAdmin: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -18,14 +21,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profilEnCours, setProfilEnCours] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from('app_e08c374bc4_profiles')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
-    setProfile((data as Profile) ?? null);
+    try {
+      const { data } = await supabase
+        .from('app_e08c374bc4_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+      setProfile((data as Profile) ?? null);
+    } finally {
+      setProfilEnCours(false);
+    }
   };
 
   const refreshProfile = async () => {
@@ -36,29 +44,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    let mounted = true;
+    let monte = true;
 
-    supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
-      if (!mounted) return;
-      setSession(currentSession);
-      if (currentSession?.user) {
-        await fetchProfile(currentSession.user.id);
-      }
+    /**
+     * La session commande l'affichage : tant qu'on ne sait pas si l'utilisateur
+     * est connecté, les pages protégées attendent. Cette attente doit donc se
+     * terminer quoi qu'il arrive, y compris si la lecture du profil échoue.
+     */
+    supabase.auth
+      .getSession()
+      .then(({ data: { session: sessionCourante } }) => {
+        if (!monte) return;
+        setSession(sessionCourante);
+        if (sessionCourante?.user) {
+          // Sans await : le profil complète l'affichage, il ne le conditionne pas.
+          fetchProfile(sessionCourante.user.id).catch(() => setProfile(null));
+        } else {
+          setProfilEnCours(false);
+        }
+      })
+      .catch(() => {
+        if (monte) setSession(null);
+      })
+      .finally(() => {
+        if (monte) setLoading(false);
+      });
+
+    const { data: ecoute } = supabase.auth.onAuthStateChange((_evenement, nouvelleSession) => {
+      if (!monte) return;
+      setSession(nouvelleSession);
       setLoading(false);
-    });
 
-    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      setSession(newSession);
-      if (newSession?.user) {
-        await fetchProfile(newSession.user.id);
-      } else {
+      if (!nouvelleSession?.user) {
         setProfile(null);
+        setProfilEnCours(false);
+        return;
       }
+
+      setProfilEnCours(true);
+
+      // Le client Supabase tient un verrou pendant ce rappel : tout appel qui
+      // en dépend et qui serait attendu ici s'y bloquerait, et la connexion
+      // resterait sans effet. On sort donc du rappel avant de lire le profil.
+      setTimeout(() => {
+        if (monte) fetchProfile(nouvelleSession.user.id).catch(() => setProfile(null));
+      }, 0);
     });
 
     return () => {
-      mounted = false;
-      listener.subscription.unsubscribe();
+      monte = false;
+      ecoute.subscription.unsubscribe();
     };
   }, []);
 
@@ -74,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         profile,
         loading,
+        profilEnCours,
         isAdmin: profile?.type_compte === 'admin',
         signOut,
         refreshProfile,

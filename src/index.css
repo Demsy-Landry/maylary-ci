@@ -202,3 +202,118 @@
     animation: float-drift var(--float-duration, 9s) ease-in-out infinite;
   }
 }
+
+/* ------------------------------------------------------------------
+   Mouvement
+   ------------------------------------------------------------------
+   Un service logistique se juge aussi à la fluidité de son interface.
+   Le mouvement sert ici à trois choses seulement : faire entrer un
+   contenu qui arrive, signaler qu'un élément répond au survol, et
+   occuper l'attente d'un chargement. Rien de décoratif.
+
+   Toutes les durées restent courtes : au-delà de 400 ms une interface
+   paraît lente, pas soignée.
+   ------------------------------------------------------------------ */
+
+@keyframes apparition-bas {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes apparition {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes glissement-lueur {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.animate-apparition-bas {
+  animation: apparition-bas 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-apparition {
+  animation: apparition 300ms ease-out both;
+}
+
+/* Entrée en cascade d'une liste : chaque élément suit le précédent d'un
+   souffle. Au-delà du dixième, le décalage cesse — sinon les derniers
+   éléments d'une longue grille se feraient attendre. */
+.cascade > * {
+  animation: apparition-bas 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.cascade > *:nth-child(1)  { animation-delay: 0ms; }
+.cascade > *:nth-child(2)  { animation-delay: 40ms; }
+.cascade > *:nth-child(3)  { animation-delay: 80ms; }
+.cascade > *:nth-child(4)  { animation-delay: 120ms; }
+.cascade > *:nth-child(5)  { animation-delay: 160ms; }
+.cascade > *:nth-child(6)  { animation-delay: 200ms; }
+.cascade > *:nth-child(7)  { animation-delay: 240ms; }
+.cascade > *:nth-child(8)  { animation-delay: 280ms; }
+.cascade > *:nth-child(9)  { animation-delay: 320ms; }
+.cascade > *:nth-child(n+10) { animation-delay: 360ms; }
+
+/* Carte réactive au survol : léger soulèvement, ombre plus marquée. */
+.carte-reactive {
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms ease;
+}
+@media (hover: hover) {
+  .carte-reactive:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px -12px oklch(0.19 0.02 250 / 0.28);
+  }
+}
+.carte-reactive:active {
+  transform: translateY(-1px);
+}
+
+/* Squelette de chargement : une lueur traverse la surface. Préférable à
+   un disque qui tourne, parce qu'il montre la forme de ce qui arrive. */
+.squelette {
+  position: relative;
+  overflow: hidden;
+  background: var(--muted);
+}
+.squelette::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.55),
+    transparent
+  );
+  animation: glissement-lueur 1.4s ease-in-out infinite;
+}
+
+/* Les boutons et liens répondent au doigt comme à la souris. */
+button,
+[role='button'],
+a {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+/* Respect du réglage système : certaines personnes souffrent du mouvement.
+   On ne le supprime pas au hasard, on le réduit à une transition instantanée
+   pour que rien ne disparaisse de l'écran. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -178,7 +178,7 @@ export default function Index() {
             {ETAPES_IMPORT.map((etape) => (
               <div
                 key={etape.title}
-                className="rounded-lg border bg-card p-5 transition-shadow duration-300 hover:shadow-md"
+                className="carte-reactive rounded-lg border bg-card p-5"
               >
                 <etape.icon className="h-6 w-6 text-primary" />
                 <h3 className="font-display mt-3 font-bold text-foreground">{etape.title}</h3>
@@ -291,7 +291,7 @@ export default function Index() {
             {ETAPES_EXPORT.map((etape) => (
               <div
                 key={etape.title}
-                className="rounded-lg border bg-card p-5 transition-shadow duration-300 hover:shadow-md"
+                className="carte-reactive rounded-lg border bg-card p-5"
               >
                 <etape.icon className="h-6 w-6 text-primary" />
                 <h3 className="font-display mt-3 font-bold text-foreground">{etape.title}</h3>
