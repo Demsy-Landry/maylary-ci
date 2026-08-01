@@ -39,6 +39,8 @@ export const PROFILES_TABLE = 'app_e08c374bc4_profiles';
 export const PRODUITS_TABLE = 'app_e08c374bc4_produits';
 /** Vue publique sans le prix d'achat fournisseur : à utiliser pour TOUTE lecture côté client. */
 export const PRODUITS_PUBLIC_VIEW = 'app_e08c374bc4_produits_public';
+/** Grille de prix dégressive, exposée sans nos coûts. */
+export const PALIERS_PRIX_PUBLIC_VIEW = 'app_e08c374bc4_paliers_prix_public';
 export const DEMANDES_DEVIS_TABLE = 'app_e08c374bc4_demandes_devis';
 export const LIGNES_DEVIS_TABLE = 'app_e08c374bc4_lignes_devis';
 export const HISTORIQUE_STATUT_TABLE = 'app_e08c374bc4_historique_statut_devis';
@@ -201,6 +203,8 @@ export interface Produit {
    * prix unitaire acceptable.
    */
   quantite_minimum: number;
+  /** Grille de gros, chargée séparément depuis la vue des paliers. */
+  paliers?: { quantite_min: number; prix_unitaire_fcfa: number }[];
   /**
    * Provenance du produit, exposée au client pour qu'il sache à quoi s'attendre
    * en termes de délai. Le nom du fournisseur réel n'est jamais divulgué.

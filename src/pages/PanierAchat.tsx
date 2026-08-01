@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
-import { useCartGP } from '@/hooks/useCartGP';
+import { useCartGP, prixLigne } from '@/hooks/useCartGP';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
 import ImageWithFallback from '@/components/ImageWithFallback';
@@ -40,7 +40,7 @@ export default function PanierAchat() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-foreground">{item.nom}</p>
                     <p className="text-sm font-semibold text-primary">
-                      {item.prix_unitaire_fcfa.toLocaleString('fr-FR')} FCFA
+                      {prixLigne(item).toLocaleString('fr-FR')} FCFA
                     </p>
                   </div>
                   <div className="flex items-center rounded-md border">

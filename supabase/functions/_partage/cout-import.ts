@@ -20,6 +20,7 @@ export interface ParametresCout {
   taux_taxe_assurance: number | string;
   quantite_minimum_defaut: number | string;
   seuil_petit_article_fcfa: number | string;
+  paliers_quantite?: number[] | null;
 }
 
 export interface RepartitionIncoterm {
@@ -143,4 +144,69 @@ export function calculerCout(params: {
     prime_lot_fcfa,
     taux_marge_applique: tauxMarge,
   };
+}
+
+export interface PalierMesure {
+  quantite_min: number;
+  cout_fret_unitaire_fcfa: number;
+  cout_assurance_unitaire_fcfa: number;
+  cout_revient_unitaire_fcfa: number;
+  prix_unitaire_fcfa: number;
+  fret_transporteur: string | null;
+  fret_delai: string | null;
+}
+
+/**
+ * Construit la grille de prix dégressive à partir de devis de transport
+ * réellement obtenus, un par quantité.
+ *
+ * Deux règles, toutes deux imposées par la réalité du transport :
+ *
+ *  - une quantité sans devis est écartée. On ne publie pas un prix qu'on ne
+ *    sait pas tenir ;
+ *  - un palier n'est retenu que si son prix unitaire est *strictement
+ *    inférieur* à tous les paliers plus petits. Au-delà d'un certain poids le
+ *    transporteur économique ne prend plus la marchandise, l'expédition bascule
+ *    sur un service express et le prix par pièce remonte. Annoncer « plus vous
+ *    en prenez, moins c'est cher » impose de le vérifier à chaque palier.
+ */
+export function construirePaliers(params: {
+  prixAchatFcfa: number;
+  devis: { quantite: number; fret: FretReel | null }[];
+  parametres: ParametresCout;
+  incoterm: RepartitionIncoterm;
+  tauxMarge?: number | null;
+}): PalierMesure[] {
+  const retenus: PalierMesure[] = [];
+  let meilleurPrix = Number.POSITIVE_INFINITY;
+
+  const parQuantiteCroissante = [...params.devis].sort((a, b) => a.quantite - b.quantite);
+
+  for (const { quantite, fret } of parQuantiteCroissante) {
+    if (!fret) continue;
+
+    const cout = calculerCout({
+      prixAchatFcfa: params.prixAchatFcfa,
+      quantiteMinimum: quantite,
+      fretReel: fret,
+      parametres: params.parametres,
+      incoterm: params.incoterm,
+      tauxMarge: params.tauxMarge ?? null,
+    });
+
+    if (cout.prix_unitaire_fcfa >= meilleurPrix) continue;
+    meilleurPrix = cout.prix_unitaire_fcfa;
+
+    retenus.push({
+      quantite_min: quantite,
+      cout_fret_unitaire_fcfa: cout.cout_fret_fcfa,
+      cout_assurance_unitaire_fcfa: cout.cout_assurance_fcfa,
+      cout_revient_unitaire_fcfa: cout.cout_revient_fcfa,
+      prix_unitaire_fcfa: cout.prix_unitaire_fcfa,
+      fret_transporteur: cout.fret_transporteur,
+      fret_delai: cout.fret_delai,
+    });
+  }
+
+  return retenus;
 }

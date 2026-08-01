@@ -1,14 +1,13 @@
 /**
- * Retarification du catalogue importé.
+ * Retarification du catalogue importé et construction de la grille de gros.
  *
- * Les produits importés avant la mise en place du modèle de coût portent une
- * marge appliquée au seul prix d'achat : ni le fret ni l'assurance n'y figurent,
- * et ils sont donc vendus en dessous de leur coût de revient. Cette fonction
- * rejoue sur eux exactement la chaîne de coût de l'import (module partagé), en
- * réinterrogeant CJ pour le prix fournisseur du jour et le fret réel.
+ * Pour chaque produit, on redemande au transporteur un devis à chaque quantité
+ * de la grille, puis on ne retient que les paliers dont le prix unitaire baisse
+ * réellement. Le produit prend le prix de son palier d'entrée.
  *
- * Traitement par lots : CJ plafonne à 1 appel par seconde et chaque produit en
- * demande deux. L'appelant relance tant que `restants` n'est pas nul.
+ * Traitement par lots : le transporteur plafonne à un appel par seconde et
+ * chaque produit en consomme un par palier. L'appelant relance tant que
+ * `restants` n'est pas nul.
  */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import {
@@ -18,7 +17,7 @@ import {
   pause,
   type FretReel,
 } from '../_partage/cj-api.ts';
-import { calculerCout, quantiteMinimumPour } from '../_partage/cout-import.ts';
+import { calculerCout, construirePaliers, quantiteMinimumPour } from '../_partage/cout-import.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,42 +32,19 @@ function jsonResponse(body: unknown, status: number) {
 }
 
 /** Au-delà, le temps d'exécution dépasse le budget d'une invocation. */
-const TAILLE_LOT_MAX = 6;
+const TAILLE_LOT_MAX = 3;
 
 interface RetariferBody {
-  /** Nombre de produits traités dans cette invocation. */
   taille_lot?: number;
-  /** Vrai (défaut) : on calcule et on renvoie l'impact sans rien écrire. */
   simulation?: boolean;
-  /** Restreint le traitement à ces produits ; sinon, tous les produits importés. */
   produit_ids?: string[];
-}
-
-interface LigneResultat {
-  id: string;
-  nom: string;
-  ancien_prix_fcfa: number;
-  nouveau_prix_fcfa: number;
-  prix_achat_fcfa: number;
-  cout_fret_fcfa: number;
-  cout_assurance_fcfa: number;
-  cout_revient_fcfa: number;
-  quantite_minimum: number;
-  fret_source: string;
-  /** Vrai si l'ancien prix était inférieur au coût de revient : vente à perte. */
-  vendait_a_perte: boolean;
-  prix_achat_rafraichi: boolean;
 }
 
 Deno.serve(async (req: Request) => {
   const requestId = crypto.randomUUID();
 
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders });
-  }
-  if (req.method !== 'POST') {
-    return jsonResponse({ error: 'Méthode non autorisée.' }, 405);
-  }
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });
+  if (req.method !== 'POST') return jsonResponse({ error: 'Méthode non autorisée.' }, 405);
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -85,9 +61,7 @@ Deno.serve(async (req: Request) => {
       data: { user },
       error: userError,
     } = await supabaseAsCaller.auth.getUser();
-    if (userError || !user) {
-      return jsonResponse({ error: 'Session invalide, reconnectez-vous.' }, 401);
-    }
+    if (userError || !user) return jsonResponse({ error: 'Session invalide, reconnectez-vous.' }, 401);
 
     const supabaseService = createClient(supabaseUrl, serviceRoleKey);
     const { data: profile } = await supabaseService
@@ -107,19 +81,14 @@ Deno.serve(async (req: Request) => {
     }
 
     const simulation = body.simulation !== false;
-    const tailleLot = Math.min(
-      TAILLE_LOT_MAX,
-      Math.max(1, Math.round(body.taille_lot ?? TAILLE_LOT_MAX)),
-    );
+    const tailleLot = Math.min(TAILLE_LOT_MAX, Math.max(1, Math.round(body.taille_lot ?? TAILLE_LOT_MAX)));
 
     const { data: parametres } = await supabaseService
       .from('app_e08c374bc4_parametres_import')
       .select('*')
       .eq('id', 1)
       .maybeSingle();
-    if (!parametres) {
-      return jsonResponse({ error: 'Impossible de lire les paramètres de marge.' }, 500);
-    }
+    if (!parametres) return jsonResponse({ error: 'Impossible de lire les paramètres.' }, 500);
 
     const incotermChoisi = parametres.incoterm_achat_defaut;
     const { data: repartition } = await supabaseService
@@ -127,26 +96,17 @@ Deno.serve(async (req: Request) => {
       .select('incoterm, part_fret, assurance_a_charge')
       .eq('incoterm', incotermChoisi)
       .maybeSingle();
-    if (!repartition) {
-      return jsonResponse({ error: `Incoterm inconnu : ${incotermChoisi}.` }, 400);
-    }
+    if (!repartition) return jsonResponse({ error: `Incoterm inconnu : ${incotermChoisi}.` }, 400);
 
-    // Sélection des produits à traiter. En simulation, on les reprend tous à
-    // chaque appel ; en application, `retarife_le` marque ceux qui sont faits,
-    // ce qui rend la reprise après interruption naturelle.
     let requete = supabaseService
       .from('app_e08c374bc4_produits')
-      .select('id, nom, prix_achat_fcfa, prix_unitaire_fcfa, retarife_le')
+      .select('id, nom, reference_externe, prix_achat_fcfa, prix_unitaire_fcfa, paliers_calcules_le')
       .eq('source_donnee', 'import_cj_dropshipping')
       .not('reference_externe', 'is', null)
       .order('prix_achat_fcfa', { ascending: true });
 
-    if (body.produit_ids?.length) {
-      requete = requete.in('id', body.produit_ids);
-    }
-    if (!simulation) {
-      requete = requete.is('retarife_le', null);
-    }
+    if (body.produit_ids?.length) requete = requete.in('id', body.produit_ids);
+    if (!simulation) requete = requete.is('paliers_calcules_le', null);
 
     const { data: produits, error: produitsError } = await requete;
     if (produitsError || !produits) {
@@ -156,106 +116,192 @@ Deno.serve(async (req: Request) => {
 
     const aTraiter = produits.slice(0, tailleLot);
     const restants = Math.max(0, produits.length - aTraiter.length);
-
     if (aTraiter.length === 0) {
       return jsonResponse({ success: true, simulation, resultats: [], restants: 0 }, 200);
     }
 
     const token = parametres.utiliser_fret_reel_cj ? await getCjAccessToken() : null;
-    const resultats: LigneResultat[] = [];
+    const resultats: Record<string, unknown>[] = [];
 
     for (const produit of aTraiter) {
-      // Chaque produit est retraité en repartant de sa référence CJ : le prix
-      // fournisseur a pu bouger depuis l'import.
-      const { data: fiche } = await supabaseService
-        .from('app_e08c374bc4_produits')
-        .select('reference_externe')
-        .eq('id', produit.id)
-        .single();
-
       let prixAchatFcfa = Number(produit.prix_achat_fcfa ?? 0);
-      let prixAchatRafraichi = false;
       let vid: string | null = null;
 
-      if (token && fiche?.reference_externe) {
-        const detail = await obtenirDetailProduitCj(String(fiche.reference_externe), token);
+      if (token && produit.reference_externe) {
+        const detail = await obtenirDetailProduitCj(String(produit.reference_externe), token);
         vid = detail.vid;
         if (detail.prix_usd) {
           prixAchatFcfa = Math.round(detail.prix_usd * Number(parametres.taux_change_usd_fcfa));
-          prixAchatRafraichi = true;
         }
         await pause(1100);
       }
+      if (prixAchatFcfa <= 0) continue;
 
-      if (prixAchatFcfa <= 0) {
-        console.log(JSON.stringify({ requestId, produitId: produit.id, step: 'prix_achat_absent' }));
-        continue;
+      // Le palier d'entrée est la quantité minimum de vente : proposer un devis
+      // pour une quantité que le client ne peut pas commander n'a pas de sens.
+      const quantiteEntree = quantiteMinimumPour(prixAchatFcfa, parametres);
+      const grille: number[] = Array.from(
+        new Set<number>([
+          quantiteEntree,
+          ...((parametres.paliers_quantite as number[] | null) ?? []).filter(
+            (q) => q > quantiteEntree,
+          ),
+        ]),
+      ).sort((a, b) => a - b);
+
+      const devis: { quantite: number; fret: FretReel | null }[] = [];
+      for (const quantite of grille) {
+        let fret: FretReel | null = null;
+        if (token && vid) {
+          fret = await obtenirFretReelCj(
+            vid,
+            token,
+            String(parametres.pays_destination_code),
+            quantite,
+          );
+          await pause(1100);
+        }
+        devis.push({ quantite, fret });
       }
 
-      const quantiteMinimum = quantiteMinimumPour(prixAchatFcfa, parametres);
-
-      let fretReel: FretReel | null = null;
-      if (token && vid) {
-        fretReel = await obtenirFretReelCj(
-          vid,
-          token,
-          String(parametres.pays_destination_code),
-          quantiteMinimum,
-        );
-        await pause(1100);
-      }
-
-      const cout = calculerCout({
+      const paliers = construirePaliers({
         prixAchatFcfa,
-        quantiteMinimum,
-        fretReel,
+        devis,
         parametres,
         incoterm: repartition,
       });
 
+      // Sans aucun devis, on ne sait pas ce que coûte l'acheminement : le produit
+      // ne peut pas être publié avec un prix inventé.
+      if (paliers.length === 0) {
+        const coutForfait = calculerCout({
+          prixAchatFcfa,
+          quantiteMinimum: quantiteEntree,
+          fretReel: null,
+          parametres,
+          incoterm: repartition,
+        });
+        resultats.push({
+          id: produit.id,
+          nom: produit.nom,
+          publiable: false,
+          motif: 'fret_non_cote',
+          prix_indicatif_fcfa: coutForfait.prix_unitaire_fcfa,
+        });
+
+        if (!simulation) {
+          await supabaseService
+            .from('app_e08c374bc4_produits')
+            .update({
+              actif: false,
+              indisponible_motif: 'fret_non_cote',
+              paliers_calcules_le: new Date().toISOString(),
+            })
+            .eq('id', produit.id);
+        }
+        continue;
+      }
+
+      const entree = paliers[0];
+
+      // Avoir un devis ne suffit pas à rendre un produit vendable : si la plus
+      // petite commande possible atteint un montant déraisonnable, le client
+      // paie surtout du transport. Le recalcul ne doit jamais remettre en
+      // vitrine un article écarté pour cette raison.
+      const commandeMinimum = entree.prix_unitaire_fcfa * entree.quantite_min;
+      const plafond = Number(parametres.plafond_commande_minimum_fcfa);
+      if (commandeMinimum > plafond) {
+        resultats.push({
+          id: produit.id,
+          nom: produit.nom,
+          publiable: false,
+          motif: 'commande_minimum_trop_elevee',
+          commande_minimum_fcfa: commandeMinimum,
+        });
+
+        if (!simulation) {
+          await supabaseService
+            .from('app_e08c374bc4_produits')
+            .update({
+              prix_achat_fcfa: prixAchatFcfa,
+              prix_unitaire_fcfa: entree.prix_unitaire_fcfa,
+              cout_fret_fcfa: entree.cout_fret_unitaire_fcfa,
+              cout_assurance_fcfa: entree.cout_assurance_unitaire_fcfa,
+              quantite_minimum: entree.quantite_min,
+              actif: false,
+              indisponible_motif: 'commande_minimum_trop_elevee',
+              retarife_le: new Date().toISOString(),
+              paliers_calcules_le: new Date().toISOString(),
+            })
+            .eq('id', produit.id);
+          await supabaseService
+            .from('app_e08c374bc4_paliers_prix')
+            .delete()
+            .eq('produit_id', produit.id);
+        }
+        continue;
+      }
+
       resultats.push({
         id: produit.id,
         nom: produit.nom,
+        publiable: true,
+        prix_achat_fcfa: prixAchatFcfa,
         ancien_prix_fcfa: Number(produit.prix_unitaire_fcfa),
-        nouveau_prix_fcfa: cout.prix_unitaire_fcfa,
-        prix_achat_fcfa: cout.prix_achat_fcfa,
-        cout_fret_fcfa: cout.cout_fret_fcfa,
-        cout_assurance_fcfa: cout.cout_assurance_fcfa,
-        cout_revient_fcfa: cout.cout_revient_fcfa,
-        quantite_minimum: cout.quantite_minimum,
-        fret_source: cout.fret_source,
-        vendait_a_perte: Number(produit.prix_unitaire_fcfa) < cout.cout_revient_fcfa,
-        prix_achat_rafraichi: prixAchatRafraichi,
+        paliers: paliers.map((p) => ({
+          quantite: p.quantite_min,
+          prix: p.prix_unitaire_fcfa,
+          fret: p.cout_fret_unitaire_fcfa,
+          transporteur: p.fret_transporteur,
+        })),
+        economie_max_pct:
+          paliers.length > 1
+            ? Math.round(
+                (1 - paliers[paliers.length - 1].prix_unitaire_fcfa / entree.prix_unitaire_fcfa) * 100,
+              )
+            : 0,
       });
 
       if (!simulation) {
-        const { error: updateError } = await supabaseService
+        const { error: majError } = await supabaseService
           .from('app_e08c374bc4_produits')
           .update({
-            prix_achat_fcfa: cout.prix_achat_fcfa,
-            prix_unitaire_fcfa: cout.prix_unitaire_fcfa,
-            cout_fret_fcfa: cout.cout_fret_fcfa,
-            cout_assurance_fcfa: cout.cout_assurance_fcfa,
+            prix_achat_fcfa: prixAchatFcfa,
+            prix_unitaire_fcfa: entree.prix_unitaire_fcfa,
+            cout_fret_fcfa: entree.cout_fret_unitaire_fcfa,
+            cout_assurance_fcfa: entree.cout_assurance_unitaire_fcfa,
+            quantite_minimum: entree.quantite_min,
             incoterm_achat: incotermChoisi,
-            fret_source: cout.fret_source,
-            fret_transporteur: cout.fret_transporteur,
-            quantite_minimum: cout.quantite_minimum,
-            delai_livraison_estime: cout.fret_delai ? `${cout.fret_delai} jours` : null,
+            fret_source: 'cj_reel',
+            fret_transporteur: entree.fret_transporteur,
+            delai_livraison_estime: entree.fret_delai ? `${entree.fret_delai} jours` : null,
+            actif: true,
+            indisponible_motif: null,
             retarife_le: new Date().toISOString(),
+            paliers_calcules_le: new Date().toISOString(),
           })
           .eq('id', produit.id);
 
-        if (updateError) {
-          console.log(JSON.stringify({ requestId, produitId: produit.id, error: updateError }));
+        if (majError) {
+          console.log(JSON.stringify({ requestId, produitId: produit.id, error: majError }));
           return jsonResponse({ error: `Échec de la mise à jour de « ${produit.nom} ».` }, 500);
         }
+
+        // La grille est remplacée en bloc : un ancien palier qui n'est plus
+        // rentable ne doit pas survivre au recalcul.
+        await supabaseService
+          .from('app_e08c374bc4_paliers_prix')
+          .delete()
+          .eq('produit_id', produit.id);
+        await supabaseService.from('app_e08c374bc4_paliers_prix').insert(
+          paliers.map((p) => ({ produit_id: produit.id, ...p })),
+        );
       }
     }
 
     console.log(
-      JSON.stringify({ requestId, step: 'retarifer', simulation, traites: resultats.length, restants }),
+      JSON.stringify({ requestId, step: 'paliers', simulation, traites: resultats.length, restants }),
     );
-
     return jsonResponse({ success: true, simulation, resultats, restants }, 200);
   } catch (error) {
     console.log(JSON.stringify({ requestId, error: String(error) }));

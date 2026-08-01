@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
-import { useCartGP } from '@/hooks/useCartGP';
+import { useCartGP, prixLigne } from '@/hooks/useCartGP';
 import { useAuth } from '@/hooks/useAuth';
 import {
   supabase,
@@ -97,8 +97,8 @@ export default function CommandeGP() {
       produit_id: i.produit_id,
       nom_produit: i.nom,
       quantite: i.quantite,
-      prix_unitaire_fcfa: i.prix_unitaire_fcfa,
-      sous_total: i.prix_unitaire_fcfa * i.quantite,
+      prix_unitaire_fcfa: prixLigne(i),
+      sous_total: prixLigne(i) * i.quantite,
     }));
 
     const { error: lignesError } = await supabase.from(LIGNES_COMMANDE_GP_TABLE).insert(lignes);
@@ -255,7 +255,7 @@ export default function CommandeGP() {
                   <div key={item.produit_id} className="flex justify-between py-1.5">
                     <span className="text-foreground">{item.nom} × {item.quantite}</span>
                     <span className="font-medium text-foreground">
-                      {(item.prix_unitaire_fcfa * item.quantite).toLocaleString('fr-FR')} FCFA
+                      {(prixLigne(item) * item.quantite).toLocaleString('fr-FR')} FCFA
                     </span>
                   </div>
                 ))}
