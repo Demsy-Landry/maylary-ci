@@ -6,6 +6,7 @@ import {
   supabase,
   CATEGORIES_GP_TABLE,
   PRODUITS_PUBLIC_VIEW,
+  PALIERS_PRIX_PUBLIC_VIEW,
   ORIGINE_PRODUIT_LABELS,
   type CategorieGP,
   type OrigineProduit,
@@ -39,7 +40,7 @@ export default function CatalogueGrandPublic() {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const [categoriesRes, produitsRes] = await Promise.all([
+      const [categoriesRes, produitsRes, paliersRes] = await Promise.all([
         supabase
           .from(CATEGORIES_GP_TABLE)
           .select('*')
@@ -50,9 +51,35 @@ export default function CatalogueGrandPublic() {
           .select('*')
           .eq('espace', 'grand_public')
           .eq('actif', true),
+        supabase
+          .from(PALIERS_PRIX_PUBLIC_VIEW)
+          .select('produit_id, quantite_min, prix_unitaire_fcfa')
+          .order('quantite_min'),
       ]);
       setCategories((categoriesRes.data as CategorieGP[]) ?? []);
-      setProduits((produitsRes.data as Produit[]) ?? []);
+
+      // Les grilles de gros arrivent à part : on les rattache à leur produit
+      // pour que la carte affiche « à partir de » et que le panier applique le
+      // bon palier dès l'ajout rapide.
+      const grilles = new Map<string, { quantite_min: number; prix_unitaire_fcfa: number }[]>();
+      for (const ligne of (paliersRes.data ?? []) as {
+        produit_id: string;
+        quantite_min: number;
+        prix_unitaire_fcfa: number;
+      }[]) {
+        const liste = grilles.get(ligne.produit_id) ?? [];
+        liste.push({
+          quantite_min: Number(ligne.quantite_min),
+          prix_unitaire_fcfa: Number(ligne.prix_unitaire_fcfa),
+        });
+        grilles.set(ligne.produit_id, liste);
+      }
+      setProduits(
+        ((produitsRes.data as Produit[]) ?? []).map((p) => ({
+          ...p,
+          paliers: grilles.get(p.id) ?? [],
+        })),
+      );
       setLoading(false);
     };
     load();
@@ -231,6 +258,8 @@ export function ProductCardGP({ produit }: { produit: Produit }) {
         nom: produit.nom,
         prix_unitaire_fcfa: produit.prix_unitaire_fcfa,
         photo: produit.photos?.[0] ?? null,
+        quantite_minimum: quantite,
+        paliers: produit.paliers ?? [],
       },
       quantite,
     );
@@ -270,6 +299,12 @@ export function ProductCardGP({ produit }: { produit: Produit }) {
         {produit.quantite_minimum > 1 && (
           <p className="mt-1 text-[11px] text-muted-foreground">
             Par lot de {produit.quantite_minimum}
+          </p>
+        )}
+        {(produit.paliers?.length ?? 0) > 1 && (
+          <p className="mt-1 text-[11px] font-medium text-emerald-600">
+            Dès {produit.paliers!.at(-1)!.quantite_min} pièces :{' '}
+            {produit.paliers!.at(-1)!.prix_unitaire_fcfa.toLocaleString('fr-FR')} FCFA
           </p>
         )}
         {enRupture && (

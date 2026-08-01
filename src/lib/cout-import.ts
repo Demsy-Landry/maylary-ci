@@ -140,3 +140,30 @@ export function calculerPrimeAssurance(params: {
     prime_fcfa,
   };
 }
+
+/**
+ * Un palier de la grille de gros : à partir de `quantite_min` pièces, le prix
+ * unitaire tombe à `prix_unitaire_fcfa`.
+ */
+export interface PalierPrix {
+  quantite_min: number;
+  prix_unitaire_fcfa: number;
+}
+
+/**
+ * Prix unitaire applicable pour une quantité donnée.
+ *
+ * On retient le palier le plus avantageux dont le seuil est atteint. À défaut
+ * de grille, ou en dessous du premier seuil, c'est le prix de base du produit
+ * qui s'applique.
+ */
+export function prixPourQuantite(
+  paliers: PalierPrix[],
+  prixBaseFcfa: number,
+  quantite: number,
+): number {
+  const applicable = paliers
+    .filter((p) => quantite >= p.quantite_min)
+    .sort((a, b) => a.prix_unitaire_fcfa - b.prix_unitaire_fcfa)[0];
+  return applicable ? applicable.prix_unitaire_fcfa : prixBaseFcfa;
+}

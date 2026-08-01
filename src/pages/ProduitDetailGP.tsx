@@ -11,6 +11,9 @@ import {
   type CategorieGP,
   type Produit,
 } from '@/lib/supabase';
+import { GrilleDeGros } from '@/components/GrilleDeGros';
+import { usePaliers } from '@/hooks/usePaliers';
+import { prixPourQuantite } from '@/lib/cout-import';
 import OrigineProduitBadge from '@/components/OrigineProduitBadge';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
@@ -38,6 +41,8 @@ export default function ProduitDetailGP() {
   const [activePhoto, setActivePhoto] = useState(0);
   const [brokenPhotos, setBrokenPhotos] = useState<Set<string>>(new Set());
   const [quantite, setQuantite] = useState(1);
+  const grilles = usePaliers(produitId ? [produitId] : []);
+  const paliers = (produitId && grilles[produitId]) || [];
   const [isFavori, setIsFavori] = useState(false);
   const [favoriBusy, setFavoriBusy] = useState(false);
 
@@ -110,6 +115,8 @@ export default function ProduitDetailGP() {
         nom: produit.nom,
         prix_unitaire_fcfa: produit.prix_unitaire_fcfa,
         photo: produit.photos?.[0] ?? null,
+        quantite_minimum: produit.quantite_minimum ?? 1,
+        paliers,
       },
       quantite,
     );
@@ -191,7 +198,11 @@ export default function ProduitDetailGP() {
               )}
               <h1 className="mt-1 text-2xl font-bold text-foreground">{produit.nom}</h1>
               <p className="mt-2 text-2xl font-semibold text-primary">
-                {produit.prix_unitaire_fcfa.toLocaleString('fr-FR')} FCFA
+                {prixPourQuantite(paliers, produit.prix_unitaire_fcfa, quantite).toLocaleString(
+                  'fr-FR',
+                )}{' '}
+                FCFA
+                <span className="ml-1 text-sm font-normal text-muted-foreground">/ pièce</span>
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
@@ -224,6 +235,12 @@ export default function ProduitDetailGP() {
                   pièces dans un même envoi divise les frais de transport et d'assurance : c'est ce
                   qui rend ce prix unitaire possible.
                 </p>
+              )}
+
+              {paliers.length > 1 && (
+                <div className="mt-4">
+                  <GrilleDeGros paliers={paliers} quantiteChoisie={quantite} />
+                </div>
               )}
 
               <div className="mt-6 flex items-center gap-3">
