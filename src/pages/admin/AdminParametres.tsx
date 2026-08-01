@@ -238,7 +238,7 @@ function ParametresFacturationCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="cascade grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="raison-sociale">Raison sociale</Label>
             <Input
@@ -257,7 +257,7 @@ function ParametresFacturationCard() {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="cascade grid gap-3 sm:grid-cols-3">
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="adresse-facture">Adresse</Label>
             <Input
@@ -276,7 +276,7 @@ function ParametresFacturationCard() {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="cascade grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="tel-facture">Téléphone</Label>
             <Input
@@ -295,7 +295,7 @@ function ParametresFacturationCard() {
           </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="cascade grid gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="rccm">RCCM</Label>
             <Input
@@ -368,7 +368,7 @@ function ParametresFacturationCard() {
           />
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="cascade grid gap-3 sm:grid-cols-3">
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="mentions">Mentions de bas de page</Label>
             <Input

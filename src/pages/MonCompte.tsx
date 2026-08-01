@@ -59,7 +59,7 @@ interface DocumentLigne {
 }
 
 export default function MonCompte() {
-  const { user, profile, loading: authLoading, isAdmin, refreshProfile } = useAuth();
+  const { user, profile, loading: authLoading, profilEnCours, isAdmin, refreshProfile } = useAuth();
 
   const [nomComplet, setNomComplet] = useState('');
   const [telephone, setTelephone] = useState('');
@@ -200,7 +200,7 @@ export default function MonCompte() {
 
   const isEntreprise = useMemo(() => profile?.type_compte === 'entreprise_acheteuse', [profile]);
 
-  if (authLoading) {
+  if (authLoading || (user && profilEnCours)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -259,7 +259,7 @@ export default function MonCompte() {
               <CardDescription>Connecté en tant que {user.email}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="cascade grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="nom-complet">Nom complet</Label>
                   <Input id="nom-complet" value={nomComplet} onChange={(e) => setNomComplet(e.target.value)} />

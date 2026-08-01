@@ -520,7 +520,7 @@ function ParametresMarge({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="cascade grid gap-4 sm:grid-cols-3">
           <div className="space-y-1.5">
             <Label htmlFor="taux-marge">Marge appliquée (%)</Label>
             <Input id="taux-marge" type="number" min={0} step={1}

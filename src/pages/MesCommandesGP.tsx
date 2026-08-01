@@ -54,7 +54,7 @@ interface CommandeAvecDetail extends CommandeGP {
 }
 
 export default function MesCommandesGP() {
-  const { user, loading: authLoading, isAdmin } = useAuth();
+  const { user, loading: authLoading, profilEnCours, isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
 
   const [commandes, setCommandes] = useState<CommandeGP[]>([]);
@@ -111,7 +111,7 @@ export default function MesCommandesGP() {
   // Les redirections viennent après tous les hooks : un `return` anticipé
   // placé au-dessus changerait le nombre de hooks entre deux rendus et ferait
   // planter React au moment où l'authentification finit de charger.
-  if (authLoading) {
+  if (authLoading || (user && profilEnCours)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

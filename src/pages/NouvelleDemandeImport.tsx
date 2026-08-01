@@ -319,7 +319,7 @@ export default function NouvelleDemandeImport() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="cascade grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="quantite">Quantité</Label>
               <Input
@@ -341,7 +341,7 @@ export default function NouvelleDemandeImport() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="cascade grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="incoterm">Incoterm souhaité</Label>
               <select
@@ -385,7 +385,7 @@ export default function NouvelleDemandeImport() {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="cascade grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="poids">Poids estimé (kg)</Label>
               <Input

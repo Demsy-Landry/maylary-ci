@@ -45,10 +45,10 @@ export default function AdminDashboard() {
       </header>
 
       <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Link
             to="/admin/import"
-            className="group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+            className="carte-reactive group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary "
           >
             <div className="flex items-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary-emphasis">
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
 
           <Link
             to="/admin/export"
-            className="group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+            className="carte-reactive group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary "
           >
             <div className="flex items-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary-emphasis">
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
 
           <Link
             to="/admin/commandes"
-            className="group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+            className="carte-reactive group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary "
           >
             <div className="flex items-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary-emphasis">
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
 
           <Link
             to="/admin/devis"
-            className="group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+            className="carte-reactive group flex items-center justify-between rounded-lg border bg-card p-5 transition-all hover:-translate-y-0.5 hover:border-primary "
           >
             <div className="flex items-center gap-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent/15 text-accent">

@@ -193,7 +193,7 @@ export default function CommandeGP() {
             <div className="space-y-4 lg:col-span-2">
               <div className="rounded-md border p-4">
                 <h2 className="mb-3 font-semibold text-foreground">Livraison</h2>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="cascade grid gap-3 sm:grid-cols-2">
                   <div className="space-y-1.5">
                     <Label htmlFor="nom-dest">Nom du destinataire *</Label>
                     <Input id="nom-dest" value={nomDestinataire} onChange={(e) => setNomDestinataire(e.target.value)} />

@@ -49,7 +49,7 @@ export default function CatalogueCategorieGP() {
         {loading ? (
           <div className="space-y-4">
             <Skeleton className="h-8 w-64" />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[1, 2, 3, 4].map((i) => (
                 <Skeleton key={i} className="h-40 w-full" />
               ))}
@@ -78,7 +78,7 @@ export default function CatalogueCategorieGP() {
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {produits.map((p) => (
                 <ProductCardGP key={p.id} produit={p} />
               ))}

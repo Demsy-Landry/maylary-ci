@@ -184,7 +184,7 @@ export default function CompteGP() {
 
               <TabsContent value="signup" className="pt-4">
                 <form onSubmit={handleSignup} className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="cascade grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setTypeCompte('particulier')}
@@ -225,7 +225,7 @@ export default function CompteGP() {
                       />
                     </div>
                   )}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="cascade grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="signup-telephone-gp">Téléphone</Label>
                       <Input

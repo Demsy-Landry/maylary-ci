@@ -338,7 +338,7 @@ export default function Index() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <Link
               to="/boutique"
-              className="group flex items-center justify-between rounded-lg border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+              className="carte-reactive group flex items-center justify-between rounded-lg border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary "
             >
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary-emphasis">
@@ -355,7 +355,7 @@ export default function Index() {
             </Link>
             <Link
               to="/catalogue"
-              className="group flex items-center justify-between rounded-lg border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+              className="carte-reactive group flex items-center justify-between rounded-lg border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary "
             >
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/15 text-accent">

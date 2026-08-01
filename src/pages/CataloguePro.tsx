@@ -37,7 +37,7 @@ export default function CataloguePro() {
         </div>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-40 w-full" />
             ))}
@@ -47,14 +47,14 @@ export default function CataloguePro() {
             L'espace Pro est en cours de constitution, revenez bientôt.
           </p>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {secteurs.map((s) => {
               const photo = SECTOR_PHOTOS[guessSector(s.nom)];
               return (
                 <Link
                   key={s.id}
                   to={`/catalogue/secteur/${s.id}`}
-                  className="group overflow-hidden rounded-lg border bg-card transition-all hover:-translate-y-1 hover:border-primary hover:shadow-xl"
+                  className="carte-reactive group overflow-hidden rounded-lg border bg-card transition-all hover:-translate-y-1 hover:border-primary "
                 >
                   <div className="relative h-32 w-full overflow-hidden">
                     {photo ? (

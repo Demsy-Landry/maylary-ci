@@ -29,11 +29,23 @@ export interface FretReel {
   delai: string | null;
 }
 
-/** Détail d'un produit CJ : prix fournisseur du jour et première variante. */
+/**
+ * Détail d'un produit CJ : prix fournisseur du jour, première variante, et
+ * mesures d'encombrement.
+ *
+ * Le poids et le volume ne servent pas au fret aérien — le transporteur le
+ * cote lui-même — mais ils commandent le fret maritime, qui se facture à
+ * l'unité payante. Sans eux, un produit ne peut pas entrer en groupage.
+ */
 export async function obtenirDetailProduitCj(
   pid: string,
   token: string,
-): Promise<{ vid: string | null; prix_usd: number | null }> {
+): Promise<{
+  vid: string | null;
+  prix_usd: number | null;
+  poids_g: number | null;
+  volume_cm3: number | null;
+}> {
   try {
     const url = new URL(`${CJ_BASE_URL}/product/query`);
     url.searchParams.set('pid', pid);
@@ -41,14 +53,22 @@ export async function obtenirDetailProduitCj(
       .json()
       .catch(() => null);
 
-    const vid = detail?.data?.variants?.[0]?.vid ?? null;
-    const prixBrut = Number(detail?.data?.sellPrice ?? detail?.data?.variants?.[0]?.variantSellPrice);
+    const variante = detail?.data?.variants?.[0] ?? {};
+    const vid = variante.vid ?? null;
+    const prixBrut = Number(detail?.data?.sellPrice ?? variante.variantSellPrice);
+
+    const poids = Number(variante.variantWeight ?? detail?.data?.packingWeight ?? 0);
+    // Le fournisseur exprime le volume en mm³ ; on travaille en cm³.
+    const volumeMm3 = Number(variante.variantVolume ?? 0);
+
     return {
       vid: vid ? String(vid) : null,
       prix_usd: Number.isFinite(prixBrut) && prixBrut > 0 ? prixBrut : null,
+      poids_g: Number.isFinite(poids) && poids > 0 ? poids : null,
+      volume_cm3: Number.isFinite(volumeMm3) && volumeMm3 > 0 ? volumeMm3 / 1000 : null,
     };
   } catch {
-    return { vid: null, prix_usd: null };
+    return { vid: null, prix_usd: null, poids_g: null, volume_cm3: null };
   }
 }
 
