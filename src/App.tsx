@@ -33,6 +33,7 @@ import AdminLogin from '@/pages/admin/AdminLogin';
 import APropos from '@/pages/APropos';
 import MentionsLegales from '@/pages/MentionsLegales';
 import PageIntrouvable from '@/pages/PageIntrouvable';
+import TransitionDePage from '@/components/TransitionDePage';
 import AdminParametres from '@/pages/admin/AdminParametres';
 import MonCompte from '@/pages/MonCompte';
 
@@ -45,6 +46,7 @@ function App() {
         <CartGPProvider>
           <CartProvider>
             <BrowserRouter>
+              <TransitionDePage>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/import" element={<NouvelleDemandeImport />} />
@@ -136,6 +138,7 @@ function App() {
                 {/* Toute adresse inconnue aboutit ici plutôt qu'à une page blanche. */}
                 <Route path="*" element={<PageIntrouvable />} />
               </Routes>
+              </TransitionDePage>
             </BrowserRouter>
             <Toaster />
           </CartProvider>

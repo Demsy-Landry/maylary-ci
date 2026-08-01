@@ -126,10 +126,12 @@ Deno.serve(async (req: Request) => {
     for (const produit of aTraiter) {
       let prixAchatFcfa = Number(produit.prix_achat_fcfa ?? 0);
       let vid: string | null = null;
+      let mesures: { poids_g: number | null; volume_cm3: number | null } = { poids_g: null, volume_cm3: null };
 
       if (token && produit.reference_externe) {
         const detail = await obtenirDetailProduitCj(String(produit.reference_externe), token);
         vid = detail.vid;
+        mesures = { poids_g: detail.poids_g, volume_cm3: detail.volume_cm3 };
         if (detail.prix_usd) {
           prixAchatFcfa = Math.round(detail.prix_usd * Number(parametres.taux_change_usd_fcfa));
         }
@@ -271,6 +273,8 @@ Deno.serve(async (req: Request) => {
             cout_fret_fcfa: entree.cout_fret_unitaire_fcfa,
             cout_assurance_fcfa: entree.cout_assurance_unitaire_fcfa,
             quantite_minimum: entree.quantite_min,
+            poids_unitaire_g: mesures.poids_g,
+            volume_unitaire_cm3: mesures.volume_cm3,
             incoterm_achat: incotermChoisi,
             fret_source: 'cj_reel',
             fret_transporteur: entree.fret_transporteur,

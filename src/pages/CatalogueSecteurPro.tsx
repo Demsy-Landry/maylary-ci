@@ -70,7 +70,7 @@ export default function CatalogueSecteurPro() {
         {loading ? (
           <div className="space-y-4">
             <Skeleton className="h-8 w-64" />
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[1, 2, 3, 4].map((i) => (
                 <Skeleton key={i} className="h-56 w-full" />
               ))}
@@ -90,7 +90,7 @@ export default function CatalogueSecteurPro() {
                 Aucun produit disponible pour le moment dans ce secteur.
               </p>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {produits.map((p) => (
                   <Link
                     key={p.id}

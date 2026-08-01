@@ -235,7 +235,7 @@ export default function NouvelleDemandeExport() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="cascade grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="pays-destination">Pays de destination</Label>
               <Input
@@ -257,7 +257,7 @@ export default function NouvelleDemandeExport() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="cascade grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="acheteur">Acheteur / société destinataire (optionnel)</Label>
               <Input
@@ -352,7 +352,7 @@ export default function NouvelleDemandeExport() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="cascade grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="incoterm">Incoterm souhaité</Label>
               <select
@@ -396,7 +396,7 @@ export default function NouvelleDemandeExport() {
             />
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <div className="cascade grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="poids">Poids estimé (kg)</Label>
               <Input

@@ -395,7 +395,7 @@ export default function AdminExportGestion() {
               {(gestion.statut === 'nouvelle' || gestion.statut === 'en_cotation') && (
                 <div className="space-y-3 rounded-md border p-3">
                   <p className="text-sm font-medium text-foreground">Atelier de cotation</p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="cascade grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-xs">Transport local (FCFA)</Label>
                       <Input

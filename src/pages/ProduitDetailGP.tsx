@@ -141,7 +141,7 @@ export default function ProduitDetailGP() {
         </Link>
 
         {loading ? (
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="cascade grid gap-6 sm:grid-cols-2">
             <Skeleton className="h-80 w-full" />
             <div className="space-y-3">
               <Skeleton className="h-8 w-3/4" />
@@ -152,7 +152,7 @@ export default function ProduitDetailGP() {
         ) : !produit ? (
           <p className="text-sm text-muted-foreground">Produit introuvable.</p>
         ) : (
-          <div className="grid gap-8 sm:grid-cols-2">
+          <div className="cascade grid gap-8 sm:grid-cols-2">
             <div>
               {produit.photos?.length > 0 && !brokenPhotos.has(produit.photos[activePhoto]) ? (
                 <>
