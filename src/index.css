@@ -326,3 +326,85 @@ a {
 .animate-page {
   animation: entree-page 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* ------------------------------------------------------------------
+   Retour au clic
+   ------------------------------------------------------------------
+   Un bouton doit répondre au doigt. Sans retour visuel, l'utilisateur
+   ne sait pas si son geste a été pris en compte et appuie deux fois —
+   ce qui, sur un bouton de commande, est un vrai problème.
+
+   Deux signaux : l'enfoncement, immédiat et bref, et l'onde partant du
+   point de contact, qui donne au geste une origine physique.
+   ------------------------------------------------------------------ */
+
+.bouton-anime {
+  position: relative;
+  overflow: hidden;
+  /* Sur mobile, le surlignage bleu du navigateur écrase notre retour. */
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 90ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease;
+}
+
+.bouton-anime:not(:disabled):active {
+  transform: scale(0.965);
+}
+
+@media (hover: hover) {
+  .bouton-anime:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+  .bouton-anime:not(:disabled):active {
+    transform: scale(0.965) translateY(0);
+  }
+}
+
+/* L'onde est portée par une variable posée au clic : sans coordonnées,
+   elle part du centre, ce qui reste correct au clavier. */
+.bouton-anime::after {
+  content: '';
+  position: absolute;
+  left: var(--onde-x, 50%);
+  top: var(--onde-y, 50%);
+  width: 0;
+  height: 0;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  background: currentColor;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.bouton-anime.onde::after {
+  animation: onde-clic 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes onde-clic {
+  from { width: 0; height: 0; opacity: 0.28; }
+  to   { width: 240%; height: 240%; opacity: 0; }
+}
+
+/* Les champs de saisie signalent leur activation. */
+input,
+textarea,
+select {
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background-color 160ms ease;
+}
+
+/* Compteur du panier : une pastille qui ne bouge pas quand son nombre
+   change passe inaperçue. */
+@keyframes pastille-saut {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+.pastille-animee {
+  animation: pastille-saut 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}

@@ -70,7 +70,10 @@ export default function PublicHeaderGP() {
               <ShoppingCart className="mr-1.5 h-4 w-4" />
               <span className="hidden sm:inline">Panier</span>
               {totalArticles > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground">
+                <span
+                  key={totalArticles}
+                  className="pastille-animee absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[11px] font-semibold text-primary-foreground"
+                >
                   {totalArticles}
                 </span>
               )}
