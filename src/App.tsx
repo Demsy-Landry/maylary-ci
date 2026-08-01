@@ -32,6 +32,7 @@ import MesDemandesExport from '@/pages/MesDemandesExport';
 import AdminLogin from '@/pages/admin/AdminLogin';
 import APropos from '@/pages/APropos';
 import MentionsLegales from '@/pages/MentionsLegales';
+import PageIntrouvable from '@/pages/PageIntrouvable';
 import AdminParametres from '@/pages/admin/AdminParametres';
 import MonCompte from '@/pages/MonCompte';
 
@@ -132,6 +133,8 @@ function App() {
                     </AdminRoute>
                   }
                 />
+                {/* Toute adresse inconnue aboutit ici plutôt qu'à une page blanche. */}
+                <Route path="*" element={<PageIntrouvable />} />
               </Routes>
             </BrowserRouter>
             <Toaster />

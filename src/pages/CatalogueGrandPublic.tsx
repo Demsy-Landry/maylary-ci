@@ -158,7 +158,7 @@ export default function CatalogueGrandPublic() {
         </div>
 
         {loading ? (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-32 w-full" />
             ))}
@@ -173,7 +173,7 @@ export default function CatalogueGrandPublic() {
                 Aucun produit ne correspond à votre recherche.
               </p>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+              <div className="cascade grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
                 {searchResults.map((p) => (
                   <ProductCardGP key={p.id} produit={p} />
                 ))}
@@ -221,7 +221,7 @@ export default function CatalogueGrandPublic() {
                     ({produitsFiltres.length})
                   </span>
                 </h2>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+                <div className="cascade grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
                   {produitsFiltres.map((p) => (
                     <ProductCardGP key={p.id} produit={p} />
                   ))}
@@ -271,7 +271,7 @@ export function ProductCardGP({ produit }: { produit: Produit }) {
   return (
     <Link
       to={`/boutique/produit/${produit.id}`}
-      className="group flex flex-col overflow-hidden rounded-lg border bg-card transition-shadow hover:shadow-lg"
+      className="carte-reactive group flex flex-col overflow-hidden rounded-lg border bg-card"
     >
       <div className="aspect-square w-full overflow-hidden bg-white p-2">
         {produit.photos?.[0] && !imgError ? (

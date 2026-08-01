@@ -16,7 +16,6 @@ type TypeCompte = 'particulier' | 'entreprise_acheteuse';
 
 export default function CompteGP() {
   const navigate = useNavigate();
-  const { refreshProfile } = useAuth();
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -50,7 +49,9 @@ export default function CompteGP() {
       setLoginLoading(false);
       return;
     }
-    await refreshProfile();
+    // Le profil décide de la destination. On le lit directement plutôt que
+    // d'attendre le rafraîchissement du contexte : la redirection ne doit pas
+    // dépendre d'un aller-retour supplémentaire.
     const { data: profileData } = await supabase
       .from(PROFILES_TABLE)
       .select('type_compte')
@@ -119,7 +120,6 @@ export default function CompteGP() {
         setSignupLoading(false);
         return;
       }
-      await refreshProfile();
       toast.success('Bienvenue sur Maylary !');
       setSignupLoading(false);
       navigate(typeCompte === 'entreprise_acheteuse' ? '/catalogue/mes-devis' : '/boutique/mes-commandes');
