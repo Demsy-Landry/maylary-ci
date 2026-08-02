@@ -7,6 +7,7 @@ import {
   SECTEURS_TABLE,
   ENSEIGNES_TABLE,
   PRODUITS_PUBLIC_VIEW,
+  PALIERS_PRIX_PUBLIC_VIEW,
   type Secteur,
   type Enseigne,
   type Produit,
@@ -44,7 +45,29 @@ export default function CatalogueSecteurPro() {
           .in('enseigne_id', enseigneIds)
           .eq('espace', 'pro')
           .eq('actif', true);
-        setProduits((produitsData as Produit[]) ?? []);
+        // Les grilles de gros arrivent à part : on les rattache à leur produit
+        // pour afficher « à partir de » plutôt qu'un prix à l'unité qui donne
+        // une image chère d'une offre en réalité dégressive.
+        const liste = (produitsData as Produit[]) ?? [];
+        const { data: paliersData } = await supabase
+          .from(PALIERS_PRIX_PUBLIC_VIEW)
+          .select('produit_id, quantite_min, prix_unitaire_fcfa')
+          .in('produit_id', liste.map((p) => p.id))
+          .order('quantite_min');
+        const grilles = new Map<string, { quantite_min: number; prix_unitaire_fcfa: number }[]>();
+        for (const ligne of (paliersData ?? []) as {
+          produit_id: string;
+          quantite_min: number;
+          prix_unitaire_fcfa: number;
+        }[]) {
+          const g = grilles.get(ligne.produit_id) ?? [];
+          g.push({
+            quantite_min: Number(ligne.quantite_min),
+            prix_unitaire_fcfa: Number(ligne.prix_unitaire_fcfa),
+          });
+          grilles.set(ligne.produit_id, g);
+        }
+        setProduits(liste.map((p) => ({ ...p, paliers: grilles.get(p.id) ?? [] })));
       } else {
         setProduits([]);
       }
@@ -115,7 +138,16 @@ export default function CatalogueSecteurPro() {
                       </p>
                       <div className="mt-1 flex items-center justify-between">
                         <span className="text-sm font-semibold text-primary">
-                          {p.prix_unitaire_fcfa.toLocaleString('fr-FR')} FCFA
+                          {p.paliers && p.paliers.length > 1 && (
+                            <span className="mr-1 text-xs font-normal text-muted-foreground">
+                              dès
+                            </span>
+                          )}
+                          {(p.paliers && p.paliers.length > 1
+                            ? p.paliers[p.paliers.length - 1].prix_unitaire_fcfa
+                            : p.prix_unitaire_fcfa
+                          ).toLocaleString('fr-FR')}{' '}
+                          FCFA
                         </span>
                         {p.stock_disponible === 'rupture' && (
                           <Badge variant="destructive" className="text-[10px]">

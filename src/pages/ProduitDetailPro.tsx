@@ -6,6 +6,7 @@ import {
   supabase,
   ENSEIGNES_TABLE,
   PRODUITS_PUBLIC_VIEW,
+  PALIERS_PRIX_PUBLIC_VIEW,
   PRODUITS_FAVORIS_TABLE,
   ORIGINE_PRODUIT_DESCRIPTIONS,
   type Enseigne,
@@ -38,6 +39,11 @@ export default function ProduitDetailPro() {
   const [activePhoto, setActivePhoto] = useState(0);
   const [brokenPhotos, setBrokenPhotos] = useState<Set<string>>(new Set());
   const [quantite, setQuantite] = useState(1);
+  /**
+   * Grille de gros mesurée chez le transporteur. Vide pour un article qui n'en
+   * a pas : on n'invente pas une remise qu'on ne sait pas tenir.
+   */
+  const [paliers, setPaliers] = useState<{ quantite_min: number; prix_unitaire_fcfa: number }[]>([]);
   const [isFavori, setIsFavori] = useState(false);
   const [favoriBusy, setFavoriBusy] = useState(false);
 
@@ -52,6 +58,17 @@ export default function ProduitDetailPro() {
         .maybeSingle();
       if (produitData) {
         setProduit(produitData as Produit);
+        const { data: paliersData } = await supabase
+          .from(PALIERS_PRIX_PUBLIC_VIEW)
+          .select('quantite_min, prix_unitaire_fcfa')
+          .eq('produit_id', produitId)
+          .order('quantite_min');
+        setPaliers(
+          ((paliersData ?? []) as { quantite_min: number; prix_unitaire_fcfa: number }[]).map((p) => ({
+            quantite_min: Number(p.quantite_min),
+            prix_unitaire_fcfa: Number(p.prix_unitaire_fcfa),
+          })),
+        );
         const enseigneId = (produitData as Produit).enseigne_id;
         if (enseigneId) {
           const { data: enseigneData } = await supabase
@@ -179,8 +196,62 @@ export default function ProduitDetailPro() {
               {enseigne && <p className="text-sm text-primary">{enseigne.nom}</p>}
               <h1 className="mt-1 text-2xl font-bold text-foreground">{produit.nom}</h1>
               <p className="mt-2 text-2xl font-semibold text-primary">
-                {produit.prix_unitaire_fcfa.toLocaleString('fr-FR')} FCFA
+                {paliers.length > 1 && (
+                  <span className="mr-1 text-sm font-normal text-muted-foreground">à partir de</span>
+                )}
+                {(paliers.length > 1
+                  ? paliers[paliers.length - 1].prix_unitaire_fcfa
+                  : produit.prix_unitaire_fcfa
+                ).toLocaleString('fr-FR')}{' '}
+                FCFA
+                {produit.unite_vente ? (
+                  <span className="text-sm font-normal text-muted-foreground"> / {produit.unite_vente}</span>
+                ) : null}
               </p>
+
+              {/* La grille vient de devis de transport réellement obtenus, un par
+                  quantité. Un palier n'y figure que si son prix baisse vraiment. */}
+              {paliers.length > 1 && (
+                <div className="mt-3 overflow-hidden rounded-md border">
+                  <div className="flex items-center justify-between bg-muted/50 px-3 py-2 text-xs font-medium text-foreground">
+                    <span>Quantité commandée</span>
+                    <span>Prix unitaire</span>
+                  </div>
+                  {paliers.map((pal, i) => {
+                    const suivant = paliers[i + 1];
+                    const plage = suivant
+                      ? `${pal.quantite_min} à ${suivant.quantite_min - 1}`
+                      : `${pal.quantite_min} et plus`;
+                    const atteint = quantite >= pal.quantite_min && (!suivant || quantite < suivant.quantite_min);
+                    const economie =
+                      i > 0
+                        ? Math.round((1 - pal.prix_unitaire_fcfa / paliers[0].prix_unitaire_fcfa) * 100)
+                        : 0;
+                    return (
+                      <div
+                        key={pal.quantite_min}
+                        className={`flex items-center justify-between border-t px-3 py-2 text-sm ${
+                          atteint ? 'bg-primary/5 font-medium text-foreground' : 'text-muted-foreground'
+                        }`}
+                      >
+                        <span>
+                          {plage}
+                          {economie > 0 && (
+                            <span className="ml-2 text-xs text-primary">−{economie} %</span>
+                          )}
+                        </span>
+                        <span>{pal.prix_unitaire_fcfa.toLocaleString('fr-FR')} FCFA</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {produit.quantite_minimum > 1 && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Commande minimum : {produit.quantite_minimum} unités.
+                </p>
+              )}
 
               <div className="mt-3 flex flex-wrap gap-2">
                 <Badge variant={produit.stock_disponible === 'rupture' ? 'destructive' : 'secondary'}>
