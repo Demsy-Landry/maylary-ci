@@ -13,6 +13,7 @@ import {
   MODE_PAIEMENT_LABELS,
   type ParametresPaiement,
   type ModePaiement,
+  EDGE_FUNCTIONS_URL,
 } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -70,6 +71,41 @@ export default function CommandeGP() {
     }
 
     setSubmitting(true);
+
+    // Contrôle de disponibilité juste avant d'engager la commande. C'est le
+    // moment où une rupture coûte le plus cher : encaisser puis rembourser
+    // détruit une confiance qu'on met des mois à bâtir. Une disponibilité
+    // qu'on n'a pas pu joindre laisse passer — on ne bloque pas une vente
+    // parce que le fournisseur n'a pas répondu.
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      const jeton = session.session?.access_token;
+      if (jeton) {
+        const res = await fetch(`${EDGE_FUNCTIONS_URL}/app_e08c374bc4_cj_stock`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jeton}` },
+          body: JSON.stringify({
+            action: 'verifier',
+            lignes: items.map((i) => ({ produit_id: i.produit_id, quantite: i.quantite })),
+          }),
+        });
+        const controle = await res.json().catch(() => null);
+        if (res.ok && controle?.tout_disponible === false) {
+          const manquants = (controle.lignes as { nom: string; suffisant: boolean; stock_disponible: number | null }[])
+            .filter((l) => !l.suffisant)
+            .map((l) => `${l.nom} (${l.stock_disponible ?? 0} disponible)`);
+          setFormError(
+            `Stock insuffisant chez le fournisseur : ${manquants.join(', ')}. ` +
+              'Ajustez les quantités avant de valider.',
+          );
+          setSubmitting(false);
+          return;
+        }
+      }
+    } catch {
+      // Le contrôle est une protection, pas un péage : son échec ne doit pas
+      // empêcher un client de commander.
+    }
 
     const { data: commande, error: commandeError } = await supabase
       .from(COMMANDES_GP_TABLE)
