@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import {
   supabase,
+  EDGE_FUNCTIONS_URL,
   COMMANDES_GP_TABLE,
   HISTORIQUE_COMMANDE_GP_TABLE,
   STATUT_COMMANDE_GP_LABELS,
@@ -21,7 +22,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, CheckCircle2, AlertTriangle, Pencil } from 'lucide-react';
+import {
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+  Pencil,
+  Truck,
+  RefreshCw,
+  Wallet,
+  ExternalLink,
+} from 'lucide-react';
 
 const STATUT_BADGE_VARIANT: Record<StatutCommandeGP, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   en_attente_paiement: 'secondary',
@@ -53,6 +63,8 @@ export default function AdminCommandesGP() {
   const [problemeAction, setProblemeAction] = useState<ProblemeAction>(null);
   const [commentaire, setCommentaire] = useState('');
   const [nouveauMontant, setNouveauMontant] = useState('');
+  const [solde, setSolde] = useState<number | null>(null);
+  const [fournisseurBusy, setFournisseurBusy] = useState(false);
 
   const loadCommandes = async () => {
     setLoading(true);
@@ -64,9 +76,76 @@ export default function AdminCommandesGP() {
     setLoading(false);
   };
 
+  /** Appel commun aux trois actions fournisseur (solde, envoi, suivi). */
+  const appelerFournisseur = async (corps: Record<string, unknown>) => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.access_token) throw new Error('Session expirée, reconnectez-vous.');
+    const res = await fetch(`${EDGE_FUNCTIONS_URL}/app_e08c374bc4_cj_commande`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify(corps),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(json.error ?? 'Une erreur est survenue.');
+    return json;
+  };
+
+  const lireSolde = async () => {
+    try {
+      const json = await appelerFournisseur({ action: 'solde' });
+      setSolde(typeof json.solde_usd === 'number' ? json.solde_usd : null);
+    } catch {
+      // Le solde est une information de confort : son absence ne doit pas
+      // empêcher de gérer les commandes.
+      setSolde(null);
+    }
+  };
+
   useEffect(() => {
     loadCommandes();
+    lireSolde();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const envoyerAuFournisseur = async (commande: CommandeGP) => {
+    setFournisseurBusy(true);
+    try {
+      const json = await appelerFournisseur({ action: 'envoyer', commande_id: commande.id });
+      toast.success(
+        `Commande transmise au fournisseur (${json.reference_fournisseur}).` +
+          (json.non_transmis?.length
+            ? ` ${json.non_transmis.length} article(s) à préparer nous-mêmes.`
+            : ''),
+      );
+      setGestion(null);
+      loadCommandes();
+      lireSolde();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Transmission impossible.');
+      loadCommandes();
+    } finally {
+      setFournisseurBusy(false);
+    }
+  };
+
+  const releverSuivi = async () => {
+    setFournisseurBusy(true);
+    try {
+      const json = await appelerFournisseur({ action: 'suivre' });
+      const n = Array.isArray(json.commandes) ? json.commandes.length : 0;
+      toast.success(n === 0 ? 'Aucune commande à suivre.' : `${n} commande(s) relevée(s).`);
+      loadCommandes();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Relève impossible.');
+    } finally {
+      setFournisseurBusy(false);
+    }
+  };
 
   const enVerification = commandes.filter((c) => c.statut === 'paiement_recu_verification');
 
@@ -168,11 +247,27 @@ export default function AdminCommandesGP() {
               Admin — Commandes Boutique
             </h1>
           </div>
-          {enVerification.length > 0 && (
-            <Badge variant="outline" className="border-primary text-primary-emphasis">
-              {enVerification.length} en attente de vérification
-            </Badge>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {enVerification.length > 0 && (
+              <Badge variant="outline" className="border-primary text-primary-emphasis">
+                {enVerification.length} en attente de vérification
+              </Badge>
+            )}
+            {solde !== null && (
+              <Badge variant={solde > 0 ? 'secondary' : 'destructive'} className="gap-1">
+                <Wallet className="h-3.5 w-3.5" />
+                Solde fournisseur {solde.toFixed(2)} $
+              </Badge>
+            )}
+            <Button variant="outline" size="sm" onClick={releverSuivi} disabled={fournisseurBusy}>
+              {fournisseurBusy ? (
+                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-1.5 h-4 w-4" />
+              )}
+              Relever le suivi
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -233,6 +328,70 @@ export default function AdminCommandesGP() {
                     {gestion.montant_total_fcfa.toLocaleString('fr-FR')} FCFA
                   </span>
                 </p>
+              </div>
+
+              <div className="rounded-md border p-3">
+                <p className="text-sm font-medium text-foreground">Commande chez le fournisseur</p>
+                {gestion.reference_fournisseur ? (
+                  <div className="mt-1 space-y-1 text-xs text-muted-foreground">
+                    <p>
+                      Référence <span className="font-medium text-foreground">{gestion.reference_fournisseur}</span>
+                      {gestion.statut_fournisseur ? ` · ${gestion.statut_fournisseur}` : ''}
+                      {gestion.envoye_fournisseur_le
+                        ? ` · transmise le ${new Date(gestion.envoye_fournisseur_le).toLocaleDateString('fr-FR')}`
+                        : ''}
+                    </p>
+                    {gestion.numero_suivi && (
+                      <p>
+                        Suivi {gestion.transporteur_suivi ?? ''}{' '}
+                        <span className="font-medium text-foreground">{gestion.numero_suivi}</span>
+                        {gestion.url_suivi && (
+                          <a
+                            href={gestion.url_suivi}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            className="ml-1 inline-flex items-center gap-0.5 text-primary underline"
+                          >
+                            ouvrir
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </p>
+                    )}
+                    {gestion.cout_fournisseur_usd != null && (
+                      <p>Coût constaté : {Number(gestion.cout_fournisseur_usd).toFixed(2)} $</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-1 space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      Pas encore transmise. L'envoi n'est possible qu'une fois le paiement du client
+                      confirmé, et ne peut être fait qu'une seule fois.
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => envoyerAuFournisseur(gestion)}
+                      disabled={
+                        fournisseurBusy ||
+                        !['paiement_confirme', 'en_preparation'].includes(gestion.statut)
+                      }
+                    >
+                      {fournisseurBusy ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Truck className="mr-2 h-4 w-4" />
+                      )}
+                      Transmettre au fournisseur
+                    </Button>
+                  </div>
+                )}
+                {gestion.erreur_fournisseur && (
+                  <p className="mt-2 rounded-md border border-destructive/40 bg-destructive/5 p-2 text-xs text-destructive">
+                    {gestion.erreur_fournisseur}
+                  </p>
+                )}
               </div>
 
               {gestion.statut === 'paiement_recu_verification' && problemeAction === null && (

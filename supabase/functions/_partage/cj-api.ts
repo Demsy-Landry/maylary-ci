@@ -5,22 +5,113 @@
  * tout appelant doit espacer ses requêtes et réutiliser un même jeton.
  */
 
+import { createClient } from 'npm:@supabase/supabase-js@2';
+
 export const CJ_BASE_URL = 'https://developers.cjdropshipping.com/api2.0/v1';
 
 export const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function getCjAccessToken(): Promise<string | null> {
+/** Table de cache du jeton, sans politique RLS : serveur uniquement. */
+const TABLE_JETON = 'app_e08c374bc4_cj_jeton';
+
+/**
+ * Marge de renouvellement.
+ *
+ * On renouvelle un jour avant l'échéance plutôt qu'à la dernière minute : le
+ * fournisseur n'accorde un jeton qu'une fois toutes les 300 secondes, donc
+ * échouer au moment précis de l'expiration coûterait cinq minutes de service.
+ */
+const MARGE_RENOUVELLEMENT_MS = 24 * 60 * 60 * 1000;
+
+/** Durée retenue quand le fournisseur n'annonce pas d'échéance. */
+const DUREE_PAR_DEFAUT_MS = 10 * 24 * 60 * 60 * 1000;
+
+function clientService() {
+  const url = Deno.env.get('SUPABASE_URL');
+  const cle = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  return url && cle ? createClient(url, cle) : null;
+}
+
+async function demanderNouveauJeton(): Promise<{ token: string; expire: Date } | null> {
   const email = Deno.env.get('CJ_DROPSHIPPING_EMAIL');
   const apiKey = Deno.env.get('CJ_DROPSHIPPING_API_KEY');
   if (!email || !apiKey) return null;
 
-  const res = await fetch(`${CJ_BASE_URL}/authentication/getAccessToken`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password: apiKey }),
-  });
-  const data = await res.json().catch(() => null);
-  return data?.data?.accessToken ?? null;
+  try {
+    const res = await fetch(`${CJ_BASE_URL}/authentication/getAccessToken`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: apiKey }),
+    });
+    const data = await res.json().catch(() => null);
+    const token = data?.data?.accessToken;
+    if (!token) return null;
+
+    const annoncee = data?.data?.accessTokenExpiryDate;
+    const expire = annoncee ? new Date(annoncee) : new Date(Date.now() + DUREE_PAR_DEFAUT_MS);
+    return {
+      token: String(token),
+      expire: Number.isNaN(expire.getTime())
+        ? new Date(Date.now() + DUREE_PAR_DEFAUT_MS)
+        : expire,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Jeton d'accès au fournisseur, mis en cache et partagé par toutes les
+ * fonctions.
+ *
+ * Le fournisseur ne délivre un jeton qu'une fois toutes les 300 secondes. Sans
+ * cache, deux appels rapprochés — la relève du suivi et une transmission de
+ * commande, par exemple — se privaient mutuellement de jeton et échouaient
+ * toutes deux sous un message trompeur.
+ */
+export async function getCjAccessToken(): Promise<string | null> {
+  const db = clientService();
+
+  if (db) {
+    const { data } = await db
+      .from(TABLE_JETON)
+      .select('access_token, expire_le')
+      .eq('id', 1)
+      .maybeSingle();
+
+    if (data?.access_token) {
+      const reste = new Date(String(data.expire_le)).getTime() - Date.now();
+      if (reste > MARGE_RENOUVELLEMENT_MS) return String(data.access_token);
+    }
+  }
+
+  const neuf = await demanderNouveauJeton();
+
+  if (!neuf) {
+    // Le renouvellement a échoué — souvent parce qu'on l'a demandé trop tôt.
+    // Un jeton encore valable, même proche de l'échéance, vaut mieux que rien.
+    if (db) {
+      const { data } = await db
+        .from(TABLE_JETON)
+        .select('access_token, expire_le')
+        .eq('id', 1)
+        .maybeSingle();
+      if (data?.access_token && new Date(String(data.expire_le)).getTime() > Date.now()) {
+        return String(data.access_token);
+      }
+    }
+    return null;
+  }
+
+  if (db) {
+    await db.from(TABLE_JETON).upsert({
+      id: 1,
+      access_token: neuf.token,
+      expire_le: neuf.expire.toISOString(),
+      obtenu_le: new Date().toISOString(),
+    });
+  }
+  return neuf.token;
 }
 
 export interface FretReel {
@@ -85,6 +176,22 @@ export async function obtenirFretReelCj(
   paysDestination: string,
   quantite: number,
 ): Promise<FretReel | null> {
+  return await obtenirFretReelLotCj([{ vid, quantite }], token, paysDestination);
+}
+
+/**
+ * Même calcul, pour un panier de plusieurs références.
+ *
+ * Le transport se cote sur l'expédition entière : coter chaque ligne à part
+ * paierait plusieurs fois la part fixe et désignerait un transporteur qui ne
+ * sera pas celui du colis réellement formé.
+ */
+export async function obtenirFretReelLotCj(
+  lignes: { vid: string; quantite: number }[],
+  token: string,
+  paysDestination: string,
+): Promise<FretReel | null> {
+  if (lignes.length === 0) return null;
   try {
     const res = await fetch(`${CJ_BASE_URL}/logistic/freightCalculate`, {
       method: 'POST',
@@ -92,7 +199,7 @@ export async function obtenirFretReelCj(
       body: JSON.stringify({
         startCountryCode: 'CN',
         endCountryCode: paysDestination,
-        products: [{ quantity: quantite, vid }],
+        products: lignes.map((l) => ({ quantity: l.quantite, vid: l.vid })),
       }),
     });
     const data = await res.json().catch(() => null);
@@ -113,6 +220,138 @@ export async function obtenirFretReelCj(
   } catch {
     return null;
   }
+}
+
+/** Réponse brute du fournisseur, ramenée à ce dont l'appelant a besoin. */
+export interface ResultatCj<T> {
+  ok: boolean;
+  donnees: T | null;
+  /** Message du fournisseur, à remonter tel quel : il dit quoi corriger. */
+  message: string | null;
+}
+
+async function appelCj<T>(
+  chemin: string,
+  token: string,
+  options: { methode?: 'GET' | 'POST'; corps?: unknown } = {},
+): Promise<ResultatCj<T>> {
+  try {
+    const res = await fetch(`${CJ_BASE_URL}${chemin}`, {
+      method: options.methode ?? 'GET',
+      headers: { 'CJ-Access-Token': token, 'Content-Type': 'application/json' },
+      body: options.corps ? JSON.stringify(options.corps) : undefined,
+    });
+    const data = await res.json().catch(() => null);
+    if (data?.code !== 200 || data?.result === false) {
+      return { ok: false, donnees: null, message: String(data?.message ?? `HTTP ${res.status}`) };
+    }
+    return { ok: true, donnees: (data.data ?? null) as T, message: null };
+  } catch (erreur) {
+    return { ok: false, donnees: null, message: String(erreur) };
+  }
+}
+
+/**
+ * Solde du compte fournisseur, en dollars.
+ *
+ * Une commande ne peut pas être réglée sans provision : connaître le solde
+ * avant d'envoyer évite de créer chez le fournisseur une commande impayée
+ * qu'il faudrait aller supprimer à la main.
+ */
+export async function obtenirSoldeCj(token: string): Promise<number | null> {
+  const r = await appelCj<{ amount: number }>('/shopping/pay/getBalance', token);
+  const montant = Number(r.donnees?.amount);
+  return r.ok && Number.isFinite(montant) ? montant : null;
+}
+
+export interface LigneCommandeCj {
+  vid: string;
+  quantite: number;
+}
+
+export interface AdresseLivraisonCj {
+  nom: string;
+  telephone: string;
+  adresse: string;
+  ville: string;
+  province: string;
+  code_pays: string;
+  code_postal: string;
+}
+
+/**
+ * Crée la commande chez le fournisseur.
+ *
+ * `orderNumber` reprend notre propre référence : c'est elle qui rend l'appel
+ * rejouable sans risque. Si le réseau lâche après que le fournisseur a
+ * enregistré la commande, un second envoi porte le même numéro et se fait
+ * refuser pour doublon plutôt que de créer une seconde expédition.
+ */
+export async function creerCommandeCj(
+  token: string,
+  params: {
+    reference: string;
+    adresse: AdresseLivraisonCj;
+    lignes: LigneCommandeCj[];
+    transporteur: string | null;
+    remarque?: string | null;
+  },
+): Promise<ResultatCj<{ orderId: string; orderNumber?: string }>> {
+  return await appelCj('/shopping/order/createOrderV2', token, {
+    methode: 'POST',
+    corps: {
+      orderNumber: params.reference,
+      shippingZip: params.adresse.code_postal,
+      shippingCountryCode: params.adresse.code_pays,
+      shippingProvince: params.adresse.province,
+      shippingCity: params.adresse.ville,
+      shippingAddress: params.adresse.adresse,
+      shippingCustomerName: params.adresse.nom,
+      shippingPhone: params.adresse.telephone,
+      remark: params.remarque ?? '',
+      fromCountryCode: 'CN',
+      logisticName: params.transporteur ?? undefined,
+      products: params.lignes.map((l) => ({ vid: l.vid, quantity: l.quantite })),
+    },
+  });
+}
+
+/** Règle la commande sur le solde du compte. */
+export async function payerCommandeCj(
+  token: string,
+  orderId: string,
+): Promise<ResultatCj<unknown>> {
+  return await appelCj('/shopping/pay/payBalance', token, {
+    methode: 'POST',
+    corps: { orderId },
+  });
+}
+
+export interface EtatCommandeCj {
+  statut: string | null;
+  numero_suivi: string | null;
+  transporteur: string | null;
+  montant_usd: number | null;
+}
+
+/** État d'une commande chez le fournisseur : avancement et numéro de suivi. */
+export async function obtenirEtatCommandeCj(
+  token: string,
+  orderId: string,
+): Promise<EtatCommandeCj | null> {
+  const r = await appelCj<Record<string, unknown>>(
+    `/shopping/order/getOrderDetail?orderId=${encodeURIComponent(orderId)}`,
+    token,
+  );
+  if (!r.ok || !r.donnees) return null;
+  const d = r.donnees;
+  const montant = Number(d.orderAmount ?? d.orderWeightAmount);
+  return {
+    statut: d.orderStatus ? String(d.orderStatus) : null,
+    numero_suivi: d.trackNumber ? String(d.trackNumber) : null,
+    transporteur: d.logisticName ? String(d.logisticName) : null,
+    montant_usd: Number.isFinite(montant) && montant > 0 ? montant : null,
+  };
 }
 
 /**
