@@ -8,6 +8,9 @@ import {
 } from '../_partage/cj-api.ts';
 import { calculerCout, quantiteMinimumPour } from '../_partage/cout-import.ts';
 
+/** Enseigne maison sous laquelle paraissent les imports Maylary en espace pro. */
+const ENSEIGNE_MAYLARY = 'Maylary Import';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
@@ -27,6 +30,10 @@ interface ImportBody {
   photos?: string[];
   prix_fournisseur_usd?: number;
   categorie_gp_id?: string | null;
+  /** Destination de l'article : vitrine grand public ou espace professionnel. */
+  espace?: 'grand_public' | 'pro';
+  /** Pour l'espace pro : le rayon où ranger l'article. */
+  secteur_id?: string | null;
   stock?: number | null;
   /** Optionnel : remplace ponctuellement le taux de marge par défaut pour cet import. */
   taux_marge?: number;
@@ -98,6 +105,14 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const espace = body.espace === 'pro' ? 'pro' : 'grand_public';
+    if (espace === 'grand_public' && !body.categorie_gp_id) {
+      return jsonResponse({ error: 'Choisissez une catégorie de la boutique.' }, 400);
+    }
+    if (espace === 'pro' && !body.secteur_id) {
+      return jsonResponse({ error: 'Choisissez un secteur de l\'espace professionnel.' }, 400);
+    }
+
     // 3. Paramètres de coût de revient (configurables en base, jamais en dur).
     const { data: parametres, error: parametresError } = await supabaseService
       .from('app_e08c374bc4_parametres_import')
@@ -162,6 +177,42 @@ Deno.serve(async (req: Request) => {
       tauxMarge: body.taux_marge ?? null,
     });
 
+    // Sur l'espace professionnel, un article relève d'une enseigne. Les articles
+    // importés par Maylary sont regroupés sous une enseigne maison, créée à la
+    // demande dans le secteur choisi : l'administration choisit un rayon, pas
+    // une entité à administrer en plus.
+    let enseigneId: string | null = null;
+    if (espace === 'pro') {
+      const { data: existante } = await supabaseService
+        .from('app_e08c374bc4_enseignes')
+        .select('id')
+        .eq('secteur_id', body.secteur_id)
+        .eq('nom', ENSEIGNE_MAYLARY)
+        .maybeSingle();
+
+      if (existante) {
+        enseigneId = existante.id as string;
+      } else {
+        const { data: creee, error: enseigneError } = await supabaseService
+          .from('app_e08c374bc4_enseignes')
+          .insert({
+            secteur_id: body.secteur_id,
+            nom: ENSEIGNE_MAYLARY,
+            description_courte:
+              'Références sourcées et importées par Maylary, prix dégressifs selon la quantité.',
+            ville: 'Abidjan',
+            actif: true,
+          })
+          .select('id')
+          .single();
+        if (enseigneError || !creee) {
+          console.log(JSON.stringify({ requestId, error: enseigneError }));
+          return jsonResponse({ error: "Impossible de préparer l'enseigne Maylary." }, 500);
+        }
+        enseigneId = creee.id as string;
+      }
+    }
+
     // 4. Insertion du produit.
     const { data: produit, error: insertError } = await supabaseService
       .from('app_e08c374bc4_produits')
@@ -179,8 +230,9 @@ Deno.serve(async (req: Request) => {
         quantite_minimum: cout.quantite_minimum,
         // Le délai annoncé par le transporteur devient le délai affiché au client.
         delai_livraison_estime: cout.fret_delai ? `${cout.fret_delai} jours` : null,
-        categorie_gp_id: body.categorie_gp_id ?? null,
-        espace: 'grand_public',
+        categorie_gp_id: espace === 'grand_public' ? (body.categorie_gp_id ?? null) : null,
+        enseigne_id: enseigneId,
+        espace,
         stock_disponible: (body.stock ?? 0) > 0 ? 'en_stock' : 'sur_commande',
         actif: true,
         source_donnee: 'import_cj_dropshipping',
