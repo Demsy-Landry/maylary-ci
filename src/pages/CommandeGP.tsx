@@ -29,8 +29,59 @@ import { Loader2, Landmark, Smartphone, ShoppingCart } from 'lucide-react';
 
 export default function CommandeGP() {
   const { items, totalFcfa, clearCart } = useCartGP();
+  /**
+   * Remise de groupage : la part fixe de transport que les prix article
+   * facturent une fois chacun, alors que le panier ne part qu'en un seul colis.
+   * Cotée chez le fournisseur, calculée côté serveur, annoncée avant paiement.
+   */
+  const [remiseGroupage, setRemiseGroupage] = useState<{
+    remise_fcfa: number;
+    fret_facture_articles_fcfa?: number;
+    fret_reel_panier_fcfa?: number;
+  } | null>(null);
+  const [remiseEnCours, setRemiseEnCours] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // La remise est cotée dès l'arrivée sur le tunnel, pour que le client la voie
+  // avant de choisir son mode de paiement — jamais découverte après coup.
+  useEffect(() => {
+    if (!user || items.length === 0) return;
+    let annule = false;
+    const coter = async () => {
+      setRemiseEnCours(true);
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session?.access_token) return;
+        const res = await fetch(`${EDGE_FUNCTIONS_URL}/app_e08c374bc4_fret_panier`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            lignes: items.map((i) => ({ produit_id: i.produit_id, quantite: i.quantite })),
+          }),
+        });
+        const json = await res.json().catch(() => null);
+        if (!annule && res.ok && json?.success) setRemiseGroupage(json);
+      } catch {
+        // Sans cotation, le client paie le prix annoncé : aucune surprise.
+      } finally {
+        if (!annule) setRemiseEnCours(false);
+      }
+    };
+    coter();
+    return () => {
+      annule = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, items.length]);
+
+  const remise = remiseGroupage?.remise_fcfa ?? 0;
+  const totalAPayer = Math.max(0, totalFcfa - remise);
 
   const [nomDestinataire, setNomDestinataire] = useState('');
   const [telephoneDestinataire, setTelephoneDestinataire] = useState('');
@@ -111,7 +162,10 @@ export default function CommandeGP() {
       .from(COMMANDES_GP_TABLE)
       .insert({
         user_id: user.id,
-        montant_total_fcfa: totalFcfa,
+        montant_total_fcfa: totalAPayer,
+        remise_groupage_fcfa: remise,
+        fret_facture_articles_fcfa: remiseGroupage?.fret_facture_articles_fcfa ?? null,
+        fret_reel_panier_fcfa: remiseGroupage?.fret_reel_panier_fcfa ?? null,
         mode_paiement: modePaiement,
         nom_destinataire: nomDestinataire.trim(),
         telephone_destinataire: telephoneDestinataire.trim(),
@@ -295,10 +349,26 @@ export default function CommandeGP() {
                     </span>
                   </div>
                 ))}
+                {(remise > 0 || remiseEnCours) && (
+                  <div className="flex justify-between py-1.5">
+                    <span className="text-foreground">
+                      Groupage de votre commande
+                      <span className="block text-xs text-muted-foreground">
+                        Vos articles partent dans un seul colis : les frais de transport
+                        comptés en double vous sont rendus.
+                      </span>
+                    </span>
+                    <span className="shrink-0 font-medium text-primary">
+                      {remiseEnCours ? '…' : `− ${remise.toLocaleString('fr-FR')} FCFA`}
+                    </span>
+                  </div>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total</p>
-                <p className="text-2xl font-bold text-primary">{totalFcfa.toLocaleString('fr-FR')} FCFA</p>
+                <p className="text-2xl font-bold text-primary">
+                  {totalAPayer.toLocaleString('fr-FR')} FCFA
+                </p>
               </div>
               {formError && <p className="text-sm text-destructive">{formError}</p>}
               <Button className="w-full" onClick={handleSubmit} disabled={submitting}>
