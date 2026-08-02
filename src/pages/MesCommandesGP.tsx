@@ -26,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Eye, Package, CheckCircle2 } from 'lucide-react';
+import { Loader2, Eye, Package, CheckCircle2, Truck, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import BoutonFacture from '@/components/BoutonFacture';
 
@@ -258,6 +258,30 @@ export default function MesCommandesGP() {
                   </Button>
                 )}
               </div>
+
+              {detail.numero_suivi && (
+                <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+                  <p className="flex items-center gap-1.5 font-medium text-foreground">
+                    <Truck className="h-4 w-4" />
+                    Colis en route
+                  </p>
+                  <p className="mt-1 text-muted-foreground">
+                    {detail.transporteur_suivi ? `${detail.transporteur_suivi} — ` : ''}
+                    <span className="font-medium text-foreground">{detail.numero_suivi}</span>
+                  </p>
+                  {detail.url_suivi && (
+                    <a
+                      href={detail.url_suivi}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="mt-1 inline-flex items-center gap-1 text-xs text-primary underline"
+                    >
+                      Suivre mon colis
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  )}
+                </div>
+              )}
 
               <div className="rounded-md border p-3 text-sm">
                 <p className="font-medium text-foreground">{detail.nom_destinataire}</p>

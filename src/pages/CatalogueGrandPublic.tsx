@@ -12,6 +12,7 @@ import {
   type OrigineProduit,
   type Produit,
 } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -236,6 +237,21 @@ export default function CatalogueGrandPublic() {
             )}
           </>
         )}
+
+        {/* Le catalogue ne pourra jamais tout contenir : plutôt que de laisser
+            repartir un client bredouille, on lui ouvre une porte. */}
+        <section className="carte-reactive mt-10 rounded-lg border border-primary/30 bg-primary/5 p-5 text-center">
+          <h2 className="text-lg font-semibold text-foreground">
+            Vous ne trouvez pas ce que vous cherchez ?
+          </h2>
+          <p className="mx-auto mt-1 max-w-xl text-sm text-muted-foreground">
+            Décrivez-nous l'article : nous le cherchons chez nos fournisseurs et vous annonçons un
+            prix ferme, transport et assurance compris. Vous décidez ensuite.
+          </p>
+          <Button asChild className="mt-4">
+            <Link to="/boutique/sourcing">Demander un article</Link>
+          </Button>
+        </section>
       </main>
       <SiteFooter />
     </div>

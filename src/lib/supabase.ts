@@ -64,6 +64,8 @@ export const DEMANDES_EXPORT_TABLE = 'app_e08c374bc4_demandes_export';
 export const HISTORIQUE_EXPORT_TABLE = 'app_e08c374bc4_historique_statut_export';
 export const DOCUMENTS_EXPORT_TABLE = 'app_e08c374bc4_documents_export';
 
+export const DEMANDES_SOURCING_TABLE = 'app_e08c374bc4_demandes_sourcing';
+
 export const FACTURES_TABLE = 'app_e08c374bc4_factures';
 export const PARAMETRES_FACTURATION_TABLE = 'app_e08c374bc4_parametres_facturation';
 
@@ -307,6 +309,16 @@ export interface CommandeGP {
   notes_client: string | null;
   created_at: string;
   updated_at: string;
+  /** Référence de la commande chez le fournisseur, une fois transmise. */
+  reference_fournisseur: string | null;
+  numero_suivi: string | null;
+  transporteur_suivi: string | null;
+  statut_fournisseur: string | null;
+  suivi_maj_le: string | null;
+  url_suivi: string | null;
+  cout_fournisseur_usd: number | null;
+  envoye_fournisseur_le: string | null;
+  erreur_fournisseur: string | null;
 }
 
 export interface LigneCommandeGP {
@@ -325,6 +337,82 @@ export interface HistoriqueStatutCommandeGP {
   statut: StatutCommandeGP;
   horodatage: string;
   commentaire_admin: string | null;
+}
+
+/**
+ * Sourcing sur demande : le client décrit un article absent du catalogue, nous
+ * le cherchons chez nos fournisseurs et lui proposons un prix ferme.
+ */
+export type StatutSourcing =
+  | 'nouvelle'
+  | 'transmise'
+  | 'cotee'
+  | 'devis_envoye'
+  | 'acceptee'
+  | 'refusee'
+  | 'abandonnee';
+
+export const STATUT_SOURCING_LABELS: Record<StatutSourcing, string> = {
+  nouvelle: 'Reçue',
+  transmise: 'Recherche en cours',
+  cotee: 'Chiffrage en cours',
+  devis_envoye: 'Prix proposé',
+  acceptee: 'Acceptée',
+  refusee: 'Introuvable',
+  abandonnee: 'Abandonnée',
+};
+
+/** Ce que le client lit sous le statut, pour savoir où en est sa demande. */
+export const STATUT_SOURCING_MESSAGES: Record<StatutSourcing, string> = {
+  nouvelle: "Votre demande nous est bien parvenue. Nous lançons la recherche.",
+  transmise: 'Nous interrogeons nos fournisseurs pour trouver cet article.',
+  cotee: 'Nous avons des pistes et finalisons le chiffrage.',
+  devis_envoye:
+    "Voici notre prix, valable pour la quantité demandée. À vous de décider — rien n'est engagé tant que vous n'acceptez pas.",
+  acceptee: 'Merci ! Nous vous recontactons pour finaliser la commande.',
+  refusee: "Nous n'avons pas trouvé cet article à des conditions acceptables. Le motif est indiqué ci-dessous.",
+  abandonnee: 'Vous avez abandonné cette demande.',
+};
+
+export interface DemandeSourcing {
+  id: string;
+  reference_publique: string;
+  user_id: string;
+  designation: string;
+  lien_reference: string | null;
+  photos: string[];
+  quantite_souhaitee: number;
+  prix_cible_fcfa: number | null;
+  precisions: string | null;
+  statut: StatutSourcing;
+  reference_sourcing_fournisseur: string | null;
+  prix_source_usd: number | null;
+  delai_source_jours: number | null;
+  commentaire_admin: string | null;
+  prix_propose_fcfa: number | null;
+  devis_envoye_le: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Un candidat trouvé chez le fournisseur, déjà chiffré au coût réel. */
+export interface CandidatSourcing {
+  reference_externe: string;
+  nom: string;
+  photo: string | null;
+  prix_source_usd: number;
+  stock_disponible: number | null;
+  quantite_chiffree: number;
+  prix_unitaire_fcfa: number;
+  total_fcfa: number;
+  cout_fret_unitaire_fcfa: number;
+  cout_assurance_unitaire_fcfa: number;
+  cout_revient_unitaire_fcfa: number;
+  fret_source: 'cj_reel' | 'forfait';
+  fret_transporteur: string | null;
+  fret_delai: string | null;
+  quantite_minimum_conseillee: number;
+  dans_le_budget: boolean | null;
 }
 
 export interface DemandeDevis {

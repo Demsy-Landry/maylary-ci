@@ -8,6 +8,7 @@ const LINKS = [
   { to: '/admin/import', label: "Demandes d'import" },
   { to: '/admin/export', label: "Demandes d'export" },
   { to: '/admin/commandes', label: 'Commandes Boutique' },
+  { to: '/admin/sourcing', label: 'Sourcing sur demande' },
   { to: '/admin/devis', label: 'Demandes de devis' },
   { to: '/admin/cj-dropshipping', label: 'Catalogue CJ Dropshipping' },
   { to: '/admin/prospection', label: 'Prospection fournisseurs' },
