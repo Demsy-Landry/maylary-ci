@@ -14,6 +14,7 @@ import CommandeGP from '@/pages/CommandeGP';
 import CompteGP from '@/pages/CompteGP';
 import MesCommandesGP from '@/pages/MesCommandesGP';
 import SourcingGP from '@/pages/SourcingGP';
+import EspaceVendeur from '@/pages/EspaceVendeur';
 import CataloguePro from '@/pages/CataloguePro';
 import CatalogueSecteurPro from '@/pages/CatalogueSecteurPro';
 import ProduitDetailPro from '@/pages/ProduitDetailPro';
@@ -23,6 +24,7 @@ import CjDropshippingImport from '@/pages/admin/CjDropshippingImport';
 import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
 import AdminCommandesGP from '@/pages/admin/CommandesGP';
 import AdminSourcingGestion from '@/pages/admin/SourcingGestion';
+import AdminVendeursGestion from '@/pages/admin/VendeursGestion';
 import AdminDevisGestion from '@/pages/admin/DevisGestion';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import AdminImportGestion from '@/pages/admin/ImportGestion';
@@ -65,6 +67,8 @@ function App() {
                 <Route path="/boutique/compte" element={<CompteGP />} />
                 <Route path="/boutique/mes-commandes" element={<MesCommandesGP />} />
                 <Route path="/boutique/sourcing" element={<SourcingGP />} />
+                <Route path="/vendre" element={<EspaceVendeur />} />
+                <Route path="/vendre/espace" element={<EspaceVendeur />} />
                 <Route path="/catalogue" element={<CataloguePro />} />
                 <Route path="/catalogue/secteur/:secteurId" element={<CatalogueSecteurPro />} />
                 <Route path="/catalogue/produit/:produitId" element={<ProduitDetailPro />} />
@@ -111,6 +115,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <AdminCommandesGP />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/vendeurs"
+                  element={
+                    <AdminRoute>
+                      <AdminVendeursGestion />
                     </AdminRoute>
                   }
                 />

@@ -66,6 +66,11 @@ export const DOCUMENTS_EXPORT_TABLE = 'app_e08c374bc4_documents_export';
 
 export const DEMANDES_SOURCING_TABLE = 'app_e08c374bc4_demandes_sourcing';
 
+export const VENDEURS_TABLE = 'app_e08c374bc4_vendeurs';
+export const VENDEURS_PUBLIC_VIEW = 'app_e08c374bc4_vendeurs_public';
+export const REVERSEMENTS_TABLE = 'app_e08c374bc4_reversements';
+export const PARAMETRES_MARKETPLACE_TABLE = 'app_e08c374bc4_parametres_marketplace';
+
 export const FACTURES_TABLE = 'app_e08c374bc4_factures';
 export const PARAMETRES_FACTURATION_TABLE = 'app_e08c374bc4_parametres_facturation';
 
@@ -84,17 +89,20 @@ export type Espace = 'pro' | 'grand_public';
  * client un article commandé à l'étranger (délai plus long) ; « local » un
  * article déjà disponible en Côte d'Ivoire.
  */
-export type OrigineProduit = 'import_international' | 'local';
+export type OrigineProduit = 'import_international' | 'local' | 'vendeur_local';
 
 export const ORIGINE_PRODUIT_LABELS: Record<OrigineProduit, string> = {
   import_international: 'Import sur commande',
   local: 'Disponible localement',
+  vendeur_local: 'Vendu par une entreprise ivoirienne',
 };
 
 export const ORIGINE_PRODUIT_DESCRIPTIONS: Record<OrigineProduit, string> = {
   import_international:
     "Article commandé à l'international par Maylary : comptez un délai de livraison plus long, mais un prix négocié à la source.",
   local: 'Article déjà disponible en Côte d’Ivoire : livraison rapide après confirmation de votre commande.',
+  vendeur_local:
+    'Article proposé par une entreprise ivoirienne inscrite sur Maylary. Maylary sécurise le paiement et suit la livraison.',
 };
 
 export type Fiabilite = 'a_verifier' | 'fiable' | 'tres_fiable';
@@ -413,6 +421,107 @@ export interface CandidatSourcing {
   fret_delai: string | null;
   quantite_minimum_conseillee: number;
   dans_le_budget: boolean | null;
+}
+
+/**
+ * Marketplace : une entreprise ivoirienne vend sur Maylary. L'inscription et la
+ * publication sont gratuites ; Maylary ne facture que son service, prélevé sur
+ * chaque vente conclue.
+ */
+export type StatutVendeur = 'en_attente' | 'valide' | 'suspendu' | 'refuse';
+
+export const STATUT_VENDEUR_LABELS: Record<StatutVendeur, string> = {
+  en_attente: 'Dossier en cours d\u2019examen',
+  valide: 'Boutique active',
+  suspendu: 'Boutique suspendue',
+  refuse: 'Dossier refus\u00e9',
+};
+
+/** Ce que le vendeur lit sous son statut : ce qui se passe, et ce qu'il peut faire. */
+export const STATUT_VENDEUR_MESSAGES: Record<StatutVendeur, string> = {
+  en_attente:
+    'Nous v\u00e9rifions votre dossier. Vous pourrez publier votre catalogue d\u00e8s la validation \u2014 comptez un jour ouvr\u00e9.',
+  valide:
+    'Votre boutique est en ligne. Publiez vos articles : ils apparaissent imm\u00e9diatement dans la boutique Maylary.',
+  suspendu:
+    'Votre catalogue est retir\u00e9 de la vitrine. Le motif est indiqu\u00e9 ci-dessous ; contactez-nous pour r\u00e9tablir la situation.',
+  refuse: 'Nous n\u2019avons pas pu retenir votre dossier. Le motif est indiqu\u00e9 ci-dessous.',
+};
+
+export type ModeReversement = 'mobile_money' | 'virement';
+
+export const MODE_REVERSEMENT_LABELS: Record<ModeReversement, string> = {
+  mobile_money: 'Mobile Money',
+  virement: 'Virement bancaire',
+};
+
+export interface Vendeur {
+  id: string;
+  user_id: string;
+  reference_publique: string;
+  nom_entreprise: string;
+  secteur_id: string | null;
+  description: string | null;
+  logo_url: string | null;
+  ville: string | null;
+  adresse: string | null;
+  telephone: string;
+  email_contact: string | null;
+  registre_commerce: string | null;
+  numero_contribuable: string | null;
+  mode_reversement: ModeReversement;
+  compte_reversement: string | null;
+  titulaire_compte: string | null;
+  statut: StatutVendeur;
+  motif_statut: string | null;
+  /** Null : le vendeur suit le taux g\u00e9n\u00e9ral de la place. */
+  taux_commission: number | null;
+  valide_le: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type StatutReversement = 'a_payer' | 'paye' | 'annule';
+
+export const STATUT_REVERSEMENT_LABELS: Record<StatutReversement, string> = {
+  a_payer: '\u00c0 verser',
+  paye: 'Vers\u00e9',
+  annule: 'Annul\u00e9',
+};
+
+export interface Reversement {
+  id: string;
+  reference_publique: string | null;
+  vendeur_id: string;
+  montant_fcfa: number;
+  periode_debut: string | null;
+  periode_fin: string | null;
+  mode_reglement: string | null;
+  reference_reglement: string | null;
+  statut: StatutReversement;
+  commentaire: string | null;
+  paye_le: string | null;
+  created_at: string;
+}
+
+export interface ParametresMarketplace {
+  id: number;
+  taux_commission_defaut: number;
+  delai_reversement_jours: number;
+  commission_minimum_fcfa: number;
+  updated_at: string;
+}
+
+/** Une vente r\u00e9alis\u00e9e par un vendeur, telle qu'il la voit. */
+export interface VenteVendeur {
+  id: string;
+  commande_id: string;
+  nom_produit: string;
+  quantite: number;
+  sous_total: number;
+  commission_fcfa: number | null;
+  net_vendeur_fcfa: number | null;
+  taux_commission_applique: number | null;
 }
 
 export interface DemandeDevis {
