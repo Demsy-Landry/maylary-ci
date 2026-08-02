@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { ROLES_PAR_ECRAN } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 
 const LINKS = [
@@ -13,13 +14,23 @@ const LINKS = [
   { to: '/admin/devis', label: 'Demandes de devis' },
   { to: '/admin/cj-dropshipping', label: 'Catalogue CJ Dropshipping' },
   { to: '/admin/prospection', label: 'Prospection fournisseurs' },
+  { to: '/admin/equipe', label: 'Équipe' },
   { to: '/admin/parametres', label: 'Paramètres' },
 ];
 
 export default function AdminNav() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
+
+  // On n'affiche que les écrans réellement accessibles : un lien qui renvoie
+  // vers un refus use la confiance dans l'outil.
+  const role = profile?.role_equipe ?? null;
+  const liens = LINKS.filter((l) => {
+    const autorises = ROLES_PAR_ECRAN[l.to];
+    if (!autorises) return true;
+    return role !== null && autorises.includes(role);
+  });
 
   const handleSignOut = async () => {
     await signOut();
@@ -42,7 +53,7 @@ export default function AdminNav() {
         </Button>
       </div>
       <nav className="flex flex-wrap gap-x-4 gap-y-1.5">
-        {LINKS.map((link) => (
+        {liens.map((link) => (
           <Link
             key={link.to}
             to={link.to}

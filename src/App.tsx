@@ -25,6 +25,7 @@ import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
 import AdminCommandesGP from '@/pages/admin/CommandesGP';
 import AdminSourcingGestion from '@/pages/admin/SourcingGestion';
 import AdminVendeursGestion from '@/pages/admin/VendeursGestion';
+import AdminEquipeGestion from '@/pages/admin/EquipeGestion';
 import AdminDevisGestion from '@/pages/admin/DevisGestion';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import AdminImportGestion from '@/pages/admin/ImportGestion';
@@ -89,7 +90,7 @@ function App() {
                 <Route
                   path="/admin/devis"
                   element={
-                    <AdminRoute>
+                    <AdminRoute ecran="/admin/devis">
                       <AdminDevisGestion />
                     </AdminRoute>
                   }
@@ -97,7 +98,7 @@ function App() {
                 <Route
                   path="/admin/cj-dropshipping"
                   element={
-                    <AdminRoute>
+                    <AdminRoute ecran="/admin/cj-dropshipping">
                       <CjDropshippingImport />
                     </AdminRoute>
                   }
@@ -105,7 +106,7 @@ function App() {
                 <Route
                   path="/admin/prospection"
                   element={
-                    <AdminRoute>
+                    <AdminRoute ecran="/admin/prospection">
                       <ProspectionFournisseurs />
                     </AdminRoute>
                   }
@@ -113,7 +114,7 @@ function App() {
                 <Route
                   path="/admin/commandes"
                   element={
-                    <AdminRoute>
+                    <AdminRoute ecran="/admin/commandes">
                       <AdminCommandesGP />
                     </AdminRoute>
                   }
@@ -121,7 +122,7 @@ function App() {
                 <Route
                   path="/admin/vendeurs"
                   element={
-                    <AdminRoute>
+                    <AdminRoute ecran="/admin/vendeurs">
                       <AdminVendeursGestion />
                     </AdminRoute>
                   }
@@ -129,7 +130,7 @@ function App() {
                 <Route
                   path="/admin/sourcing"
                   element={
-                    <AdminRoute>
+                    <AdminRoute ecran="/admin/sourcing">
                       <AdminSourcingGestion />
                     </AdminRoute>
                   }
@@ -137,7 +138,7 @@ function App() {
                 <Route
                   path="/admin/import"
                   element={
-                    <AdminRoute>
+                    <AdminRoute ecran="/admin/import">
                       <AdminImportGestion />
                     </AdminRoute>
                   }
@@ -145,15 +146,23 @@ function App() {
                 <Route
                   path="/admin/export"
                   element={
-                    <AdminRoute>
+                    <AdminRoute ecran="/admin/export">
                       <AdminExportGestion />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/equipe"
+                  element={
+                    <AdminRoute ecran="/admin/equipe">
+                      <AdminEquipeGestion />
                     </AdminRoute>
                   }
                 />
                 <Route
                   path="/admin/parametres"
                   element={
-                    <AdminRoute>
+                    <AdminRoute ecran="/admin/parametres">
                       <AdminParametres />
                     </AdminRoute>
                   }
