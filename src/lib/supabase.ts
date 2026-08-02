@@ -181,6 +181,8 @@ export interface Enseigne {
 }
 
 export interface Profile {
+  /** Rôle interne Maylary. Null pour un client. */
+  role_equipe: RoleEquipe | null;
   id: string;
   user_id: string;
   type_compte: 'entreprise_acheteuse' | 'particulier' | 'admin';
@@ -428,6 +430,42 @@ export interface CandidatSourcing {
  * publication sont gratuites ; Maylary ne facture que son service, prélevé sur
  * chaque vente conclue.
  */
+/**
+ * Rôle interne Maylary. « admin » était tout ou rien : confier les commandes à
+ * un associé lui donnait aussi la main sur les marges et les versements.
+ */
+export type RoleEquipe = 'proprietaire' | 'operations' | 'catalogue';
+
+export const ROLE_EQUIPE_LABELS: Record<RoleEquipe, string> = {
+  proprietaire: 'Propriétaire',
+  operations: 'Opérations',
+  catalogue: 'Catalogue',
+};
+
+export const ROLE_EQUIPE_DESCRIPTIONS: Record<RoleEquipe, string> = {
+  proprietaire:
+    'Accès complet, y compris les marges, les taux de commission et les versements aux vendeurs.',
+  operations:
+    'Commandes, sourcing, vendeurs, demandes d’import et d’export. Ne modifie ni les prix de revient ni les versements.',
+  catalogue:
+    'Import fournisseur et gestion des produits. N’accède ni aux commandes ni à l’argent.',
+};
+
+/** Écrans réservés à certains rôles. Le propriétaire atteint tout. */
+export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
+  '/admin': ['proprietaire', 'operations', 'catalogue'],
+  '/admin/commandes': ['proprietaire', 'operations'],
+  '/admin/sourcing': ['proprietaire', 'operations'],
+  '/admin/vendeurs': ['proprietaire', 'operations'],
+  '/admin/import': ['proprietaire', 'operations'],
+  '/admin/export': ['proprietaire', 'operations'],
+  '/admin/devis': ['proprietaire', 'operations'],
+  '/admin/cj-dropshipping': ['proprietaire', 'catalogue'],
+  '/admin/prospection': ['proprietaire', 'catalogue'],
+  '/admin/equipe': ['proprietaire'],
+  '/admin/parametres': ['proprietaire'],
+};
+
 export type StatutVendeur = 'en_attente' | 'valide' | 'suspendu' | 'refuse';
 
 export const STATUT_VENDEUR_LABELS: Record<StatutVendeur, string> = {
