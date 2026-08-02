@@ -8,7 +8,10 @@
   --radius: 0.5rem;
 
   /* Style "grosse boutique en ligne" — fond blanc, encre bleu-nuit quasi noir */
-  --background: oklch(1 0 0);
+  /* Ivoire tiède plutôt que blanc pur : un fond à 100 % de luminosité
+     renvoie tout l'éclairage de l'écran dans l'œil et fatigue en lecture
+     prolongée. Les cartes, elles, restent blanches et se détachent. */
+  --background: oklch(0.977 0.008 78);
   --foreground: oklch(0.19 0.02 250);
 
   --card: oklch(1 0 0);
@@ -119,6 +122,53 @@
   h3,
   h4 {
     font-family: var(--font-display);
+  }
+
+  /* ---- Fond d'écran de l'application ------------------------------------
+     Toutes les pages ouvrent sur la même coquille `min-h-screen bg-background`.
+     On y pose deux voiles très diffus dans les teintes de la marque et une
+     trame diagonale à peine perceptible. L'ensemble reste sous les 6 %
+     d'opacité : l'objectif est de donner de la matière au fond, pas d'attirer
+     le regard, qui doit aller au contenu.
+
+     La couleur de fond vient de l'utilitaire, l'image d'ici : les deux se
+     composent sans se contredire. */
+  .min-h-screen.bg-background {
+    background-image:
+      radial-gradient(
+        60rem 40rem at 85% -10%,
+        color-mix(in oklab, var(--primary) 14%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        50rem 35rem at -10% 15%,
+        color-mix(in oklab, var(--accent) 10%, transparent),
+        transparent 65%
+      ),
+      repeating-linear-gradient(
+        135deg,
+        color-mix(in oklab, var(--foreground) 2%, transparent) 0 1px,
+        transparent 1px 22px
+      );
+    background-repeat: no-repeat, no-repeat, repeat;
+    background-attachment: scroll;
+  }
+
+  /* Sur fond sombre, les mêmes voiles écraseraient le contraste du texte :
+     on les réduit de moitié et on retire la trame. */
+  .dark .min-h-screen.bg-background {
+    background-image:
+      radial-gradient(
+        60rem 40rem at 85% -10%,
+        color-mix(in oklab, var(--primary) 7%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        50rem 35rem at -10% 15%,
+        color-mix(in oklab, var(--accent) 6%, transparent),
+        transparent 65%
+      );
+    background-repeat: no-repeat, no-repeat;
   }
 }
 
