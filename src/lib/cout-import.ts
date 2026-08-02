@@ -18,6 +18,11 @@ export interface ParametresCoutImport {
   frais_police_assurance_fcfa: number;
   /** Taxe sur les contrats d'assurance, appliquée à la prime frais compris. */
   taux_taxe_assurance: number;
+  /**
+   * Vrai quand le devis du transporteur est un porte-à-porte droits acquittés :
+   * sa couverture rend inutile une police facultés locale.
+   */
+  fret_transporteur_couvre_assurance?: boolean;
 }
 
 export interface RepartitionIncoterm {

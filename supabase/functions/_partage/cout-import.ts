@@ -21,6 +21,11 @@ export interface ParametresCout {
   quantite_minimum_defaut: number | string;
   seuil_petit_article_fcfa: number | string;
   paliers_quantite?: number[] | null;
+  /**
+   * Vrai quand le devis du transporteur est un porte-à-porte droits acquittés :
+   * sa couverture rend inutile une police facultés locale.
+   */
+  fret_transporteur_couvre_assurance?: boolean | null;
 }
 
 export interface RepartitionIncoterm {
@@ -51,6 +56,8 @@ export interface DetailCout {
   fret_delai: string | null;
   prime_nette_lot_fcfa: number;
   prime_lot_fcfa: number;
+  /** Vrai quand aucune prime n'est ajoutée parce que le transporteur couvre. */
+  assurance_incluse_dans_le_fret: boolean;
   taux_marge_applique: number;
 }
 
@@ -97,17 +104,29 @@ export function calculerCout(params: {
 
   const valeur_cif_fcfa = prixAchatFcfa + cout_fret_fcfa;
 
+  // Une police facultés ne se justifie que si personne d'autre ne couvre la
+  // marchandise. Deux cas l'excluent : l'incoterm d'achat met déjà l'assurance
+  // à la charge du fournisseur, ou le transporteur cote un porte-à-porte droits
+  // acquittés, auquel cas sa responsabilité et les droits sont dans son prix.
+  //
+  // La distinction pèse : les frais de police sont dus par expédition, donc
+  // identiques pour un colis de 126 FCFA et pour une palette. Les ajouter à un
+  // colis postal renchérissait l'article de 40 %.
+  const transporteurCouvre =
+    fretReel != null && parametres.fret_transporteur_couvre_assurance !== false;
+  const assuranceANotreCharge = incoterm.assurance_a_charge && !transporteurCouvre;
+
   // Barème de l'assureur local, appliqué au colis complet puis réparti :
   //   (FOB + fret) x couverture x taux de prime
   //   + frais de police (une fois par expédition)
   //   puis + taxe sur les contrats d'assurance.
-  const valeur_assuree_lot_fcfa = incoterm.assurance_a_charge
+  const valeur_assuree_lot_fcfa = assuranceANotreCharge
     ? Math.round(valeur_cif_fcfa * quantiteMinimum * Number(parametres.taux_couverture_assurance))
     : 0;
-  const prime_nette_lot_fcfa = incoterm.assurance_a_charge
+  const prime_nette_lot_fcfa = assuranceANotreCharge
     ? Math.round(valeur_assuree_lot_fcfa * Number(parametres.taux_assurance))
     : 0;
-  const prime_lot_fcfa = incoterm.assurance_a_charge
+  const prime_lot_fcfa = assuranceANotreCharge
     ? Math.round(
         (prime_nette_lot_fcfa + Number(parametres.frais_police_assurance_fcfa)) *
           (1 + Number(parametres.taux_taxe_assurance)),
@@ -142,6 +161,7 @@ export function calculerCout(params: {
     fret_delai: fretReel?.delai ?? null,
     prime_nette_lot_fcfa,
     prime_lot_fcfa,
+    assurance_incluse_dans_le_fret: transporteurCouvre,
     taux_marge_applique: tauxMarge,
   };
 }
