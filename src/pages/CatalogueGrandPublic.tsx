@@ -252,6 +252,21 @@ export default function CatalogueGrandPublic() {
             <Link to="/boutique/sourcing">Demander un article</Link>
           </Button>
         </section>
+
+        {/* La marketplace ne se remplit que si les entreprises savent qu'elle
+            existe, et ce qu'elle leur coûte. */}
+        <section className="carte-reactive mt-4 rounded-lg border bg-card p-5 text-center">
+          <h2 className="text-lg font-semibold text-foreground">
+            Vous êtes une entreprise ivoirienne ?
+          </h2>
+          <p className="mx-auto mt-1 max-w-xl text-sm text-muted-foreground">
+            Vendez vos produits sur Maylary. L'inscription et la publication de votre catalogue sont
+            gratuites — nous ne prenons une commission que sur les ventes que nous vous apportons.
+          </p>
+          <Button asChild variant="outline" className="mt-4">
+            <Link to="/vendre">Ouvrir ma boutique</Link>
+          </Button>
+        </section>
       </main>
       <SiteFooter />
     </div>
