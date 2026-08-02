@@ -114,3 +114,34 @@ export async function obtenirFretReelCj(
     return null;
   }
 }
+
+/**
+ * Disponibilité d'une variante chez le fournisseur.
+ *
+ * Le stock est réparti entre plusieurs entrepôts ; on retient le total, seule
+ * grandeur qui décide si l'article peut être vendu.
+ *
+ * Renvoie null quand la variante est inconnue ou que l'appel échoue : une
+ * disponibilité inconnue ne doit jamais être confondue avec zéro, sous peine de
+ * retirer de la vente un article qui s'y trouve légitimement.
+ */
+export async function obtenirStockVariante(
+  vid: string,
+  token: string,
+): Promise<number | null> {
+  try {
+    const url = new URL(`${CJ_BASE_URL}/product/stock/queryByVid`);
+    url.searchParams.set('vid', vid);
+    const res = await fetch(url, { headers: { 'CJ-Access-Token': token } });
+    const data = await res.json().catch(() => null);
+    if (data?.code !== 200 || !Array.isArray(data?.data)) return null;
+
+    const total = data.data.reduce((somme: number, entrepot: Record<string, unknown>) => {
+      const n = Number(entrepot.storageNum ?? entrepot.countryStock ?? 0);
+      return somme + (Number.isFinite(n) ? n : 0);
+    }, 0);
+    return Number.isFinite(total) ? total : null;
+  } catch {
+    return null;
+  }
+}
