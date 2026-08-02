@@ -4,9 +4,11 @@ import {
   supabase,
   EDGE_FUNCTIONS_URL,
   CATEGORIES_GP_TABLE,
+  SECTEURS_TABLE,
   PARAMETRES_IMPORT_TABLE,
   PARAMETRES_INCOTERM_TABLE,
   type CategorieGP,
+  type Secteur,
   type ParametresImport,
   type ParametresIncoterm,
 } from '@/lib/supabase';
@@ -82,6 +84,14 @@ export default function CjDropshippingImport() {
    * resélectionner la catégorie à chaque fois.
    */
   const [derniereCategorie, setDerniereCategorie] = useState<string>('');
+  /**
+   * Destination de l'import. La boutique vend au détail, l'espace pro vend en
+   * gros : c'est la même marchandise, rangée dans deux vitrines qui ne
+   * s'adressent pas aux mêmes acheteurs.
+   */
+  const [destination, setDestination] = useState<'grand_public' | 'pro'>('grand_public');
+  const [secteurs, setSecteurs] = useState<Secteur[]>([]);
+  const [dernierSecteur, setDernierSecteur] = useState<string>('');
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -95,6 +105,13 @@ export default function CjDropshippingImport() {
   }, []);
 
   const loadParametres = async () => {
+    const secteursRes = await supabase
+      .from(SECTEURS_TABLE)
+      .select('*')
+      .eq('actif', true)
+      .order('ordre_affichage');
+    setSecteurs((secteursRes.data as Secteur[]) ?? []);
+
     const [parametresRes, incotermsRes] = await Promise.all([
       supabase.from(PARAMETRES_IMPORT_TABLE).select('*').eq('id', 1).maybeSingle(),
       supabase.from(PARAMETRES_INCOTERM_TABLE).select('*').order('ordre_affichage'),
@@ -128,7 +145,7 @@ export default function CjDropshippingImport() {
     }
   };
 
-  const handleImport = async (produit: CjResult, categorieId: string | null) => {
+  const handleImport = async (produit: CjResult, rangement: string | null) => {
     try {
       const result = await callEdgeFunction<{
         taux_marge_applique: number;
@@ -152,7 +169,9 @@ export default function CjDropshippingImport() {
         photos: produit.photo ? [produit.photo] : [],
         prix_fournisseur_usd: produit.prix_fournisseur_usd,
         stock: produit.stock,
-        categorie_gp_id: categorieId,
+        espace: destination,
+        categorie_gp_id: destination === 'grand_public' ? rangement : null,
+        secteur_id: destination === 'pro' ? rangement : null,
       });
       setImportedRefs((prev) => new Set(prev).add(produit.reference_externe));
       setImportResultats((prev) => ({
@@ -162,7 +181,9 @@ export default function CjDropshippingImport() {
           taux_marge_applique: result.taux_marge_applique,
         },
       }));
-      toast.success(`« ${produit.nom} » importé dans le catalogue.`);
+      toast.success(
+        `« ${produit.nom} » importé ${destination === 'pro' ? "dans l'espace pro" : 'dans la boutique'}.`,
+      );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Échec de l'import.");
     }
@@ -184,7 +205,32 @@ export default function CjDropshippingImport() {
       <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <ParametresMarge parametres={parametres} incoterms={incoterms} onSaved={loadParametres} />
 
-        <form onSubmit={handleSearch} className="mt-8 flex max-w-lg gap-2">
+        {/* La destination se choisit une fois pour toute une session d'import :
+            on range rarement un article en boutique et le suivant en gros. */}
+        <div className="mt-8 flex flex-wrap items-center gap-2">
+          <span className="text-sm text-muted-foreground">Importer vers :</span>
+          {([
+            ['grand_public', 'Boutique (détail)'],
+            ['pro', 'Espace Pro (gros)'],
+          ] as const).map(([valeur, libelle]) => (
+            <Button
+              key={valeur}
+              type="button"
+              size="sm"
+              variant={destination === valeur ? 'default' : 'outline'}
+              onClick={() => setDestination(valeur)}
+            >
+              {libelle}
+            </Button>
+          ))}
+        </div>
+        <p className="mt-1.5 text-xs text-muted-foreground">
+          {destination === 'pro'
+            ? 'Les articles paraissent sous l’enseigne « Maylary Import » du secteur choisi, avec leur grille de prix dégressive.'
+            : 'Les articles paraissent dans la boutique grand public, au prix de détail.'}
+        </p>
+
+        <form onSubmit={handleSearch} className="mt-4 flex max-w-lg gap-2">
           <Input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
@@ -225,6 +271,10 @@ export default function CjDropshippingImport() {
                 imported={importedRefs.has(p.reference_externe)}
                 resultat={importResultats[p.reference_externe] ?? null}
                 onImport={handleImport}
+                destination={destination}
+                secteurs={secteurs}
+                secteurParDefaut={dernierSecteur}
+                onSecteurChoisi={setDernierSecteur}
               />
             ))}
           </div>
@@ -242,6 +292,10 @@ function ResultCard({
   imported,
   resultat,
   onImport,
+  destination,
+  secteurs,
+  secteurParDefaut,
+  onSecteurChoisi,
 }: {
   produit: CjResult;
   categories: CategorieGP[];
@@ -249,18 +303,30 @@ function ResultCard({
   onCategorieChoisie: (id: string) => void;
   imported: boolean;
   resultat: ImportResultat | null;
-  onImport: (produit: CjResult, categorieId: string | null) => Promise<void>;
+  onImport: (produit: CjResult, rangement: string | null) => Promise<void>;
+  destination: 'grand_public' | 'pro';
+  secteurs: Secteur[];
+  secteurParDefaut: string;
+  onSecteurChoisi: (id: string) => void;
 }) {
   const [categorieId, setCategorieId] = useState<string>(categorieParDefaut);
+  const [secteurId, setSecteurId] = useState<string>(secteurParDefaut);
   const [importing, setImporting] = useState(false);
 
+  const versPro = destination === 'pro';
+  const rangement = versPro ? secteurId : categorieId;
+
   const submit = async () => {
-    if (!categorieId) {
-      toast.error('Choisissez une catégorie avant d’importer ce produit.');
+    if (!rangement) {
+      toast.error(
+        versPro
+          ? 'Choisissez un secteur avant d’importer ce produit.'
+          : 'Choisissez une catégorie avant d’importer ce produit.',
+      );
       return;
     }
     setImporting(true);
-    await onImport(produit, categorieId);
+    await onImport(produit, rangement);
     setImporting(false);
   };
 
@@ -345,22 +411,28 @@ function ResultCard({
         ) : (
           <>
             <div className="space-y-1.5">
-              <Label htmlFor={`cat-${produit.reference_externe}`} className="text-xs">
-                Catégorie boutique *
+              <Label htmlFor={`rangement-${produit.reference_externe}`} className="text-xs">
+                {versPro ? 'Secteur de l’espace pro *' : 'Catégorie boutique *'}
               </Label>
               <select
-                id={`cat-${produit.reference_externe}`}
-                value={categorieId}
+                id={`rangement-${produit.reference_externe}`}
+                value={rangement}
                 onChange={(e) => {
-                  setCategorieId(e.target.value);
-                  if (e.target.value) onCategorieChoisie(e.target.value);
+                  const v = e.target.value;
+                  if (versPro) {
+                    setSecteurId(v);
+                    if (v) onSecteurChoisi(v);
+                  } else {
+                    setCategorieId(v);
+                    if (v) onCategorieChoisie(v);
+                  }
                 }}
                 className="border-input flex h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs"
               >
-                <option value="">Choisir une catégorie…</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nom}
+                <option value="">{versPro ? 'Choisir un secteur…' : 'Choisir une catégorie…'}</option>
+                {(versPro ? secteurs : categories).map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.nom}
                   </option>
                 ))}
               </select>
