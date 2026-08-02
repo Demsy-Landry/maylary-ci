@@ -161,6 +161,8 @@ export const MODE_PAIEMENT_LABELS: Record<ModePaiement, string> = {
 export interface Secteur {
   id: string;
   nom: string;
+  /** Visuels du rayon, dans l'ordre de défilement. Vide : illustration dessinée. */
+  photos: string[];
   icone: string | null;
   actif: boolean;
   ordre_affichage: number;

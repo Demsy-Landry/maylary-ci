@@ -5,6 +5,7 @@ import SiteFooter from '@/components/SiteFooter';
 import { supabase, SECTEURS_TABLE, type Secteur } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
 import SectorIllustration, { SECTOR_PHOTOS, guessSector } from '@/components/illustrations/SectorIllustration';
+import CarrouselSecteur from '@/components/CarrouselSecteur';
 
 export default function CataloguePro() {
   const [secteurs, setSecteurs] = useState<Secteur[]>([]);
@@ -49,6 +50,10 @@ export default function CataloguePro() {
         ) : (
           <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {secteurs.map((s) => {
+              // Les visuels du rayon priment ; à défaut on garde la photo
+              // générique, puis l'illustration dessinée. Aucune carte ne peut
+              // se retrouver vide pendant qu'on remplit les rayons un par un.
+              const visuels = s.photos ?? [];
               const photo = SECTOR_PHOTOS[guessSector(s.nom)];
               return (
                 <Link
@@ -57,7 +62,9 @@ export default function CataloguePro() {
                   className="carte-reactive group overflow-hidden rounded-lg border bg-card transition-all hover:-translate-y-1 hover:border-primary "
                 >
                   <div className="relative h-32 w-full overflow-hidden">
-                    {photo ? (
+                    {visuels.length > 0 ? (
+                      <CarrouselSecteur photos={visuels} alt={s.nom} />
+                    ) : photo ? (
                       <img
                         src={photo}
                         alt={s.nom}
