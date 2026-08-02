@@ -11,6 +11,7 @@ import {
   PRODUITS_TABLE,
   LIGNES_COMMANDE_GP_TABLE,
   CATEGORIES_GP_TABLE,
+  PRODUIT_PHOTOS_BUCKET,
   SECTEURS_TABLE,
   STATUT_VENDEUR_LABELS,
   STATUT_VENDEUR_MESSAGES,
@@ -87,6 +88,8 @@ export default function EspaceVendeur() {
   const [artPrix, setArtPrix] = useState('');
   const [artCategorie, setArtCategorie] = useState<string>('');
   const [artDescription, setArtDescription] = useState('');
+  /** Photos choisies pour l'article en cours de publication. */
+  const [artPhotos, setArtPhotos] = useState<File[]>([]);
 
   const remplirDepuis = (v: Vendeur) => {
     setNomEntreprise(v.nom_entreprise);
@@ -207,7 +210,29 @@ export default function EspaceVendeur() {
       toast.error('Nom, prix et catégorie sont requis.');
       return;
     }
+    if (artPhotos.length === 0) {
+      toast.error('Ajoutez au moins une photo : un article sans image ne se vend pas.');
+      return;
+    }
     setBusy(true);
+
+    // Le dépôt est public en lecture : on garde l'adresse définitive, pas un
+    // lien signé qui expirerait au milieu d'une fiche produit.
+    const adresses: string[] = [];
+    for (const fichier of artPhotos) {
+      const chemin = `vendeurs/${vendeur.id}/${crypto.randomUUID()}-${fichier.name}`;
+      const { error: envoiError } = await supabase.storage
+        .from(PRODUIT_PHOTOS_BUCKET)
+        .upload(chemin, fichier);
+      if (envoiError) {
+        setBusy(false);
+        toast.error("L'envoi de la photo a échoué. Réessayez.");
+        return;
+      }
+      const { data } = supabase.storage.from(PRODUIT_PHOTOS_BUCKET).getPublicUrl(chemin);
+      adresses.push(data.publicUrl);
+    }
+
     const { error } = await supabase.from(PRODUITS_TABLE).insert({
       nom: artNom.trim(),
       description: artDescription.trim() || null,
@@ -215,7 +240,7 @@ export default function EspaceVendeur() {
       categorie_gp_id: artCategorie,
       espace: 'grand_public',
       vendeur_id: vendeur.id,
-      photos: [],
+      photos: adresses,
       actif: true,
     });
     setBusy(false);
@@ -227,6 +252,7 @@ export default function EspaceVendeur() {
     setArtNom('');
     setArtPrix('');
     setArtDescription('');
+    setArtPhotos([]);
     charger();
   };
 
@@ -481,6 +507,21 @@ export default function EspaceVendeur() {
                             </option>
                           ))}
                         </select>
+                      </div>
+                      <div className="space-y-1.5 sm:col-span-4">
+                        <Label htmlFor="aphotos">Photos de l'article *</Label>
+                        <Input
+                          id="aphotos"
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={(e) => setArtPhotos(Array.from(e.target.files ?? []))}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                          {artPhotos.length > 0
+                            ? `${artPhotos.length} photo(s) prête(s) à être publiée(s).`
+                            : 'La première photo sert de vignette dans la boutique.'}
+                        </p>
                       </div>
                       <div className="space-y-1.5 sm:col-span-4">
                         <Label htmlFor="ad">Description</Label>
