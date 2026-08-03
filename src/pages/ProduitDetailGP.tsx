@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
+import AvisProduit from '@/components/AvisProduit';
 import {
   supabase,
   CATEGORIES_GP_TABLE,
@@ -276,6 +277,8 @@ export default function ProduitDetailGP() {
                   Acheter maintenant
                 </Button>
               </div>
+
+              <AvisProduit produitId={produit.id} />
             </div>
           </div>
         )}

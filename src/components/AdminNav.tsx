@@ -14,6 +14,7 @@ const LINKS = [
   { to: '/admin/devis', label: 'Demandes de devis' },
   { to: '/admin/cj-dropshipping', label: 'Catalogue CJ Dropshipping' },
   { to: '/admin/prospection', label: 'Prospection fournisseurs' },
+  { to: '/admin/qualite-fournisseurs', label: 'Qualité fournisseurs' },
   { to: '/admin/equipe', label: 'Équipe' },
   { to: '/admin/parametres', label: 'Paramètres' },
 ];

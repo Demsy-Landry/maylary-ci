@@ -13,6 +13,7 @@ import {
   type Produit,
 } from '@/lib/supabase';
 import OrigineProduitBadge from '@/components/OrigineProduitBadge';
+import AvisProduit from '@/components/AvisProduit';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { Button } from '@/components/ui/button';
@@ -308,6 +309,8 @@ export default function ProduitDetailPro() {
                 <ClipboardList className="mr-2 h-4 w-4" />
                 Ajouter à ma demande de devis
               </Button>
+
+              <AvisProduit produitId={produit.id} />
             </div>
           </div>
         )}
