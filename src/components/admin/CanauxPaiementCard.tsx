@@ -64,8 +64,18 @@ export default function CanauxPaiementCard() {
   }, []);
 
   const ajouter = async () => {
-    if (!brouillon.libelle.trim() || !brouillon.numero.trim() || !brouillon.titulaire.trim()) {
-      toast.info('Le nom du canal, le numéro et le titulaire sont indispensables.');
+    const estLien = brouillon.type_canal === 'lien_paiement';
+    if (!brouillon.libelle.trim() || !brouillon.numero.trim()) {
+      toast.info(estLien ? 'Le nom et l’adresse du lien sont indispensables.' : 'Le nom du canal et le numéro sont indispensables.');
+      return;
+    }
+    // Un lien de paiement en clair exposerait le client sur un réseau public.
+    if (estLien && !/^https:\/\//i.test(brouillon.numero.trim())) {
+      toast.info('L’adresse du lien doit commencer par https://');
+      return;
+    }
+    if (!estLien && !brouillon.titulaire.trim()) {
+      toast.info('Le titulaire du compte est indispensable.');
       return;
     }
     setAjout(true);
@@ -73,7 +83,7 @@ export default function CanauxPaiementCard() {
       type_canal: brouillon.type_canal,
       libelle: brouillon.libelle.trim(),
       numero: brouillon.numero.trim(),
-      titulaire: brouillon.titulaire.trim(),
+      titulaire: brouillon.titulaire.trim() || null,
       instructions: brouillon.instructions.trim() || null,
       ordre: canaux.length,
     });
@@ -154,7 +164,8 @@ export default function CanauxPaiementCard() {
                       )}
                     </p>
                     <p className="break-words text-sm text-muted-foreground">
-                      {c.numero} — {c.titulaire}
+                      {c.numero}
+                      {c.titulaire ? ` — ${c.titulaire}` : ''}
                     </p>
                     {c.instructions && (
                       <p className="mt-1 break-words text-xs italic text-muted-foreground">
@@ -190,6 +201,16 @@ export default function CanauxPaiementCard() {
         <div className="space-y-3 rounded-md border p-3">
           <p className="text-sm font-medium text-foreground">Ajouter un canal</p>
 
+          {/* Ce que ce canal ne fait pas doit être dit ici, pas découvert sur
+              une commande mal réglée. */}
+          {brouillon.type_canal === 'lien_paiement' && (
+            <p className="rounded-md border bg-muted/40 p-2 text-xs text-muted-foreground">
+              Un lien de paiement marchand ne porte ni le montant ni la référence de commande : le
+              client saisit lui-même la somme, et aucune confirmation ne revient automatiquement.
+              La vérification du règlement reste manuelle.
+            </p>
+          )}
+
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="type-canal">Type</Label>
@@ -215,31 +236,51 @@ export default function CanauxPaiementCard() {
                 id="libelle-canal"
                 value={brouillon.libelle}
                 onChange={(e) => setBrouillon((b) => ({ ...b, libelle: e.target.value }))}
-                placeholder={brouillon.type_canal === 'virement' ? 'ex: Ecobank' : 'ex: Wave'}
+                placeholder={
+                  brouillon.type_canal === 'virement'
+                    ? 'ex: Ecobank'
+                    : brouillon.type_canal === 'lien_paiement'
+                      ? 'ex: Payer avec Wave'
+                      : 'ex: Wave'
+                }
               />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="numero-canal">
-                {brouillon.type_canal === 'virement' ? 'IBAN ou RIB' : 'Numéro marchand'}
+                {brouillon.type_canal === 'virement'
+                  ? 'IBAN ou RIB'
+                  : brouillon.type_canal === 'lien_paiement'
+                    ? 'Adresse du lien de paiement'
+                    : 'Numéro marchand'}
               </Label>
               <Input
                 id="numero-canal"
                 value={brouillon.numero}
                 onChange={(e) => setBrouillon((b) => ({ ...b, numero: e.target.value }))}
-                placeholder={brouillon.type_canal === 'virement' ? 'CI93 CI...' : '+225 07 ...'}
+                placeholder={
+                  brouillon.type_canal === 'virement'
+                    ? 'CI93 CI...'
+                    : brouillon.type_canal === 'lien_paiement'
+                      ? 'https://pay.wave.com/m/...'
+                      : '+225 07 ...'
+                }
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="titulaire-canal">Titulaire du compte</Label>
-              <Input
-                id="titulaire-canal"
-                value={brouillon.titulaire}
-                onChange={(e) => setBrouillon((b) => ({ ...b, titulaire: e.target.value }))}
-                placeholder="ex: Dems'Inc"
-              />
-            </div>
+            {/* Sans objet pour un lien : c'est la page du marchand qui affiche
+                son propre nom au client. */}
+            {brouillon.type_canal !== 'lien_paiement' && (
+              <div className="space-y-1.5">
+                <Label htmlFor="titulaire-canal">Titulaire du compte</Label>
+                <Input
+                  id="titulaire-canal"
+                  value={brouillon.titulaire}
+                  onChange={(e) => setBrouillon((b) => ({ ...b, titulaire: e.target.value }))}
+                  placeholder="ex: Dems'Inc"
+                />
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">

@@ -270,11 +270,12 @@ export interface CategorieGP {
   updated_at: string;
 }
 
-export type TypeCanalPaiement = 'mobile_money' | 'virement';
+export type TypeCanalPaiement = 'mobile_money' | 'virement' | 'lien_paiement';
 
 export const TYPE_CANAL_LABELS: Record<TypeCanalPaiement, string> = {
   mobile_money: 'Mobile Money',
   virement: 'Virement bancaire',
+  lien_paiement: 'Lien de paiement',
 };
 
 /**
@@ -287,9 +288,14 @@ export interface CanalPaiement {
   type_canal: TypeCanalPaiement;
   /** « Wave », « Orange Money », « Ecobank »… tel que le client le reconnaîtra. */
   libelle: string;
-  /** Numéro marchand, ou IBAN/RIB selon le type. */
+  /**
+   * Numéro marchand, IBAN/RIB, ou URL du lien de paiement selon le type. Le
+   * champ garde son nom : le renommer imposerait de toucher toutes les lectures
+   * pour un gain nul.
+   */
   numero: string;
-  titulaire: string;
+  /** Sans objet pour un lien : c'est la page du marchand qui affiche son nom. */
+  titulaire: string | null;
   instructions: string | null;
   actif: boolean;
   ordre: number;
