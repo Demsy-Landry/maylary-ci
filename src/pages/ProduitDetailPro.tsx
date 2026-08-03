@@ -209,6 +209,14 @@ export default function ProduitDetailPro() {
                 ) : null}
               </p>
 
+              {/* Le prix est celui de la marchandise. Le transport se cote sur
+                  l'expédition réelle, donc sur la quantité effectivement
+                  commandée : l'annoncer ici évite de le découvrir au devis. */}
+              <p className="mt-1 text-xs text-muted-foreground">
+                Hors livraison. Le transport est coté sur votre commande complète et facturé
+                séparément — plus la quantité est importante, moins il pèse par pièce.
+              </p>
+
               {/* La grille vient de devis de transport réellement obtenus, un par
                   quantité. Un palier n'y figure que si son prix baisse vraiment. */}
               {paliers.length > 1 && (

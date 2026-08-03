@@ -192,10 +192,15 @@ export default function PanierDevis() {
 
             <div className="space-y-4 rounded-md border p-4">
               <div>
-                <p className="text-sm text-muted-foreground">Total estimé</p>
+                <p className="text-sm text-muted-foreground">Marchandise estimée</p>
                 <p className="text-2xl font-bold text-primary">{totalFcfa.toLocaleString('fr-FR')} FCFA</p>
+                {/* Même règle qu'en boutique : le prix affiché est celui de la
+                    marchandise. Le transport se cote sur l'expédition réelle,
+                    et figure comme une ligne à part sur le devis. */}
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Montant indicatif — le devis final peut varier selon les quantités négociées.
+                  Hors livraison. Le transport est coté séparément sur votre commande complète et
+                  chiffré dans le devis que nous vous adressons. Montant indicatif — le devis final
+                  peut varier selon les quantités négociées.
                 </p>
               </div>
               {formError && <p className="text-sm text-destructive">{formError}</p>}
