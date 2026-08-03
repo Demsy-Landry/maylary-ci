@@ -9,9 +9,9 @@ import {
   COMMANDES_GP_TABLE,
   LIGNES_COMMANDE_GP_TABLE,
   HISTORIQUE_COMMANDE_GP_TABLE,
-  PARAMETRES_PAIEMENT_TABLE,
+  CANAUX_PAIEMENT_TABLE,
   MODE_PAIEMENT_LABELS,
-  type ParametresPaiement,
+  type CanalPaiement,
   type ModePaiement,
   EDGE_FUNCTIONS_URL,
   type OptionTransport,
@@ -123,7 +123,7 @@ export default function CommandeGP() {
   const [villeLivraison, setVilleLivraison] = useState('');
   const [notesClient, setNotesClient] = useState('');
   const [modePaiement, setModePaiement] = useState<ModePaiement>('mobile_money');
-  const [parametresPaiement, setParametresPaiement] = useState<ParametresPaiement | null>(null);
+  const [canaux, setCanaux] = useState<CanalPaiement[]>([]);
   const [loadingParams, setLoadingParams] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [commandeCreee, setCommandeCreee] = useState<string | null>(null);
@@ -133,10 +133,12 @@ export default function CommandeGP() {
     const load = async () => {
       setLoadingParams(true);
       const { data } = await supabase
-        .from(PARAMETRES_PAIEMENT_TABLE)
+        .from(CANAUX_PAIEMENT_TABLE)
         .select('*')
-        .maybeSingle();
-      setParametresPaiement((data as ParametresPaiement) ?? null);
+        .eq('actif', true)
+        .order('ordre')
+        .order('created_at');
+      setCanaux((data as CanalPaiement[]) ?? []);
       setLoadingParams(false);
     };
     load();
@@ -260,42 +262,55 @@ export default function CommandeGP() {
             <p className="mt-2 text-sm text-muted-foreground">
               Référence : <span className="font-semibold text-foreground">{commandeCreee}</span>
             </p>
-            <p className="mt-4 text-sm text-foreground">
-              Merci d'effectuer le règlement selon les instructions ci-dessous, puis rendez-vous dans
-              « Mes commandes » et cliquez sur « J'ai payé » pour nous en informer. Nous vérifierons
-              la réception avant de préparer votre commande.
-            </p>
-            {parametresPaiement && (
-              <div className="mt-6 space-y-4 text-left">
-                {parametresPaiement.nom_banque && (
-                  <div className="rounded-md border p-4">
-                    <p className="flex items-center gap-2 font-medium text-foreground">
-                      <Landmark className="h-4 w-4" /> Virement bancaire
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Banque : {parametresPaiement.nom_banque}<br />
-                      Titulaire : {parametresPaiement.titulaire_compte}<br />
-                      RIB : {parametresPaiement.numero_compte_rib}
-                    </p>
-                  </div>
-                )}
-                {parametresPaiement.mobile_money_numero && (
-                  <div className="rounded-md border p-4">
-                    <p className="flex items-center gap-2 font-medium text-foreground">
-                      <Smartphone className="h-4 w-4" /> Mobile Money
-                    </p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Opérateur : {parametresPaiement.mobile_money_operateur}<br />
-                      Numéro : {parametresPaiement.mobile_money_numero}<br />
-                      Titulaire : {parametresPaiement.mobile_money_titulaire}
-                    </p>
-                  </div>
-                )}
-                {parametresPaiement.instructions_complementaires && (
-                  <p className="text-sm italic text-muted-foreground">
-                    {parametresPaiement.instructions_complementaires}
+            {/* Ne jamais annoncer « les instructions ci-dessous » sans rien
+                en dessous. Un client invité à payer sans savoir où abandonne,
+                et il a raison. */}
+            {canaux.length > 0 ? (
+              <>
+                <p className="mt-4 text-sm text-foreground">
+                  Réglez sur l'un des comptes ci-dessous, puis rendez-vous dans « Mes commandes » et
+                  déclarez votre paiement avec sa référence ou son reçu. Nous vérifions la réception
+                  avant de préparer votre commande.
+                </p>
+                <div className="mt-6 space-y-3 text-left">
+                  {canaux.map((c) => (
+                    <div key={c.id} className="rounded-md border p-4">
+                      <p className="flex items-center gap-2 font-medium text-foreground">
+                        {c.type_canal === 'virement' ? (
+                          <Landmark className="h-4 w-4 shrink-0" />
+                        ) : (
+                          <Smartphone className="h-4 w-4 shrink-0" />
+                        )}
+                        <span className="break-words">{c.libelle}</span>
+                      </p>
+                      <p className="mt-1 break-words text-sm text-muted-foreground">
+                        {c.type_canal === 'virement' ? 'IBAN / RIB' : 'Numéro'} : {c.numero}
+                        <br />
+                        Titulaire : {c.titulaire}
+                      </p>
+                      {c.instructions && (
+                        <p className="mt-1 break-words text-xs italic text-muted-foreground">
+                          {c.instructions}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                  {/* Le motif est ce qui permet de rapprocher un virement d'une
+                      commande. Le demander ici évite un rapprochement à l'aveugle. */}
+                  <p className="text-sm text-foreground">
+                    Indiquez la référence{' '}
+                    <span className="font-semibold">{commandeCreee}</span> dans le motif de votre
+                    règlement.
                   </p>
-                )}
+                </div>
+              </>
+            ) : (
+              <div className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-4 text-left">
+                <p className="text-sm text-foreground">
+                  Nos coordonnées de règlement ne sont pas affichables pour le moment. Notre équipe
+                  vous contacte au {telephoneDestinataire || 'numéro indiqué'} pour convenir du
+                  paiement — votre commande est bien enregistrée et rien n'est perdu.
+                </p>
               </div>
             )}
             <Button asChild className="mt-6">
@@ -465,9 +480,23 @@ export default function CommandeGP() {
                     </div>
                   </RadioGroup>
                 )}
-                <p className="mt-3 text-xs text-muted-foreground">
-                  Les instructions de paiement précises s'afficheront après validation de votre commande.
-                </p>
+                {/* Annoncer les comptes disponibles avant de valider, pas après :
+                    un client qui n'a que Wave doit le savoir maintenant. */}
+                {!loadingParams &&
+                  (canaux.length > 0 ? (
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Comptes disponibles :{' '}
+                      <span className="text-foreground">
+                        {canaux.map((c) => c.libelle).join(', ')}
+                      </span>
+                      . Les coordonnées complètes s'affichent dès votre commande validée.
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-xs text-muted-foreground">
+                      Nos coordonnées de règlement ne sont pas affichables en ligne pour le moment :
+                      notre équipe vous contactera pour convenir du paiement.
+                    </p>
+                  ))}
               </div>
             </div>
 

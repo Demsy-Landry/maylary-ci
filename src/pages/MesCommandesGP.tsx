@@ -5,7 +5,6 @@ import SiteFooter from '@/components/SiteFooter';
 import { useAuth } from '@/hooks/useAuth';
 import {
   supabase,
-  EDGE_FUNCTIONS_URL,
   COMMANDES_GP_TABLE,
   LIGNES_COMMANDE_GP_TABLE,
   HISTORIQUE_COMMANDE_GP_TABLE,
@@ -26,10 +25,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Loader2, Eye, Package, CheckCircle2, Truck, ExternalLink } from 'lucide-react';
-import { toast } from 'sonner';
+import { Loader2, Eye, Package, Truck, ExternalLink } from 'lucide-react';
 import BoutonFacture from '@/components/BoutonFacture';
 import AvisCommande from '@/components/AvisCommande';
+import DeclarerPaiement from '@/components/DeclarerPaiement';
 
 /** Statuts à partir desquels la facture définitive est émise (paiement acquis). */
 const FACTURE_DISPONIBLE: StatutCommandeGP[] = [
@@ -62,7 +61,6 @@ export default function MesCommandesGP() {
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<CommandeAvecDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [marquerPayeBusy, setMarquerPayeBusy] = useState<string | null>(null);
 
   const loadCommandes = async () => {
     if (!user) return;
@@ -124,39 +122,6 @@ export default function MesCommandesGP() {
     return <Navigate to="/boutique/compte" replace />;
   }
 
-  const handleMarquerPaye = async (commandeId: string) => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const token = session?.access_token;
-    if (!token) {
-      toast.error('Session expirée, reconnectez-vous.');
-      return;
-    }
-
-    setMarquerPayeBusy(commandeId);
-    try {
-      const res = await fetch(`${EDGE_FUNCTIONS_URL}/app_e08c374bc4_commande_gp_marquer_paye`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ commande_id: commandeId }),
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(json.error ?? 'Une erreur est survenue.');
-      }
-      toast.success('Merci ! Nous vérifions la réception de votre paiement.');
-      await loadCommandes();
-      if (detail?.id === commandeId) {
-        setDetail(null);
-      }
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Impossible de marquer la commande comme payée.');
-    } finally {
-      setMarquerPayeBusy(null);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
@@ -196,19 +161,8 @@ export default function MesCommandesGP() {
                   <Badge variant={STATUT_BADGE_VARIANT[c.statut]}>
                     {STATUT_COMMANDE_GP_LABELS[c.statut]}
                   </Badge>
-                  {c.statut === 'en_attente_paiement' && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleMarquerPaye(c.id)}
-                      disabled={marquerPayeBusy === c.id}
-                    >
-                      {marquerPayeBusy === c.id ? (
-                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                      ) : (
-                        <CheckCircle2 className="mr-1.5 h-4 w-4" />
-                      )}
-                      J'ai payé
-                    </Button>
+                  {c.statut === 'en_attente_paiement' && user && (
+                    <DeclarerPaiement commande={c} userId={user.id} onDeclare={loadCommandes} />
                   )}
                   <Button variant="ghost" size="icon" onClick={() => openDetail(c)}>
                     <Eye className="h-4 w-4" />
@@ -243,20 +197,17 @@ export default function MesCommandesGP() {
               <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
                 <p className="font-medium text-foreground">{STATUT_COMMANDE_GP_LABELS[detail.statut]}</p>
                 <p className="mt-1 text-muted-foreground">{STATUT_COMMANDE_GP_MESSAGES[detail.statut]}</p>
-                {detail.statut === 'en_attente_paiement' && (
-                  <Button
-                    size="sm"
-                    className="mt-3"
-                    onClick={() => handleMarquerPaye(detail.id)}
-                    disabled={marquerPayeBusy === detail.id}
-                  >
-                    {marquerPayeBusy === detail.id ? (
-                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                    ) : (
-                      <CheckCircle2 className="mr-1.5 h-4 w-4" />
-                    )}
-                    J'ai payé
-                  </Button>
+                {detail.statut === 'en_attente_paiement' && user && (
+                  <div className="mt-3">
+                    <DeclarerPaiement
+                      commande={detail}
+                      userId={user.id}
+                      onDeclare={() => {
+                        loadCommandes();
+                        setDetail(null);
+                      }}
+                    />
+                  </div>
                 )}
               </div>
 

@@ -11,6 +11,7 @@ import {
   type StatutCommandeGP,
 } from '@/lib/supabase';
 import AdminNav from '@/components/AdminNav';
+import PreuveReglement from '@/components/admin/PreuveReglement';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,6 +64,8 @@ export default function AdminCommandesGP() {
   const [problemeAction, setProblemeAction] = useState<ProblemeAction>(null);
   const [commentaire, setCommentaire] = useState('');
   const [nouveauMontant, setNouveauMontant] = useState('');
+  /** Ce que la caisse a réellement vu, saisi au moment de confirmer. */
+  const [montantRecu, setMontantRecu] = useState('');
   const [solde, setSolde] = useState<number | null>(null);
   const [fournisseurBusy, setFournisseurBusy] = useState(false);
 
@@ -160,6 +163,7 @@ export default function AdminCommandesGP() {
     setGestion(null);
     setProblemeAction(null);
     setCommentaire('');
+    setMontantRecu('');
   };
 
   const majStatut = async (statut: StatutCommandeGP, commentaireAdmin: string | null) => {
@@ -188,7 +192,45 @@ export default function AdminCommandesGP() {
     loadCommandes();
   };
 
-  const handleConfirmer = () => majStatut('paiement_confirme', null);
+  /**
+   * Confirmer, en consignant ce qui est réellement arrivé.
+   *
+   * `montant_recu_fcfa` reste distinct de `montant_total_fcfa` : le premier est
+   * ce que la caisse a vu, le second ce qui était dû. Les confondre effacerait
+   * le règlement partiel, précisément le cas qu'on veut pouvoir retrouver.
+   */
+  const handleConfirmer = async () => {
+    if (!gestion) return;
+    const recu = montantRecu === '' ? null : Number(montantRecu);
+    if (recu !== null && !Number.isFinite(recu)) {
+      toast.error('Montant reçu invalide.');
+      return;
+    }
+    setBusy(true);
+    const { data: session } = await supabase.auth.getSession();
+    const { error } = await supabase
+      .from(COMMANDES_GP_TABLE)
+      .update({
+        montant_recu_fcfa: recu,
+        paiement_confirme_le: new Date().toISOString(),
+        paiement_confirme_par: session.session?.user.id ?? null,
+      })
+      .eq('id', gestion.id);
+    setBusy(false);
+    if (error) {
+      toast.error("Le règlement n'a pas pu être consigné.");
+      return;
+    }
+    const ecart = recu === null ? 0 : recu - gestion.montant_total_fcfa;
+    await majStatut(
+      'paiement_confirme',
+      recu === null
+        ? null
+        : ecart === 0
+          ? `Reçu ${recu.toLocaleString('fr-FR')} FCFA`
+          : `Reçu ${recu.toLocaleString('fr-FR')} FCFA — écart de ${ecart.toLocaleString('fr-FR')} FCFA`,
+    );
+  };
 
   const handleRembourser = async () => {
     if (!commentaire.trim()) {
@@ -395,7 +437,14 @@ export default function AdminCommandesGP() {
               </div>
 
               {gestion.statut === 'paiement_recu_verification' && problemeAction === null && (
-                <div className="space-y-2">
+                <div className="space-y-3">
+                  {/* Confirmer sans avoir vu la preuve, c'est confirmer une
+                      affirmation. Elle est donc placée avant le bouton. */}
+                  <PreuveReglement
+                    commande={gestion}
+                    montantRecu={montantRecu}
+                    onMontantRecu={setMontantRecu}
+                  />
                   <Button className="w-full" onClick={handleConfirmer} disabled={busy}>
                     {busy ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
