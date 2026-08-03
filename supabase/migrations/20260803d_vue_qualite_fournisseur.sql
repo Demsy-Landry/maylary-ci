@@ -58,8 +58,12 @@ from catalogue c
 left join livraisons l on l.fournisseur_origine_id = c.fournisseur_origine_id
 left join notes n on n.fournisseur_origine_id = c.fournisseur_origine_id
 left join incidents i on i.fournisseur_origine_id = c.fournisseur_origine_id
--- Une vue s'exécute avec les droits de son propriétaire : les RLS des tables
--- sous-jacentes ne s'appliquent pas ici. Sans ce filtre, n'importe quel compte
--- connecté lirait nos volumes livrés et la liste de nos ateliers. Le test rend
--- la vue vide pour tout autre que l'administrateur.
+-- Deux verrous, et non un seul :
+--   - le test ci-dessous rend la vue vide pour tout autre que l'administrateur ;
+--   - `security_invoker` ci-après la fait passer par les RLS des tables
+--     sous-jacentes au lieu de les contourner. Vérifié : l'administrateur voit
+--     les mêmes chiffres dans les deux régimes (4 commandes, 4 lignes,
+--     57 produits), donc rien n'est perdu à appliquer les deux.
 where app_e08c374bc4_is_admin();
+
+alter view app_e08c374bc4_qualite_fournisseurs set (security_invoker = true);

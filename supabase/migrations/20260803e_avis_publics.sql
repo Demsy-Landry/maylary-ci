@@ -11,6 +11,9 @@ create or replace function app_e08c374bc4_nom_abrege(nom text)
 returns text
 language sql
 immutable
+-- `search_path` figé : sans lui, un schéma placé devant `public` par l'appelant
+-- détournerait les fonctions utilisées ici.
+set search_path = pg_catalog, public
 as $$
   select case
     when nom is null or btrim(nom) = '' then 'Client Maylary'
@@ -40,6 +43,16 @@ select produit_id,
 from app_e08c374bc4_avis_articles
 where publie
 group by produit_id;
+
+-- `notes_produits` n'agrège que des avis déjà publics : elle s'exécute avec les
+-- droits de l'appelant et rentre donc dans le régime RLS normal.
+--
+-- `avis_public` reste en `security definer`, et c'est délibéré : elle joint la
+-- table des profils pour composer le nom d'affichage, que la RLS des profils
+-- réserve à leur propriétaire. En droits de l'appelant, tous les avis
+-- s'afficheraient sous « Client Maylary ». Le seul champ qui en sort est le
+-- prénom suivi d'une initiale — ni identifiant, ni commande, ni nom complet.
+alter view app_e08c374bc4_notes_produits set (security_invoker = true);
 
 grant select on app_e08c374bc4_avis_public to anon, authenticated;
 grant select on app_e08c374bc4_notes_produits to anon, authenticated;

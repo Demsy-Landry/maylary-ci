@@ -43,7 +43,13 @@ export default function PublicHeaderGP() {
             <span className="hidden text-lg font-semibold tracking-tight sm:inline">Maylary</span>
           </Link>
 
-          <nav className="flex shrink-0 items-center gap-1 sm:order-3 sm:gap-2">
+          {/* `shrink-0` empêchait la barre de céder, et `flex-wrap` seul ne
+              suffit pas : un conteneur qui ne rétrécit pas garde sa largeur
+              maximale et ne passe jamais à la ligne. Sur un écran de 320 px,
+              la barre débordait de 74 px. Elle se replie désormais ; le
+              comportement bureau, où elle reste sur une ligne à droite de la
+              recherche, est préservé à partir de `sm`. */}
+          <nav className="flex flex-wrap items-center justify-end gap-1 sm:order-3 sm:shrink-0 sm:flex-nowrap sm:gap-2">
           <Button asChild variant="outline" size="sm" className="text-foreground">
             <Link to="/import/nouvelle-demande">
               <PackageSearch className="mr-1.5 h-4 w-4" />

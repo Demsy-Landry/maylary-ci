@@ -28,14 +28,18 @@ export default function PanierAchat() {
           </div>
         ) : (
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
-            <div className="space-y-3 lg:col-span-2">
+            {/* `min-w-0` sur l'élément de grille : sans lui, la colonne se
+                dimensionne sur le contenu le plus large — ici le nom de produit,
+                que `truncate` empêche de se couper — et la page entière défile
+                horizontalement sur mobile. */}
+            <div className="min-w-0 space-y-3 lg:col-span-2">
               {items.map((item) => (
                 <div key={item.produit_id} className="flex items-center gap-3 rounded-md border p-3">
                   <ImageWithFallback
                     src={item.photo}
                     alt={item.nom}
-                    className="h-16 w-16 rounded-md border object-cover"
-                    fallbackClassName="h-16 w-16 rounded-md border"
+                    className="h-16 w-16 shrink-0 rounded-md border object-cover"
+                    fallbackClassName="h-16 w-16 shrink-0 rounded-md border"
                   />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-foreground">{item.nom}</p>
@@ -43,7 +47,7 @@ export default function PanierAchat() {
                       {prixLigne(item).toLocaleString('fr-FR')} FCFA
                     </p>
                   </div>
-                  <div className="flex items-center rounded-md border">
+                  <div className="flex shrink-0 items-center rounded-md border">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -60,7 +64,12 @@ export default function PanierAchat() {
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => removeItem(item.produit_id)}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => removeItem(item.produit_id)}
+                  >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>

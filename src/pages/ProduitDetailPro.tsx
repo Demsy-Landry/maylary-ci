@@ -159,7 +159,12 @@ export default function ProduitDetailPro() {
           <p className="text-sm text-muted-foreground">Produit introuvable.</p>
         ) : (
           <div className="cascade grid gap-8 sm:grid-cols-2">
-            <div>
+            {/* `min-w-0` sur les deux colonnes : un élément de grille a
+                `min-width: auto`, donc la colonne se dimensionne sur le mot le
+                plus long de la fiche. Une référence sans espace — et les noms
+                venus du fournisseur en contiennent — faisait défiler la page
+                entière horizontalement. */}
+            <div className="min-w-0">
               {produit.photos?.length > 0 && !brokenPhotos.has(produit.photos[activePhoto]) ? (
                 <>
                   <img
@@ -193,9 +198,9 @@ export default function ProduitDetailPro() {
               )}
             </div>
 
-            <div>
-              {enseigne && <p className="text-sm text-primary">{enseigne.nom}</p>}
-              <h1 className="mt-1 text-2xl font-bold text-foreground">{produit.nom}</h1>
+            <div className="min-w-0">
+              {enseigne && <p className="truncate text-sm text-primary">{enseigne.nom}</p>}
+              <h1 className="mt-1 break-words text-2xl font-bold text-foreground">{produit.nom}</h1>
               <p className="mt-2 text-2xl font-semibold text-primary">
                 {paliers.length > 1 && (
                   <span className="mr-1 text-sm font-normal text-muted-foreground">à partir de</span>
@@ -283,7 +288,9 @@ export default function ProduitDetailPro() {
               )}
 
               {produit.description && (
-                <p className="mt-4 whitespace-pre-line text-sm text-foreground">{produit.description}</p>
+                <p className="mt-4 whitespace-pre-line break-words text-sm text-foreground">
+                  {produit.description}
+                </p>
               )}
 
               <div className="mt-6 flex items-center gap-3">
