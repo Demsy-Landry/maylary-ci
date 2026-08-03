@@ -1,36 +1,32 @@
 /**
- * Transport d'un panier : remise de groupage, offres du fournisseur, et refus.
+ * Transport d'un panier : offres du fournisseur, refus, et remise de groupage.
  *
- * Le prix de chaque article porte le transport de son propre colis : c'est la
- * seule façon d'afficher un prix ferme avant de connaître le panier. Mais un
- * panier de plusieurs références part dans un seul envoi, et la part fixe du
- * colis — mesurée à 1,31 $ chez le fournisseur — n'est due qu'une fois.
+ * Le prix affiché d'un article ne porte plus le transport : celui-ci est coté
+ * ici, sur le panier réel, et facturé en ligne séparée. Personne ne porte plus
+ * le risque d'une estimation, et le client voit où va son argent.
  *
- * Cette fonction cote le panier tel qu'il est et en tire trois choses.
+ * Cette fonction en tire trois choses.
  *
- * 1. La remise de groupage : l'écart entre le transport déjà facturé dans les
- *    prix et le transport réel du colis unique. Elle ne peut jamais être
- *    négative — si le groupage revient plus cher, le client garde le prix
- *    annoncé, c'est notre affaire. Elle est calculée ici, jamais par le
- *    navigateur : le client ne choisit pas la remise qu'il obtient.
- *
- * 2. Les offres du transporteur, toutes, avec leur délai. Retenir d'office la
+ * 1. Les offres du transporteur, toutes, avec leur délai. Retenir d'office la
  *    moins chère convient pour bâtir un prix de vente, pas pour servir un
  *    client : sur un même colis l'écart mesuré va de 11,04 $ en 20-60 jours à
- *    85,41 $ en 3-7 jours. Cet arbitrage appartient à celui qui paie. Seule
- *    l'option économique est comprise dans les prix affichés ; les autres se
- *    paient en supplément, ce qui ne refait jamais le prix des articles.
+ *    85,41 $ en 3-7 jours. Cet arbitrage appartient à celui qui paie.
  *
- * 3. Le refus. Quand le fournisseur répond mais qu'aucun transporteur n'accepte
+ * 2. Le refus. Quand le fournisseur répond mais qu'aucun transporteur n'accepte
  *    la combinaison — un liquide mêlé à un colis sec suffit — le panier n'est
  *    pas expédiable. On le dit avant le paiement, et on nomme l'article en
  *    cause : découvrir cela après encaissement obligerait à revenir sur un prix
  *    déjà payé.
  *
+ * 3. La remise de groupage, si l'ancien modèle est rétabli. Quand les prix
+ *    portent le transport d'un colis chacun, un panier de plusieurs références
+ *    facture plusieurs fois une part fixe qui n'est due qu'une fois — mesurée
+ *    à 1,31 $ chez le fournisseur. Elle ne peut jamais être négative : si le
+ *    groupage revient plus cher, le client garde le prix annoncé.
+ *
  * Tout est annoncé avant le paiement. Un montant présenté puis modifié détruit
  * la confiance, même à la baisse.
- */
-import { createClient } from 'npm:@supabase/supabase-js@2';
+ */import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getCjAccessToken, obtenirOptionsFretLotCj, pause } from '../_partage/cj-api.ts';
 
 const corsHeaders = {
@@ -110,7 +106,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: parametres } = await db
       .from('app_e08c374bc4_parametres_import')
-      .select('taux_change_usd_fcfa, pays_destination_code')
+      .select('taux_change_usd_fcfa, pays_destination_code, fret_inclus_dans_prix, taux_marge_fret')
       .eq('id', 1)
       .maybeSingle();
     if (!parametres) return reponse({ error: 'Paramètres indisponibles.' }, 500);
@@ -129,7 +125,12 @@ Deno.serve(async (req: Request) => {
 
     const pays = String(parametres.pays_destination_code ?? 'CI');
     const taux = Number(parametres.taux_change_usd_fcfa);
-    const enFcfa = (usd: number) => Math.round(usd * taux);
+    // Le transport est répercuté à prix coûtant tant que la marge sur fret reste
+    // à zéro. Ce n'est pas une générosité : c'est ce qui rend la ligne
+    // vérifiable par le client, et ce qui nous décharge du risque d'estimation.
+    const margeFret = Number(parametres.taux_marge_fret ?? 0);
+    const fretInclusDansPrix = parametres.fret_inclus_dans_prix !== false;
+    const enFcfa = (usd: number) => Math.round(usd * taux * (1 + margeFret));
 
     const options = await obtenirOptionsFretLotCj(aExpedier, token, pays);
 
@@ -173,19 +174,35 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // La moins chère est celle dont le transport est déjà compris dans les prix
-    // affichés. Les autres se paient en supplément, jamais en refaisant le prix.
     const economique = options[0];
     const fretReelPanier = enFcfa(economique.prix_usd);
-    const remise = aExpedier.length >= 2 ? Math.max(0, fretFactureArticles - fretReelPanier) : 0;
 
-    const optionsClient = options.map((o, i) => ({
-      transporteur: o.transporteur,
-      delai: o.delai,
-      prix_fcfa: enFcfa(o.prix_usd),
-      supplement_fcfa: Math.max(0, enFcfa(o.prix_usd) - fretReelPanier),
-      economique: i === 0,
-    }));
+    // Deux façons de facturer le transport, selon le réglage.
+    //
+    // Séparé — le prix des articles ne le porte pas : chaque offre se paie en
+    // entier, et il n'y a plus rien à rendre puisque rien n'a été facturé
+    // d'avance. C'est le modèle en vigueur.
+    //
+    // Compris — l'ancien modèle : les prix portaient le transport d'un colis
+    // chacun, on rendait la part comptée en double et les offres plus rapides
+    // se payaient en supplément. Conservé pour qu'un retour en arrière reste
+    // possible sans redéploiement.
+    const remise =
+      fretInclusDansPrix && aExpedier.length >= 2
+        ? Math.max(0, fretFactureArticles - fretReelPanier)
+        : 0;
+
+    const optionsClient = options.map((o, i) => {
+      const prix = enFcfa(o.prix_usd);
+      return {
+        transporteur: o.transporteur,
+        delai: o.delai,
+        prix_fcfa: prix,
+        // Ce que cette offre ajoute au total, une fois la remise déduite.
+        supplement_fcfa: fretInclusDansPrix ? Math.max(0, prix - fretReelPanier) : prix,
+        economique: i === 0,
+      };
+    });
 
     console.log(
       JSON.stringify({
@@ -194,6 +211,7 @@ Deno.serve(async (req: Request) => {
         fretFactureArticles,
         fretReelPanier,
         remise,
+        fretInclusDansPrix,
         options: optionsClient.length,
       }),
     );
@@ -207,6 +225,7 @@ Deno.serve(async (req: Request) => {
         fret_reel_panier_fcfa: fretReelPanier,
         transporteur: economique.transporteur,
         options: optionsClient,
+        fret_inclus_dans_prix: fretInclusDansPrix,
         articles_groupes: aExpedier.length,
       },
       200,

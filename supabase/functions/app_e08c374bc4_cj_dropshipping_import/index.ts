@@ -194,7 +194,12 @@ Deno.serve(async (req: Request) => {
     // conjonction « transport écrasant » et « facture salée » qui est refusée.
     const ratioFret =
       cout.prix_achat_fcfa > 0 ? cout.cout_fret_fcfa / cout.prix_achat_fcfa : Infinity;
-    const commandeMinimum = cout.prix_unitaire_fcfa * cout.quantite_minimum;
+    // Ce que le client débourse réellement, transport compris — que celui-ci
+    // soit dans le prix ou facturé à part. Juger sur la seule marchandise
+    // laisserait passer un article de 3 000 FCFA avec 50 000 FCFA de port.
+    const commandeMinimum =
+      (cout.prix_unitaire_fcfa + (cout.fret_inclus_dans_prix ? 0 : cout.cout_fret_fcfa)) *
+      cout.quantite_minimum;
     const ratioMaximum = Number(parametres.ratio_fret_maximum);
     const seuilSurveille = Number(parametres.seuil_commande_surveillee_fcfa);
 

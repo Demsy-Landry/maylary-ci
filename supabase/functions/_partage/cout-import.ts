@@ -26,6 +26,11 @@ export interface ParametresCout {
    * sa couverture rend inutile une police facultés locale.
    */
   fret_transporteur_couvre_assurance?: boolean | null;
+  /**
+   * Faux quand le transport ne fait plus partie du prix affiché : il est alors
+   * coté sur le panier réel et facturé au client en ligne séparée.
+   */
+  fret_inclus_dans_prix?: boolean | null;
 }
 
 export interface RepartitionIncoterm {
@@ -59,6 +64,12 @@ export interface DetailCout {
   /** Vrai quand aucune prime n'est ajoutée parce que le transporteur couvre. */
   assurance_incluse_dans_le_fret: boolean;
   taux_marge_applique: number;
+  /**
+   * Vrai quand `cout_fret_fcfa` entre dans le prix de vente. Faux, le fret
+   * reste calculé et consigné — il sert à juger la viabilité d'un article —
+   * mais il est facturé au panier, pas dans le prix affiché.
+   */
+  fret_inclus_dans_prix: boolean;
 }
 
 /**
@@ -136,7 +147,15 @@ export function calculerCout(params: {
   const valeur_assuree_fcfa = Math.round(valeur_assuree_lot_fcfa / quantiteMinimum);
   const cout_assurance_fcfa = Math.round(prime_lot_fcfa / quantiteMinimum);
 
-  const cout_revient_fcfa = prixAchatFcfa + cout_fret_fcfa + cout_assurance_fcfa;
+  // Le transport ne fait plus partie du prix affiché : il est coté sur le
+  // panier réel et facturé en ligne séparée. Il reste calculé et consigné, car
+  // c'est lui qui dit si un article est vendable depuis ce fournisseur.
+  //
+  // L'assurance, elle, reste dans le prix : elle porte sur la marchandise, que
+  // le client la voie ou non, et vaut zéro dès que le transporteur couvre.
+  const fretInclus = parametres.fret_inclus_dans_prix !== false;
+  const cout_revient_fcfa =
+    prixAchatFcfa + (fretInclus ? cout_fret_fcfa : 0) + cout_assurance_fcfa;
   const prix_avant_plancher_fcfa = Math.round(cout_revient_fcfa * (1 + tauxMarge));
 
   // Le plancher protège la valeur d'une commande, pas celle d'une pièce : sur
@@ -163,6 +182,7 @@ export function calculerCout(params: {
     prime_lot_fcfa,
     assurance_incluse_dans_le_fret: transporteurCouvre,
     taux_marge_applique: tauxMarge,
+    fret_inclus_dans_prix: fretInclus,
   };
 }
 

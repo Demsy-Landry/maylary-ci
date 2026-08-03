@@ -69,10 +69,15 @@ export default function PanierAchat() {
 
             <div className="space-y-4 rounded-md border p-4">
               <div>
-                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-sm text-muted-foreground">Sous-total marchandise</p>
                 <p className="text-2xl font-bold text-primary">{totalFcfa.toLocaleString('fr-FR')} FCFA</p>
+                {/* Le transport n'est plus fondu dans les prix : le dire ici,
+                    pas au moment de payer. Une somme qui grossit à la dernière
+                    étape fait abandonner le panier. */}
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Frais de livraison précisés à l'étape suivante selon votre ville.
+                  Hors livraison. Vos articles partent dans un seul colis : le transport est coté à
+                  l'étape suivante et vous choisissez entre plusieurs transporteurs, du plus
+                  économique au plus rapide.
                 </p>
               </div>
               <Button className="w-full" onClick={() => navigate('/boutique/commande')}>
