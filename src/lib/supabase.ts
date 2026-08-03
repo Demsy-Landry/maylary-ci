@@ -48,7 +48,12 @@ export const PRODUITS_FAVORIS_TABLE = 'app_e08c374bc4_produits_favoris';
 
 export const FOURNISSEURS_TABLE = 'app_e08c374bc4_fournisseurs';
 export const CATEGORIES_GP_TABLE = 'app_e08c374bc4_categories_gp';
+/** @deprecated Remplacée par CANAUX_PAIEMENT_TABLE, qui accepte plusieurs canaux. */
 export const PARAMETRES_PAIEMENT_TABLE = 'app_e08c374bc4_parametres_paiement';
+/** Coordonnées d'encaissement : lecture réservée aux comptes connectés. */
+export const CANAUX_PAIEMENT_TABLE = 'app_e08c374bc4_canaux_paiement';
+/** Compartiment privé des reçus de paiement déposés par les clients. */
+export const PREUVES_PAIEMENT_BUCKET = 'app_e08c374bc4_preuves_paiement';
 export const PARAMETRES_IMPORT_TABLE = 'app_e08c374bc4_parametres_import';
 export const PARAMETRES_INCOTERM_TABLE = 'app_e08c374bc4_parametres_incoterm';
 export const COMMANDES_GP_TABLE = 'app_e08c374bc4_commandes_gp';
@@ -265,6 +270,34 @@ export interface CategorieGP {
   updated_at: string;
 }
 
+export type TypeCanalPaiement = 'mobile_money' | 'virement';
+
+export const TYPE_CANAL_LABELS: Record<TypeCanalPaiement, string> = {
+  mobile_money: 'Mobile Money',
+  virement: 'Virement bancaire',
+};
+
+/**
+ * Un moyen d'encaissement de Maylary. Plusieurs coexistent : en Côte d'Ivoire
+ * un commerçant encaisse sur Wave, Orange Money, MTN, Moov et par virement, et
+ * imposer un seul canal revient à refuser les clients des autres.
+ */
+export interface CanalPaiement {
+  id: string;
+  type_canal: TypeCanalPaiement;
+  /** « Wave », « Orange Money », « Ecobank »… tel que le client le reconnaîtra. */
+  libelle: string;
+  /** Numéro marchand, ou IBAN/RIB selon le type. */
+  numero: string;
+  titulaire: string;
+  instructions: string | null;
+  actif: boolean;
+  ordre: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** @deprecated Remplacée par CanalPaiement. */
 export interface ParametresPaiement {
   id: number;
   nom_banque: string | null;
@@ -350,6 +383,23 @@ export interface CommandeGP {
   /** Écart payé par rapport à la livraison économique, déjà comprise dans les prix. */
   supplement_transporteur_fcfa: number;
   delai_transporteur: string | null;
+
+  /* --- Règlement -------------------------------------------------------- */
+  /** Canal par lequel le client dit avoir payé (« Wave », « Ecobank »…). */
+  canal_paiement_declare: string | null;
+  reference_transaction: string | null;
+  /** Chemin du reçu dans le compartiment privé. Jamais une URL : elle expirerait. */
+  preuve_paiement_chemin: string | null;
+  paiement_declare_le: string | null;
+  /**
+   * Ce qui est réellement arrivé, distinct de `montant_total_fcfa` qui est ce
+   * qui était dû. Les confondre effacerait le règlement partiel, précisément le
+   * cas qu'on veut voir.
+   */
+  montant_recu_fcfa: number | null;
+  paiement_confirme_le: string | null;
+  paiement_confirme_par: string | null;
+  note_reglement: string | null;
 }
 
 /**

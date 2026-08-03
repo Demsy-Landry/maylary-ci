@@ -7,6 +7,7 @@ import {
 } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import AdminNav from '@/components/AdminNav';
+import CanauxPaiementCard from '@/components/admin/CanauxPaiementCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -85,6 +86,10 @@ export default function AdminParametres() {
       </header>
 
       <main className="mx-auto max-w-screen-md space-y-6 px-4 py-8 sm:px-6">
+        {/* En tête : sans canal d'encaissement, la boutique prend des commandes
+            qu'elle ne peut pas faire payer. Rien n'est plus urgent sur cet écran. */}
+        <CanauxPaiementCard />
+
         <ParametresFacturationCard />
 
         <Card>

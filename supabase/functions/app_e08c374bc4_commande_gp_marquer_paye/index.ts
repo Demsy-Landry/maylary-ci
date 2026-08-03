@@ -13,10 +13,24 @@ function jsonResponse(body: unknown, status: number) {
 }
 
 /**
+ * Déclaration de règlement par le client.
+ *
  * Transition contrôlée côté serveur : le client ne peut pas modifier
- * commandes_gp.statut directement (RLS admin-only), donc cette fonction
+ * `commandes_gp.statut` directement (RLS admin-only), donc cette fonction
  * vérifie la propriété de la commande et n'autorise qu'un seul passage,
  * en_attente_paiement -> paiement_recu_verification, jamais un autre statut.
+ *
+ * Elle exige désormais une trace. Auparavant le bouton « J'ai payé » basculait
+ * la commande sur simple déclaration : rien à confronter en cas de litige, ni
+ * pour le client qui a réellement payé, ni pour Maylary. Une référence de
+ * transaction ou un reçu est maintenant obligatoire — l'un ou l'autre, pas les
+ * deux : un virement bancaire donne une référence sans capture, un paiement
+ * Wave donne une capture sans référence recopiable.
+ *
+ * Le reçu lui-même n'est pas reçu ici : le client le dépose directement dans un
+ * compartiment privé dont la RLS impose que le premier segment du chemin soit
+ * son propre identifiant. La fonction ne fait que consigner ce chemin, après
+ * l'avoir vérifié — un chemin fabriqué désignerait le reçu d'un autre client.
  */
 Deno.serve(async (req: Request) => {
   const requestId = crypto.randomUUID();
@@ -51,7 +65,12 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Session invalide, reconnectez-vous.' }, 401);
     }
 
-    let body: { commande_id?: string };
+    let body: {
+      commande_id?: string;
+      canal?: string;
+      reference_transaction?: string;
+      preuve_chemin?: string;
+    };
     try {
       body = await req.json();
     } catch {
@@ -60,6 +79,27 @@ Deno.serve(async (req: Request) => {
 
     if (!body.commande_id) {
       return jsonResponse({ error: 'commande_id requis.' }, 400);
+    }
+
+    const reference = (body.reference_transaction ?? '').trim();
+    const preuve = (body.preuve_chemin ?? '').trim();
+
+    if (!reference && !preuve) {
+      return jsonResponse(
+        {
+          error:
+            'Indiquez la référence de votre transaction, ou joignez le reçu. ' +
+            "Sans l'un des deux, nous ne pouvons pas rapprocher votre règlement.",
+        },
+        400,
+      );
+    }
+
+    // Un chemin de reçu commence par l'identifiant de son déposant. La RLS du
+    // compartiment l'impose déjà à l'écriture ; on le revérifie ici pour qu'un
+    // client ne puisse pas rattacher à sa commande le reçu d'un autre.
+    if (preuve && !preuve.startsWith(`${user.id}/`)) {
+      return jsonResponse({ error: 'Reçu invalide.' }, 400);
     }
 
     const supabaseService = createClient(supabaseUrl, serviceRoleKey);
@@ -75,7 +115,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (commande.user_id !== user.id) {
-      return jsonResponse({ error: "Cette commande ne vous appartient pas." }, 403);
+      return jsonResponse({ error: 'Cette commande ne vous appartient pas.' }, 403);
     }
 
     if (commande.statut !== 'en_attente_paiement') {
@@ -85,9 +125,27 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Le reçu doit exister réellement : sans ce contrôle, un chemin bien formé
+    // mais vide passerait, et la commande porterait une preuve fantôme.
+    if (preuve) {
+      const dernierSlash = preuve.lastIndexOf('/');
+      const { data: fichiers } = await supabaseService.storage
+        .from('app_e08c374bc4_preuves_paiement')
+        .list(preuve.slice(0, dernierSlash), { search: preuve.slice(dernierSlash + 1) });
+      if (!fichiers || fichiers.length === 0) {
+        return jsonResponse({ error: "Le reçu n'a pas pu être retrouvé. Réessayez." }, 400);
+      }
+    }
+
     const { error: updateError } = await supabaseService
       .from('app_e08c374bc4_commandes_gp')
-      .update({ statut: 'paiement_recu_verification' })
+      .update({
+        statut: 'paiement_recu_verification',
+        canal_paiement_declare: (body.canal ?? '').trim() || null,
+        reference_transaction: reference || null,
+        preuve_paiement_chemin: preuve || null,
+        paiement_declare_le: new Date().toISOString(),
+      })
       .eq('id', commande.id);
 
     if (updateError) {
@@ -98,7 +156,15 @@ Deno.serve(async (req: Request) => {
     await supabaseService.from('app_e08c374bc4_historique_statut_commande_gp').insert({
       commande_id: commande.id,
       statut: 'paiement_recu_verification',
-      commentaire_admin: null,
+      // Ce que le client a déclaré est repris tel quel dans l'historique : la
+      // trace doit rester lisible même si la commande est modifiée ensuite.
+      commentaire_admin: [
+        (body.canal ?? '').trim() ? `Canal : ${(body.canal ?? '').trim()}` : null,
+        reference ? `Référence : ${reference}` : null,
+        preuve ? 'Reçu joint' : null,
+      ]
+        .filter(Boolean)
+        .join(' · ') || null,
     });
 
     // Notifie l'admin (best-effort : n'échoue jamais la requête principale
