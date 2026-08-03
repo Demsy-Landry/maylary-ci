@@ -1,36 +1,32 @@
 /**
- * Transport d'un panier : remise de groupage, offres du fournisseur, et refus.
+ * Transport d'un panier : offres du fournisseur, refus, et remise de groupage.
  *
- * Le prix de chaque article porte le transport de son propre colis : c'est la
- * seule façon d'afficher un prix ferme avant de connaître le panier. Mais un
- * panier de plusieurs références part dans un seul envoi, et la part fixe du
- * colis — mesurée à 1,31 $ chez le fournisseur — n'est due qu'une fois.
+ * Le prix affiché d'un article ne porte plus le transport : celui-ci est coté
+ * ici, sur le panier réel, et facturé en ligne séparée. Personne ne porte plus
+ * le risque d'une estimation, et le client voit où va son argent.
  *
- * Cette fonction cote le panier tel qu'il est et en tire trois choses.
+ * Cette fonction en tire trois choses.
  *
- * 1. La remise de groupage : l'écart entre le transport déjà facturé dans les
- *    prix et le transport réel du colis unique. Elle ne peut jamais être
- *    négative — si le groupage revient plus cher, le client garde le prix
- *    annoncé, c'est notre affaire. Elle est calculée ici, jamais par le
- *    navigateur : le client ne choisit pas la remise qu'il obtient.
- *
- * 2. Les offres du transporteur, toutes, avec leur délai. Retenir d'office la
+ * 1. Les offres du transporteur, toutes, avec leur délai. Retenir d'office la
  *    moins chère convient pour bâtir un prix de vente, pas pour servir un
  *    client : sur un même colis l'écart mesuré va de 11,04 $ en 20-60 jours à
- *    85,41 $ en 3-7 jours. Cet arbitrage appartient à celui qui paie. Seule
- *    l'option économique est comprise dans les prix affichés ; les autres se
- *    paient en supplément, ce qui ne refait jamais le prix des articles.
+ *    85,41 $ en 3-7 jours. Cet arbitrage appartient à celui qui paie.
  *
- * 3. Le refus. Quand le fournisseur répond mais qu'aucun transporteur n'accepte
+ * 2. Le refus. Quand le fournisseur répond mais qu'aucun transporteur n'accepte
  *    la combinaison — un liquide mêlé à un colis sec suffit — le panier n'est
  *    pas expédiable. On le dit avant le paiement, et on nomme l'article en
  *    cause : découvrir cela après encaissement obligerait à revenir sur un prix
  *    déjà payé.
  *
+ * 3. La remise de groupage, si l'ancien modèle est rétabli. Quand les prix
+ *    portent le transport d'un colis chacun, un panier de plusieurs références
+ *    facture plusieurs fois une part fixe qui n'est due qu'une fois — mesurée
+ *    à 1,31 $ chez le fournisseur. Elle ne peut jamais être négative : si le
+ *    groupage revient plus cher, le client garde le prix annoncé.
+ *
  * Tout est annoncé avant le paiement. Un montant présenté puis modifié détruit
  * la confiance, même à la baisse.
- */
-import { createClient } from 'npm:@supabase/supabase-js@2';
+ */import { createClient } from 'npm:@supabase/supabase-js@2';
 import { getCjAccessToken, obtenirOptionsFretLotCj, pause } from '../_partage/cj-api.ts';
 
 const corsHeaders = {
@@ -215,6 +211,7 @@ Deno.serve(async (req: Request) => {
         fretFactureArticles,
         fretReelPanier,
         remise,
+        fretInclusDansPrix,
         options: optionsClient.length,
       }),
     );
