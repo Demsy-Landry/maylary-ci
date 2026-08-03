@@ -393,12 +393,15 @@ export default function CommandeGP() {
                       )}
                     </div>
                   ))}
-                  {/* Le motif est ce qui permet de rapprocher un virement d'une
-                      commande. Le demander ici évite un rapprochement à l'aveugle. */}
+                  {/* La référence est ce qui rapproche un règlement d'une
+                      commande. Un virement a un champ « motif » pour la porter ;
+                      un lien de paiement marchand, pas toujours. La formulation
+                      couvre les deux plutôt que de demander l'impossible à qui
+                      paie par lien. */}
                   <p className="text-sm text-foreground">
-                    Indiquez la référence{' '}
-                    <span className="font-semibold">{commandeCreee}</span> dans le motif de votre
-                    règlement.
+                    Gardez la référence <span className="font-semibold">{commandeCreee}</span> sous
+                    la main : elle vous sera demandée pour déclarer votre règlement. Si votre moyen
+                    de paiement propose un champ « motif », indiquez-la dedans.
                   </p>
                 </div>
               </>
