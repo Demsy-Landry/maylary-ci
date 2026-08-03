@@ -1,21 +1,60 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
-// Utilitaire interne : télécharge une image depuis une URL externe (ex: export
-// Canva) et la dépose dans Supabase Storage, server-side (contourne les
-// restrictions réseau de l'environnement de développement qui ne peut pas
-// atteindre canva.com directement). Protégé par un jeton partagé stocké en
-// secret Supabase (Project Settings > Edge Functions > Secrets), jamais en dur
-// dans le code.
+/**
+ * Rapatrie une image depuis une URL externe (export Canva, banque d'images) et
+ * la dépose dans Supabase Storage.
+ *
+ * Le téléchargement se fait côté serveur pour deux raisons : le navigateur d'un
+ * administrateur serait bloqué par la politique d'origine du fournisseur, et
+ * l'environnement de développement n'atteint pas canva.com.
+ *
+ * Deux façons de s'authentifier, parce que deux usages différents s'en servent :
+ *
+ *  - un jeton partagé, pour les scripts d'outillage qui n'ont pas de session ;
+ *  - une session d'administrateur, pour que l'application elle-même puisse
+ *    appeler la fonction sans qu'un secret ait à circuler dans le navigateur.
+ *
+ * Les deux donnent le même pouvoir : écrire dans un dépôt public. Il n'y a donc
+ * pas de voie plus permissive que l'autre.
+ */
 const INTERNAL_TOKEN = Deno.env.get('IMPORT_REMOTE_IMAGE_TOKEN');
+
+async function estAdministrateur(entete: string | null): Promise<boolean> {
+  if (!entete) return false;
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  if (!supabaseUrl || !anonKey || !serviceRoleKey) return false;
+
+  const commeAppelant = createClient(supabaseUrl, anonKey, {
+    global: { headers: { Authorization: entete } },
+  });
+  const {
+    data: { user },
+  } = await commeAppelant.auth.getUser();
+  if (!user) return false;
+
+  const service = createClient(supabaseUrl, serviceRoleKey);
+  const { data: profil } = await service
+    .from('app_e08c374bc4_profiles')
+    .select('type_compte')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  return profil?.type_compte === 'admin';
+}
 
 Deno.serve(async (req: Request) => {
   try {
-    if (!INTERNAL_TOKEN) {
-      return new Response(JSON.stringify({ error: 'IMPORT_REMOTE_IMAGE_TOKEN non configuré.' }), { status: 500 });
+    const body = await req.json().catch(() => null);
+    if (!body) {
+      return new Response(JSON.stringify({ error: 'Corps de requête JSON invalide.' }), { status: 400 });
     }
 
-    const body = await req.json().catch(() => null);
-    if (!body || body.token !== INTERNAL_TOKEN) {
+    const jetonValide = Boolean(INTERNAL_TOKEN) && body.token === INTERNAL_TOKEN;
+    const autorise = jetonValide || (await estAdministrateur(req.headers.get('Authorization')));
+
+    if (!autorise) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     }
 
