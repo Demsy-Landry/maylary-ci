@@ -14,6 +14,7 @@ import {
   type ParametresPaiement,
   type ModePaiement,
   EDGE_FUNCTIONS_URL,
+  type OptionTransport,
 } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +26,7 @@ import {
   RadioGroupItem,
 } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Loader2, Landmark, Smartphone, ShoppingCart } from 'lucide-react';
+import { Loader2, Landmark, Smartphone, ShoppingCart, Truck, TriangleAlert } from 'lucide-react';
 
 export default function CommandeGP() {
   const { items, totalFcfa, clearCart } = useCartGP();
@@ -38,8 +39,20 @@ export default function CommandeGP() {
     remise_fcfa: number;
     fret_facture_articles_fcfa?: number;
     fret_reel_panier_fcfa?: number;
+    expediable?: boolean;
+    motif?: string;
+    articles_en_cause?: string[];
+    options?: OptionTransport[];
   } | null>(null);
   const [remiseEnCours, setRemiseEnCours] = useState(false);
+  /**
+   * Transporteur retenu par le client.
+   *
+   * Le transport économique est déjà compris dans les prix affichés : choisir
+   * plus rapide ajoute un supplément, ça ne refait jamais le prix. Le montant
+   * annoncé ici est celui qui sera encaissé.
+   */
+  const [transporteurChoisi, setTransporteurChoisi] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -66,7 +79,13 @@ export default function CommandeGP() {
           }),
         });
         const json = await res.json().catch(() => null);
-        if (!annule && res.ok && json?.success) setRemiseGroupage(json);
+        if (!annule && res.ok && json?.success) {
+          setRemiseGroupage(json);
+          // L'option économique est présélectionnée : elle est déjà comprise
+          // dans les prix, donc c'est le choix sans surprise.
+          const eco = (json.options as OptionTransport[] | undefined)?.find((o) => o.economique);
+          setTransporteurChoisi(eco?.transporteur ?? null);
+        }
       } catch {
         // Sans cotation, le client paie le prix annoncé : aucune surprise.
       } finally {
@@ -81,7 +100,14 @@ export default function CommandeGP() {
   }, [user, items.length]);
 
   const remise = remiseGroupage?.remise_fcfa ?? 0;
-  const totalAPayer = Math.max(0, totalFcfa - remise);
+  const optionsTransport = remiseGroupage?.options ?? [];
+  const optionRetenue = optionsTransport.find((o) => o.transporteur === transporteurChoisi) ?? null;
+  const supplementTransport = optionRetenue?.supplement_fcfa ?? 0;
+  const totalAPayer = Math.max(0, totalFcfa - remise) + supplementTransport;
+
+  // Un panier qu'aucun transporteur n'accepte ne doit pas être payé : on le
+  // dirait après coup, et il faudrait revenir sur un prix encaissé.
+  const panierBloque = remiseGroupage?.expediable === false;
 
   const [nomDestinataire, setNomDestinataire] = useState('');
   const [telephoneDestinataire, setTelephoneDestinataire] = useState('');
@@ -116,6 +142,12 @@ export default function CommandeGP() {
       return;
     }
     if (items.length === 0) return;
+    if (panierBloque) {
+      setFormError(
+        "Ce panier ne peut pas être expédié en l'état. Retirez l'article signalé et commandez-le séparément.",
+      );
+      return;
+    }
     if (!nomDestinataire.trim() || !telephoneDestinataire.trim() || !adresseLivraison.trim() || !villeLivraison.trim()) {
       setFormError('Merci de remplir tous les champs de livraison obligatoires.');
       return;
@@ -166,6 +198,9 @@ export default function CommandeGP() {
         remise_groupage_fcfa: remise,
         fret_facture_articles_fcfa: remiseGroupage?.fret_facture_articles_fcfa ?? null,
         fret_reel_panier_fcfa: remiseGroupage?.fret_reel_panier_fcfa ?? null,
+        transporteur_choisi: optionRetenue?.transporteur ?? null,
+        supplement_transporteur_fcfa: supplementTransport,
+        delai_transporteur: optionRetenue?.delai ?? null,
         mode_paiement: modePaiement,
         nom_destinataire: nomDestinataire.trim(),
         telephone_destinataire: telephoneDestinataire.trim(),
@@ -313,6 +348,92 @@ export default function CommandeGP() {
                 </div>
               </div>
 
+              {/* Le transport, avant le paiement : le client voit ce que le
+                  fournisseur propose réellement et arbitre lui-même entre prix
+                  et délai. Sur un même colis, l'écart va du simple au septuple. */}
+              {(remiseEnCours || optionsTransport.length > 0 || panierBloque) && (
+                <div className="rounded-md border p-4">
+                  <h2 className="mb-1 flex items-center gap-2 font-semibold text-foreground">
+                    <Truck className="h-4 w-4 text-primary" />
+                    Mode de livraison
+                  </h2>
+
+                  {panierBloque ? (
+                    <div className="mt-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
+                      <p className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
+                        <TriangleAlert className="h-4 w-4" />
+                        Ces articles ne voyagent pas ensemble
+                      </p>
+                      <p className="mt-1.5 text-sm text-muted-foreground">
+                        {remiseGroupage?.motif === 'article_non_expediable'
+                          ? "Aucun transporteur n'accepte cet article vers votre pays :"
+                          : 'Pris séparément chacun part sans difficulté, mais aucun transporteur ne les accepte dans le même colis :'}
+                      </p>
+                      <ul className="mt-1.5 space-y-0.5 text-sm text-foreground">
+                        {(remiseGroupage?.articles_en_cause ?? []).map((nom) => (
+                          <li key={nom}>· {nom}</li>
+                        ))}
+                      </ul>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Retirez-le de votre panier et commandez-le séparément. Nous préférons vous le
+                        dire maintenant plutôt qu'après votre paiement.
+                      </p>
+                    </div>
+                  ) : remiseEnCours ? (
+                    <div className="mt-2 space-y-2">
+                      <Skeleton className="h-14 w-full" />
+                      <Skeleton className="h-14 w-full" />
+                    </div>
+                  ) : (
+                    <>
+                      <p className="mb-3 text-xs text-muted-foreground">
+                        Tarifs du transporteur pour votre colis. La livraison économique est déjà
+                        comprise dans les prix affichés.
+                      </p>
+                      <RadioGroup
+                        value={transporteurChoisi ?? ''}
+                        onValueChange={setTransporteurChoisi}
+                      >
+                        {optionsTransport.map((o) => (
+                          <div
+                            key={o.transporteur}
+                            className="flex items-start gap-2 rounded-md border p-3"
+                          >
+                            <RadioGroupItem
+                              value={o.transporteur}
+                              id={`tr-${o.transporteur}`}
+                              className="mt-0.5"
+                            />
+                            <Label
+                              htmlFor={`tr-${o.transporteur}`}
+                              className="flex flex-1 flex-wrap items-baseline justify-between gap-2 font-normal"
+                            >
+                              <span>
+                                <span className="font-medium text-foreground">{o.transporteur}</span>
+                                {o.delai && (
+                                  <span className="block text-xs text-muted-foreground">
+                                    Livraison estimée sous {o.delai} jours
+                                  </span>
+                                )}
+                              </span>
+                              <span
+                                className={`shrink-0 text-sm font-semibold ${
+                                  o.economique ? 'text-primary' : 'text-foreground'
+                                }`}
+                              >
+                                {o.economique
+                                  ? 'Comprise'
+                                  : `+ ${o.supplement_fcfa.toLocaleString('fr-FR')} FCFA`}
+                              </span>
+                            </Label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </>
+                  )}
+                </div>
+              )}
+
               <div className="rounded-md border p-4">
                 <h2 className="mb-3 font-semibold text-foreground">Mode de paiement</h2>
                 {loadingParams ? (
@@ -363,6 +484,21 @@ export default function CommandeGP() {
                     </span>
                   </div>
                 )}
+                {supplementTransport > 0 && optionRetenue && (
+                  <div className="flex justify-between py-1.5">
+                    <span className="text-foreground">
+                      Livraison {optionRetenue.transporteur}
+                      {optionRetenue.delai && (
+                        <span className="block text-xs text-muted-foreground">
+                          Sous {optionRetenue.delai} jours au lieu de la livraison économique.
+                        </span>
+                      )}
+                    </span>
+                    <span className="shrink-0 font-medium text-foreground">
+                      + {supplementTransport.toLocaleString('fr-FR')} FCFA
+                    </span>
+                  </div>
+                )}
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total</p>
@@ -371,7 +507,7 @@ export default function CommandeGP() {
                 </p>
               </div>
               {formError && <p className="text-sm text-destructive">{formError}</p>}
-              <Button className="w-full" onClick={handleSubmit} disabled={submitting}>
+              <Button className="w-full" onClick={handleSubmit} disabled={submitting || panierBloque}>
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Confirmer la commande
               </Button>

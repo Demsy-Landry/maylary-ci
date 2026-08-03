@@ -191,7 +191,30 @@ export async function obtenirFretReelLotCj(
   token: string,
   paysDestination: string,
 ): Promise<FretReel | null> {
-  if (lignes.length === 0) return null;
+  const options = await obtenirOptionsFretLotCj(lignes, token, paysDestination);
+  return options.length > 0 ? options[0] : null;
+}
+
+/**
+ * Toutes les options de transport pour une expédition, de la moins chère à la
+ * plus chère.
+ *
+ * Retenir d'office la moins chère convient pour fixer un prix de vente, mais
+ * pas pour servir un client : sur un même colis, l'écart mesuré va de 11,04 $
+ * en 20-60 jours à 85,41 $ en 3-7 jours. C'est un arbitrage entre délai et
+ * prix, et il appartient à celui qui paie.
+ *
+ * Une liste vide n'est pas une panne : le fournisseur répond bien, mais aucun
+ * transporteur n'accepte cette combinaison de marchandises — un liquide mêlé à
+ * un colis sec, typiquement. L'appelant doit traiter ce cas comme un refus
+ * explicite, pas comme une indisponibilité passagère.
+ */
+export async function obtenirOptionsFretLotCj(
+  lignes: { vid: string; quantite: number }[],
+  token: string,
+  paysDestination: string,
+): Promise<FretReel[]> {
+  if (lignes.length === 0) return [];
   try {
     const res = await fetch(`${CJ_BASE_URL}/logistic/freightCalculate`, {
       method: 'POST',
@@ -203,22 +226,18 @@ export async function obtenirFretReelLotCj(
       }),
     });
     const data = await res.json().catch(() => null);
-    const options = Array.isArray(data?.data) ? data.data : [];
-    if (options.length === 0) return null;
+    const brutes = Array.isArray(data?.data) ? (data.data as Record<string, unknown>[]) : [];
 
-    const moinsChere = options.reduce((a: Record<string, unknown>, b: Record<string, unknown>) =>
-      Number(a.logisticPrice) <= Number(b.logisticPrice) ? a : b,
-    );
-    const prix = Number(moinsChere.logisticPrice);
-    if (!Number.isFinite(prix) || prix <= 0) return null;
-
-    return {
-      prix_usd: prix,
-      transporteur: String(moinsChere.logisticName ?? 'CJ Dropshipping'),
-      delai: moinsChere.logisticAging ? String(moinsChere.logisticAging) : null,
-    };
+    return brutes
+      .map((o) => ({
+        prix_usd: Number(o.logisticPrice),
+        transporteur: String(o.logisticName ?? 'CJ Dropshipping'),
+        delai: o.logisticAging ? String(o.logisticAging) : null,
+      }))
+      .filter((o) => Number.isFinite(o.prix_usd) && o.prix_usd > 0)
+      .sort((a, b) => a.prix_usd - b.prix_usd);
   } catch {
-    return null;
+    return [];
   }
 }
 

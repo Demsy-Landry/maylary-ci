@@ -254,16 +254,23 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Le transporteur retenu est celui sur lequel le prix a été bâti : le moins
-    // cher. Laisser le fournisseur choisir exposerait à un service express dont
-    // le surcoût ne serait facturé à personne.
+    // Le transporteur est celui que le client a choisi et payé au panier. On ne
+    // le recalcule pas : le tarif du fournisseur bouge d'un jour à l'autre, et
+    // reprendre la main ici reviendrait à livrer autrement que ce qui a été
+    // annoncé — parfois plus lentement que ce qui a été facturé.
+    //
+    // Sans choix enregistré — commande antérieure à cette fonctionnalité, ou
+    // fournisseur injoignable ce jour-là — on retombe sur l'option la moins
+    // chère, celle sur laquelle les prix de vente ont été bâtis. Laisser le
+    // fournisseur décider exposerait à un express dont le surcoût ne serait
+    // facturé à personne.
     const fret = await obtenirFretReelLotCj(
       aCommander.map((a) => ({ vid: a.vid, quantite: a.quantite })),
       token,
       'CI',
     );
     await pause(1100);
-    const transporteur = fret?.transporteur ?? null;
+    const transporteur = (commande.transporteur_choisi as string | null) ?? fret?.transporteur ?? null;
     const fretUsd = fret?.prix_usd ?? null;
 
     const solde = await obtenirSoldeCj(token);
