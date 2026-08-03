@@ -41,7 +41,7 @@ create policy avis_lecture_publique on app_e08c374bc4_avis_articles
 -- Trois conditions, chacune indispensable :
 --   - l'avis est signé par celui qui l'écrit ;
 --   - la commande lui appartient et elle est livrée ;
---   - l'article notéfigurait bien dans cette commande.
+--   - l'article noté figurait bien dans cette commande.
 --
 -- La troisième mérite son insistance : rédigée sans qualifier la ligne insérée,
 -- elle se replie sur l'alias de la sous-requête (`l.produit_id = l.produit_id`),
@@ -102,6 +102,11 @@ begin
   return new;
 end;
 $$;
+
+-- Fonction de déclencheur : elle n'a rien à faire dans l'API REST. Un appel
+-- direct échouerait, mais une fonction `security definer` joignable depuis
+-- l'extérieur n'a pas à exister.
+revoke execute on function app_e08c374bc4_avis_correction_bornee() from public, anon, authenticated;
 
 drop trigger if exists app_e08c374bc4_avis_correction_bornee on app_e08c374bc4_avis_articles;
 create trigger app_e08c374bc4_avis_correction_bornee
