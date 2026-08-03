@@ -29,6 +29,7 @@ import {
 import { Loader2, Eye, Package, CheckCircle2, Truck, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import BoutonFacture from '@/components/BoutonFacture';
+import AvisCommande from '@/components/AvisCommande';
 
 /** Statuts à partir desquels la facture définitive est émise (paiement acquis). */
 const FACTURE_DISPONIBLE: StatutCommandeGP[] = [
@@ -305,6 +306,13 @@ export default function MesCommandesGP() {
                   Total : {detail.montant_total_fcfa.toLocaleString('fr-FR')} FCFA
                 </p>
               </div>
+
+              {/* La notation n'apparaît qu'une fois le colis reçu : c'est la
+                  livraison qui donne le droit d'en parler, et la base applique
+                  la même règle de son côté. */}
+              {detail.statut === 'livree' && user && (
+                <AvisCommande commandeId={detail.id} userId={user.id} lignes={detail.lignes} />
+              )}
 
               <div className="rounded-md border p-3">
                 <p className="text-sm font-medium text-foreground">Documents comptables</p>

@@ -74,6 +74,16 @@ export const PARAMETRES_MARKETPLACE_TABLE = 'app_e08c374bc4_parametres_marketpla
 export const FACTURES_TABLE = 'app_e08c374bc4_factures';
 export const PARAMETRES_FACTURATION_TABLE = 'app_e08c374bc4_parametres_facturation';
 
+/** Avis clients : écriture réservée à l'auteur d'une commande livrée (RLS). */
+export const AVIS_ARTICLES_TABLE = 'app_e08c374bc4_avis_articles';
+/** Lecture publique d'un avis : ni user_id, ni commande_id, nom abrégé. */
+export const AVIS_PUBLIC_VIEW = 'app_e08c374bc4_avis_public';
+/** Note moyenne par produit, pour les vignettes de catalogue. */
+export const NOTES_PRODUITS_VIEW = 'app_e08c374bc4_notes_produits';
+export const INCIDENTS_FOURNISSEUR_TABLE = 'app_e08c374bc4_incidents_fournisseur';
+/** Fiche de qualité par atelier — vide pour tout autre que l'administrateur. */
+export const QUALITE_FOURNISSEURS_VIEW = 'app_e08c374bc4_qualite_fournisseurs';
+
 export type StockDisponible = 'en_stock' | 'sur_commande' | 'rupture';
 export type StatutDevis =
   | 'nouvelle'
@@ -376,6 +386,94 @@ export interface HistoriqueStatutCommandeGP {
 }
 
 /**
+ * Avis déposé par un client sur un article qu'il a réellement reçu. La table
+ * n'est ouverte en écriture que si la commande lui appartient, qu'elle est
+ * livrée, et que l'article y figurait — la base le vérifie, pas le formulaire.
+ */
+export interface AvisArticle {
+  id: string;
+  produit_id: string;
+  commande_id: string;
+  user_id: string;
+  note: number;
+  commentaire: string | null;
+  publie: boolean;
+  motif_retrait: string | null;
+  created_at: string;
+}
+
+/** Ce qu'une fiche produit affiche : jamais l'acheteur, jamais la commande. */
+export interface AvisPublic {
+  id: string;
+  produit_id: string;
+  note: number;
+  commentaire: string | null;
+  created_at: string;
+  auteur: string;
+}
+
+export interface NoteProduit {
+  produit_id: string;
+  note_moyenne: number;
+  nb_avis: number;
+}
+
+/**
+ * Défaut constaté par nous, que le client ne verra jamais : un article cassé
+ * remplacé avant expédition ne produit aucun mauvais avis mais coûte, et dit
+ * quelque chose de l'atelier.
+ */
+export type TypeIncidentFournisseur =
+  | 'article_defectueux'
+  | 'non_conforme'
+  | 'rupture_apres_commande'
+  | 'retard_expedition'
+  | 'emballage_insuffisant'
+  | 'quantite_manquante'
+  | 'autre';
+
+export const TYPE_INCIDENT_LABELS: Record<TypeIncidentFournisseur, string> = {
+  article_defectueux: 'Article défectueux',
+  non_conforme: 'Non conforme à la fiche',
+  rupture_apres_commande: 'Rupture après commande',
+  retard_expedition: "Retard d'expédition",
+  emballage_insuffisant: 'Emballage insuffisant',
+  quantite_manquante: 'Quantité manquante',
+  autre: 'Autre',
+};
+
+export interface IncidentFournisseur {
+  id: string;
+  produit_id: string | null;
+  commande_id: string | null;
+  fournisseur_origine_id: string | null;
+  fournisseur_origine: string | null;
+  type_incident: TypeIncidentFournisseur;
+  description: string;
+  cout_fcfa: number;
+  constate_par: string | null;
+  created_at: string;
+}
+
+/**
+ * Fiche de qualité d'un atelier. `taux_incident_pct` est nul tant qu'aucune
+ * pièce n'a été livrée : zéro pour cent sans livraison se lirait comme un
+ * sans-faute alors que c'est une absence de mesure.
+ */
+export interface QualiteFournisseur {
+  fournisseur_origine_id: string;
+  fournisseur: string | null;
+  articles_actifs: number;
+  marchands_max: number | null;
+  pieces_livrees: number;
+  note_moyenne: number | null;
+  nb_avis: number;
+  nb_incidents: number;
+  cout_incidents_fcfa: number;
+  taux_incident_pct: number | null;
+}
+
+/**
  * Sourcing sur demande : le client décrit un article absent du catalogue, nous
  * le cherchons chez nos fournisseurs et lui proposons un prix ferme.
  */
@@ -488,6 +586,7 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin/devis': ['proprietaire', 'operations'],
   '/admin/cj-dropshipping': ['proprietaire', 'catalogue'],
   '/admin/prospection': ['proprietaire', 'catalogue'],
+  '/admin/qualite-fournisseurs': ['proprietaire', 'operations', 'catalogue'],
   '/admin/equipe': ['proprietaire'],
   '/admin/parametres': ['proprietaire'],
 };

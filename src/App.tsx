@@ -22,6 +22,7 @@ import PanierDevis from '@/pages/PanierDevis';
 import MesDevis from '@/pages/MesDevis';
 import CjDropshippingImport from '@/pages/admin/CjDropshippingImport';
 import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
+import QualiteFournisseurs from '@/pages/admin/QualiteFournisseurs';
 import AdminCommandesGP from '@/pages/admin/CommandesGP';
 import AdminSourcingGestion from '@/pages/admin/SourcingGestion';
 import AdminVendeursGestion from '@/pages/admin/VendeursGestion';
@@ -108,6 +109,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/prospection">
                       <ProspectionFournisseurs />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/qualite-fournisseurs"
+                  element={
+                    <AdminRoute ecran="/admin/qualite-fournisseurs">
+                      <QualiteFournisseurs />
                     </AdminRoute>
                   }
                 />
