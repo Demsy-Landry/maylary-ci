@@ -335,6 +335,26 @@ export interface CommandeGP {
   cout_fournisseur_usd: number | null;
   envoye_fournisseur_le: string | null;
   erreur_fournisseur: string | null;
+  /** Transporteur retenu par le client au moment de commander. */
+  transporteur_choisi: string | null;
+  /** Écart payé par rapport à la livraison économique, déjà comprise dans les prix. */
+  supplement_transporteur_fcfa: number;
+  delai_transporteur: string | null;
+}
+
+/**
+ * Une offre de transport du fournisseur pour le panier entier.
+ *
+ * `supplement_fcfa` se compte par rapport à l'option économique, la seule déjà
+ * comprise dans les prix affichés en boutique. Choisir plus rapide ajoute donc
+ * une ligne au total ; ça ne refait jamais le prix des articles.
+ */
+export interface OptionTransport {
+  transporteur: string;
+  delai: string | null;
+  prix_fcfa: number;
+  supplement_fcfa: number;
+  economique: boolean;
 }
 
 export interface LigneCommandeGP {

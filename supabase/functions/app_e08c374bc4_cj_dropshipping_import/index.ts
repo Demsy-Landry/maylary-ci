@@ -149,11 +149,16 @@ Deno.serve(async (req: Request) => {
     // selon l'incoterm.
     let fretReel: FretReel | null = null;
     let mesures: { poids_g: number | null; volume_cm3: number | null } = { poids_g: null, volume_cm3: null };
+    // La variante est l'identifiant que le fournisseur exige pour coter un
+    // transport ou passer une commande — la référence produit ne suffit pas.
+    // Sans elle en base, l'article ne peut plus être ni groupé ni expédié.
+    let referenceVariante: string | null = null;
     if (parametres.utiliser_fret_reel_cj) {
       const token = await getCjAccessToken();
       if (token) {
         const detail = await obtenirDetailProduitCj(reference_externe, token);
         const { vid } = detail;
+        referenceVariante = vid;
         mesures = { poids_g: detail.poids_g, volume_cm3: detail.volume_cm3 };
         if (vid) {
           // CJ plafonne à 1 appel par seconde : sans cette pause, le devis part en 429.
@@ -272,6 +277,7 @@ Deno.serve(async (req: Request) => {
         actif: true,
         source_donnee: 'import_cj_dropshipping',
         reference_externe,
+        reference_variante: referenceVariante,
         poids_unitaire_g: mesures.poids_g,
         volume_unitaire_cm3: mesures.volume_cm3,
         retarife_le: new Date().toISOString(),

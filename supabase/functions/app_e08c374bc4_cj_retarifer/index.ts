@@ -316,6 +316,10 @@ Deno.serve(async (req: Request) => {
             cout_fret_fcfa: entree.cout_fret_unitaire_fcfa,
             cout_assurance_fcfa: entree.cout_assurance_unitaire_fcfa,
             quantite_minimum: entree.quantite_min,
+            // La variante conditionne toute cotation et toute commande future.
+            // Le recalcul vient de la résoudre : on la garde, sans quoi
+            // l'article resterait ingroupable et inexpédiable.
+            reference_variante: vid,
             poids_unitaire_g: mesures.poids_g,
             volume_unitaire_cm3: mesures.volume_cm3,
             incoterm_achat: incotermChoisi,
