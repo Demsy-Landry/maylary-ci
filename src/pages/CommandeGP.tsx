@@ -43,13 +43,14 @@ export default function CommandeGP() {
     motif?: string;
     articles_en_cause?: string[];
     options?: OptionTransport[];
+    fret_inclus_dans_prix?: boolean;
   } | null>(null);
   const [remiseEnCours, setRemiseEnCours] = useState(false);
   /**
    * Transporteur retenu par le client.
    *
-   * Le transport économique est déjà compris dans les prix affichés : choisir
-   * plus rapide ajoute un supplément, ça ne refait jamais le prix. Le montant
+   * Le transport est coté sur le panier réel chez le fournisseur et facturé en
+   * ligne séparée : le client voit ce qu'il paie et pour quel délai. Le montant
    * annoncé ici est celui qui sera encaissé.
    */
   const [transporteurChoisi, setTransporteurChoisi] = useState<string | null>(null);
@@ -81,8 +82,8 @@ export default function CommandeGP() {
         const json = await res.json().catch(() => null);
         if (!annule && res.ok && json?.success) {
           setRemiseGroupage(json);
-          // L'option économique est présélectionnée : elle est déjà comprise
-          // dans les prix, donc c'est le choix sans surprise.
+          // La moins chère est présélectionnée : c'est le choix par défaut
+          // raisonnable, le client reste libre de payer pour aller plus vite.
           const eco = (json.options as OptionTransport[] | undefined)?.find((o) => o.economique);
           setTransporteurChoisi(eco?.transporteur ?? null);
         }
@@ -102,8 +103,15 @@ export default function CommandeGP() {
   const remise = remiseGroupage?.remise_fcfa ?? 0;
   const optionsTransport = remiseGroupage?.options ?? [];
   const optionRetenue = optionsTransport.find((o) => o.transporteur === transporteurChoisi) ?? null;
-  const supplementTransport = optionRetenue?.supplement_fcfa ?? 0;
-  const totalAPayer = Math.max(0, totalFcfa - remise) + supplementTransport;
+  /**
+   * Le transport ne fait pas partie des prix affichés : il s'ajoute au total,
+   * en entier, une fois le transporteur choisi. `supplement_fcfa` porte déjà
+   * cette distinction — il vaut le prix complet quand le fret est séparé, et
+   * seulement l'écart avec l'option économique quand il est compris.
+   */
+  const fretSepare = remiseGroupage?.fret_inclus_dans_prix === false;
+  const coutLivraison = optionRetenue?.supplement_fcfa ?? 0;
+  const totalAPayer = Math.max(0, totalFcfa - remise) + coutLivraison;
 
   // Un panier qu'aucun transporteur n'accepte ne doit pas être payé : on le
   // dirait après coup, et il faudrait revenir sur un prix encaissé.
@@ -199,7 +207,7 @@ export default function CommandeGP() {
         fret_facture_articles_fcfa: remiseGroupage?.fret_facture_articles_fcfa ?? null,
         fret_reel_panier_fcfa: remiseGroupage?.fret_reel_panier_fcfa ?? null,
         transporteur_choisi: optionRetenue?.transporteur ?? null,
-        supplement_transporteur_fcfa: supplementTransport,
+        supplement_transporteur_fcfa: coutLivraison,
         delai_transporteur: optionRetenue?.delai ?? null,
         mode_paiement: modePaiement,
         nom_destinataire: nomDestinataire.trim(),
@@ -387,8 +395,9 @@ export default function CommandeGP() {
                   ) : (
                     <>
                       <p className="mb-3 text-xs text-muted-foreground">
-                        Tarifs du transporteur pour votre colis. La livraison économique est déjà
-                        comprise dans les prix affichés.
+                        {fretSepare
+                          ? "Tarifs réels du transporteur pour votre colis, sans marge de notre part. Les prix des articles n'incluent pas la livraison."
+                          : 'Tarifs du transporteur pour votre colis. La livraison économique est déjà comprise dans les prix affichés.'}
                       </p>
                       <RadioGroup
                         value={transporteurChoisi ?? ''}
@@ -421,9 +430,11 @@ export default function CommandeGP() {
                                   o.economique ? 'text-primary' : 'text-foreground'
                                 }`}
                               >
-                                {o.economique
-                                  ? 'Comprise'
-                                  : `+ ${o.supplement_fcfa.toLocaleString('fr-FR')} FCFA`}
+                                {fretSepare
+                                  ? `${o.prix_fcfa.toLocaleString('fr-FR')} FCFA`
+                                  : o.economique
+                                    ? 'Comprise'
+                                    : `+ ${o.supplement_fcfa.toLocaleString('fr-FR')} FCFA`}
                               </span>
                             </Label>
                           </div>
@@ -484,18 +495,20 @@ export default function CommandeGP() {
                     </span>
                   </div>
                 )}
-                {supplementTransport > 0 && optionRetenue && (
+                {coutLivraison > 0 && optionRetenue && (
                   <div className="flex justify-between py-1.5">
                     <span className="text-foreground">
                       Livraison {optionRetenue.transporteur}
                       {optionRetenue.delai && (
                         <span className="block text-xs text-muted-foreground">
-                          Sous {optionRetenue.delai} jours au lieu de la livraison économique.
+                          {fretSepare
+                            ? `Colis groupé, livré sous ${optionRetenue.delai} jours.`
+                            : `Sous ${optionRetenue.delai} jours au lieu de la livraison économique.`}
                         </span>
                       )}
                     </span>
                     <span className="shrink-0 font-medium text-foreground">
-                      + {supplementTransport.toLocaleString('fr-FR')} FCFA
+                      + {coutLivraison.toLocaleString('fr-FR')} FCFA
                     </span>
                   </div>
                 )}

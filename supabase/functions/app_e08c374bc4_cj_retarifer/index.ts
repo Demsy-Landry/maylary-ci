@@ -210,7 +210,12 @@ Deno.serve(async (req: Request) => {
       // petite commande possible atteint un montant déraisonnable, le client
       // paie surtout du transport. Le recalcul ne doit jamais remettre en
       // vitrine un article écarté pour cette raison.
-      const commandeMinimum = entree.prix_unitaire_fcfa * entree.quantite_min;
+      // Ce que le client débourse réellement, transport compris — que celui-ci
+      // soit dans le prix ou facturé à part au panier.
+      const fretHorsPrix =
+        parametres.fret_inclus_dans_prix === false ? entree.cout_fret_unitaire_fcfa : 0;
+      const commandeMinimum =
+        (entree.prix_unitaire_fcfa + fretHorsPrix) * entree.quantite_min;
       const plafond = Number(parametres.plafond_commande_minimum_fcfa);
       if (commandeMinimum > plafond) {
         resultats.push({

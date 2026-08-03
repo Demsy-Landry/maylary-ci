@@ -110,7 +110,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: parametres } = await db
       .from('app_e08c374bc4_parametres_import')
-      .select('taux_change_usd_fcfa, pays_destination_code')
+      .select('taux_change_usd_fcfa, pays_destination_code, fret_inclus_dans_prix, taux_marge_fret')
       .eq('id', 1)
       .maybeSingle();
     if (!parametres) return reponse({ error: 'Paramètres indisponibles.' }, 500);
@@ -129,7 +129,12 @@ Deno.serve(async (req: Request) => {
 
     const pays = String(parametres.pays_destination_code ?? 'CI');
     const taux = Number(parametres.taux_change_usd_fcfa);
-    const enFcfa = (usd: number) => Math.round(usd * taux);
+    // Le transport est répercuté à prix coûtant tant que la marge sur fret reste
+    // à zéro. Ce n'est pas une générosité : c'est ce qui rend la ligne
+    // vérifiable par le client, et ce qui nous décharge du risque d'estimation.
+    const margeFret = Number(parametres.taux_marge_fret ?? 0);
+    const fretInclusDansPrix = parametres.fret_inclus_dans_prix !== false;
+    const enFcfa = (usd: number) => Math.round(usd * taux * (1 + margeFret));
 
     const options = await obtenirOptionsFretLotCj(aExpedier, token, pays);
 
@@ -173,19 +178,35 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // La moins chère est celle dont le transport est déjà compris dans les prix
-    // affichés. Les autres se paient en supplément, jamais en refaisant le prix.
     const economique = options[0];
     const fretReelPanier = enFcfa(economique.prix_usd);
-    const remise = aExpedier.length >= 2 ? Math.max(0, fretFactureArticles - fretReelPanier) : 0;
 
-    const optionsClient = options.map((o, i) => ({
-      transporteur: o.transporteur,
-      delai: o.delai,
-      prix_fcfa: enFcfa(o.prix_usd),
-      supplement_fcfa: Math.max(0, enFcfa(o.prix_usd) - fretReelPanier),
-      economique: i === 0,
-    }));
+    // Deux façons de facturer le transport, selon le réglage.
+    //
+    // Séparé — le prix des articles ne le porte pas : chaque offre se paie en
+    // entier, et il n'y a plus rien à rendre puisque rien n'a été facturé
+    // d'avance. C'est le modèle en vigueur.
+    //
+    // Compris — l'ancien modèle : les prix portaient le transport d'un colis
+    // chacun, on rendait la part comptée en double et les offres plus rapides
+    // se payaient en supplément. Conservé pour qu'un retour en arrière reste
+    // possible sans redéploiement.
+    const remise =
+      fretInclusDansPrix && aExpedier.length >= 2
+        ? Math.max(0, fretFactureArticles - fretReelPanier)
+        : 0;
+
+    const optionsClient = options.map((o, i) => {
+      const prix = enFcfa(o.prix_usd);
+      return {
+        transporteur: o.transporteur,
+        delai: o.delai,
+        prix_fcfa: prix,
+        // Ce que cette offre ajoute au total, une fois la remise déduite.
+        supplement_fcfa: fretInclusDansPrix ? Math.max(0, prix - fretReelPanier) : prix,
+        economique: i === 0,
+      };
+    });
 
     console.log(
       JSON.stringify({
@@ -207,6 +228,7 @@ Deno.serve(async (req: Request) => {
         fret_reel_panier_fcfa: fretReelPanier,
         transporteur: economique.transporteur,
         options: optionsClient,
+        fret_inclus_dans_prix: fretInclusDansPrix,
         articles_groupes: aExpedier.length,
       },
       200,

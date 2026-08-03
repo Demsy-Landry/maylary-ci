@@ -23,6 +23,11 @@ export interface ParametresCoutImport {
    * sa couverture rend inutile une police facultés locale.
    */
   fret_transporteur_couvre_assurance?: boolean;
+  /**
+   * Faux quand le transport ne fait plus partie du prix affiché : il est alors
+   * coté sur le panier réel et facturé au client en ligne séparée.
+   */
+  fret_inclus_dans_prix?: boolean;
 }
 
 export interface RepartitionIncoterm {
@@ -44,6 +49,8 @@ export interface DetailCoutImport {
   /** Vrai si le prix plancher a relevé le prix de vente calculé. */
   plancher_applique: boolean;
   taux_marge_applique: number;
+  /** Vrai quand `cout_fret_fcfa` entre dans le prix de vente. */
+  fret_inclus_dans_prix: boolean;
 }
 
 /**
@@ -88,7 +95,12 @@ export function calculerCoutImport(params: {
       )
     : 0;
 
-  const cout_revient_fcfa = prix_achat_fcfa + cout_fret_fcfa + cout_assurance_fcfa;
+  // Le transport ne fait plus partie du prix affiché : il est coté sur le
+  // panier réel et facturé en ligne séparée. Il reste calculé, car c'est lui
+  // qui dit si un article est vendable depuis ce fournisseur.
+  const fretInclus = parametres.fret_inclus_dans_prix !== false;
+  const cout_revient_fcfa =
+    prix_achat_fcfa + (fretInclus ? cout_fret_fcfa : 0) + cout_assurance_fcfa;
   const prix_avant_plancher_fcfa = Math.round(cout_revient_fcfa * (1 + tauxMarge));
   const plancher = Number(parametres.prix_plancher_fcfa);
   const prix_unitaire_fcfa = Math.max(prix_avant_plancher_fcfa, plancher);
@@ -103,6 +115,7 @@ export function calculerCoutImport(params: {
     prix_avant_plancher_fcfa,
     prix_unitaire_fcfa,
     plancher_applique: prix_unitaire_fcfa > prix_avant_plancher_fcfa,
+    fret_inclus_dans_prix: fretInclus,
     taux_marge_applique: tauxMarge,
   };
 }
