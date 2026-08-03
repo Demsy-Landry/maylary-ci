@@ -26,7 +26,15 @@ import {
   RadioGroupItem,
 } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Loader2, Landmark, Smartphone, ShoppingCart, Truck, TriangleAlert } from 'lucide-react';
+import {
+  Loader2,
+  Landmark,
+  Smartphone,
+  ShoppingCart,
+  Truck,
+  TriangleAlert,
+  ExternalLink,
+} from 'lucide-react';
 
 export default function CommandeGP() {
   const { items, totalFcfa, clearCart } = useCartGP();
@@ -127,6 +135,12 @@ export default function CommandeGP() {
   const [loadingParams, setLoadingParams] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [commandeCreee, setCommandeCreee] = useState<string | null>(null);
+  /**
+   * Montant figé à la validation. L'écran de confirmation s'affiche après
+   * `clearCart()` : lire le total du panier y renverrait zéro, et le client
+   * verrait « Payer 0 FCFA ».
+   */
+  const [montantAPayer, setMontantAPayer] = useState(0);
   const [formError, setFormError] = useState('');
 
   useEffect(() => {
@@ -247,6 +261,7 @@ export default function CommandeGP() {
       commentaire_admin: null,
     });
 
+    setMontantAPayer(totalAPayer);
     clearCart();
     setSubmitting(false);
     setCommandeCreee(commande.reference_publique);
@@ -278,16 +293,48 @@ export default function CommandeGP() {
                       <p className="flex items-center gap-2 font-medium text-foreground">
                         {c.type_canal === 'virement' ? (
                           <Landmark className="h-4 w-4 shrink-0" />
+                        ) : c.type_canal === 'lien_paiement' ? (
+                          <ExternalLink className="h-4 w-4 shrink-0" />
                         ) : (
                           <Smartphone className="h-4 w-4 shrink-0" />
                         )}
                         <span className="break-words">{c.libelle}</span>
                       </p>
-                      <p className="mt-1 break-words text-sm text-muted-foreground">
-                        {c.type_canal === 'virement' ? 'IBAN / RIB' : 'Numéro'} : {c.numero}
-                        <br />
-                        Titulaire : {c.titulaire}
-                      </p>
+
+                      {/* Un lien se clique, il ne se recopie pas. Afficher son
+                          URL en toutes lettres inviterait à la retaper à la
+                          main, avec les fautes de frappe que cela suppose. */}
+                      {c.type_canal === 'lien_paiement' ? (
+                        <div className="mt-2 space-y-2">
+                          <Button asChild className="w-full">
+                            <a href={c.numero} target="_blank" rel="noreferrer noopener">
+                              Payer {montantAPayer.toLocaleString('fr-FR')} FCFA
+                              <ExternalLink className="ml-2 h-4 w-4" />
+                            </a>
+                          </Button>
+                          {/* Le lien est ouvert : c'est le client qui saisit la
+                              somme. Le rappeler ici évite un paiement partiel
+                              découvert au moment de la vérification. */}
+                          <p className="text-xs text-muted-foreground">
+                            Saisissez exactement{' '}
+                            <span className="font-semibold text-foreground">
+                              {montantAPayer.toLocaleString('fr-FR')} FCFA
+                            </span>{' '}
+                            sur la page de paiement.
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="mt-1 break-words text-sm text-muted-foreground">
+                          {c.type_canal === 'virement' ? 'IBAN / RIB' : 'Numéro'} : {c.numero}
+                          {c.titulaire && (
+                            <>
+                              <br />
+                              Titulaire : {c.titulaire}
+                            </>
+                          )}
+                        </p>
+                      )}
+
                       {c.instructions && (
                         <p className="mt-1 break-words text-xs italic text-muted-foreground">
                           {c.instructions}
