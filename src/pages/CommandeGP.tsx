@@ -34,6 +34,8 @@ import {
   Truck,
   TriangleAlert,
   ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 export default function CommandeGP() {
@@ -141,6 +143,38 @@ export default function CommandeGP() {
    * verrait « Payer 0 FCFA ».
    */
   const [montantAPayer, setMontantAPayer] = useState(0);
+  const [montantCopie, setMontantCopie] = useState(false);
+
+  /**
+   * Copie la somme sans espaces ni devise : c'est ce que le champ de la page de
+   * paiement attend. « 124 500 FCFA » collé tel quel y serait refusé.
+   *
+   * `navigator.clipboard` n'existe pas partout — vieux navigateurs, pages non
+   * sécurisées. Le repli passe par un champ temporaire plutôt que d'échouer en
+   * silence sur le téléphone d'un client.
+   */
+  const copierMontant = async (montant: number) => {
+    const brut = String(montant);
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(brut);
+      } else {
+        const champ = document.createElement('textarea');
+        champ.value = brut;
+        champ.setAttribute('readonly', '');
+        champ.style.position = 'fixed';
+        champ.style.opacity = '0';
+        document.body.appendChild(champ);
+        champ.select();
+        document.execCommand('copy');
+        document.body.removeChild(champ);
+      }
+      setMontantCopie(true);
+      setTimeout(() => setMontantCopie(false), 2500);
+    } catch {
+      toast.info(`Montant à saisir : ${brut}`);
+    }
+  };
   const [formError, setFormError] = useState('');
 
   useEffect(() => {
@@ -313,15 +347,32 @@ export default function CommandeGP() {
                             </a>
                           </Button>
                           {/* Le lien est ouvert : c'est le client qui saisit la
-                              somme. Le rappeler ici évite un paiement partiel
-                              découvert au moment de la vérification. */}
-                          <p className="text-xs text-muted-foreground">
-                            Saisissez exactement{' '}
-                            <span className="font-semibold text-foreground">
-                              {montantAPayer.toLocaleString('fr-FR')} FCFA
-                            </span>{' '}
-                            sur la page de paiement.
-                          </p>
+                              somme. Le rappeler ne suffit pas — sur un téléphone,
+                              retenir six chiffres en basculant d'application est
+                              exactement là où l'on se trompe. Le presse-papier
+                              supprime la saisie. */}
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="min-w-0 flex-1 text-xs text-muted-foreground">
+                              Saisissez exactement{' '}
+                              <span className="font-semibold text-foreground">
+                                {montantAPayer.toLocaleString('fr-FR')} FCFA
+                              </span>{' '}
+                              sur la page de paiement.
+                            </p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="shrink-0"
+                              onClick={() => copierMontant(montantAPayer)}
+                            >
+                              {montantCopie ? (
+                                <Check className="mr-1.5 h-4 w-4" />
+                              ) : (
+                                <Copy className="mr-1.5 h-4 w-4" />
+                              )}
+                              {montantCopie ? 'Copié' : 'Copier'}
+                            </Button>
+                          </div>
                         </div>
                       ) : (
                         <p className="mt-1 break-words text-sm text-muted-foreground">
