@@ -20,7 +20,18 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, ImageOff, Loader2, PackagePlus, Settings, Calculator, Truck, ShieldCheck, Boxes } from 'lucide-react';
+import {
+  Search,
+  ImageOff,
+  Loader2,
+  PackagePlus,
+  Settings,
+  Calculator,
+  Truck,
+  ShieldCheck,
+  Boxes,
+  TriangleAlert,
+} from 'lucide-react';
 
 interface CjResult {
   reference_externe: string;
@@ -474,6 +485,8 @@ function ParametresMarge({
     paysDestination: 'CI',
     seuilPetitArticle: '',
     lotPetitArticle: '',
+    ratioFretMax: '',
+    seuilCommandeSurveillee: '',
   });
   const [fretReelActif, setFretReelActif] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -494,6 +507,8 @@ function ParametresMarge({
       paysDestination: parametres.pays_destination_code,
       seuilPetitArticle: String(Number(parametres.seuil_petit_article_fcfa)),
       lotPetitArticle: String(Number(parametres.quantite_minimum_defaut)),
+      ratioFretMax: String(Number(parametres.ratio_fret_maximum)),
+      seuilCommandeSurveillee: String(Number(parametres.seuil_commande_surveillee_fcfa)),
     });
     setFretReelActif(parametres.utiliser_fret_reel_cj);
   }, [parametres]);
@@ -547,6 +562,16 @@ function ParametresMarge({
       toast.error('Le taux de couverture ne peut pas être inférieur à 100 % de la valeur CIF.');
       return;
     }
+    // Un rapport inférieur à 1 refuserait tout article dont le fret dépasse la
+    // marchandise, ce qui est le cas courant sur les petites pièces.
+    if (!(parseFloat(champs.ratioFretMax) >= 1)) {
+      toast.error('Le rapport fret / marchandise doit valoir au moins 1.');
+      return;
+    }
+    if (!(parseFloat(champs.seuilCommandeSurveillee) >= 0)) {
+      toast.error('La commande minimum surveillée doit être un nombre positif.');
+      return;
+    }
 
     setSaving(true);
     const { error } = await supabase
@@ -565,6 +590,8 @@ function ParametresMarge({
         pays_destination_code: champs.paysDestination.trim().toUpperCase(),
         seuil_petit_article_fcfa: parseFloat(champs.seuilPetitArticle) || 0,
         quantite_minimum_defaut: Math.max(1, parseInt(champs.lotPetitArticle, 10) || 1),
+        ratio_fret_maximum: parseFloat(champs.ratioFretMax) || 0,
+        seuil_commande_surveillee_fcfa: parseFloat(champs.seuilCommandeSurveillee) || 0,
       })
       .eq('id', 1);
     if (error) {
@@ -708,6 +735,41 @@ function ParametresMarge({
               <p className="text-xs text-muted-foreground">
                 Mesuré sur un article réel : 1 320 FCFA de fret l'unité, 690 par lot de 5,
                 572 par lot de 20.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-md border p-3">
+          <div className="flex items-center gap-2">
+            <TriangleAlert className="h-4 w-4 text-primary" />
+            <p className="text-sm font-medium text-foreground">Refus des articles au transport écrasant</p>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Certaines références ne sont transportables que par express : une lampe achetée
+            4 002 FCFA revenait à 52 213 FCFA de fret, soit 78 701 FCFA en rayon. L'import refuse
+            désormais ces articles — mais seulement quand les <strong>deux</strong> conditions sont
+            réunies. Un rapport élevé sur une petite commande reste acceptable : une pochette bulle
+            a un rapport de 10 et se vend 500 FCFA.
+          </p>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="ratio-fret">Rapport fret / marchandise maximum</Label>
+              <Input id="ratio-fret" type="number" min={1} step={0.5}
+                value={champs.ratioFretMax}
+                onChange={(e) => maj('ratioFretMax', e.target.value)} />
+              <p className="text-xs text-muted-foreground">
+                Au-delà, le fret est jugé écrasant. Mesuré sur le catalogue : les articles sains
+                restent sous 5.
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="seuil-surveille">Commande minimum surveillée (FCFA)</Label>
+              <Input id="seuil-surveille" type="number" min={0} step={1000}
+                value={champs.seuilCommandeSurveillee}
+                onChange={(e) => maj('seuilCommandeSurveillee', e.target.value)} />
+              <p className="text-xs text-muted-foreground">
+                En dessous de ce montant, le rapport n'est pas opposé : le client ne perd rien.
               </p>
             </div>
           </div>

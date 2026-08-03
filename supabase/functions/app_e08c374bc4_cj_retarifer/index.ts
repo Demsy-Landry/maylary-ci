@@ -244,6 +244,49 @@ Deno.serve(async (req: Request) => {
         continue;
       }
 
+      // Second garde-fou, sur le rapport et non sur le montant : le transport ne
+      // doit pas écraser la marchandise. Les deux conditions sont exigées
+      // ensemble — un rapport élevé sur une petite commande reste acceptable,
+      // une pochette bulle vendue 500 FCFA ne gêne personne. C'est la
+      // conjonction « transport écrasant » et « facture salée » qu'on écarte.
+      const ratioFret =
+        prixAchatFcfa > 0 ? entree.cout_fret_unitaire_fcfa / prixAchatFcfa : Infinity;
+      const ratioMaximum = Number(parametres.ratio_fret_maximum);
+      const seuilSurveille = Number(parametres.seuil_commande_surveillee_fcfa);
+
+      if (ratioFret > ratioMaximum && commandeMinimum > seuilSurveille) {
+        resultats.push({
+          id: produit.id,
+          nom: produit.nom,
+          publiable: false,
+          motif: 'fret_disproportionne',
+          ratio_fret: Number(ratioFret.toFixed(1)),
+          commande_minimum_fcfa: commandeMinimum,
+        });
+
+        if (!simulation) {
+          await supabaseService
+            .from('app_e08c374bc4_produits')
+            .update({
+              prix_achat_fcfa: prixAchatFcfa,
+              prix_unitaire_fcfa: entree.prix_unitaire_fcfa,
+              cout_fret_fcfa: entree.cout_fret_unitaire_fcfa,
+              cout_assurance_fcfa: entree.cout_assurance_unitaire_fcfa,
+              quantite_minimum: entree.quantite_min,
+              actif: false,
+              indisponible_motif: 'fret_disproportionne',
+              retarife_le: new Date().toISOString(),
+              paliers_calcules_le: new Date().toISOString(),
+            })
+            .eq('id', produit.id);
+          await supabaseService
+            .from('app_e08c374bc4_paliers_prix')
+            .delete()
+            .eq('produit_id', produit.id);
+        }
+        continue;
+      }
+
       resultats.push({
         id: produit.id,
         nom: produit.nom,

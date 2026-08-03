@@ -110,7 +110,7 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: 'Choisissez une catégorie de la boutique.' }, 400);
     }
     if (espace === 'pro' && !body.secteur_id) {
-      return jsonResponse({ error: 'Choisissez un secteur de l\'espace professionnel.' }, 400);
+      return jsonResponse({ error: "Choisissez un secteur de l'espace professionnel." }, 400);
     }
 
     // 3. Paramètres de coût de revient (configurables en base, jamais en dur).
@@ -176,6 +176,41 @@ Deno.serve(async (req: Request) => {
       incoterm: repartition,
       tauxMarge: body.taux_marge ?? null,
     });
+
+    // Garde-fou contre le fret disproportionné.
+    //
+    // Le plafond de commande minimum ne protège que des montants absolus : il a
+    // laissé entrer une lampe achetée 4 002 FCFA avec 52 213 FCFA de fret DHL,
+    // vendue 78 701 FCFA. Le client aurait payé 93 % de transport.
+    //
+    // Les deux conditions sont exigées ensemble, jamais séparément : un rapport
+    // élevé sur une petite commande reste acceptable — une pochette bulle a un
+    // rapport de 10 et se vend 500 FCFA, personne ne s'en plaint. C'est la
+    // conjonction « transport écrasant » et « facture salée » qui est refusée.
+    const ratioFret =
+      cout.prix_achat_fcfa > 0 ? cout.cout_fret_fcfa / cout.prix_achat_fcfa : Infinity;
+    const commandeMinimum = cout.prix_unitaire_fcfa * cout.quantite_minimum;
+    const ratioMaximum = Number(parametres.ratio_fret_maximum);
+    const seuilSurveille = Number(parametres.seuil_commande_surveillee_fcfa);
+
+    if (ratioFret > ratioMaximum && commandeMinimum > seuilSurveille) {
+      console.log(
+        JSON.stringify({ requestId, refus: 'fret_disproportionne', ratio: ratioFret, commandeMinimum }),
+      );
+      return jsonResponse(
+        {
+          error:
+            `Transport disproportionné : ${Math.round(cout.cout_fret_fcfa).toLocaleString('fr-FR')} FCFA de fret ` +
+            `pour ${Math.round(cout.prix_achat_fcfa).toLocaleString('fr-FR')} FCFA de marchandise ` +
+            `(${ratioFret.toFixed(1)}×), soit une commande minimum de ` +
+            `${Math.round(commandeMinimum).toLocaleString('fr-FR')} FCFA. ` +
+            `Cet article n'est pas vendable depuis ce fournisseur.`,
+          motif: 'fret_disproportionne',
+          detail_cout: cout,
+        },
+        422,
+      );
+    }
 
     // Sur l'espace professionnel, un article relève d'une enseigne. Les articles
     // importés par Maylary sont regroupés sous une enseigne maison, créée à la
