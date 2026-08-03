@@ -292,6 +292,10 @@ export interface ParametresImport {
   quantite_minimum_defaut: number;
   /** En dessous de ce prix d'achat, l'article est vendu par lot. */
   seuil_petit_article_fcfa: number;
+  /** Rapport maximum toléré entre le fret et le prix d'achat d'un article. */
+  ratio_fret_maximum: number;
+  /** En dessous de ce montant de commande minimum, le rapport de fret n'est pas opposé. */
+  seuil_commande_surveillee_fcfa: number;
   updated_at: string;
 }
 
