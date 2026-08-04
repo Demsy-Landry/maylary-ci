@@ -38,6 +38,7 @@ import MesDemandesExport from '@/pages/MesDemandesExport';
 import AdminLogin from '@/pages/admin/AdminLogin';
 import APropos from '@/pages/APropos';
 import MentionsLegales from '@/pages/MentionsLegales';
+import Confidentialite from '@/pages/Confidentialite';
 import PageIntrouvable from '@/pages/PageIntrouvable';
 import TransitionDePage from '@/components/TransitionDePage';
 import AdminParametres from '@/pages/admin/AdminParametres';
@@ -80,6 +81,7 @@ function App() {
                 <Route path="/admin/connexion" element={<AdminLogin />} />
                 <Route path="/a-propos" element={<APropos />} />
                 <Route path="/mentions-legales" element={<MentionsLegales />} />
+                <Route path="/confidentialite" element={<Confidentialite />} />
                 <Route
                   path="/admin"
                   element={

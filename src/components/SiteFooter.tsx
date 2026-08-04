@@ -36,6 +36,7 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
       { label: 'Livraison en Côte d’Ivoire', to: '/boutique' },
       { label: 'À propos', to: '/a-propos' },
       { label: 'Mentions légales', to: '/mentions-legales' },
+      { label: 'Données personnelles', to: '/confidentialite' },
     ],
   },
 ];
