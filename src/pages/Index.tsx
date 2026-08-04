@@ -8,14 +8,13 @@ import {
   Ship,
   Plane,
   FileCheck2,
-  ShoppingBag,
-  Building2,
   ArrowRight,
   Globe,
   ClipboardList,
   Send,
 } from 'lucide-react';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
+import BandeServices from '@/components/BandeServices';
 import SiteFooter from '@/components/SiteFooter';
 
 const STORAGE_BASE =
@@ -169,6 +168,11 @@ export default function Index() {
             </div>
           </div>
         </section>
+
+        {/* Placée ici et pas plus bas : c'est le premier endroit où le visiteur
+            regarde après le hero, et la moitié de l'offre lui était invisible
+            tant qu'il ne déroulait pas la page entière. */}
+        <BandeServices />
 
         <section id="comment-ca-marche" className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
           <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
@@ -327,51 +331,6 @@ export default function Index() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
-          <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
-            Besoin de quelque chose de plus simple et rapide ?
-          </h2>
-          <p className="mx-auto mt-1 max-w-prose text-center text-sm text-muted-foreground">
-            Pour les achats standards déjà disponibles chez nous, sans passer par une demande
-            d'import sur mesure.
-          </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <Link
-              to="/boutique"
-              className="carte-reactive group flex items-center justify-between rounded-lg border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary "
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary-emphasis">
-                  <ShoppingBag className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="font-display font-bold text-foreground">Boutique</p>
-                  <p className="text-sm text-muted-foreground">
-                    Catalogue prêt à l'achat, livré rapidement en Côte d'Ivoire.
-                  </p>
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
-            </Link>
-            <Link
-              to="/catalogue"
-              className="carte-reactive group flex items-center justify-between rounded-lg border bg-card p-6 transition-all hover:-translate-y-0.5 hover:border-primary "
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent/15 text-accent">
-                  <Building2 className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="font-display font-bold text-foreground">Espace Pro</p>
-                  <p className="text-sm text-muted-foreground">
-                    Catalogue professionnel et devis pour l'équipement de votre entreprise.
-                  </p>
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
-            </Link>
-          </div>
-        </section>
       </main>
 
       <SiteFooter />

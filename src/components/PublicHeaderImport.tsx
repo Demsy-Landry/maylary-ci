@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import MenuServices from '@/components/MenuServices';
 import { useAuth } from '@/hooks/useAuth';
 import { Boxes, ShieldCheck, LogOut, User, ShoppingBag, Building2, PackageSearch, Ship } from 'lucide-react';
 
@@ -23,6 +24,9 @@ export default function PublicHeaderImport() {
         </Link>
 
         <nav className="flex flex-wrap items-center gap-1 sm:gap-2">
+          {/* Tous les métiers, y compris ceux que l'en-tête n'a pas la place
+              d'afficher en toutes lettres sur un téléphone. */}
+          <MenuServices />
           <Button asChild variant="ghost" size="sm">
             <Link to="/import/nouvelle-demande">
               <PackageSearch className="mr-1.5 h-4 w-4" />

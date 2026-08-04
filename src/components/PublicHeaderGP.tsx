@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import MenuServices from '@/components/MenuServices';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
 import {
@@ -50,6 +51,9 @@ export default function PublicHeaderGP() {
               comportement bureau, où elle reste sur une ligne à droite de la
               recherche, est préservé à partir de `sm`. */}
           <nav className="flex flex-wrap items-center justify-end gap-1 sm:order-3 sm:shrink-0 sm:flex-nowrap sm:gap-2">
+          {/* Tous les métiers, y compris ceux que l'en-tête n'a pas la place
+              d'afficher en toutes lettres sur un téléphone. */}
+          <MenuServices />
           <Button asChild variant="outline" size="sm" className="text-foreground">
             <Link to="/import/nouvelle-demande">
               <PackageSearch className="mr-1.5 h-4 w-4" />
