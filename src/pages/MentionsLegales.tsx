@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
 
@@ -52,6 +53,18 @@ export default function MentionsLegales() {
               dédouanement des marchandises de ses clients. Les estimations indicatives affichées
               avant cotation ferme peuvent varier selon les conditions réelles du marché, du fret
               et de la douane.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="font-display text-lg font-bold text-foreground">Données personnelles</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Le traitement de vos données personnelles est décrit en détail dans notre{' '}
+              <Link to="/confidentialite" className="text-primary hover:underline">
+                politique de protection des données
+              </Link>{' '}
+              : ce que nous collectons, pourquoi, combien de temps, et comment exercer vos droits au
+              titre de la loi n° 2013-450 du 19 juin 2013.
             </p>
           </section>
 
