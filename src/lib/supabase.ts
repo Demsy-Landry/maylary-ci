@@ -397,6 +397,8 @@ export interface CommandeGP {
   /** Chemin du reçu dans le compartiment privé. Jamais une URL : elle expirerait. */
   preuve_paiement_chemin: string | null;
   paiement_declare_le: string | null;
+  /** Ce que le client dit avoir versé, refusé par le serveur s'il diffère du dû. */
+  montant_declare_fcfa: number | null;
   /**
    * Ce qui est réellement arrivé, distinct de `montant_total_fcfa` qui est ce
    * qui était dû. Les confondre effacerait le règlement partiel, précisément le

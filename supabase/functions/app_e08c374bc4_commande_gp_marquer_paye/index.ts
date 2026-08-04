@@ -20,12 +20,20 @@ function jsonResponse(body: unknown, status: number) {
  * vérifie la propriété de la commande et n'autorise qu'un seul passage,
  * en_attente_paiement -> paiement_recu_verification, jamais un autre statut.
  *
- * Elle exige désormais une trace. Auparavant le bouton « J'ai payé » basculait
- * la commande sur simple déclaration : rien à confronter en cas de litige, ni
- * pour le client qui a réellement payé, ni pour Maylary. Une référence de
- * transaction ou un reçu est maintenant obligatoire — l'un ou l'autre, pas les
- * deux : un virement bancaire donne une référence sans capture, un paiement
- * Wave donne une capture sans référence recopiable.
+ * Trois contrôles, tous imposés par ce qu'un lien de paiement statique ne sait
+ * pas faire — il ne fixe ni le montant, ni l'unicité du règlement :
+ *
+ *  1. la référence de transaction ET le reçu sont exigés, les deux. Wave comme
+ *     la banque fournissent l'un et l'autre ; n'en demander qu'un laissait au
+ *     client le choix de la pièce la plus facile à inventer ;
+ *  2. le montant déclaré doit correspondre au montant dû. Le client saisit
+ *     lui-même la somme sur la page de paiement, et un règlement partiel ne se
+ *     découvrait qu'à la vérification, commande déjà engagée. Ce contrôle
+ *     rattrape l'erreur honnête, pas la fraude : qui veut tricher déclarera le
+ *     bon montant. C'est le rapprochement bancaire qui tranche, pas ceci ;
+ *  3. une référence ne sert qu'une fois. Un index unique en base refuse le code
+ *     d'un règlement déjà passé, quelle que soit sa casse ou ses espaces. Celui-
+ *     là est un vrai verrou, pas un garde-fou.
  *
  * Le reçu lui-même n'est pas reçu ici : le client le dépose directement dans un
  * compartiment privé dont la RLS impose que le premier segment du chemin soit
@@ -70,6 +78,7 @@ Deno.serve(async (req: Request) => {
       canal?: string;
       reference_transaction?: string;
       preuve_chemin?: string;
+      montant_declare?: number | string;
     };
     try {
       body = await req.json();
@@ -84,13 +93,15 @@ Deno.serve(async (req: Request) => {
     const reference = (body.reference_transaction ?? '').trim();
     const preuve = (body.preuve_chemin ?? '').trim();
 
-    if (!reference && !preuve) {
+    if (!reference) {
       return jsonResponse(
-        {
-          error:
-            'Indiquez la référence de votre transaction, ou joignez le reçu. ' +
-            "Sans l'un des deux, nous ne pouvons pas rapprocher votre règlement.",
-        },
+        { error: 'La référence de votre transaction est obligatoire.' },
+        400,
+      );
+    }
+    if (!preuve) {
+      return jsonResponse(
+        { error: 'Le reçu de votre transaction est obligatoire.' },
         400,
       );
     }
@@ -125,6 +136,27 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Le montant déclaré doit correspondre à ce qui est dû. La comparaison se
+    // fait à l'unité près : en francs CFA il n'y a pas de centimes, un écart
+    // d'un franc est une erreur de saisie, pas un arrondi.
+    const du = Number(commande.montant_total_fcfa);
+    const declare = Number(body.montant_declare);
+    if (!Number.isFinite(declare) || declare <= 0) {
+      return jsonResponse({ error: 'Indiquez le montant que vous avez réglé.' }, 400);
+    }
+    if (Math.round(declare) !== Math.round(du)) {
+      const ecart = Math.round(du) - Math.round(declare);
+      return jsonResponse(
+        {
+          error:
+            ecart > 0
+              ? `Le montant réglé ne correspond pas : il manque ${ecart.toLocaleString('fr-FR')} FCFA sur les ${du.toLocaleString('fr-FR')} FCFA dus. Complétez votre règlement, puis déclarez le total.`
+              : `Vous avez déclaré ${declare.toLocaleString('fr-FR')} FCFA alors que ${du.toLocaleString('fr-FR')} FCFA sont dus. Vérifiez le montant saisi.`,
+        },
+        400,
+      );
+    }
+
     // Le reçu doit exister réellement : sans ce contrôle, un chemin bien formé
     // mais vide passerait, et la commande porterait une preuve fantôme.
     if (preuve) {
@@ -142,14 +174,28 @@ Deno.serve(async (req: Request) => {
       .update({
         statut: 'paiement_recu_verification',
         canal_paiement_declare: (body.canal ?? '').trim() || null,
-        reference_transaction: reference || null,
-        preuve_paiement_chemin: preuve || null,
+        reference_transaction: reference,
+        preuve_paiement_chemin: preuve,
+        montant_declare_fcfa: Math.round(declare),
         paiement_declare_le: new Date().toISOString(),
       })
       .eq('id', commande.id);
 
     if (updateError) {
       console.log(JSON.stringify({ requestId, step: 'update_error', error: updateError }));
+      // 23505 : l'index unique a refusé une référence déjà consignée sur une
+      // autre commande. C'est le cas que le contrôle existe pour attraper, il
+      // mérite donc son propre message plutôt qu'une erreur interne.
+      if ((updateError as { code?: string }).code === '23505') {
+        return jsonResponse(
+          {
+            error:
+              'Cette référence de transaction a déjà servi pour une autre commande. ' +
+              'Vérifiez que vous recopiez bien celle du règlement de cette commande-ci.',
+          },
+          409,
+        );
+      }
       return jsonResponse({ error: 'Impossible de mettre à jour la commande.' }, 500);
     }
 
@@ -160,11 +206,12 @@ Deno.serve(async (req: Request) => {
       // trace doit rester lisible même si la commande est modifiée ensuite.
       commentaire_admin: [
         (body.canal ?? '').trim() ? `Canal : ${(body.canal ?? '').trim()}` : null,
-        reference ? `Référence : ${reference}` : null,
-        preuve ? 'Reçu joint' : null,
+        `Référence : ${reference}`,
+        `Déclaré : ${Math.round(declare).toLocaleString('fr-FR')} FCFA`,
+        'Reçu joint',
       ]
         .filter(Boolean)
-        .join(' · ') || null,
+        .join(' · '),
     });
 
     // Notifie l'admin (best-effort : n'échoue jamais la requête principale

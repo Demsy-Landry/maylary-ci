@@ -65,6 +65,17 @@ export default function PreuveReglement({
               <span className="font-medium text-foreground">{commande.reference_transaction}</span>
             </p>
           )}
+          {/* Ce que le client dit avoir versé. Le serveur a déjà refusé toute
+              déclaration qui ne correspondait pas au dû : la voir ici sert à
+              confronter au relevé, pas à recontrôler l'arithmétique. */}
+          {commande.montant_declare_fcfa != null && (
+            <p>
+              Déclaré :{' '}
+              <span className="font-medium text-foreground">
+                {Number(commande.montant_declare_fcfa).toLocaleString('fr-FR')} FCFA
+              </span>
+            </p>
+          )}
           {lienRecu ? (
             <a
               href={lienRecu}
