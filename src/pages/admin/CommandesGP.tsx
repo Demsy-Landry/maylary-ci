@@ -221,6 +221,18 @@ export default function AdminCommandesGP() {
       toast.error("Le règlement n'a pas pu être consigné.");
       return;
     }
+    // La comptabilisation suit la confirmation, pas la commande : tant que le
+    // règlement n'est pas acquis, il n'y a rien à constater. La fonction est
+    // idempotente, un double clic ne double pas le chiffre d'affaires.
+    const { error: erreurCompta } = await supabase.rpc('app_e08c374bc4_comptabiliser_commande', {
+      p_commande: gestion.id,
+    });
+    if (erreurCompta) {
+      // Le règlement reste confirmé : une écriture manquante se rattrape, une
+      // commande bloquée pour un motif comptable fait attendre un client.
+      toast.error("Règlement confirmé, mais les écritures comptables n'ont pas pu être passées.");
+    }
+
     const ecart = recu === null ? 0 : recu - gestion.montant_total_fcfa;
     await majStatut(
       'paiement_confirme',

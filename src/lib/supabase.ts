@@ -89,6 +89,68 @@ export const INCIDENTS_FOURNISSEUR_TABLE = 'app_e08c374bc4_incidents_fournisseur
 /** Fiche de qualité par atelier — vide pour tout autre que l'administrateur. */
 export const QUALITE_FOURNISSEURS_VIEW = 'app_e08c374bc4_qualite_fournisseurs';
 
+/* --- Comptabilité (partie double, réservée à l'administrateur) ----------- */
+export const COMPTES_TABLE = 'app_e08c374bc4_comptes';
+export const JOURNAUX_TABLE = 'app_e08c374bc4_journaux';
+export const ECRITURES_TABLE = 'app_e08c374bc4_ecritures';
+export const LIGNES_ECRITURE_TABLE = 'app_e08c374bc4_lignes_ecriture';
+export const BALANCE_VIEW = 'app_e08c374bc4_balance';
+export const GRAND_LIVRE_VIEW = 'app_e08c374bc4_grand_livre';
+export const COMPTE_RESULTAT_VIEW = 'app_e08c374bc4_compte_resultat';
+
+/** Un compte du plan comptable, dans la logique des classes SYSCOHADA. */
+export interface CompteComptable {
+  code: string;
+  libelle: string;
+  classe: number;
+  sens: 'debit' | 'credit';
+  actif: boolean;
+  note: string | null;
+}
+
+export interface LigneGrandLivre {
+  id: string;
+  numero: string;
+  date_ecriture: string;
+  journal: string;
+  ecriture_libelle: string;
+  piece: string | null;
+  source_type: string | null;
+  source_id: string | null;
+  compte: string;
+  compte_libelle: string;
+  ligne_libelle: string | null;
+  debit_fcfa: number;
+  credit_fcfa: number;
+  ordre: number;
+}
+
+export interface LigneBalance {
+  code: string;
+  libelle: string;
+  classe: number;
+  sens: 'debit' | 'credit';
+  total_debit: number;
+  total_credit: number;
+  solde: number;
+}
+
+export interface LigneCompteResultat {
+  classe: number;
+  nature: 'Charges' | 'Produits';
+  code: string;
+  libelle: string;
+  montant: number;
+}
+
+export const JOURNAUX_LABELS: Record<string, string> = {
+  VE: 'Ventes',
+  AC: 'Achats',
+  BQ: 'Banque',
+  MM: 'Monnaie électronique',
+  OD: 'Opérations diverses',
+};
+
 export type StockDisponible = 'en_stock' | 'sur_commande' | 'rupture';
 export type StatutDevis =
   | 'nouvelle'
@@ -645,6 +707,8 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin/cj-dropshipping': ['proprietaire', 'catalogue'],
   '/admin/prospection': ['proprietaire', 'catalogue'],
   '/admin/qualite-fournisseurs': ['proprietaire', 'operations', 'catalogue'],
+  // Les comptes de l'entreprise : le propriétaire seul.
+  '/admin/comptabilite': ['proprietaire'],
   '/admin/equipe': ['proprietaire'],
   '/admin/parametres': ['proprietaire'],
 };

@@ -275,6 +275,10 @@ export default function CommandeGP() {
       return;
     }
 
+    // Le coût d'achat n'est pas envoyé d'ici : il ne figure pas dans la vue
+    // publique des produits, et le faire transiter par le navigateur
+    // exposerait nos prix fournisseur. Un déclencheur le fige côté base au
+    // moment de l'insertion.
     const lignes = items.map((i) => ({
       commande_id: commande.id,
       produit_id: i.produit_id,

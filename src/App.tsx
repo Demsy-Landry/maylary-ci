@@ -23,6 +23,7 @@ import MesDevis from '@/pages/MesDevis';
 import CjDropshippingImport from '@/pages/admin/CjDropshippingImport';
 import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
 import QualiteFournisseurs from '@/pages/admin/QualiteFournisseurs';
+import Comptabilite from '@/pages/admin/Comptabilite';
 import AdminCommandesGP from '@/pages/admin/CommandesGP';
 import AdminSourcingGestion from '@/pages/admin/SourcingGestion';
 import AdminVendeursGestion from '@/pages/admin/VendeursGestion';
@@ -111,6 +112,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/prospection">
                       <ProspectionFournisseurs />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/comptabilite"
+                  element={
+                    <AdminRoute ecran="/admin/comptabilite">
+                      <Comptabilite />
                     </AdminRoute>
                   }
                 />
