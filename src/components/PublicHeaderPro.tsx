@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import MenuServices from '@/components/MenuServices';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
 import { Boxes, ClipboardList, User, ShoppingBag, LogOut, PackageSearch, Ship } from 'lucide-react';
@@ -32,6 +33,9 @@ export default function PublicHeaderPro() {
         {/* Pas de `shrink-0` ici : un conteneur qui ne rétrécit pas garde sa
             largeur maximale et ne passe jamais à la ligne, `flex-wrap` ou non. */}
         <nav className="flex flex-wrap items-center justify-end gap-1 sm:shrink-0 sm:flex-nowrap sm:gap-2">
+          {/* Tous les métiers, y compris ceux que l'en-tête n'a pas la place
+              d'afficher en toutes lettres sur un téléphone. */}
+          <MenuServices />
           <Button asChild variant="outline" size="sm" className="text-foreground">
             <Link to="/import/nouvelle-demande">
               <PackageSearch className="mr-1.5 h-4 w-4" />

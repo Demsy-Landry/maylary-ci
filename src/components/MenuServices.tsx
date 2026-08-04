@@ -1,0 +1,94 @@
+import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import {
+  PackageSearch,
+  Ship,
+  ShoppingBag,
+  Building2,
+  Search,
+  Store,
+  LayoutGrid,
+  type LucideIcon,
+} from 'lucide-react';
+
+const SERVICES: { to: string; titre: string; icone: LucideIcon }[] = [
+  { to: '/import/nouvelle-demande', titre: 'Importer', icone: PackageSearch },
+  { to: '/export/nouvelle-demande', titre: 'Exporter', icone: Ship },
+  { to: '/boutique', titre: 'Boutique', icone: ShoppingBag },
+  { to: '/catalogue', titre: 'Espace Pro', icone: Building2 },
+  { to: '/boutique/sourcing', titre: 'Sourcing sur demande', icone: Search },
+  { to: '/vendre', titre: 'Vendre sur Maylary', icone: Store },
+];
+
+/**
+ * Accès à tous les métiers depuis n'importe quelle page.
+ *
+ * L'en-tête ne pouvait pas les porter tous : sur un téléphone il n'en affichait
+ * que deux, et les quatre autres n'étaient joignables que par la page d'accueil.
+ * Un visiteur arrivé sur une fiche produit n'avait aucun chemin vers l'export ou
+ * le sourcing.
+ *
+ * Un panneau plutôt qu'une rangée de boutons, parce que six libellés ne tiennent
+ * pas sur 393 px sans repousser le reste de l'en-tête hors de l'écran.
+ */
+export default function MenuServices() {
+  const [ouvert, setOuvert] = useState(false);
+  const conteneur = useRef<HTMLDivElement>(null);
+
+  // Un panneau qui ne se referme qu'en recliquant le bouton passe pour bloqué.
+  // On ferme donc au clic extérieur et à la touche Échap, comme partout ailleurs.
+  useEffect(() => {
+    if (!ouvert) return;
+    const auClic = (e: MouseEvent) => {
+      if (!conteneur.current?.contains(e.target as Node)) setOuvert(false);
+    };
+    const auClavier = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOuvert(false);
+    };
+    document.addEventListener('mousedown', auClic);
+    document.addEventListener('keydown', auClavier);
+    return () => {
+      document.removeEventListener('mousedown', auClic);
+      document.removeEventListener('keydown', auClavier);
+    };
+  }, [ouvert]);
+
+  return (
+    <div className="relative" ref={conteneur}>
+      <Button
+        variant="ghost"
+        size="sm"
+        aria-expanded={ouvert}
+        aria-haspopup="menu"
+        onClick={() => setOuvert((o) => !o)}
+      >
+        <LayoutGrid className="mr-1.5 h-4 w-4" />
+        Services
+      </Button>
+
+      {ouvert && (
+        <div
+          role="menu"
+          className="absolute right-0 z-20 mt-1 w-60 overflow-hidden rounded-md border bg-card py-1 text-foreground shadow-lg"
+        >
+          {SERVICES.map((s) => {
+            const Icone = s.icone;
+            return (
+              <Link
+                key={s.to}
+                to={s.to}
+                role="menuitem"
+                onClick={() => setOuvert(false)}
+                className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted"
+              >
+                <Icone className="h-4 w-4 shrink-0 text-primary" />
+                {s.titre}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
