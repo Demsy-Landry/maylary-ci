@@ -35,8 +35,14 @@ export default function PublicHeaderGP() {
 
   return (
     <header className="sticky top-0 z-10 bg-foreground text-background">
-      <div className="mx-auto flex max-w-screen-xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-6">
-        <div className="flex items-center justify-between gap-3 sm:contents">
+      {/* La bascule vers une seule ligne — logo, recherche, navigation — attend
+          `xl` et non `sm`. Dès 640 px les libellés apparaissent en toutes
+          lettres ; les tenir sur une ligne avec la barre de recherche faisait
+          déborder l'en-tête de 338 px sur une tablette de 768 px, et encore de
+          82 px sur un portable de 1024 px. En dessous de 1280 px la barre reste
+          donc sur deux rangées et la navigation se replie. */}
+      <div className="mx-auto flex max-w-screen-xl flex-col gap-2 px-4 py-3 sm:px-6 xl:flex-row xl:items-center xl:gap-3">
+        <div className="flex items-center justify-between gap-3 xl:contents">
           <Link to="/" className="flex shrink-0 items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <Boxes className="h-5 w-5" />
@@ -49,8 +55,8 @@ export default function PublicHeaderGP() {
               maximale et ne passe jamais à la ligne. Sur un écran de 320 px,
               la barre débordait de 74 px. Elle se replie désormais ; le
               comportement bureau, où elle reste sur une ligne à droite de la
-              recherche, est préservé à partir de `sm`. */}
-          <nav className="flex flex-wrap items-center justify-end gap-1 sm:order-3 sm:shrink-0 sm:flex-nowrap sm:gap-2">
+              recherche, est préservé à partir de `xl`. */}
+          <nav className="flex flex-wrap items-center justify-end gap-1 sm:gap-2 xl:order-3 xl:shrink-0 xl:flex-nowrap">
           {/* Tous les métiers, y compris ceux que l'en-tête n'a pas la place
               d'afficher en toutes lettres sur un téléphone. */}
           <MenuServices />
@@ -127,7 +133,7 @@ export default function PublicHeaderGP() {
           </nav>
         </div>
 
-        <form onSubmit={handleHeaderSearch} className="flex w-full min-w-0 sm:order-2 sm:flex-1">
+        <form onSubmit={handleHeaderSearch} className="flex w-full min-w-0 xl:order-2 xl:flex-1">
           <div className="flex w-full items-center rounded-md bg-background focus-within:ring-2 focus-within:ring-primary">
             <input
               value={headerSearch}

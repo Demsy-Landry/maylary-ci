@@ -10,13 +10,19 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+const STORAGE_BASE =
+  'https://oubowmftzxpruckjzwuq.supabase.co/storage/v1/object/public/app_e08c374bc4_produit_photos/accueil';
+
 interface Service {
   to: string;
   titre: string;
   phrase: string;
   icone: LucideIcon;
-  /** Classes de la pastille, pour distinguer les métiers d'un coup d'œil. */
-  teinte: string;
+  image: string;
+  /** Texte alternatif : ce que montre la photo, pour qui ne la voit pas. */
+  alt: string;
+  /** Famille de métier, pour situer le service d'un coup d'œil. */
+  famille: string;
 }
 
 /**
@@ -28,44 +34,62 @@ const SERVICES: Service[] = [
   {
     to: '/import/nouvelle-demande',
     titre: 'Importer',
-    phrase: "Achetez n'importe où dans le monde, livré chez vous, douane comprise.",
+    phrase:
+      "Achetez chez n'importe quel fournisseur dans le monde. Marchandise, fret, assurance, douane et livraison : un seul devis, un seul interlocuteur.",
     icone: PackageSearch,
-    teinte: 'bg-primary/15 text-primary-emphasis',
+    image: `${STORAGE_BASE}/service-importer.jpg`,
+    alt: "Entrepôt logistique : cartons palettisés et manutentionnaire en gilet de sécurité vérifiant un colis.",
+    famille: 'Commerce international',
   },
   {
     to: '/export/nouvelle-demande',
     titre: 'Exporter',
-    phrase: 'Vendez votre production ivoirienne à un acheteur étranger.',
+    phrase:
+      "Vendez votre production ivoirienne à l'étranger. Nous montons le dossier, la logistique et les documents d'exportation.",
     icone: Ship,
-    teinte: 'bg-accent/15 text-accent',
+    image: `${STORAGE_BASE}/service-exporter.jpg`,
+    alt: "Quai d'exportation : sacs de fèves de cacao empilés devant un conteneur maritime ouvert.",
+    famille: 'Commerce international',
   },
   {
     to: '/boutique',
     titre: 'Boutique',
-    phrase: "Catalogue prêt à l'achat, livré rapidement en Côte d'Ivoire.",
+    phrase:
+      "Un catalogue prêt à l'achat, au prix réel : le fret est affiché à part, jamais caché dans le prix de l'article.",
     icone: ShoppingBag,
-    teinte: 'bg-primary/15 text-primary-emphasis',
+    image: `${STORAGE_BASE}/service-boutique.jpg`,
+    alt: 'Cliente ouvrant chez elle un colis de commande en ligne.',
+    famille: 'Achat en ligne',
   },
   {
     to: '/catalogue',
     titre: 'Espace Pro',
-    phrase: 'Équipement professionnel par rayon, sur devis, pour votre entreprise.',
+    phrase:
+      "Équipement professionnel par rayon — outillage, mobilier, électricité, informatique — chiffré pour votre entreprise.",
     icone: Building2,
-    teinte: 'bg-accent/15 text-accent',
+    image: `${STORAGE_BASE}/service-espace-pro.jpg`,
+    alt: "Gérant consultant son stock, tablette en main, dans les rayons d'un magasin professionnel.",
+    famille: 'Entreprises',
   },
   {
     to: '/boutique/sourcing',
     titre: 'Sourcing sur demande',
-    phrase: "L'article que vous cherchez n'est pas au catalogue ? Nous allons le chercher.",
+    phrase:
+      "L'article que vous cherchez n'est pas au catalogue ? Décrivez-le : nous allons le chercher chez le fournisseur et nous vous chiffrons.",
     icone: Search,
-    teinte: 'bg-primary/15 text-primary-emphasis',
+    image: `${STORAGE_BASE}/service-sourcing.jpg`,
+    alt: "Acheteur examinant à la main des échantillons de produits posés sur un bureau.",
+    famille: 'Sur demande',
   },
   {
     to: '/vendre',
     titre: 'Vendre sur Maylary',
-    phrase: 'Entreprise ivoirienne ? Ouvrez votre boutique, nous sécurisons le paiement.',
+    phrase:
+      "Entreprise ivoirienne ? Ouvrez votre boutique sans abonnement : vous êtes payé, nous prenons une commission sur la vente.",
     icone: Store,
-    teinte: 'bg-accent/15 text-accent',
+    image: `${STORAGE_BASE}/service-vendre.jpg`,
+    alt: 'Commerçante ivoirienne refermant un colis dans sa boutique, ordinateur portable ouvert à côté.',
+    famille: 'Marketplace',
   },
 ];
 
@@ -77,7 +101,17 @@ const SERVICES: Service[] = [
  * marketplace nulle part. Un visiteur devait dérouler l'écran entier pour
  * découvrir la moitié de l'offre — et la plupart ne déroulent pas.
  *
- * La bande se place juste sous le hero, donc à un demi-écran du chargement.
+ * Chaque service porte désormais sa photographie, comme les sections Import et
+ * Export : six pastilles d'icônes se ressemblaient toutes, et rien ne disait à
+ * quoi ressemble le métier. Les images sont servies en 800 px et chargées à la
+ * demande — sur une connexion mobile ivoirienne, six visuels pleine résolution
+ * en haut de page coûteraient plus cher que ce qu'ils rapportent.
+ *
+ * Sur téléphone la carte se couche : vignette à gauche, texte à droite. Six
+ * cartes en pleine largeur avec leur image en 16/9 faisaient 2 200 px de bande —
+ * on retombait dans le défaut qu'elle corrige, celui de devoir dérouler pour
+ * voir l'offre. À partir de la tablette, la place existe : la carte se redresse
+ * et l'image passe en grand.
  */
 export default function BandeServices() {
   return (
@@ -90,22 +124,33 @@ export default function BandeServices() {
           Six services, un seul interlocuteur, de la recherche du fournisseur jusqu'à votre porte.
         </p>
 
-        <div className="cascade mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="cascade mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((s) => {
             const Icone = s.icone;
             return (
               <Link
                 key={s.to}
                 to={s.to}
-                className="carte-reactive group flex min-w-0 items-start gap-3 rounded-lg border bg-card p-4 transition-all hover:-translate-y-0.5 hover:border-primary"
+                className="carte-reactive group flex min-w-0 gap-3 overflow-hidden rounded-lg border bg-card p-3 transition-all hover:-translate-y-0.5 hover:border-primary sm:flex-col sm:gap-0 sm:p-0"
               >
-                <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${s.teinte}`}
-                >
-                  <Icone className="h-5 w-5" />
+                <div className="relative w-28 shrink-0 self-stretch overflow-hidden rounded-md bg-muted sm:aspect-[16/9] sm:w-auto sm:self-auto sm:rounded-none">
+                  <img
+                    src={s.image}
+                    alt={s.alt}
+                    width={800}
+                    height={450}
+                    loading="lazy"
+                    decoding="async"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-1.5 font-display font-bold text-foreground">
+
+                <div className="flex min-w-0 flex-1 flex-col sm:p-4">
+                  <p className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wide text-primary-emphasis">
+                    <Icone className="h-3 w-3 shrink-0" />
+                    {s.famille}
+                  </p>
+                  <p className="mt-0.5 flex items-center gap-1.5 font-display font-bold text-foreground">
                     {s.titre}
                     <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1" />
                   </p>

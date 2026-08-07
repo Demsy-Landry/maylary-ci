@@ -32,7 +32,7 @@ export default function PublicHeaderPro() {
         </Link>
         {/* Pas de `shrink-0` ici : un conteneur qui ne rétrécit pas garde sa
             largeur maximale et ne passe jamais à la ligne, `flex-wrap` ou non. */}
-        <nav className="flex flex-wrap items-center justify-end gap-1 sm:shrink-0 sm:flex-nowrap sm:gap-2">
+        <nav className="flex flex-wrap items-center justify-end gap-1 sm:gap-2 lg:shrink-0 lg:flex-nowrap">
           {/* Tous les métiers, y compris ceux que l'en-tête n'a pas la place
               d'afficher en toutes lettres sur un téléphone. */}
           <MenuServices />
