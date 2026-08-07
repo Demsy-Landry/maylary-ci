@@ -34,6 +34,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Store, Plus, Trash2, Eye, EyeOff, Wallet, BadgeCheck } from 'lucide-react';
 import { toast } from 'sonner';
+import GarantiePayeProtege from '@/components/GarantiePayeProtege';
 
 /** Même habillage que le champ texte : le projet n'embarque pas de select. */
 const selectClassName =
@@ -334,6 +335,10 @@ export default function EspaceVendeur() {
           </div>
         ) : (
           <div className="cascade mt-6 space-y-6">
+            {/* Ce qui rassure un vendeur n'est pas ce qui rassure un acheteur :
+                lui, ce qu'il veut savoir, c'est quand il est payé. */}
+            <GarantiePayeProtege variante="vendeur" />
+
             {/* Ce que coûte le service, dit avant qu'on le demande. */}
             <section className="carte-reactive rounded-lg border border-primary/30 bg-primary/5 p-4">
               <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
