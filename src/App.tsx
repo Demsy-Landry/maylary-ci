@@ -13,6 +13,7 @@ import PanierAchat from '@/pages/PanierAchat';
 import CommandeGP from '@/pages/CommandeGP';
 import CompteGP from '@/pages/CompteGP';
 import MesCommandesGP from '@/pages/MesCommandesGP';
+import AchatsGroupes from '@/pages/AchatsGroupes';
 import SourcingGP from '@/pages/SourcingGP';
 import EspaceVendeur from '@/pages/EspaceVendeur';
 import CataloguePro from '@/pages/CataloguePro';
@@ -27,6 +28,7 @@ import Comptabilite from '@/pages/admin/Comptabilite';
 import AdminCommandesGP from '@/pages/admin/CommandesGP';
 import AdminSourcingGestion from '@/pages/admin/SourcingGestion';
 import AdminVendeursGestion from '@/pages/admin/VendeursGestion';
+import AdminAchatsGroupesGestion from '@/pages/admin/AchatsGroupesGestion';
 import AdminEquipeGestion from '@/pages/admin/EquipeGestion';
 import AdminDevisGestion from '@/pages/admin/DevisGestion';
 import AdminDashboard from '@/pages/admin/Dashboard';
@@ -70,6 +72,7 @@ function App() {
                 <Route path="/boutique/commande" element={<CommandeGP />} />
                 <Route path="/boutique/compte" element={<CompteGP />} />
                 <Route path="/boutique/mes-commandes" element={<MesCommandesGP />} />
+                <Route path="/boutique/achats-groupes" element={<AchatsGroupes />} />
                 <Route path="/boutique/sourcing" element={<SourcingGP />} />
                 <Route path="/vendre" element={<EspaceVendeur />} />
                 <Route path="/vendre/espace" element={<EspaceVendeur />} />
@@ -144,6 +147,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/vendeurs">
                       <AdminVendeursGestion />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/achats-groupes"
+                  element={
+                    <AdminRoute ecran="/admin/achats-groupes">
+                      <AdminAchatsGroupesGestion />
                     </AdminRoute>
                   }
                 />

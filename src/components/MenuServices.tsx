@@ -8,6 +8,7 @@ import {
   Building2,
   Search,
   Store,
+  Users,
   LayoutGrid,
   type LucideIcon,
 } from 'lucide-react';
@@ -18,6 +19,7 @@ const SERVICES: { to: string; titre: string; icone: LucideIcon }[] = [
   { to: '/boutique', titre: 'Boutique', icone: ShoppingBag },
   { to: '/catalogue', titre: 'Espace Pro', icone: Building2 },
   { to: '/boutique/sourcing', titre: 'Sourcing sur demande', icone: Search },
+  { to: '/boutique/achats-groupes', titre: 'Achats groupés', icone: Users },
   { to: '/vendre', titre: 'Vendre sur Maylary', icone: Store },
 ];
 

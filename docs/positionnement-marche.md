@@ -63,16 +63,33 @@ Classées par effet rapporté à l'effort.
    le libéré, le retenu et l'en-cours ; la fonction
    `app_e08c374bc4_confirmer_reception` n'accepte que le titulaire de la
    commande. Le délai vit dans `app_e08c374bc4_parametres_garantie`, réglable
-   depuis l'administration des vendeurs — sept jours par défaut.
+   depuis l'administration des vendeurs — **deux jours** par défaut.
 
    Le repli sur le délai n'est pas un détail : sans lui, un client silencieux
    gèlerait l'argent d'un vendeur indéfiniment, et aucune entreprise sérieuse
-   n'accepterait de vendre ici.
-2. **L'achat groupé.** *(à construire, moyen)* Le fret a une part fixe : cinq
-   clients sur la même référence la divisent par cinq. Le moteur existe déjà côté
-   administration (`app_e08c374bc4_groupage_simuler`) mais n'est pas ouvert au
-   client. Ce qui manque est la campagne : seuil, date limite, et ce qui se passe
-   si le seuil n'est pas atteint.
+   n'accepterait de vendre ici. Il est court, et c'est délibéré : la voie
+   normale est la confirmation du client. Retenir longtemps l'argent d'un
+   vendeur revient à financer Maylary sur sa trésorerie — ce n'est pas le
+   marché qu'on lui propose.
+2. **L'achat groupé.** *(construit le 7 août 2026)* Le fret a une part fixe :
+   cinq clients sur la même référence la divisent par cinq.
+
+   **On réserve sans payer**, et la forme découle de la règle de la maison. Le
+   montage habituel — payer puis être remboursé d'une partie — ferait bouger le
+   prix après paiement, et supposerait des remboursements Wave à la main, un par
+   client. Ici Maylary publie un prix ferme, tout compris, et un seuil : si le
+   seuil est atteint avant l'échéance, chaque réservation devient une commande à
+   ce prix exactement ; sinon personne n'a rien payé, rien à rembourser.
+
+   `app_e08c374bc4_achats_groupes` et `..._participations_achat_groupe` ;
+   `..._rejoindre_achat_groupe` porte les règles de plafond, d'échéance et
+   d'adresse ; `..._cloturer_achat_groupe` convertit les réservations en
+   commandes dans le circuit de paiement existant. Le compteur est public via
+   `..._achats_groupes_publics` — des agrégats, jamais un nom.
+
+   À ne pas confondre avec `app_e08c374bc4_campagnes_groupage`, qui existait
+   déjà et désigne les expéditions consolidées côté transitaire. L'une est un
+   navire, l'autre est une offre faite aux clients ; les relier reste à faire.
 3. **Le devis d'import opposable.** *(en grande partie en place)* Daté, décomposé
    poste par poste, durée de validité écrite, PDF téléchargeable. Reste de la
    finition et l'équivalent pour l'export.
@@ -94,5 +111,6 @@ Classées par effet rapporté à l'effort.
   financiers.
 - Tarif du transitaire maritime et catégorie douanière par famille de produits :
   les deux dernières inconnues du calcul de coût.
-- Jusqu'où va la garantie : délai de confirmation, que faire si le client ne
-  confirme jamais, qui tranche un litige.
+- Qui tranche un litige quand l'acheteur conteste avant la fin du délai. (Le
+  délai lui-même est tranché : deux jours, et la confirmation du client reste la
+  voie normale.)
