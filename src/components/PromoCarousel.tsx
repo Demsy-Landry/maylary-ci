@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ShoppingBag, Building2, Truck } from 'lucide-react';
+import { STORAGE_PUBLIC_URL } from '@/lib/supabase';
 
-const STORAGE_BASE =
-  'https://oubowmftzxpruckjzwuq.supabase.co/storage/v1/object/public/app_e08c374bc4_produit_photos/accueil';
+const STORAGE_BASE = `${STORAGE_PUBLIC_URL}/app_e08c374bc4_produit_photos/accueil`;
 
 interface Slide {
   eyebrow: string;

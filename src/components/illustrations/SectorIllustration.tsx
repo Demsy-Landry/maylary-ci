@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement } from 'react';
+import { STORAGE_PUBLIC_URL } from '@/lib/supabase';
 
 /**
  * Illustrations figuratives par secteur — codées en dur en SVG (aucune photo
@@ -21,8 +22,7 @@ export type SectorKey =
  * remplacent l'illustration SVG codée en dur quand elles existent. Un
  * secteur sans entrée ici retombe automatiquement sur son SVG.
  */
-const PHOTOS_BASE_URL =
-  'https://oubowmftzxpruckjzwuq.supabase.co/storage/v1/object/public/app_e08c374bc4_produit_photos/secteurs';
+const PHOTOS_BASE_URL = `${STORAGE_PUBLIC_URL}/app_e08c374bc4_produit_photos/secteurs`;
 
 export const SECTOR_PHOTOS: Partial<Record<SectorKey, string>> = {
   boutique: `${PHOTOS_BASE_URL}/boutique.jpg`,
