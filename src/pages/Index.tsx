@@ -16,9 +16,9 @@ import {
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import BandeServices from '@/components/BandeServices';
 import SiteFooter from '@/components/SiteFooter';
+import { STORAGE_PUBLIC_URL } from '@/lib/supabase';
 
-const STORAGE_BASE =
-  'https://oubowmftzxpruckjzwuq.supabase.co/storage/v1/object/public/app_e08c374bc4_produit_photos/accueil';
+const STORAGE_BASE = `${STORAGE_PUBLIC_URL}/app_e08c374bc4_produit_photos/accueil`;
 
 const HERO_IMPORT_IMAGE = `${STORAGE_BASE}/hero-import-maritime.jpg`;
 const HERO_EXPORT_IMAGE = `${STORAGE_BASE}/hero-export-aerien.jpg`;

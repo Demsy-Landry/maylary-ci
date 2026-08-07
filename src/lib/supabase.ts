@@ -1,18 +1,37 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Ces valeurs viennent des variables d'environnement Vercel (voir .env.example).
-// La clé "anon" Supabase est publique par nature (visible côté navigateur) :
-// la vraie protection des données vient des règles RLS côté Supabase, pas du secret de cette clé.
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+// Coordonnées du projet Supabase de Maylary.
+//
+// Ces deux valeurs sont publiques par construction : elles partent dans le
+// paquet envoyé au navigateur, l'URL figure déjà en clair dans l'en-tête
+// Content-Security-Policy de `vercel.json` et dans les adresses d'images du
+// site. La protection des données ne vient pas de leur secret — elle vient des
+// règles RLS, éprouvées côté Supabase.
+//
+// Elles servent de repli et non de réglage principal : les variables
+// d'environnement restent prioritaires, pour qu'un environnement de recette
+// puisse viser une autre base sans toucher au code. Mais l'application ne doit
+// pas dépendre d'elles pour démarrer. Elle le faisait, et cette dépendance a
+// déjà coûté cher : quand l'intégration Vercel ↔ Supabase se détache, les
+// variables disparaissent avec elle et le site s'ouvrait sur une page blanche —
+// une panne totale pour un réglage de tableau de bord.
+const URL_PROJET = 'https://oubowmftzxpruckjzwuq.supabase.co';
+const CLE_ANON =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91Ym93bWZ0enhwcnVja2p6d3VxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0NjIyNjcsImV4cCI6MjEwMDAzODI2N30.pCNBwo_TJCxTxPYSeoAsTltqVwPgQRBVXd7NKe-3qs4';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Variables VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY manquantes. Vérifiez la configuration sur Vercel (Settings > Environment Variables) ou votre fichier .env local.'
-  );
-}
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || URL_PROJET;
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || CLE_ANON;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+/**
+ * Racine des fichiers publics (photos produits, visuels d'accueil, secteurs).
+ *
+ * Elle était recopiée à la main dans chaque page qui affiche une image. Une
+ * adresse recopiée finit toujours par diverger : elle se dérive désormais de
+ * l'URL du projet, comme le reste.
+ */
+export const STORAGE_PUBLIC_URL = `${supabaseUrl}/storage/v1/object/public`;
 
 /** Base URL to invoke Supabase Edge Functions. Always use this, never window.location.origin. */
 export const EDGE_FUNCTIONS_URL = `${supabaseUrl}/functions/v1`;
