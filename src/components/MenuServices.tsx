@@ -34,6 +34,16 @@ const SERVICES: { to: string; titre: string; icone: LucideIcon }[] = [
  */
 export default function MenuServices() {
   const [ouvert, setOuvert] = useState(false);
+  /**
+   * Position du panneau sur mobile, mesurée à l'ouverture.
+   *
+   * Un ancrage purement CSS ne marche pas ici : le bouton se trouve à gauche de
+   * la barre, et un panneau aligné sur son bord droit part hors de l'écran —
+   * il s'affichait tronqué, illisible. On mesure donc le bas du bouton et on
+   * étale le panneau sur toute la largeur, comme le fait n'importe quel menu
+   * mobile.
+   */
+  const [hautPanneau, setHautPanneau] = useState(0);
   const conteneur = useRef<HTMLDivElement>(null);
 
   // Un panneau qui ne se referme qu'en recliquant le bouton passe pour bloqué.
@@ -61,7 +71,14 @@ export default function MenuServices() {
         size="sm"
         aria-expanded={ouvert}
         aria-haspopup="menu"
-        onClick={() => setOuvert((o) => !o)}
+        onClick={() => {
+          // Mesuré sur le conteneur et non sur le bouton : `Button` ne transmet
+          // pas de ref, et une ref silencieusement nulle laissait le panneau
+          // collé en haut de l'écran, par-dessus l'en-tête.
+          const rect = conteneur.current?.getBoundingClientRect();
+          if (rect) setHautPanneau(Math.round(rect.bottom + 6));
+          setOuvert((o) => !o);
+        }}
       >
         <LayoutGrid className="mr-1.5 h-4 w-4" />
         Services
@@ -70,7 +87,8 @@ export default function MenuServices() {
       {ouvert && (
         <div
           role="menu"
-          className="absolute right-0 z-20 mt-1 w-60 overflow-hidden rounded-md border bg-card py-1 text-foreground shadow-lg"
+          style={{ top: hautPanneau }}
+          className="fixed inset-x-2 z-30 overflow-hidden rounded-md border bg-card py-1 text-foreground shadow-lg sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-1 sm:w-60"
         >
           {SERVICES.map((s) => {
             const Icone = s.icone;
