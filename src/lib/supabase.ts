@@ -489,6 +489,36 @@ export interface CommandeGP {
   paiement_confirme_le: string | null;
   paiement_confirme_par: string | null;
   note_reglement: string | null;
+
+  /* --- Garantie « payé, protégé » --------------------------------------- */
+  /** Bascule vers « livrée ». Point de départ du délai de contestation. */
+  livree_le: string | null;
+  /** Réception acquise : le client a confirmé, ou le délai a couru. */
+  reception_confirmee_le: string | null;
+  reception_confirmee_par: 'client' | 'delai' | 'administration' | null;
+}
+
+export const PARAMETRES_GARANTIE_TABLE = 'app_e08c374bc4_parametres_garantie';
+export const REVERSEMENTS_DUS_VIEW = 'app_e08c374bc4_reversements_dus';
+
+/**
+ * Ce qu'on doit à un vendeur, et ce qu'on retient encore.
+ *
+ * Le partage entre `retenu` et `libere` est la garantie elle-même : tant que la
+ * réception n'est pas acquise, l'argent reste du côté de l'acheteur.
+ */
+export interface ReversementsDus {
+  vendeur_id: string;
+  nom_entreprise: string;
+  /** Réception acquise : reversable. */
+  libere_fcfa: number;
+  /** Livré, mais le client peut encore contester. */
+  retenu_fcfa: number;
+  /** Payé par le client, pas encore arrivé chez lui. */
+  en_cours_fcfa: number;
+  deja_reverse_fcfa: number;
+  /** `libere` moins ce qui a déjà été engagé. C'est le plafond d'un reversement. */
+  disponible_fcfa: number;
 }
 
 /**

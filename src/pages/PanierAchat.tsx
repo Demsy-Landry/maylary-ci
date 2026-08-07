@@ -5,6 +5,7 @@ import { useCartGP, prixLigne } from '@/hooks/useCartGP';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import GarantiePayeProtege from '@/components/GarantiePayeProtege';
 
 export default function PanierAchat() {
   const { items, updateQuantite, removeItem, totalFcfa } = useCartGP();
@@ -93,6 +94,10 @@ export default function PanierAchat() {
                 Passer la commande
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+
+              {/* L'engagement se dit ici, juste avant le geste qui fait peur —
+                  pas sur une page « conditions » que personne n'ouvre. */}
+              <GarantiePayeProtege />
             </div>
           </div>
         )}

@@ -52,13 +52,22 @@ se renier.
 
 Classées par effet rapporté à l'effort.
 
-1. **Payé, protégé — l'argent retenu jusqu'à la livraison.** *(à construire,
-   petit)* Sur un article vendu par une entreprise tierce, le reversement au
-   vendeur n'intervient qu'après confirmation de livraison par le client. C'est
-   la réponse directe au paiement à la livraison. Les reversements sont
-   aujourd'hui manuels et périodiques : en pratique le paiement suit déjà la
-   livraison, mais ce n'est ni promis au client ni imposé par la base. Il manque
-   un verrou en base et une phrase visible sur la fiche produit.
+1. **Payé, protégé — l'argent retenu jusqu'à la livraison.** *(construit le
+   7 août 2026)* Sur un article vendu par une entreprise tierce, le reversement
+   n'intervient qu'une fois la réception acquise — par confirmation du client,
+   ou par expiration du délai de contestation. C'est la réponse directe au
+   paiement à la livraison.
+
+   Un déclencheur sur `app_e08c374bc4_reversements` refuse tout versement au
+   delà de ce qui est libéré ; la vue `app_e08c374bc4_reversements_dus` sépare
+   le libéré, le retenu et l'en-cours ; la fonction
+   `app_e08c374bc4_confirmer_reception` n'accepte que le titulaire de la
+   commande. Le délai vit dans `app_e08c374bc4_parametres_garantie`, réglable
+   depuis l'administration des vendeurs — sept jours par défaut.
+
+   Le repli sur le délai n'est pas un détail : sans lui, un client silencieux
+   gèlerait l'argent d'un vendeur indéfiniment, et aucune entreprise sérieuse
+   n'accepterait de vendre ici.
 2. **L'achat groupé.** *(à construire, moyen)* Le fret a une part fixe : cinq
    clients sur la même référence la divisent par cinq. Le moteur existe déjà côté
    administration (`app_e08c374bc4_groupage_simuler`) mais n'est pas ouvert au

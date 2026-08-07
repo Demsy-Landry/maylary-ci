@@ -5,12 +5,13 @@ import {
   supabase,
   VENDEURS_TABLE,
   REVERSEMENTS_TABLE,
-  LIGNES_COMMANDE_GP_TABLE,
+  REVERSEMENTS_DUS_VIEW,
+  PARAMETRES_GARANTIE_TABLE,
   PARAMETRES_MARKETPLACE_TABLE,
   STATUT_VENDEUR_LABELS,
   MODE_REVERSEMENT_LABELS,
   type ParametresMarketplace,
-  type Reversement,
+  type ReversementsDus,
   type StatutVendeur,
   type Vendeur,
 } from '@/lib/supabase';
@@ -30,15 +31,29 @@ const BADGE_VARIANT: Record<StatutVendeur, 'default' | 'secondary' | 'outline' |
   refuse: 'destructive',
 };
 
-/** Ce qu'un vendeur a vendu et ce qui lui reste dû. */
-interface SoldeVendeur {
-  net: number;
-  verse: number;
-}
+/**
+ * Le solde n'est plus calculé ici.
+ *
+ * L'écran additionnait les ventes nettes et retranchait les versements — sans
+ * savoir si les colis étaient arrivés. La garantie « payé, protégé » exige la
+ * distinction, et la base la fait : `app_e08c374bc4_reversements_dus` sépare ce
+ * qui est libéré de ce qui reste retenu, et un déclencheur refuse tout
+ * versement au-delà du libéré. Recalculer côté écran ne ferait que produire un
+ * second chiffre, faux le jour où les deux divergent.
+ */
+const SOLDE_VIDE: ReversementsDus = {
+  vendeur_id: '',
+  nom_entreprise: '',
+  libere_fcfa: 0,
+  retenu_fcfa: 0,
+  en_cours_fcfa: 0,
+  deja_reverse_fcfa: 0,
+  disponible_fcfa: 0,
+};
 
 export default function AdminVendeursGestion() {
   const [vendeurs, setVendeurs] = useState<Vendeur[]>([]);
-  const [soldes, setSoldes] = useState<Record<string, SoldeVendeur>>({});
+  const [soldes, setSoldes] = useState<Record<string, ReversementsDus>>({});
   const [parametres, setParametres] = useState<ParametresMarketplace | null>(null);
   const [loading, setLoading] = useState(true);
   const [ouvert, setOuvert] = useState<Vendeur | null>(null);
@@ -51,34 +66,33 @@ export default function AdminVendeursGestion() {
 
   const [tauxDefaut, setTauxDefaut] = useState('');
   const [delaiReversement, setDelaiReversement] = useState('');
+  const [delaiGarantie, setDelaiGarantie] = useState('');
 
   const charger = async () => {
     setLoading(true);
-    const [vRes, lRes, rRes, pRes] = await Promise.all([
+    const [vRes, dRes, pRes, gRes] = await Promise.all([
       supabase.from(VENDEURS_TABLE).select('*').order('created_at', { ascending: false }),
-      supabase
-        .from(LIGNES_COMMANDE_GP_TABLE)
-        .select('vendeur_id, net_vendeur_fcfa')
-        .not('vendeur_id', 'is', null),
-      supabase.from(REVERSEMENTS_TABLE).select('vendeur_id, montant_fcfa, statut'),
+      supabase.from(REVERSEMENTS_DUS_VIEW).select('*'),
       supabase.from(PARAMETRES_MARKETPLACE_TABLE).select('*').eq('id', 1).maybeSingle(),
+      supabase.from(PARAMETRES_GARANTIE_TABLE).select('delai_confirmation_jours').maybeSingle(),
     ]);
 
     setVendeurs((vRes.data as Vendeur[]) ?? []);
 
-    const agrege: Record<string, SoldeVendeur> = {};
-    for (const l of (lRes.data ?? []) as { vendeur_id: string; net_vendeur_fcfa: number }[]) {
-      const s = agrege[l.vendeur_id] ?? { net: 0, verse: 0 };
-      s.net += Number(l.net_vendeur_fcfa ?? 0);
-      agrege[l.vendeur_id] = s;
-    }
-    for (const r of (rRes.data ?? []) as { vendeur_id: string; montant_fcfa: number; statut: string }[]) {
-      if (r.statut !== 'paye') continue;
-      const s = agrege[r.vendeur_id] ?? { net: 0, verse: 0 };
-      s.verse += Number(r.montant_fcfa);
-      agrege[r.vendeur_id] = s;
+    const agrege: Record<string, ReversementsDus> = {};
+    for (const d of ((dRes.data ?? []) as ReversementsDus[])) {
+      agrege[d.vendeur_id] = {
+        ...d,
+        libere_fcfa: Number(d.libere_fcfa),
+        retenu_fcfa: Number(d.retenu_fcfa),
+        en_cours_fcfa: Number(d.en_cours_fcfa),
+        deja_reverse_fcfa: Number(d.deja_reverse_fcfa),
+        disponible_fcfa: Number(d.disponible_fcfa),
+      };
     }
     setSoldes(agrege);
+
+    if (gRes.data) setDelaiGarantie(String(gRes.data.delai_confirmation_jours));
 
     const p = pRes.data as ParametresMarketplace | null;
     setParametres(p);
@@ -99,8 +113,8 @@ export default function AdminVendeursGestion() {
     setOuvert(v);
     setMotif(v.motif_statut ?? '');
     setTaux(v.taux_commission != null ? String(Number(v.taux_commission) * 100) : '');
-    const s = soldes[v.id] ?? { net: 0, verse: 0 };
-    setMontantVersement(String(Math.max(0, s.net - s.verse)));
+    const s = soldes[v.id] ?? SOLDE_VIDE;
+    setMontantVersement(String(Math.max(0, s.disponible_fcfa)));
     setRefReglement('');
   };
 
@@ -189,16 +203,28 @@ export default function AdminVendeursGestion() {
       toast.error('Taux général invalide (0 à 99 %).');
       return;
     }
+    const g = Math.round(Number(delaiGarantie));
+    if (!Number.isFinite(g) || g < 1) {
+      toast.error('Le délai de contestation doit valoir au moins un jour.');
+      return;
+    }
     setBusy(true);
-    const { error } = await supabase
-      .from(PARAMETRES_MARKETPLACE_TABLE)
-      .update({
-        taux_commission_defaut: t,
-        delai_reversement_jours: Number.isFinite(d) ? Math.max(0, Math.round(d)) : 7,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', 1);
+    const [marche, garantie] = await Promise.all([
+      supabase
+        .from(PARAMETRES_MARKETPLACE_TABLE)
+        .update({
+          taux_commission_defaut: t,
+          delai_reversement_jours: Number.isFinite(d) ? Math.max(0, Math.round(d)) : 7,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', 1),
+      supabase
+        .from(PARAMETRES_GARANTIE_TABLE)
+        .update({ delai_confirmation_jours: g, updated_at: new Date().toISOString() })
+        .eq('ligne_unique', true),
+    ]);
     setBusy(false);
+    const error = marche.error ?? garantie.error;
     if (error) {
       toast.error(error.message);
       return;
@@ -255,6 +281,24 @@ export default function AdminVendeursGestion() {
                 onChange={(e) => setDelaiReversement(e.target.value)}
               />
             </div>
+            {/* Le réglage le plus sensible de la place de marché : trop court,
+                l'acheteur n'a pas le temps de contester ; trop long, aucune
+                entreprise n'accepte de vendre ici. */}
+            <div className="space-y-1.5">
+              <Label htmlFor="dg">Délai de contestation (jours)</Label>
+              <Input
+                id="dg"
+                type="number"
+                min={1}
+                className="w-40"
+                value={delaiGarantie}
+                onChange={(e) => setDelaiGarantie(e.target.value)}
+              />
+              <p className="max-w-xs text-xs text-muted-foreground">
+                Passé ce délai sans réponse de l'acheteur, la commande est réputée reçue et
+                l'argent du vendeur se libère.
+              </p>
+            </div>
             <Button variant="outline" onClick={enregistrerParametres} disabled={busy}>
               <Save className="mr-1.5 h-4 w-4" />
               Enregistrer
@@ -275,8 +319,8 @@ export default function AdminVendeursGestion() {
         ) : (
           <div className="cascade divide-y rounded-md border">
             {vendeurs.map((v) => {
-              const s = soldes[v.id] ?? { net: 0, verse: 0 };
-              const du = s.net - s.verse;
+              const s = soldes[v.id] ?? SOLDE_VIDE;
+              const du = s.disponible_fcfa;
               return (
                 <div key={v.id} className="flex flex-wrap items-center justify-between gap-3 p-3">
                   <div className="min-w-0">
@@ -284,6 +328,8 @@ export default function AdminVendeursGestion() {
                     <p className="text-xs text-muted-foreground">
                       {v.reference_publique} · {v.ville ?? 'ville non précisée'} · {v.telephone}
                       {du > 0 && ` · ${du.toLocaleString('fr-FR')} FCFA à verser`}
+                      {s.retenu_fcfa > 0 &&
+                        ` · ${s.retenu_fcfa.toLocaleString('fr-FR')} FCFA retenus`}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
@@ -380,10 +426,31 @@ export default function AdminVendeursGestion() {
                   <Wallet className="h-4 w-4" />
                   Verser au vendeur
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Ventes nettes {(soldes[ouvert.id]?.net ?? 0).toLocaleString('fr-FR')} FCFA · déjà
-                  versé {(soldes[ouvert.id]?.verse ?? 0).toLocaleString('fr-FR')} FCFA
-                </p>
+                {/* Le détail plutôt qu'un total : l'administration doit voir
+                    pourquoi une somme n'est pas versable, sinon elle croit à
+                    une erreur et cherche à forcer. */}
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <dt>Réception acquise</dt>
+                  <dd className="text-right tabular-nums text-foreground">
+                    {(soldes[ouvert.id]?.libere_fcfa ?? 0).toLocaleString('fr-FR')} FCFA
+                  </dd>
+                  <dt>Retenu — livré, délai en cours</dt>
+                  <dd className="text-right tabular-nums">
+                    {(soldes[ouvert.id]?.retenu_fcfa ?? 0).toLocaleString('fr-FR')} FCFA
+                  </dd>
+                  <dt>En cours — payé, pas encore livré</dt>
+                  <dd className="text-right tabular-nums">
+                    {(soldes[ouvert.id]?.en_cours_fcfa ?? 0).toLocaleString('fr-FR')} FCFA
+                  </dd>
+                  <dt>Déjà versé</dt>
+                  <dd className="text-right tabular-nums">
+                    {(soldes[ouvert.id]?.deja_reverse_fcfa ?? 0).toLocaleString('fr-FR')} FCFA
+                  </dd>
+                  <dt className="font-medium text-foreground">Versable maintenant</dt>
+                  <dd className="text-right font-medium tabular-nums text-foreground">
+                    {(soldes[ouvert.id]?.disponible_fcfa ?? 0).toLocaleString('fr-FR')} FCFA
+                  </dd>
+                </dl>
                 <div className="grid gap-2 sm:grid-cols-2">
                   <Input
                     type="number"

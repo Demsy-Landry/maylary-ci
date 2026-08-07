@@ -28,6 +28,7 @@ import {
 import { Loader2, Eye, Package, Truck, ExternalLink } from 'lucide-react';
 import BoutonFacture from '@/components/BoutonFacture';
 import AvisCommande from '@/components/AvisCommande';
+import ConfirmerReception from '@/components/ConfirmerReception';
 import DeclarerPaiement from '@/components/DeclarerPaiement';
 
 /** Statuts à partir desquels la facture définitive est émise (paiement acquis). */
@@ -257,6 +258,22 @@ export default function MesCommandesGP() {
                   Total : {detail.montant_total_fcfa.toLocaleString('fr-FR')} FCFA
                 </p>
               </div>
+
+              {/* La garantie passe avant la notation : on demande d'abord si le
+                  colis est bien arrivé — c'est ce qui débloque le règlement du
+                  vendeur — et seulement ensuite ce qu'on en pense. */}
+              {detail.statut === 'livree' && (
+                <ConfirmerReception
+                  commandeId={detail.id}
+                  livreeLe={detail.livree_le}
+                  receptionConfirmeeLe={detail.reception_confirmee_le}
+                  onConfirme={(horodatage) =>
+                    setDetail((d) =>
+                      d ? { ...d, reception_confirmee_le: horodatage, reception_confirmee_par: 'client' } : d,
+                    )
+                  }
+                />
+              )}
 
               {/* La notation n'apparaît qu'une fois le colis reçu : c'est la
                   livraison qui donne le droit d'en parler, et la base applique
