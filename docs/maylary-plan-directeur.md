@@ -21,11 +21,15 @@ Maylary remplace cette chaîne d'initiés par un service : **vous choisissez,
 vous payez, le reste est fait.** Pas « une plateforme qui met en relation » —
 un opérateur qui répond de bout en bout.
 
-**L'actif qui rend ça possible et qu'aucun concurrent numérique n'a :** le
-fondateur est transitaire de métier. Il connaît le port, la douane, les
-barèmes, les délais réels, et les endroits où les autres ajoutent leur marge
-sans le dire. Un site de e-commerce ne peut pas apprendre ça ; un transitaire
-peut apprendre à faire un site.
+**Les deux actifs qu'aucun concurrent numérique n'a :**
+
+1. **Le fondateur est transitaire de métier.** Il connaît le port, la douane,
+   les barèmes, les délais réels, et les endroits où les autres ajoutent leur
+   marge sans le dire. Un site de e-commerce ne peut pas apprendre ça ; un
+   transitaire peut apprendre à faire un site.
+2. **`le-declarant.com`, déjà en ligne**, qui résout le classement tarifaire et
+   le calcul des droits et taxes. C'est-à-dire exactement l'étape que
+   j'identifiais comme le verrou de toute la chaîne. Voir le § 4.
 
 **La direction :** faire de Maylary l'infrastructure du commerce importé en
 Côte d'Ivoire, puis dans la sous-région, puis partout où le même problème
@@ -47,7 +51,7 @@ Inventaire honnête. La colonne qui compte est la troisième.
 | Import | Demande → cotation → devis → validation client → suivi → documents |
 | Export | Même circuit, sens inverse |
 | Sourcing sur demande | Le client décrit, Maylary cherche et chiffre |
-| Coût de revient | FOB + fret réel + assurance au **barème CIMA réel** + douane. Aucune valeur inventée sauf celles listées au § 6 |
+| Coût de revient | FOB + fret réel + assurance au **barème CIMA réel** + douane. Aucune valeur inventée sauf celles listées au § 7 |
 | Facturation | Proforma et facture définitive, PDF |
 | Comptabilité | Partie double SYSCOHADA, équilibre **imposé par la base**, contrepassation obligatoire |
 | Qualité fournisseur | Avis clients après livraison + incidents par atelier |
@@ -56,6 +60,7 @@ Inventaire honnête. La colonne qui compte est la troisième.
 | Garantie « payé, protégé » | Reversement bloqué en base tant que la réception n'est pas acquise |
 | Achat groupé | Réservation sans paiement, prix ferme, seuil, conversion en commandes |
 | Données personnelles | Politique publiée, RLS prouvée table par table |
+| **`le-declarant.com`** | **En ligne, hors Maylary.** Classement tarifaire et calcul des droits et taxes — le verrou de la chaîne, déjà ouvert |
 
 ### Construit mais vide
 
@@ -99,7 +104,7 @@ qui est déjà automatique, ce qui peut l'être, et ce qui ne le sera jamais.
 | 1 | Exprimer le besoin (photo, lien, description) | Formulaire | Automatique — un agent lit une photo ou un lien et propose la fiche |
 | 2 | Trouver le fournisseur, vérifier sa fiabilité | CJ automatique, sourcing manuel | Semi-automatique — la note fournisseur maison devient le filtre |
 | 3 | Chiffrer marchandise + fret + assurance + douane + transit | **Déjà automatique** | C'est l'atout ; reste à couvrir plus d'origines |
-| 4 | **Classer la marchandise (position tarifaire SH)** | Manuel, fondateur | Assisté : un agent propose et justifie, un humain agréé valide. **Jamais entièrement automatique** |
+| 4 | **Classer la marchandise (position tarifaire SH), calculer droits et taxes** | **`le-declarant.com`, déjà en ligne** — mais séparé de Maylary | À brancher. Voir § 4 |
 | 5 | Payer | Manuel (Wave, virement) | Automatique dès l'API Wave |
 | 6 | Commander chez le fournisseur | CJ automatique, autres manuels | Extensible par API et par courriel structuré |
 | 7 | Suivre l'acheminement | CJ automatique, maritime manuel | Automatique par intégration transitaire / compagnie |
@@ -108,18 +113,23 @@ qui est déjà automatique, ce qui peut l'être, et ce qui ne le sera jamais.
 | 10 | Facturer et comptabiliser | **Déjà automatique** | Rien à faire, sinon brancher les écritures |
 | 11 | Après-vente, avis, qualité fournisseur | **Déjà automatique** | Alimente la boucle en 2 |
 
-**Lecture :** trois étapes sur onze sont déjà automatiques, et ce sont les plus
-difficiles à copier (3, 10, 11). Deux ne le seront jamais et c'est tant mieux
-(4 et 8) : ce sont elles qui empêchent un pur acteur numérique de vous
-concurrencer.
+**Lecture :** **quatre** étapes sur onze sont déjà résolues quelque part — 3,
+4, 10 et 11 — et ce sont les plus difficiles à copier. La 4 l'est dans une
+autre application, ce qui n'est pas la même chose qu'être résolue dans
+celle-ci : c'est un branchement à faire, pas un problème à traiter.
+
+Une seule étape ne sera jamais automatique, et c'est tant mieux : la **8**, le
+dédouanement, qui engage la responsabilité d'un déclarant agréé. C'est elle qui
+empêche un pur acteur numérique de vous concurrencer, et elle vous appartient.
 
 ### Les agents IA — où ils servent, où ils nuisent
 
 À introduire, avec un humain qui tranche :
 
-- **Classement tarifaire assisté** — proposer une position SH avec sa
-  justification et le taux applicable. Gain énorme : c'est ce qui bloque
-  aujourd'hui le chiffrage automatique de tout ce qui ne vient pas de CJ.
+- **Assister Le Déclarant, pas le remplacer** — un agent qui traduit une
+  description de client (« une machine à coudre industrielle, 120 kg ») en une
+  requête exploitable par le moteur tarifaire, et qui explique le résultat au
+  client en français ordinaire.
 - **Lecture de documents** — facture fournisseur, connaissement, déclaration :
   extraire les montants, les poids, les positions, et les rapprocher du devis.
 - **Rédaction des réponses client** — brouillon systématique, envoi supervisé.
@@ -140,7 +150,80 @@ concurrencer.
 
 ---
 
-## 4. Les quatre horizons
+## 4. Le Déclarant : le second actif, et ce qu'il change
+
+`le-declarant.com` est en ligne et résout le classement tarifaire et le calcul
+des droits et taxes. C'est **le verrou de toute la chaîne d'importation**, et
+vous l'avez déjà ouvert — dans une autre application.
+
+### Ce que ça change concrètement
+
+Aujourd'hui, Maylary ne sait chiffrer automatiquement que ce qui vient de CJ
+Dropshipping, parce que le reste demande de savoir *sous quelle position
+tarifaire* la marchandise entre et *quels taux* s'y appliquent. C'est la raison
+pour laquelle une demande d'import passe par un atelier de cotation manuel.
+
+Branchez Le Déclarant, et cette limite tombe : Maylary sait chiffrer
+**n'importe quelle marchandise, de n'importe quelle origine**, sans vous.
+C'est-à-dire, littéralement, votre phrase — *il choisit, il paie, le reste est
+fait.*
+
+Ce n'est plus une fonction à construire. C'est un branchement.
+
+### La question stratégique : un produit ou deux ?
+
+Vous avez maintenant deux applications qui se répondent. Trois façons de les
+tenir, et elles n'ont pas la même valeur.
+
+| | Ce que ça donne | Le risque |
+|---|---|---|
+| **Fusionner** — Le Déclarant devient un onglet de Maylary | Un seul produit, une seule histoire | On perd un service qui a ses propres utilisateurs, et qui parle à des transitaires que Maylary n'intéresse pas |
+| **Séparer complètement** | Deux produits, deux marchés | Deux fois le travail, à deux, en freelance. Intenable |
+| **Moteur et véhicule** — Le Déclarant reste un service, Maylary le consomme par API | Un actif technique réutilisable, deux revenus | Demande de traiter Le Déclarant comme un service et non comme un site : version, disponibilité, contrat |
+
+**Ma recommandation : moteur et véhicule.**
+
+Le Déclarant devient le service de référence tarifaire. Maylary l'appelle pour
+chiffrer. Et — c'est là que ça devient intéressant — **les autres transitaires
+ivoiriens peuvent l'appeler aussi, contre paiement**. Vous connaissez la
+profession, vous savez combien de temps un déclarant passe à chercher une
+position et à recalculer une liquidation.
+
+Ça vous donne :
+
+- **un revenu qui ne dépend pas du commerce** — donc qui tient pendant que
+  Maylary cherche ses premiers clients ;
+- **une barrière qui grandit toute seule** : chaque question posée au service
+  améliore la base de correspondances, et personne d'autre ne l'a ;
+- **une raison d'exister devant un financeur** qui ne repose pas sur des
+  volumes que vous n'avez pas encore.
+
+C'est aussi cohérent avec la vision d'expansion : un moteur tarifaire se porte
+d'un pays à l'autre bien plus facilement qu'une opération logistique. Le TEC de
+l'UEMOA est commun à huit pays.
+
+### Ce que j'ai besoin de savoir pour le brancher
+
+Je n'ai pas pu ouvrir le site depuis cet environnement — l'accès sortant y est
+filtré. Donc, honnêtement, je ne sais rien de sa technique. Ce qui manque :
+
+1. **Y a-t-il une API**, ou seulement une interface web ?
+2. **Sur quoi c'est construit** — Supabase aussi ? Même compte ? Quel dépôt ?
+3. **D'où viennent les données tarifaires** — TEC UEMOA, tarif DGD, saisie
+   manuelle ? Et **comment sont-elles tenues à jour** ? C'est la question la
+   plus importante : un moteur tarifaire périmé est pire qu'inutile.
+4. **Ce qu'on lui donne en entrée** : une description libre, un code SH déjà
+   connu, une photo ?
+5. **Ce qu'il rend** : la position seule, ou la liquidation complète — DD, RS,
+   PCS, PC, taxe statistique, TVA, AIRSI ?
+6. **Calcule-t-il la valeur en douane** (CAF) ou part-il d'une valeur fournie ?
+7. **Qui s'en sert aujourd'hui**, et est-ce payant ?
+
+Répondez à ces sept points et je peux chiffrer le branchement précisément.
+
+---
+
+## 5. Les quatre horizons
 
 Chaque horizon a une **condition de sortie**. On ne passe pas au suivant tant
 qu'elle n'est pas remplie — c'est la seule protection contre le travail
@@ -173,7 +256,8 @@ Ce qui manque pour qu'un particulier sans expérience aille au bout tout seul.
 
 - Confirmation de paiement automatique (API Wave, ou constat bancaire).
 - Suivi par référence, sans compte.
-- Classement tarifaire assisté, pour chiffrer autre chose que CJ.
+- **Brancher Le Déclarant** — c'est ce qui fait passer le chiffrage automatique
+  de « les articles CJ » à « n'importe quelle marchandise ». Priorité de l'horizon.
 - Service client : un canal, un délai annoncé, une trace.
 - Le prix rendu écrit comme un engagement opposable.
 - Mesure d'audience, pour savoir où les gens abandonnent.
@@ -206,7 +290,7 @@ croître avec le nombre de commandes.
 
 ---
 
-## 5. Comment nous travaillons
+## 6. Comment nous travaillons
 
 Ces règles ont déjà servi et méritent d'être écrites, parce qu'elles sont ce
 qui distingue « coder » de « construire une entreprise ».
@@ -227,7 +311,7 @@ qui distingue « coder » de « construire une entreprise ».
 
 ---
 
-## 6. Ce qui dépend du fondateur, et de lui seul
+## 7. Ce qui dépend du fondateur, et de lui seul
 
 | Sujet | Pourquoi c'est bloquant |
 |---|---|
@@ -239,10 +323,11 @@ qui distingue « coder » de « construire une entreprise ».
 | Validation du plan de comptes par un expert-comptable | Avant tout dépôt d'états financiers |
 | Qui tranche un litige de livraison | La garantie existe, l'arbitrage n'est pas organisé |
 | Détenir du stock, ou non | Change le modèle économique en entier |
+| Répondre aux sept questions sur Le Déclarant (§ 4) | Sans elles, impossible de chiffrer le branchement |
 
 ---
 
-## 7. Ce qu'il faut trancher dans la conversation de cadrage
+## 8. Ce qu'il faut trancher dans la conversation de cadrage
 
 Questions ouvertes, classées par ce qu'elles engagent.
 
@@ -255,6 +340,11 @@ Questions ouvertes, classées par ce qu'elles engagent.
    à rotation rapide ?
 3. La marketplace mérite-t-elle un effort commercial maintenant, ou attend-elle
    que la boutique tourne ?
+
+**Modèle (suite)**
+3 bis. **Le Déclarant : moteur, onglet ou produit séparé ?** Voir § 4. C'est
+   probablement la décision la plus lourde de conséquences de toute cette
+   liste — elle détermine s'il y a une ou deux sources de revenu.
 
 **Client**
 4. Qui est le client prioritaire — le particulier qui importe une fois, ou la
@@ -279,7 +369,7 @@ Questions ouvertes, classées par ce qu'elles engagent.
 
 ---
 
-## 8. Ce que je propose, si l'on ne devait retenir qu'une chose
+## 9. Ce que je propose, si l'on ne devait retenir qu'une chose
 
 **Arrêter d'ajouter des fonctions et terminer une vente.**
 
