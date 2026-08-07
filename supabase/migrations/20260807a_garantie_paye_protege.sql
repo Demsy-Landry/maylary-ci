@@ -23,6 +23,12 @@
 -- Le second cas n'est pas un détail : sans lui, un client silencieux gèlerait
 -- l'argent d'un vendeur indéfiniment, et aucune entreprise sérieuse
 -- n'accepterait de vendre ici. Le délai est réglable sans redéploiement.
+--
+-- Il est court — deux jours — et c'est délibéré : la voie normale est la
+-- confirmation du client, pas l'attente. Retenir longtemps l'argent d'un
+-- vendeur revient à financer Maylary sur sa trésorerie, ce qui n'est pas le
+-- marché qu'on lui propose. Le repli existe pour les clients silencieux, il ne
+-- doit pas devenir le régime courant.
 
 -- ---------------------------------------------------------------------------
 -- Le délai de contestation
@@ -31,7 +37,7 @@ create table if not exists app_e08c374bc4_parametres_garantie (
   -- Table à ligne unique : la contrainte porte la règle plutôt qu'un
   -- commentaire qu'on oublie de lire.
   ligne_unique              boolean primary key default true check (ligne_unique),
-  delai_confirmation_jours  integer not null default 7 check (delai_confirmation_jours > 0),
+  delai_confirmation_jours  integer not null default 2 check (delai_confirmation_jours > 0),
   updated_at                timestamptz not null default now()
 );
 

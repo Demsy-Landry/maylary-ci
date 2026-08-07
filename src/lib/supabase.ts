@@ -501,6 +501,64 @@ export interface CommandeGP {
 export const PARAMETRES_GARANTIE_TABLE = 'app_e08c374bc4_parametres_garantie';
 export const REVERSEMENTS_DUS_VIEW = 'app_e08c374bc4_reversements_dus';
 
+/* --- Achat groupé ------------------------------------------------------- */
+export const ACHATS_GROUPES_TABLE = 'app_e08c374bc4_achats_groupes';
+export const ACHATS_GROUPES_PUBLICS_VIEW = 'app_e08c374bc4_achats_groupes_publics';
+export const PARTICIPATIONS_ACHAT_GROUPE_TABLE = 'app_e08c374bc4_participations_achat_groupe';
+
+export type StatutAchatGroupe = 'ouverte' | 'reussie' | 'echouee' | 'annulee';
+
+export const STATUT_ACHAT_GROUPE_LABELS: Record<StatutAchatGroupe, string> = {
+  ouverte: 'En cours',
+  reussie: 'Objectif atteint',
+  echouee: 'Objectif non atteint',
+  annulee: 'Annulé',
+};
+
+/**
+ * Un achat groupé tel qu'il se montre — y compris à un visiteur sans compte.
+ *
+ * Le compteur de réservations est public parce que c'est lui qui donne envie de
+ * rejoindre ; les réservations elles-mêmes ne le sont pas. La vue n'expose que
+ * des agrégats, jamais un nom.
+ */
+export interface AchatGroupePublic {
+  id: string;
+  reference_publique: string;
+  produit_id: string;
+  titre: string;
+  argumentaire: string | null;
+  photos: string[] | null;
+  /** Prix rendu, tout compris, ferme dès la publication. */
+  prix_unitaire_groupe_fcfa: number;
+  /** Prix catalogue figé à l'ouverture, pour que l'économie annoncée ne bouge pas. */
+  prix_unitaire_normal_fcfa: number;
+  economie_unitaire_fcfa: number;
+  quantite_objectif: number;
+  quantite_maximum: number | null;
+  quantite_max_par_client: number;
+  cloture_prevue_le: string;
+  statut: StatutAchatGroupe;
+  cloturee_le: string | null;
+  quantite_reservee: number;
+  participants: number;
+  quantite_manquante: number;
+}
+
+export interface ParticipationAchatGroupe {
+  id: string;
+  campagne_id: string;
+  user_id: string;
+  quantite: number;
+  nom_destinataire: string;
+  telephone_destinataire: string;
+  adresse_livraison: string;
+  ville_livraison: string;
+  statut: 'reservee' | 'commandee' | 'abandonnee';
+  commande_id: string | null;
+  created_at: string;
+}
+
 /**
  * Ce qu'on doit à un vendeur, et ce qu'on retient encore.
  *

@@ -11,6 +11,7 @@ const LINKS = [
   { to: '/admin/commandes', label: 'Commandes Boutique' },
   { to: '/admin/sourcing', label: 'Sourcing sur demande' },
   { to: '/admin/vendeurs', label: 'Vendeurs marketplace' },
+  { to: '/admin/achats-groupes', label: 'Achats groupés' },
   { to: '/admin/devis', label: 'Demandes de devis' },
   { to: '/admin/cj-dropshipping', label: 'Catalogue CJ Dropshipping' },
   { to: '/admin/prospection', label: 'Prospection fournisseurs' },
