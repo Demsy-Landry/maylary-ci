@@ -1,116 +1,126 @@
-# Le Déclarant — reprise en main et mise à disposition de Maylary
+# Le Déclarant — reconstruction dans Maylary
 
-*Note de décision, 7 août 2026. Écrite avant réception du code, pour que le
-travail commence par l'exécution et non par l'hésitation.*
+*Note de décision, 7 août 2026. Le projet d'origine, hébergé sur `atoms.dev`,
+est bloqué faute d'abonnement et son code n'est pas récupérable. On reconstruit
+à l'intérieur de Maylary.*
 
-## Ce que l'application fait
+## Ce qu'on reconstruit, et pourquoi ici
 
-D'après le fondateur, `le-declarant.com` réunit deux outils :
+Deux outils, qui existaient sur `le-declarant.com` :
 
 1. **Recherche de position tarifaire (code SH)** à partir d'une description de
    marchandise, classée selon les **Règles Générales Interprétatives** et les
-   **notes explicatives**.
-2. **Éditeur de déclaration en douane** : on saisit les informations d'une
-   importation, il calcule les droits et taxes à payer.
+   notes explicatives.
+2. **Éditeur de déclaration** : on saisit les éléments d'une importation, il
+   liquide les droits et taxes.
 
-Elle est déployée depuis `atoms.dev` et **instable**. Le fondateur veut la
-reprendre en main et l'exposer en API pour que Maylary l'appelle.
+Les intégrer à Maylary plutôt que d'en refaire une application séparée sert
+trois choses à la fois :
 
-## Pourquoi cette application compte plus que sa taille ne le suggère
+- **Maylary chiffre enfin n'importe quelle marchandise.** Aujourd'hui la
+  cotation automatique ne couvre que le catalogue CJ ; tout le reste passe par
+  un atelier manuel, faute de savoir sous quelle position la marchandise entre.
+- **Les professionnels s'en servent, et découvrent Maylary.** Un transitaire qui
+  vient chercher une position tarifaire est exactement le visiteur qu'on veut :
+  il connaît le métier, il juge l'outil sur pièces, et s'il le trouve juste il
+  fait confiance au reste.
+- **Une seule base, un seul déploiement, une seule facture.** Ce qui compte
+  quand on est deux.
 
-C'est l'étape n° 4 de la chaîne d'importation du plan directeur — celle que
-j'identifiais comme le verrou. Sans elle, Maylary ne sait chiffrer
-automatiquement que le catalogue CJ Dropshipping, parce que tout le reste
-suppose de connaître la position tarifaire et les taux applicables.
+## La difficulté réelle : il n'y a pas de moteur sans corpus
 
-Une fois branchée, Maylary chiffre n'importe quelle marchandise, de n'importe
-quelle origine, sans intervention humaine. C'est exactement la promesse de
-l'entreprise : *vous choisissez, vous payez, le reste est fait.*
+Les deux outils n'ont pas du tout la même nature, et les confondre ferait
+perdre des semaines.
 
-## L'architecture retenue
+**La liquidation est de l'arithmétique.** Valeur en douane, assiettes,
+taux, ordre d'application. C'est exact, vérifiable, déterministe. On peut le
+construire aujourd'hui et le prouver.
 
-**Un moteur, deux consommateurs.**
+**Le classement tarifaire est de la documentation.** Il suppose la nomenclature
+du Système Harmonisé — sections, chapitres, positions, sous-positions — et les
+notes explicatives qui disent, pour chaque cas limite, où la marchandise tombe.
+**Ce corpus, je ne l'ai pas.** Et une recherche de code SH construite sans
+corpus ne serait pas un outil approximatif : ce serait une machine à inventer
+des codes qui ont l'air justes. Pour un déclarant, c'est pire que rien.
+
+D'où l'ordre : **liquidation d'abord, corpus ensuite, classement en dernier.**
+
+## Le principe qui gouverne tout le module
+
+> **Un outil douanier qui se trompe coûte plus cher que pas d'outil du tout.**
+
+Trois conséquences, appliquées sans exception :
+
+1. **Aucun taux inventé.** Chaque taxe porte sa source et un état
+   « confirmé / à confirmer ». Tant qu'une valeur n'a pas été confirmée par le
+   fondateur — qui est déclarant agréé —, elle est marquée comme telle jusque
+   dans le résultat affiché.
+2. **La cotation automatique de Maylary refuse les taux non confirmés.** Elle
+   bascule en cotation manuelle plutôt que d'afficher un prix qu'on ne peut pas
+   tenir. La règle de la maison — un prix ne bouge jamais après paiement —
+   interdit de s'appuyer sur un chiffre incertain.
+3. **Le tarif porte une date de version.** Un tarif périmé fait perdre de
+   l'argent à qui s'y fie. La date est rendue avec chaque liquidation.
+
+## L'architecture
 
 ```
-                    ┌──────────────────────────────┐
-                    │  Fonctions « edge » Supabase │
-                    │   classer()   liquider()     │   ← le moteur
-                    │  + corpus SH, RGI, taux      │
-                    └───────────┬──────────────────┘
-                                │
-              ┌─────────────────┴─────────────────┐
-              │                                   │
-   ┌──────────▼─────────┐            ┌────────────▼───────────┐
-   │ le-declarant.com   │            │  Maylary               │
-   │ (Vercel, refonte)  │            │  cotation automatique  │
-   │ les transitaires   │            │  achat groupé, import  │
-   └────────────────────┘            └────────────────────────┘
+  app_e08c374bc4_taxes_douanieres      ← la structure fiscale, éditable
+  app_e08c374bc4_positions_tarifaires  ← le corpus SH + taux DD par position
+                    │
+                    ▼
+      app_e08c374bc4_liquider(...)     ← le moteur, déterministe
+                    │
+        ┌───────────┴────────────┐
+        ▼                        ▼
+   /declarant                Maylary
+   (les professionnels)      (cotation automatique)
 ```
 
-### Trois décisions, et leurs raisons
+Le moteur est une fonction en base, pas du code d'écran. Deux consommateurs
+l'appellent, et une API l'expose : un transitaire pourra la payer demain sans
+qu'on réécrive quoi que ce soit.
 
-**1. Le moteur vit dans Supabase, pas dans le site.**
+## Ce dont j'ai besoin du fondateur
 
-Aujourd'hui la logique est probablement dans l'application web. Tant qu'elle y
-reste, Maylary ne peut pas l'appeler sans passer par une seconde application en
-ligne — donc une seconde source de panne, une latence supplémentaire et un
-secret à faire circuler. Déplacée dans une fonction « edge », elle devient
-appelable par les deux, versionnée, et testable sans navigateur.
+**Pour la liquidation — une demi-heure de votre temps, et le module devient exact :**
 
-**2. Même projet Supabase que Maylary, préfixe de tables distinct.**
+La liste exacte des droits et taxes à l'importation en Côte d'Ivoire, avec pour
+chacun : le sigle, l'intitulé, **l'assiette** (sur quoi il se calcule) et le
+taux. Ce que je crois savoir est ci-dessous, et **je ne l'utiliserai pas tant
+que vous ne l'aurez pas corrigé** — les sources publiques se contredisent déjà
+sur la redevance statistique.
 
-Arguments pour : un seul projet à administrer, une seule facture, aucun
-problème d'authentification croisée quand Maylary appelle, et — argument
-concret — le plan gratuit limite le nombre de projets actifs, ce qui vient
-déjà de coûter une journée de déploiements bloqués.
+| Sigle | Intitulé | Assiette supposée | Taux supposé |
+|---|---|---|---|
+| DD | Droit de douane | Valeur CAF | 0, 5, 10, 20 ou 35 % selon la catégorie TEC |
+| RS | Redevance statistique | Valeur CAF | **1 % ou 2,6 % — sources contradictoires** |
+| PCS | Prélèvement communautaire de solidarité (UEMOA) | Valeur CAF | 1 % |
+| PC | Prélèvement communautaire (CEDEAO) | Valeur CAF | 0,5 % |
+| TVA | Taxe sur la valeur ajoutée | CAF + DD + RS + PCS + PC | 18 % |
+| AIRSI | Acompte d'impôt sur le revenu | ? | ? |
 
-Argument contre, à ne pas oublier : si Le Déclarant est vendu un jour à
-d'autres transitaires, leurs données ne doivent pas cohabiter avec celles des
-clients de Maylary. **Le corpus tarifaire n'est pas une donnée personnelle**,
-donc la cohabitation est acceptable aujourd'hui ; les comptes des transitaires
-utilisateurs, eux, feront l'objet d'une décision séparée le jour où il y en
-aura.
+Manquent aussi : les taxes spécifiques (riz, alcool, tabac, produits
+pétroliers), les exonérations courantes, et le traitement des marchandises
+d'origine UEMOA/CEDEAO.
 
-**3. L'API est publique dès le départ, même si Maylary est son seul client.**
+**Pour le classement — la question ouverte :**
 
-Pas de raccourci interne. Une fonction appelée par clé, avec un contrat écrit,
-peut être facturée demain à un transitaire sans rien réécrire. Un raccourci
-interne, non.
+Où trouver la nomenclature ? Trois pistes, par ordre de préférence :
 
-## Le point de vigilance : la fiabilité de la réponse
+1. **Vous l'avez déjà** sous une forme exploitable — fichier, tableur, export
+   d'un logiciel de déclaration. C'est de loin le plus rapide.
+2. **Le tarif publié par la DGD ou l'UEMOA**, à récupérer et à importer. Faisable
+   côté serveur.
+3. **Reconstruction progressive** : commencer par les 21 sections et 97
+   chapitres, puis remplir les positions au fil des dossiers réels. Lent, mais
+   chaque dossier traité enrichit le corpus — et ce corpus devient alors un
+   actif que personne d'autre n'a.
 
-Un code SH erroné coûte de l'argent au client et de la crédibilité à Maylary.
-Avant de brancher quoi que ce soit sur la cotation automatique, il faut savoir :
+## Ordre de travail
 
-- **La classification est-elle déterministe ?** Si elle repose sur un modèle de
-  langage, deux appels identiques peuvent donner deux positions différentes.
-  C'est inacceptable pour un chiffre qu'un client paie. Il faudra alors soit
-  figer les réponses (mise en cache par description normalisée), soit
-  transformer la sortie en **proposition assortie d'un niveau de confiance**,
-  jamais en décision.
-- **D'où viennent les taux, et comment sont-ils mis à jour ?** Un moteur
-  tarifaire périmé est pire qu'inutile : il fait perdre de l'argent à ceux qui
-  s'y fient. Il faut une date de version du tarif, affichée dans la réponse.
-- **Qui répond en cas d'erreur ?** Tant que le fondateur est déclarant agréé et
-  qu'il valide les déclarations réelles, la responsabilité est tenue. Le jour
-  où l'API sert un tiers, le contrat doit dire ce qu'elle garantit — et ce
-  qu'elle ne garantit pas.
-
-## Ce qu'il faut dans le ZIP
-
-- **Tout le code source**, sans `node_modules` (il se réinstalle).
-- Le `package.json` et le fichier de verrouillage des versions.
-- Les **données tarifaires** : corpus SH, notes explicatives, table des taux —
-  sous la forme où elles existent (fichiers, base, ou en dur dans le code).
-- Le schéma de base s'il y en a une, et l'endroit où elle est hébergée.
-- **Pas de secret en clair.** S'il y en a dans le ZIP — clé de modèle, jeton de
-  service — le dire : ils seront à révoquer et à remplacer, un secret parti
-  dans un fichier est un secret perdu.
-
-## Les trois questions auxquelles je ne peux pas répondre seul
-
-1. La classification appelle-t-elle un modèle d'IA ? Lequel, avec quelle clé,
-   payée par qui ?
-2. Y a-t-il une base de données derrière, et où vit-elle aujourd'hui ?
-3. Des transitaires s'en servent-ils déjà ? Si oui, la reprise doit préserver
-   leurs accès — ce n'est plus une refonte, c'est une migration.
+1. Structure fiscale + moteur de liquidation + preuve sur cas réels.
+2. Page publique `/declarant` et API.
+3. Import du corpus SH, dès qu'une source est disponible.
+4. Recherche de position assistée, appuyée sur le corpus et les RGI.
+5. Branchement de la cotation automatique de Maylary sur le moteur.
