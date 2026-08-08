@@ -227,16 +227,32 @@ begin
     v_fob   := coalesce((v_ligne->>'fob')::numeric, 0);
     v_poids := coalesce((v_ligne->>'poids_brut')::numeric, 0);
 
-    v_taux_dd := coalesce(
-      (v_ligne->>'taux_dd')::numeric,
-      (select pt.taux_dd from app_e08c374bc4_positions_tarifaires pt
-        where pt.code = (v_ligne->>'position'))
-    );
+    v_saisi := (v_ligne->>'taux_dd')::numeric;
+
+    -- Le corpus porte les taux en pourcentage, l'appelant les donne en
+    -- fraction. Confondre les deux multiplie les droits par cent sans que
+    -- rien ne le signale : on refuse plutôt que de deviner.
+    if v_saisi is not null and v_saisi > 1 then
+      raise exception
+        'Ligne « % » : le taux de droit se donne en fraction (0.20 pour 20 %%), pas en pourcentage.',
+        coalesce(v_ligne->>'designation', '?') using errcode = '22023';
+    end if;
+
+    v_code := regexp_replace(coalesce(v_ligne->>'position', ''), '[^0-9]', '', 'g');
+    if length(v_code) = 10 then
+      v_code := substr(v_code, 1, 4) || '.' || substr(v_code, 5, 2) || '.' ||
+                substr(v_code, 7, 2) || '.' || substr(v_code, 9, 2);
+    end if;
+    select * into v_tec from app_e08c374bc4_tec_dd_reference where code_hs = v_code;
+
+    -- Le taux saisi l'emporte : un déclarant qui corrige sait ce qu'il fait.
+    v_taux_dd := coalesce(v_saisi, v_tec.taux_dd / 100.0);
 
     if v_taux_dd is null then
       raise exception
-        'Ligne « % » : droit de douane inconnu. Indiquez une position présente au corpus, ou saisissez le taux.',
-        coalesce(v_ligne->>'designation', v_ligne->>'position', '?') using errcode = '22023';
+        'Ligne « % » : droit de douane inconnu. Le code % n''est pas dans la base TEC — vérification manuelle nécessaire, ou saisissez le taux.',
+        coalesce(v_ligne->>'designation', '?'), coalesce(nullif(v_code, ''), '(vide)')
+        using errcode = '22023';
     end if;
 
     -- Le fret se répartit au poids : sans poids renseigné nulle part, on ne

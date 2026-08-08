@@ -129,7 +129,10 @@ export default function Declarant() {
     setResultats((data as PositionTec[]) ?? []);
   };
 
-  const reprendre = (code: string, designation: string, taux: number) => {
+  // On ne recopie que le code, jamais le taux : un taux figé au moment du clic
+  // survivrait à une correction du corpus sans que rien ne le signale. La
+  // liquidation le relit elle-même dans le TEC.
+  const reprendre = (code: string, designation: string) => {
     setLignes((l) => {
       const suite = [...l];
       const vide = suite.findIndex((x) => !x.position && !x.designation);
@@ -139,7 +142,7 @@ export default function Declarant() {
         ...base,
         position: code,
         designation: designation.slice(0, 120),
-        taux_dd: String(taux / 100),
+        taux_dd: '',
       };
       return suite;
     });
@@ -277,11 +280,7 @@ export default function Declarant() {
                       size="sm"
                       className="mt-3"
                       onClick={() =>
-                        reprendre(
-                          verification.code_hs!,
-                          verification.designation!,
-                          verification.taux_dd_pourcent!,
-                        )
+                        reprendre(verification.code_hs!, verification.designation!)
                       }
                     >
                       Utiliser dans le calcul
@@ -351,7 +350,7 @@ export default function Declarant() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => reprendre(r.code_hs, r.designation, r.taux_dd)}
+                              onClick={() => reprendre(r.code_hs, r.designation)}
                             >
                               Utiliser
                             </Button>
