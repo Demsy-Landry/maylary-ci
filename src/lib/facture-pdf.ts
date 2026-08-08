@@ -1,12 +1,16 @@
 import { jsPDF } from 'jspdf';
 import type { Facture, LigneFacture } from '@/lib/supabase';
 
-/** Couleurs de marque, alignées sur les variables CSS du site. */
-const ORANGE: [number, number, number] = [242, 166, 24];
-const ORANGE_SOMBRE: [number, number, number] = [177, 63, 0];
-const ENCRE: [number, number, number] = [28, 26, 23];
-const GRIS: [number, number, number] = [120, 113, 108];
-const GRIS_CLAIR: [number, number, number] = [245, 243, 240];
+/**
+ * Couleurs de marque, alignées sur les variables CSS du site. Exportées : le
+ * bulletin de liquidation du Déclarant s'imprime avec la même identité, et deux
+ * palettes recopiées finiraient par diverger.
+ */
+export const ORANGE: [number, number, number] = [242, 166, 24];
+export const ORANGE_SOMBRE: [number, number, number] = [177, 63, 0];
+export const ENCRE: [number, number, number] = [28, 26, 23];
+export const GRIS: [number, number, number] = [120, 113, 108];
+export const GRIS_CLAIR: [number, number, number] = [245, 243, 240];
 
 const MARGE = 15;
 const LARGEUR_PAGE = 210;
@@ -68,14 +72,20 @@ export function nombreEnLettres(valeur: number): string {
  * une espace fine insécable (U+202F) absente de l'encodage WinAnsi des polices
  * PDF standard, qui la rendrait par un « / » sur la facture imprimée.
  */
-const montant = (v: number) =>
+export const montant = (v: number) =>
   `${Math.round(v)
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} FCFA`;
+
+/** Le même séparateur de milliers, sans l'unité — pour les colonnes chiffrées. */
+export const chiffre = (v: number) =>
+  Math.round(v)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const jour = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
 
 /** Marque Maylary dessinée en vectoriel : carré orange + pyramide de colis. */
-function dessinerLogo(doc: jsPDF, x: number, y: number, taille: number) {
+export function dessinerLogo(doc: jsPDF, x: number, y: number, taille: number) {
   doc.setFillColor(...ORANGE);
   doc.roundedRect(x, y, taille, taille, taille * 0.22, taille * 0.22, 'F');
 

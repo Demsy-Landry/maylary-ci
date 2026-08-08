@@ -22,8 +22,16 @@ import {
   Plus,
   Trash2,
   ShieldCheck,
+  Printer,
+  ChevronDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  telechargerBulletinPdf,
+  referenceSimulation,
+  enTeteVide,
+  type EnTeteBulletin,
+} from '@/lib/bulletin-pdf';
 
 const fcfa = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
 const pct = (n: number) => `${(n * 100).toFixed(n * 100 % 1 === 0 ? 0 : 1)} %`;
@@ -82,6 +90,24 @@ export default function Declarant() {
   const [lignes, setLignes] = useState<LigneSaisie[]>([ligneVide('1')]);
   const [liquidation, setLiquidation] = useState<Liquidation | null>(null);
   const [calcul, setCalcul] = useState(false);
+
+  /* ---- En-tête du document imprimable ----
+   * Rien ici n'entre dans le calcul : ces champs habillent le bulletin pour
+   * qu'il soit remettable à un client et classable au dossier. Repliés par
+   * défaut, pour que quelqu'un venu vérifier un taux n'ait pas dix cases à
+   * ignorer avant d'arriver au bouton. */
+  const [entete, setEntete] = useState<EnTeteBulletin>(enTeteVide);
+  const [enteteOuvert, setEnteteOuvert] = useState(false);
+
+  const majEntete = (champ: keyof EnTeteBulletin, valeur: string) =>
+    setEntete((e) => ({ ...e, [champ]: valeur }));
+
+  const imprimer = () => {
+    if (!liquidation) return;
+    const reference = entete.reference || referenceSimulation();
+    if (!entete.reference) setEntete((e) => ({ ...e, reference }));
+    telechargerBulletinPdf(liquidation, { ...entete, reference });
+  };
 
   useEffect(() => {
     supabase
@@ -368,6 +394,56 @@ export default function Declarant() {
         {/* ================= LIQUIDATION ================= */}
         {onglet === 'liquidation' && (
           <section className="mt-6 space-y-4">
+            {/* En-tête du document : facultatif, replié par défaut. */}
+            <div className="rounded-md border">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left"
+                onClick={() => setEnteteOuvert((o) => !o)}
+              >
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-foreground">
+                    En-tête du document
+                  </span>
+                  <span className="block text-xs text-muted-foreground">
+                    Importateur, fournisseur, connaissement… N'entre pas dans le calcul, sert au
+                    bulletin imprimable.
+                  </span>
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${
+                    enteteOuvert ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              {enteteOuvert && (
+                <div className="grid gap-3 border-t p-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {(
+                    [
+                      ['importateur', 'Importateur / Déclarant'],
+                      ['code_importateur', 'Code importateur'],
+                      ['rccm_ncc', 'RCCM / NCC'],
+                      ['bureau', 'Bureau de douane'],
+                      ['fournisseur', 'Fournisseur'],
+                      ['pays_origine', "Pays d'origine"],
+                      ['mode_transport', 'Mode de transport'],
+                      ['connaissement', 'N° connaissement / LTA'],
+                      ['facture', 'N° facture'],
+                    ] as [keyof EnTeteBulletin, string][]
+                  ).map(([champ, libelle]) => (
+                    <div key={champ} className="space-y-1.5">
+                      <Label htmlFor={`ent-${champ}`}>{libelle}</Label>
+                      <Input
+                        id={`ent-${champ}`}
+                        value={entete[champ]}
+                        onChange={(e) => majEntete(champ, e.target.value)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="space-y-1.5">
                 <Label htmlFor="regime">Régime douanier</Label>
@@ -598,6 +674,17 @@ export default function Declarant() {
                       Montants indicatifs : l'exonération réelle dépend de votre autorisation.
                     </p>
                   )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button variant="outline" onClick={imprimer}>
+                    <Printer className="mr-1.5 h-4 w-4" />
+                    Télécharger le bulletin (PDF)
+                  </Button>
+                  <p className="text-xs text-muted-foreground">
+                    Cases numérotées, détail par ligne et zone de signature. Renseignez l'en-tête
+                    ci-dessus pour un document complet.
+                  </p>
                 </div>
 
                 <p className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
