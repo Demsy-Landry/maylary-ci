@@ -14,6 +14,7 @@ import CommandeGP from '@/pages/CommandeGP';
 import CompteGP from '@/pages/CompteGP';
 import MesCommandesGP from '@/pages/MesCommandesGP';
 import AchatsGroupes from '@/pages/AchatsGroupes';
+import Declarant from '@/pages/Declarant';
 import SourcingGP from '@/pages/SourcingGP';
 import EspaceVendeur from '@/pages/EspaceVendeur';
 import CataloguePro from '@/pages/CataloguePro';
@@ -73,6 +74,7 @@ function App() {
                 <Route path="/boutique/compte" element={<CompteGP />} />
                 <Route path="/boutique/mes-commandes" element={<MesCommandesGP />} />
                 <Route path="/boutique/achats-groupes" element={<AchatsGroupes />} />
+                <Route path="/declarant" element={<Declarant />} />
                 <Route path="/boutique/sourcing" element={<SourcingGP />} />
                 <Route path="/vendre" element={<EspaceVendeur />} />
                 <Route path="/vendre/espace" element={<EspaceVendeur />} />
