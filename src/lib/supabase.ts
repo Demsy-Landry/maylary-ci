@@ -501,6 +501,124 @@ export interface CommandeGP {
 export const PARAMETRES_GARANTIE_TABLE = 'app_e08c374bc4_parametres_garantie';
 export const REVERSEMENTS_DUS_VIEW = 'app_e08c374bc4_reversements_dus';
 
+/* --- Le Déclarant : douane, position tarifaire et liquidation ------------ */
+export const TEC_TABLE = 'app_e08c374bc4_tec_dd_reference';
+export const REGIMES_DOUANIERS_TABLE = 'app_e08c374bc4_regimes_douaniers';
+export const TAXES_DOUANIERES_TABLE = 'app_e08c374bc4_taxes_douanieres';
+
+/** Une ligne du corpus TEC UEMOA. Le taux y est en pourcentage (5.00 = 5 %). */
+export interface PositionTec {
+  code_hs: string;
+  designation: string;
+  unite_us: string | null;
+  taux_dd: number;
+  categorie: number | null;
+  /** « a_verifier » : la ligne source était ambiguë, l'écran doit le dire. */
+  statut: 'actif' | 'obsolete' | 'a_verifier';
+  pertinence?: number;
+}
+
+/**
+ * Réponse de la vérification d'un code.
+ *
+ * Quand `trouve` vaut faux, `taux_dd_pourcent` est toujours nul — c'est la
+ * règle absolue du module : on n'affiche jamais un taux qu'on n'a pas vérifié.
+ */
+export interface VerificationTec {
+  trouve: boolean;
+  code_hs?: string;
+  code_recherche?: string | null;
+  designation?: string;
+  unite_us?: string | null;
+  taux_dd_pourcent: number | null;
+  categorie?: number | null;
+  statut?: string;
+  verifie_en_base: boolean;
+  mention?: string;
+  code_proche_indicatif?: string | null;
+  designation_proche?: string | null;
+  mention_utilisateur?: string;
+  tarif: { libelle: string; date_version: string };
+}
+
+export interface RegimeDouanier {
+  code: string;
+  libelle: string;
+  categorie: string | null;
+  droits_exigibles: boolean;
+  rpi_exigible: boolean;
+  ts_exigible: boolean;
+  caution_requise: boolean;
+  depend_autorisation: boolean;
+  mention: string;
+  ordre: number;
+}
+
+/** Une ligne envoyée au moteur de liquidation. Le taux est une fraction. */
+export interface LigneDeclaration {
+  numero: string;
+  designation: string;
+  position: string;
+  /** Fraction (0.20 pour 20 %) — le moteur refuse un pourcentage. */
+  taux_dd?: number | null;
+  fob: number;
+  poids_brut: number;
+}
+
+export interface TaxeLiquidee {
+  code: string;
+  libelle: string;
+  base_fcfa: number;
+  taux: number;
+  montant_fcfa: number;
+  confirme: boolean;
+}
+
+export interface LigneLiquidee {
+  numero: string | null;
+  designation: string | null;
+  position: string | null;
+  designation_tec: string | null;
+  unite_us: string | null;
+  verifie_en_base: boolean;
+  taux_dd: number;
+  taux_dd_saisi: boolean;
+  fob_fcfa: number;
+  poids_brut_kg: number;
+  poids_stat_kg: number;
+  fret_fcfa: number;
+  assurance_fcfa: number;
+  part_fret: number;
+  part_valeur: number;
+  caf_fcfa: number;
+  base_tva_fcfa: number;
+  taxes: TaxeLiquidee[];
+}
+
+export interface Liquidation {
+  regime: {
+    code: string;
+    libelle: string;
+    mention: string;
+    categorie: string | null;
+    droits_exigibles: boolean;
+    caution_requise: boolean;
+    depend_autorisation: boolean;
+  };
+  tarif: { libelle: string; date_version: string };
+  tarif_confirme: boolean;
+  globaux: {
+    fob_total_fcfa: number;
+    fret_total_fcfa: number;
+    assurance_total_fcfa: number;
+    poids_brut_total_kg: number;
+    caf_total_fcfa: number;
+  };
+  lignes: LigneLiquidee[];
+  totaux_taxes: Record<string, number>;
+  total_a_payer_fcfa: number;
+}
+
 /* --- Achat groupé ------------------------------------------------------- */
 export const ACHATS_GROUPES_TABLE = 'app_e08c374bc4_achats_groupes';
 export const ACHATS_GROUPES_PUBLICS_VIEW = 'app_e08c374bc4_achats_groupes_publics';
