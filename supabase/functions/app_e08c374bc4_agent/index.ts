@@ -25,7 +25,7 @@ const json = (corps: unknown, status = 200) =>
 const secret = (nom: string) => (Deno.env.get(nom) ?? '').replace(/\s+/g, '');
 const CLES_GOOGLE = ['GOOGLE_API_KEY', 'GOOGLE_API_KEY2'];
 
-const PERSONNAGE = `Tu es « Le Déclarant », le logisticien de Maylary.
+const PERSONNAGE = `Tu es « Le Déclarant », le logisticien de MayLary Group.
 
 QUI TU ES
 Commissionnaire en douane et logisticien senior, plus de dix ans dans le transit et
@@ -42,8 +42,8 @@ dossier de dédouanement. Tu parles au client comme un professionnel parle à un
 professionnel : direct, concret, sans jargon inutile — et sans le prendre de
 haut quand il découvre le métier.
 
-CE QUE MAYLARY SAIT FAIRE, ET QUE TU DOIS CONNAÎTRE
-- Import : le client décrit ce qu'il veut acheter à l'étranger, Maylary chiffre
+CE QUE MAYLARY GROUP SAIT FAIRE, ET QUE TU DOIS CONNAÎTRE
+- Import : le client décrit ce qu'il veut acheter à l'étranger, MayLary Group chiffre
   la marchandise, le fret, l'assurance, la douane et la livraison, puis exécute.
 - Export : collecte, dédouanement export, expédition, suivi jusqu'à l'acheteur.
 - Le Déclarant : recherche de position tarifaire dans le TEC UEMOA officiel,
@@ -330,6 +330,40 @@ Deno.serve(async (req: Request) => {
     }
     const modele: string = parametres.modele_google ?? 'gemini-3.6-flash';
 
+    // La place se réserve AVANT l'appel. Vérifier puis appeler puis écrire
+    // laisserait deux requêtes simultanées passer toutes deux le contrôle, et
+    // chacune coûte du crédit fournisseur.
+    const { data: droit } = await sb.rpc('app_e08c374bc4_consommer_ia', {
+      p_utilisateur: utilisateur.id,
+      p_service: 'agent',
+      p_modele: modele,
+    });
+
+    if (!droit?.autorise) {
+      return json(
+        {
+          erreur: `Vous avez utilisé vos ${droit?.plafond ?? 0} questions du jour sur la formule ${droit?.libelle ?? 'Découverte'}. Passez à une formule supérieure pour continuer, ou revenez demain.`,
+          quota_atteint: true,
+          formule: droit?.formule ?? null,
+          plafond: droit?.plafond ?? null,
+        },
+        429,
+      );
+    }
+    const usageId: number | null = droit.usage_id ?? null;
+
+    /** Rend le crédit quand l'appel n'a rien produit d'utile. */
+    const mesurer = async (entree: number | null, sortie: number | null, outils: number, aboutie: boolean) => {
+      if (usageId === null) return;
+      await sb.rpc('app_e08c374bc4_mesurer_ia', {
+        p_id: usageId,
+        p_entree: entree,
+        p_sortie: sortie,
+        p_outils: outils,
+        p_aboutie: aboutie,
+      });
+    };
+
     const consigne = contexte
       ? `${PERSONNAGE}\n\nCONTEXTE : l'utilisateur écrit depuis « ${contexte} ».`
       : PERSONNAGE;
@@ -340,6 +374,14 @@ Deno.serve(async (req: Request) => {
     ];
 
     const outilsAppeles: string[] = [];
+    // Les jetons se cumulent sur tous les tours : un chiffrage qui enchaîne
+    // trois outils coûte trois appels, et c'est ce total qui décide du prix.
+    let jetonsEntree = 0;
+    let jetonsSortie = 0;
+    const compter = (corps: { usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number } }) => {
+      jetonsEntree += corps?.usageMetadata?.promptTokenCount ?? 0;
+      jetonsSortie += corps?.usageMetadata?.candidatesTokenCount ?? 0;
+    };
 
     for (let tour = 0; tour < 6; tour++) {
       const reponse = await appelerGoogle(modele, {
@@ -351,6 +393,9 @@ Deno.serve(async (req: Request) => {
 
       if (!reponse.ok) {
         console.error('agent amont', reponse.refus.statut, reponse.refus.genre);
+        // Le fournisseur a refusé : la question n'a rien coûté, on rend le
+        // crédit au lieu de facturer une panne au client.
+        await mesurer(jetonsEntree, jetonsSortie, outilsAppeles.length, false);
         return json(
           {
             erreur: 'Le Déclarant est momentanément injoignable. Réessayez dans un instant.',
@@ -363,6 +408,7 @@ Deno.serve(async (req: Request) => {
         );
       }
 
+      compter(reponse.corps);
       const candidat = reponse.corps?.candidates?.[0];
       const parts = candidat?.content?.parts ?? [];
       const appels = parts.filter((p: { functionCall?: unknown }) => p?.functionCall);
@@ -372,10 +418,12 @@ Deno.serve(async (req: Request) => {
           .map((p: { text?: string }) => p?.text ?? '')
           .join('')
           .trim();
+        await mesurer(jetonsEntree, jetonsSortie, outilsAppeles.length, true);
         return json({
           reponse: texte || "Je n'ai pas de réponse utile à donner ici. Reformulez ?",
           outils: outilsAppeles,
           modele,
+          restant: droit.restant ?? null,
         });
       }
 
@@ -405,13 +453,18 @@ Deno.serve(async (req: Request) => {
     });
 
     if (conclusion.ok) {
+      compter(conclusion.corps);
       const texte = (conclusion.corps?.candidates?.[0]?.content?.parts ?? [])
         .map((p: { text?: string }) => p?.text ?? '')
         .join('')
         .trim();
-      if (texte) return json({ reponse: texte, outils: outilsAppeles, modele });
+      if (texte) {
+        await mesurer(jetonsEntree, jetonsSortie, outilsAppeles.length, true);
+        return json({ reponse: texte, outils: outilsAppeles, modele, restant: droit.restant ?? null });
+      }
     }
 
+    await mesurer(jetonsEntree, jetonsSortie, outilsAppeles.length, false);
     return json({
       reponse:
         "Je n'arrive pas à conclure sans tourner en rond. Posez la question autrement, ou passez par l'écran du Déclarant pour la traiter pas à pas.",
