@@ -1,0 +1,81 @@
+1000	Exportation definitive
+1022	Exportation definitive en suite de perfectionnement passif pr transfo
+1023	Exportation definitive en suite de perfectionnement passif pour repara
+1024	Exportation definitive en suite de perfectionnement passif autre
+1052	Exportation definitive en suite de perfectionnement actif
+1094	Exportation en régularisation de Bon Provisoire
+2200	Perfectionnement passif pour transformation
+2300	Perfectionnement passif en suite de reparation
+2400	Perfectionnement passif autre
+3000	Re-exportation directe
+3050	Re-exportation en suite d'admission temporaire ordinaire
+3051	Re-exportation en suite d'admission temporaire speciale
+3052	Re-exportation en suite d'AT pour perfectionnement actif
+3070	Re-exportation en suite d'entrepot de stockage
+3079	Re-exportation en suite de depot
+3080	Re-exportation en suite de transit national
+3092	Re-exportation en sortie de zone franche
+3094	Re-exportation en régularisation de Bon Provisoire
+4000	Mise a la consommation directe
+4050	Mise a la consommation en suite d'admission temporaire ordinaire
+4051	Mise a la consommation en suite d'admission temporaire speciale
+4052	Mise a la consommation en suite d'AT pour perfectionnement actif
+4070	Mise a la consommation en suite d'entrepot de stockage
+4079	Mise a la consomation en suite de depot
+4080	Mise a la consommation en suite de transit national
+4094	Mise à la consommation en régularisation de Bon Provisoire
+5000	Admission temporaire ordinaire
+5050	Mutation d'admission temporaire ordinaire
+5052	Admission Temporaire Ordinaire ensuite de perfectionnement actif
+5070	Admission temporaire en suite d'entrepot de stockage
+5079	Admission temporaire ordinaire en suite de depot
+5080	Admission temporaire ordinaire en suite de transit national
+5092	Admission temporaire en suite dezone franche
+5094	Admission temporaire en régularisation de Bon Provisoire
+5100	Admission temporaire speciale (materiels d'entreprises)
+5150	Admission temporaire speciale en suite d'ATO
+5170	Admission temporaire speciale en suite d'entrepot de stockage
+5179	Admission temporaire speciale en suite de depot
+5180	Admission temporaire speciale en suite de transit national
+5200	AT pour perfectionnement actif (ouvraison,reparation,transformation)
+5250	Mutation d'ATO en ATT
+5252	Mutation de perfectionnement actif (ouvraison, reparation...)
+5270	AT pour perfectionnement actif en suite d'entrepot de stockage
+5279	Perfectionnement actif en suite de depot
+5280	Perfectionnement actif en suite de transit national
+5294	AT pour perfectionnement actif en régularisation de Bon Provisoire
+6022	Re-importation en suite de perfectionnement passif pour transformation
+6023	Re-importation en suite de perfectionnement passif pour reparation
+6024	Re-importation en suite de perfectionnement passif autre
+7000	Entree en entrepot de stockage
+7050	Entree en entrepot de stockage en suite d'AT ordinaire
+7051	Entree en entrepot de stockage en suite d'AT speciale
+7052	Entree en entrepot de stockage en suite d'AT perfectionnement actif
+7070	Mutation d'entrepot de stockage
+7079	Entrepot de stockage en suite de depot
+7080	Mise en entrepot en suite de transit national
+7094	Entrepot de stockage En Régularisation de Bon Provisoire
+8000	Transit national
+8052	Transit national en suite de perfectionnement actif
+8070	Transit national en suite d'entrepot de stockage
+8079	Transit national en suite de depot
+8080	Transit national par mer vers port/aeroport CI en suite de transit
+8100	Transbordement
+9100	Cabotage
+9200	Entree en zone franche
+9280	Entrée en zone franche industriel en suite de transit national
+9292	Mutation de zone franche
+9294	Entrée en zone franche en régularisation de Bon Provisoire
+9351	Declaration anniversaire d'AT speciale (mat. d'entreprises)
+9900	Déclaration Manuelle
+9910	Liquidation manuelle en suite d exportation
+9922	Liquidation manuelle en suite de perfectionnement passif pour transfor
+9923	Liquidation manuelle en suite de perfectionnement passif pour reparati
+9924	Liquidation manuelle en suite de perfectionnement passif autre
+9930	Liquidation manuelle en suite de reexportation
+9950	Liquidation manuelle en suite d'admission temporaire ordinaire
+9951	Liquidation Manuelle en suite d'ATME
+9952	Liquidation manuelle en suite de perfectionnement actif
+9970	Liquidation manuelle en suite d'entrepot de stockage
+9980	Liquidation manuelle en suite de transit national
+9992	Liquidation manuelle en suite de zone franche

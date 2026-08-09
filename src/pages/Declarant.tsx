@@ -447,17 +447,33 @@ export default function Declarant() {
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="space-y-1.5">
                 <Label htmlFor="regime">Régime douanier</Label>
+                {/* Quatre-vingt-un régimes officiels, mais tous ne se
+                    liquident pas. Les séparer évite d'en choisir un au hasard
+                    et de se heurter à un refus après avoir tout saisi. */}
                 <select
                   id="regime"
                   className="h-9 w-full rounded-md border bg-background px-3 text-sm"
                   value={regime}
                   onChange={(e) => setRegime(e.target.value)}
                 >
-                  {regimes.map((r) => (
-                    <option key={r.code} value={r.code}>
-                      {r.code} — {r.libelle}
-                    </option>
-                  ))}
+                  <optgroup label="Régimes calculés">
+                    {regimes
+                      .filter((r) => r.liquidation_supportee)
+                      .map((r) => (
+                        <option key={r.code} value={r.code}>
+                          {r.code} — {r.libelle}
+                        </option>
+                      ))}
+                  </optgroup>
+                  <optgroup label="Référentiel — calcul non proposé">
+                    {regimes
+                      .filter((r) => !r.liquidation_supportee)
+                      .map((r) => (
+                        <option key={r.code} value={r.code}>
+                          {r.code} — {r.libelle}
+                        </option>
+                      ))}
+                  </optgroup>
                 </select>
               </div>
               <div className="space-y-1.5">
@@ -476,7 +492,16 @@ export default function Declarant() {
             </div>
 
             {regimeChoisi && (
-              <p className="rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+              <p
+                className={`rounded-md border p-3 text-xs ${
+                  regimeChoisi.liquidation_supportee
+                    ? 'border-dashed text-muted-foreground'
+                    : 'border-destructive/40 bg-destructive/5 text-foreground'
+                }`}
+              >
+                {!regimeChoisi.liquidation_supportee && (
+                  <AlertTriangle className="mr-1.5 inline h-3.5 w-3.5 -translate-y-px text-destructive" />
+                )}
                 {regimeChoisi.mention}
               </p>
             )}
@@ -562,7 +587,11 @@ export default function Declarant() {
               ))}
             </div>
 
-            <Button onClick={liquider} disabled={calcul} className="w-full sm:w-auto">
+            <Button
+              onClick={liquider}
+              disabled={calcul || regimeChoisi?.liquidation_supportee === false}
+              className="w-full sm:w-auto"
+            >
               {calcul ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Calculator className="mr-1.5 h-4 w-4" />}
               Calculer les droits et taxes
             </Button>
