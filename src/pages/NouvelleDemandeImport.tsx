@@ -1,5 +1,5 @@
 import { useMemo, useState, type ChangeEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,7 +14,7 @@ import {
   INCOTERM_LABELS,
   MODE_TRANSPORT_LABELS,
   TYPE_DOCUMENT_LABELS,
-  estimerCoutIndicatifFcfa,
+  encadrerDroitsImport,
   type Incoterm,
   type ModeTransport,
   type TypeDocumentImport,
@@ -55,17 +55,13 @@ export default function NouvelleDemandeImport() {
   const [formError, setFormError] = useState('');
   const [referencePublique, setReferencePublique] = useState<string | null>(null);
 
-  const estimationIndicative = useMemo(() => {
-    const poids = parseFloat(poidsEstime);
+  // Ce qu'on peut dire honnêtement avant de connaître la position tarifaire :
+  // l'encadrement des droits et taxes par les deux taux extrêmes du TEC.
+  const fourchetteDroits = useMemo(() => {
     const valeur = parseFloat(valeurEstimee);
-    if (!poids || !valeur || poids <= 0 || valeur <= 0) return null;
-    return estimerCoutIndicatifFcfa({
-      poidsKg: poids,
-      valeurMarchandiseFcfa: valeur,
-      modeTransport,
-      incoterm: incoterm || null,
-    });
-  }, [poidsEstime, valeurEstimee, modeTransport, incoterm]);
+    if (!valeur || valeur <= 0) return null;
+    return encadrerDroitsImport({ valeurMarchandiseFcfa: valeur });
+  }, [valeurEstimee]);
 
   const handlePhotosChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).slice(0, 4);
@@ -139,7 +135,7 @@ export default function NouvelleDemandeImport() {
         poids_estime_kg: poidsEstime ? parseFloat(poidsEstime) : null,
         volume_estime_m3: volumeEstime ? parseFloat(volumeEstime) : null,
         valeur_marchandise_estimee_fcfa: valeurEstimee ? parseFloat(valeurEstimee) : null,
-        estimation_indicative_fcfa: estimationIndicative,
+        estimation_indicative_fcfa: null,
       })
       .select('id, reference_publique')
       .single();
@@ -438,18 +434,36 @@ export default function NouvelleDemandeImport() {
             />
           </div>
 
-          {estimationIndicative && (
+          {fourchetteDroits && (
             <Card className="border-primary/30 bg-primary/5">
-              <CardContent className="flex items-start gap-3 pt-6">
-                <Calculator className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                <div>
-                  <p className="text-sm font-semibold text-foreground">
-                    Estimation indicative : {estimationIndicative.toLocaleString('fr-FR')} FCFA
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Ordre de grandeur (marchandise + fret + douane/transit) à titre indicatif
-                    uniquement. Le devis ferme de notre équipe transit prévaudra toujours.
-                  </p>
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <Calculator className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">
+                      Droits et taxes à l'importation : entre{' '}
+                      {fourchetteDroits.minimum_fcfa.toLocaleString('fr-FR')} et{' '}
+                      {fourchetteDroits.maximum_fcfa.toLocaleString('fr-FR')} FCFA
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Le montant exact dépend de la position tarifaire de votre marchandise. Le
+                      tarif extérieur commun ne connaît que cinq taux de droit — 0, 5, 10, 20 et
+                      35 % — et ces deux bornes sont le calcul officiel appliqué au plus bas et au
+                      plus haut. Sur la seule valeur marchandise : le fret et les frais de transit
+                      local s'y ajoutent, et nous les chiffrons dans votre devis.
+                    </p>
+                    {/* Le libellé passe à la ligne : `Button` impose
+                        whitespace-nowrap, et sur un écran de 393 px cette
+                        phrase débordait la page de 29 px. */}
+                    <Button
+                      asChild
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 h-auto whitespace-normal py-2 text-left"
+                    >
+                      <Link to="/declarant">Montant exact avec Le Déclarant</Link>
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

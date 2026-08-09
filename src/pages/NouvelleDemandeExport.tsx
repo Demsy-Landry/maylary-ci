@@ -14,7 +14,7 @@ import {
   INCOTERM_LABELS,
   MODE_TRANSPORT_LABELS,
   TYPE_DOCUMENT_EXPORT_LABELS,
-  estimerCoutIndicatifExportFcfa,
+  DROITS_EXPORT_FCFA,
   type Incoterm,
   type ModeTransport,
   type TypeDocumentExport,
@@ -56,17 +56,12 @@ export default function NouvelleDemandeExport() {
   const [formError, setFormError] = useState('');
   const [referencePublique, setReferencePublique] = useState<string | null>(null);
 
-  const estimationIndicative = useMemo(() => {
-    const poids = parseFloat(poidsEstime);
+  // À l'export, la part douanière n'a pas besoin d'être estimée : elle est
+  // connue. Seul le timbre statistique est dû, une fois par déclaration.
+  const marchandiseRenseignee = useMemo(() => {
     const valeur = parseFloat(valeurEstimee);
-    if (!poids || !valeur || poids <= 0 || valeur <= 0) return null;
-    return estimerCoutIndicatifExportFcfa({
-      poidsKg: poids,
-      valeurMarchandiseFcfa: valeur,
-      modeTransport,
-      incoterm: incoterm || null,
-    });
-  }, [poidsEstime, valeurEstimee, modeTransport, incoterm]);
+    return Boolean(valeur && valeur > 0);
+  }, [valeurEstimee]);
 
   const handlePhotosChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).slice(0, 4);
@@ -139,7 +134,7 @@ export default function NouvelleDemandeExport() {
         poids_estime_kg: poidsEstime ? parseFloat(poidsEstime) : null,
         volume_estime_m3: volumeEstime ? parseFloat(volumeEstime) : null,
         valeur_marchandise_estimee_fcfa: valeurEstimee ? parseFloat(valeurEstimee) : null,
-        estimation_indicative_fcfa: estimationIndicative,
+        estimation_indicative_fcfa: null,
       })
       .select('id, reference_publique')
       .single();
@@ -449,17 +444,22 @@ export default function NouvelleDemandeExport() {
             />
           </div>
 
-          {estimationIndicative && (
+          {marchandiseRenseignee && (
             <Card className="border-primary/30 bg-primary/5">
               <CardContent className="flex items-start gap-3 pt-6">
                 <Calculator className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <div>
                   <p className="text-sm font-semibold text-foreground">
-                    Estimation indicative : {estimationIndicative.toLocaleString('fr-FR')} FCFA
+                    Droits et taxes à l'exportation :{' '}
+                    {DROITS_EXPORT_FCFA.toLocaleString('fr-FR')} FCFA
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Ordre de grandeur (marchandise + fret + douane/transit) à titre indicatif
-                    uniquement. Le devis ferme de notre équipe transit prévaudra toujours.
+                    Ce chiffre n'est pas une estimation. À l'exportation, seul le timbre
+                    statistique est dû, une fois par déclaration et quelle que soit la valeur de la
+                    marchandise — ni droits de douane, ni TVA, ni prélèvements communautaires.
+                    Restent à chiffrer le transport et les frais de transit, que nous couvrons dans
+                    votre devis. Certaines marchandises supportent en plus un Droit Unique de
+                    Sortie ; nous vous le signalons le cas échéant.
                   </p>
                 </div>
               </CardContent>

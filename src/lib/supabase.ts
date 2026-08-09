@@ -1292,38 +1292,68 @@ export interface DocumentImport {
 }
 
 /**
- * Estimation indicative très grossière (avant cotation réelle) pour donner
- * un ordre de grandeur immédiat au client. Tarifs au kilo par mode de
- * transport + majoration selon l'incoterm choisi ; la cotation ferme de
- * l'équipe transit prévaudra toujours sur ce chiffre.
+ * Fourchette de droits et taxes, avant que la position tarifaire soit connue.
+ *
+ * Ce qui existait ici était un forfait : « douane et transit ≈ 25 % de la
+ * valeur ». Il était faux dans les deux sens — surestimé sur une marchandise à
+ * 5 % de droit, sous-estimé sur du 35 %, et le client découvrait l'écart au
+ * moment de payer. Le remplacer par un autre forfait n'aurait rien réglé.
+ *
+ * La sortie n'est donc plus un nombre mais un encadrement, et il est exact :
+ * le TEC UEMOA ne connaît que cinq taux de droit — 0, 5, 10, 20 et 35 %. Sans
+ * position tarifaire, on ne sait pas lequel s'applique, mais on sait avec
+ * certitude que le résultat tombe entre le calcul à 0 % et le calcul à 35 %.
+ * Les deux bornes sortent de la formule officielle, la même que celle du
+ * moteur de liquidation :
+ *
+ *   DD = CAF × taux · RST 1 % · PCS 0,8 % · PUA 0,2 % · PCC 0,5 %
+ *   TVA = (CAF + DD + RST) × 18 %      ← jamais sur PCS/PUA/PCC
+ *   RPI = FOB × 0,75 %, plancher 100 000 · TS = 20 000 par déclaration
+ *
+ * Le fret et le transit local n'y figurent pas : ils dépendent d'une route et
+ * d'un barème, et aucun des deux ne se devine. L'écran les annonce « à coter »
+ * plutôt que de les inventer.
  */
-const TARIF_FRET_FCFA_PAR_KG: Record<ModeTransport, number> = {
-  aerien: 4500,
-  maritime: 1200,
-  routier: 2000,
-};
+export const TAUX_DD_TEC = [0, 0.05, 0.1, 0.2, 0.35] as const;
 
-const MAJORATION_INCOTERM: Record<Incoterm, number> = {
-  EXW: 1.15,
-  FCA: 1.1,
-  FOB: 1.05,
-  CFR: 1.0,
-  CIF: 0.95,
-  DAP: 0.85,
-  DDP: 0.75,
-};
+export interface FourchetteDroits {
+  /** Valeur en douane retenue : marchandise + fret connu + assurance. */
+  caf_fcfa: number;
+  /** Droits et taxes si la marchandise relève de la catégorie 0 %. */
+  minimum_fcfa: number;
+  /** Droits et taxes si elle relève de la catégorie 35 %. */
+  maximum_fcfa: number;
+  /** Vrai quand le fret est connu ; sinon les bornes portent sur la seule marchandise. */
+  fret_connu: boolean;
+}
 
-export function estimerCoutIndicatifFcfa(params: {
-  poidsKg: number;
+export function droitsEtTaxesFcfa(cafFcfa: number, fobFcfa: number, tauxDd: number): number {
+  const dd = Math.round(cafFcfa * tauxDd);
+  const rst = Math.round(cafFcfa * 0.01);
+  const pcs = Math.round(cafFcfa * 0.008);
+  const pua = Math.round(cafFcfa * 0.002);
+  const pcc = Math.round(cafFcfa * 0.005);
+  const tva = Math.round((cafFcfa + dd + rst) * 0.18);
+  const rpi = Math.max(Math.round(fobFcfa * 0.0075), 100_000);
+  const ts = 20_000;
+  return dd + rst + pcs + pua + pcc + tva + rpi + ts;
+}
+
+export function encadrerDroitsImport(params: {
   valeurMarchandiseFcfa: number;
-  modeTransport: ModeTransport;
-  incoterm: Incoterm | null;
-}): number {
-  const { poidsKg, valeurMarchandiseFcfa, modeTransport, incoterm } = params;
-  const fret = poidsKg * TARIF_FRET_FCFA_PAR_KG[modeTransport];
-  const majoration = incoterm ? MAJORATION_INCOTERM[incoterm] : 1;
-  const douaneEtTransitEstimes = (valeurMarchandiseFcfa + fret) * 0.25;
-  return Math.round((valeurMarchandiseFcfa + fret * majoration + douaneEtTransitEstimes) / 100) * 100;
+  fretFcfa?: number | null;
+  assuranceFcfa?: number | null;
+}): FourchetteDroits {
+  const fob = params.valeurMarchandiseFcfa;
+  const fret = params.fretFcfa ?? 0;
+  const assurance = params.assuranceFcfa ?? 0;
+  const caf = fob + fret + assurance;
+  return {
+    caf_fcfa: caf,
+    minimum_fcfa: droitsEtTaxesFcfa(caf, fob, TAUX_DD_TEC[0]),
+    maximum_fcfa: droitsEtTaxesFcfa(caf, fob, TAUX_DD_TEC[TAUX_DD_TEC.length - 1]),
+    fret_connu: (params.fretFcfa ?? 0) > 0,
+  };
 }
 
 export type StatutExport =
@@ -1441,15 +1471,13 @@ export interface DocumentExport {
   created_at: string;
 }
 
-/** Même logique d'estimation indicative que pour l'import, réutilisée pour l'export. */
-export function estimerCoutIndicatifExportFcfa(params: {
-  poidsKg: number;
-  valeurMarchandiseFcfa: number;
-  modeTransport: ModeTransport;
-  incoterm: Incoterm | null;
-}): number {
-  return estimerCoutIndicatifFcfa(params);
-}
+/**
+ * À l'export, il n'y a rien à encadrer : le timbre statistique de 20 000 XOF
+ * est dû une fois par déclaration, quelle que soit la marchandise, et aucune
+ * autre imposition douanière ne s'applique à une marchandise qui sort. Le
+ * chiffre est donc exact, pas estimé.
+ */
+export const DROITS_EXPORT_FCFA = 20_000;
 
 /* ------------------------------------------------------------------ */
 /* Facturation                                                         */
