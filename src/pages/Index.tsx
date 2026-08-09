@@ -174,7 +174,7 @@ export default function Index() {
             tant qu'il ne déroulait pas la page entière. */}
         <BandeServices />
 
-        <section id="comment-ca-marche" className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+        <section data-revele id="comment-ca-marche" className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
           <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
             Comment ça marche
           </h2>
@@ -201,7 +201,7 @@ export default function Index() {
           </div>
         </section>
 
-        <section className="border-y bg-muted/40">
+        <section data-revele className="border-y bg-muted/40">
           <div className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
             <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
               Pourquoi MayLary Group Import
@@ -218,7 +218,7 @@ export default function Index() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+        <section data-revele className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
           <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
             Tous les modes de transport
           </h2>
@@ -247,7 +247,7 @@ export default function Index() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden border-y text-background">
+        <section data-revele className="relative overflow-hidden border-y text-background">
           <img
             src={HERO_EXPORT_IMAGE}
             alt=""
@@ -287,7 +287,7 @@ export default function Index() {
           </div>
         </section>
 
-        <section id="comment-exporter" className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
+        <section data-revele id="comment-exporter" className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
           <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
             Comment exporter avec MayLary Group
           </h2>
@@ -305,7 +305,7 @@ export default function Index() {
           </div>
         </section>
 
-        <section className="border-y bg-muted/40">
+        <section data-revele className="border-y bg-muted/40">
           <div className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
             <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
               Pourquoi exporter avec MayLary Group

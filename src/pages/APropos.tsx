@@ -111,8 +111,8 @@ export default function APropos() {
           une opération avant de la lancer, au lieu de découvrir la facture douanière à l'arrivée.
         </p>
 
-        <h2 className="font-display mt-12 text-xl font-extrabold text-foreground">Nos services</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <h2 data-revele className="font-display mt-12 text-xl font-extrabold text-foreground">Nos services</h2>
+        <div data-revele data-revele-cascade className="mt-4 grid gap-4 sm:grid-cols-2">
           {SERVICES.map(({ icone: Icone, titre, texte, lien }) => (
             <Link
               key={titre}
@@ -128,10 +128,10 @@ export default function APropos() {
           ))}
         </div>
 
-        <h2 className="font-display mt-12 text-xl font-extrabold text-foreground">
+        <h2 data-revele className="font-display mt-12 text-xl font-extrabold text-foreground">
           Deux engagements qui ne se négocient pas
         </h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div data-revele data-revele-cascade className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="rounded-lg border bg-card p-5">
             <Lock className="h-6 w-6 text-primary" />
             <h3 className="font-display mt-3 font-bold text-foreground">Payé, protégé</h3>
@@ -151,7 +151,7 @@ export default function APropos() {
           </div>
         </div>
 
-        <h2 className="font-display mt-12 text-xl font-extrabold text-foreground">Qui nous sommes</h2>
+        <h2 data-revele className="font-display mt-12 text-xl font-extrabold text-foreground">Qui nous sommes</h2>
         <p className="mt-3 max-w-prose text-sm text-muted-foreground">
           MayLary Group est édité par <strong className="text-foreground">Dems'Inc</strong>, fondée
           par <strong className="text-foreground">Demsy Landry</strong>, responsable adjoint Aérien,

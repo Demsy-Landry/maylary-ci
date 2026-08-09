@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -46,12 +47,16 @@ import Confidentialite from '@/pages/Confidentialite';
 import PageIntrouvable from '@/pages/PageIntrouvable';
 import TransitionDePage from '@/components/TransitionDePage';
 import AssistantDeclarant from '@/components/AssistantDeclarant';
+import { demarrerRevelation } from '@/lib/revelation';
 import AdminParametres from '@/pages/admin/AdminParametres';
 import MonCompte from '@/pages/MonCompte';
 
 const queryClient = new QueryClient();
 
 function App() {
+  // Un seul observateur pour toute l'application, monté avec elle.
+  useEffect(() => demarrerRevelation(), []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
