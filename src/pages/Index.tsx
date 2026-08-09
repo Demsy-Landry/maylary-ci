@@ -15,6 +15,7 @@ import {
   Send,
 } from 'lucide-react';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
+import ScenePortAbidjan from '@/components/illustrations/ScenePortAbidjan';
 import BandeServices from '@/components/BandeServices';
 import SiteFooter from '@/components/SiteFooter';
 import { STORAGE_PUBLIC_URL, VISUELS_MARQUE_TABLE, supabase } from '@/lib/supabase';
@@ -146,7 +147,9 @@ const ATOUTS_EXPORT = [
 ];
 
 export default function Index() {
-  const heroAccueil = useVisuelMarque('accueil_hero', HERO_IMPORT_IMAGE);
+  // Vide par défaut : l'illustration dessinée sert, sauf si un visuel a été
+  // activé en base.
+  const heroAccueil = useVisuelMarque('accueil_hero', '');
 
   return (
     <div className="min-h-screen bg-background">
@@ -154,12 +157,22 @@ export default function Index() {
 
       <main>
         <section className="relative overflow-hidden border-b text-background">
-          <img
-            src={heroAccueil}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/50" />
+          {/* L'illustration remplace la photographie de fond : dessinée pour
+              cette page, elle garde sa gauche sombre pour le titre et reste
+              nette à toute taille. Un visuel activé en base la remplace. */}
+          {heroAccueil ? (
+            <img
+              src={heroAccueil}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
+            <ScenePortAbidjan className="absolute inset-0 h-full w-full" />
+          )}
+          {/* Le voile est léger : l'illustration porte déjà le sien, calculé pour
+              que la gauche reste lisible. Les superposer écrasait la scène —
+              elle devenait une tache sombre derrière le titre. */}
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/45 to-transparent" />
           <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24">
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
