@@ -628,6 +628,64 @@ export interface Liquidation {
   total_a_payer_fcfa: number;
 }
 
+export const CLASSIFICATIONS_HS_TABLE = 'app_e08c374bc4_classifications_hs';
+
+/**
+ * Le résultat d'une classification assistée.
+ *
+ * La séparation entre ce que le modèle propose et ce que le corpus confirme est
+ * volontairement visible jusque dans le type : `code_propose` vient du modèle,
+ * `taux_dd` vient du TEC et vaut `null` dès que `verifie_en_base` est faux. Un
+ * champ unique laisserait croire qu'un taux non vérifié est affichable.
+ */
+export interface ClassificationHs {
+  id: string | null;
+  description: string;
+  /** Proposé par le modèle. Nul si la description était trop vague. */
+  code_propose: string | null;
+  section: string | null;
+  chapitre: string | null;
+  position_sh: string | null;
+  sous_position: string | null;
+  caracteristiques: string | null;
+  raisonnement_rgi: string | null;
+  notes_declarant: string | null;
+  /** La précision qui manque au modèle pour trancher, ou nul. */
+  question: string | null;
+  fournisseur: string;
+  modele: string;
+  /** Confirmé dans le corpus TEC. Sans cela, aucun taux n'est montré. */
+  verifie_en_base: boolean;
+  designation_tec: string | null;
+  unite_us: string | null;
+  /** En pourcentage (10 = 10 %). Toujours nul si `verifie_en_base` est faux. */
+  taux_dd: number | null;
+  mention: string;
+  code_proche_indicatif: string | null;
+  tarif: { libelle: string; date_version: string } | null;
+  /** Classifications restantes pour la journée. */
+  restant?: number;
+}
+
+/** Une ligne de l'historique, telle qu'elle est stockée. */
+export interface ClassificationEnregistree {
+  id: string;
+  description: string;
+  code_propose: string | null;
+  designation_tec: string | null;
+  verifie_en_base: boolean;
+  taux_dd: number | null;
+  cree_le: string;
+}
+
+export interface QuotaClassification {
+  connecte: boolean;
+  plafond: number;
+  faites?: number;
+  restant: number;
+  actif: boolean;
+}
+
 /* --- Achat groupé ------------------------------------------------------- */
 export const ACHATS_GROUPES_TABLE = 'app_e08c374bc4_achats_groupes';
 export const ACHATS_GROUPES_PUBLICS_VIEW = 'app_e08c374bc4_achats_groupes_publics';

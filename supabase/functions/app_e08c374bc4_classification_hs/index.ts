@@ -64,27 +64,27 @@ interface Refus {
   statut: number;
   genre: string | null;
   motif: string | null;
+  /** Nom du secret utilisé, jamais sa valeur — pour savoir laquelle a refusé. */
+  cle?: string;
 }
 
 interface Proposition {
   texte: string;
   arret: string | null;
+  cle?: string;
 }
 
 /** Ce que les deux fournisseurs rendent en commun : du texte, ou un refus. */
 type Reponse = { ok: true; valeur: Proposition } | { ok: false; refus: Refus };
 
-async function lireRefus(reponse: Response, chemin: string[]): Promise<Refus> {
+async function lireRefus(reponse: Response): Promise<Refus> {
   let genre: string | null = null;
   let motif: string | null = null;
   try {
     const corps = await reponse.json();
-    let noeud: unknown = corps;
-    for (const cle of chemin) noeud = (noeud as Record<string, unknown> | null)?.[cle];
-    genre = (noeud as { type?: string; status?: string })?.type
-      ?? (noeud as { status?: string })?.status
-      ?? null;
-    motif = (noeud as { message?: string })?.message ?? null;
+    const noeud = corps?.error ?? corps;
+    genre = noeud?.type ?? noeud?.status ?? null;
+    motif = noeud?.message ?? null;
   } catch {
     motif = null;
   }
@@ -92,11 +92,10 @@ async function lireRefus(reponse: Response, chemin: string[]): Promise<Refus> {
 }
 
 async function interrogerAnthropic(modele: string, description: string): Promise<Reponse> {
-  const cle = secret('ANTHROPIC_API_KEY');
   const appel = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
-      'x-api-key': cle,
+      'x-api-key': secret('ANTHROPIC_API_KEY'),
       'anthropic-version': '2023-06-01',
       'Content-Type': 'application/json',
     },
@@ -108,7 +107,7 @@ async function interrogerAnthropic(modele: string, description: string): Promise
     }),
   });
 
-  if (!appel.ok) return { ok: false, refus: await lireRefus(appel, ['error']) };
+  if (!appel.ok) return { ok: false, refus: { ...(await lireRefus(appel)), cle: 'ANTHROPIC_API_KEY' } };
 
   const corps = await appel.json();
   // La réponse peut commencer par un bloc de raisonnement : on concatène les
@@ -117,36 +116,61 @@ async function interrogerAnthropic(modele: string, description: string): Promise
     .filter((b: { type?: string }) => b?.type === 'text')
     .map((b: { text?: string }) => b.text ?? '')
     .join('');
-  return { ok: true, valeur: { texte, arret: corps?.stop_reason ?? null } };
+  return { ok: true, valeur: { texte, arret: corps?.stop_reason ?? null, cle: 'ANTHROPIC_API_KEY' } };
 }
 
+/**
+ * Clés Google essayées dans l'ordre. La première est le compte principal, la
+ * seconde un compte de secours au palier gratuit. On ne bascule que sur un
+ * épuisement de quota : sur une clé invalide ou une requête mal formée,
+ * réessayer avec une autre clé masquerait le vrai défaut derrière un second
+ * refus identique.
+ */
+const CLES_GOOGLE = ['GOOGLE_API_KEY', 'GOOGLE_API_KEY2'];
+
+const quotaEpuise = (refus: Refus) =>
+  refus.statut === 429 ||
+  refus.genre === 'RESOURCE_EXHAUSTED' ||
+  (refus.statut === 403 && /quota/i.test(refus.motif ?? ''));
+
 async function interrogerGoogle(modele: string, description: string): Promise<Reponse> {
-  const cle = secret('GOOGLE_API_KEY');
-  const appel = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modele)}:generateContent`,
-    {
-      method: 'POST',
-      headers: { 'x-goog-api-key': cle, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: CONSIGNE }] },
-        contents: [
-          { role: 'user', parts: [{ text: `Classe cette marchandise : ${description}` }] },
-        ],
-        // Le mode JSON natif évite d'avoir à extraire le JSON d'un texte
-        // enrobé — l'échec de lecture le plus fréquent côté modèle.
-        generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 4000 },
-      }),
-    },
-  );
+  const disponibles = CLES_GOOGLE.filter((nom) => secret(nom).length > 0);
+  let dernier: Refus = { statut: 503, genre: null, motif: 'Aucune clé Google configurée.' };
 
-  if (!appel.ok) return { ok: false, refus: await lireRefus(appel, ['error']) };
+  for (const nom of disponibles) {
+    const appel = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modele)}:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'x-goog-api-key': secret(nom), 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: CONSIGNE }] },
+          contents: [
+            { role: 'user', parts: [{ text: `Classe cette marchandise : ${description}` }] },
+          ],
+          // Le mode JSON natif évite d'avoir à extraire le JSON d'un texte
+          // enrobé — l'échec de lecture le plus fréquent côté modèle.
+          generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 4000 },
+        }),
+      },
+    );
 
-  const corps = await appel.json();
-  const candidat = corps?.candidates?.[0];
-  const texte: string = (candidat?.content?.parts ?? [])
-    .map((p: { text?: string }) => p?.text ?? '')
-    .join('');
-  return { ok: true, valeur: { texte, arret: candidat?.finishReason ?? null } };
+    if (appel.ok) {
+      const corps = await appel.json();
+      const candidat = corps?.candidates?.[0];
+      const texte: string = (candidat?.content?.parts ?? [])
+        .map((p: { text?: string }) => p?.text ?? '')
+        .join('');
+      return { ok: true, valeur: { texte, arret: candidat?.finishReason ?? null, cle: nom } };
+    }
+
+    dernier = await lireRefus(appel);
+    dernier.cle = nom;
+    if (!quotaEpuise(dernier)) break;
+    console.error('quota epuise', nom, '- bascule sur la cle suivante');
+  }
+
+  return { ok: false, refus: dernier };
 }
 
 Deno.serve(async (req: Request) => {
@@ -194,10 +218,13 @@ Deno.serve(async (req: Request) => {
     const modele: string =
       fournisseur === 'anthropic' ? parametres.modele_anthropic : parametres.modele_google;
 
-    const cleAttendue = fournisseur === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'GOOGLE_API_KEY';
-    if (secret(cleAttendue).length === 0) {
+    const clesPossibles = fournisseur === 'anthropic' ? ['ANTHROPIC_API_KEY'] : CLES_GOOGLE;
+    if (!clesPossibles.some((nom) => secret(nom).length > 0)) {
       return json(
-        { erreur: "La clé de classification n'est pas configurée. Contactez Maylary." },
+        {
+          erreur: "La clé de classification n'est pas configurée. Contactez Maylary.",
+          cles_attendues: clesPossibles,
+        },
         503,
       );
     }
@@ -234,6 +261,7 @@ Deno.serve(async (req: Request) => {
         {
           erreur: 'Le service de classification est indisponible. Réessayez dans un instant.',
           fournisseur,
+          cle_amont: reponse.refus.cle ?? null,
           statut_amont: reponse.refus.statut,
           genre_amont: reponse.refus.genre,
           motif_amont: reponse.refus.motif,
