@@ -552,6 +552,15 @@ export interface RegimeDouanier {
   depend_autorisation: boolean;
   mention: string;
   ordre: number;
+  /** Sens de l'opération : le Déclarant ne liquide que l'importation. */
+  sens: 'import' | 'export' | 'transit' | 'special';
+  /**
+   * Faux tant que le traitement fiscal du régime n'a pas été confirmé. Le
+   * régime reste affiché — il est au référentiel officiel — mais aucun total
+   * n'en est tiré, côté serveur comme côté écran.
+   */
+  liquidation_supportee: boolean;
+  source: string;
 }
 
 /** Une ligne envoyée au moteur de liquidation. Le taux est une fraction. */
