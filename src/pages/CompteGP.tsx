@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,21 @@ import { Loader2, Building2, User } from 'lucide-react';
 
 type TypeCompte = 'particulier' | 'entreprise_acheteuse';
 
+/**
+ * Où renvoyer l'utilisateur une fois connecté.
+ *
+ * La page d'où il vient l'emporte sur la destination par défaut : quelqu'un
+ * envoyé ici depuis Le Déclarant veut revenir au Déclarant, pas atterrir sur
+ * ses commandes. Seuls les chemins internes sont acceptés — un `retour` qui
+ * pointerait ailleurs ferait de cette page un tremplin vers un site tiers.
+ */
+const retourSur = (demande: string | null): string | null =>
+  demande && /^\/[^/\\]/.test(demande) ? demande : null;
+
 export default function CompteGP() {
   const navigate = useNavigate();
+  const [parametres] = useSearchParams();
+  const retour = retourSur(parametres.get('retour'));
 
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -60,11 +73,12 @@ export default function CompteGP() {
     toast.success('Connexion réussie.');
     setLoginLoading(false);
     navigate(
-      profileData?.type_compte === 'admin'
-        ? '/admin'
-        : profileData?.type_compte === 'entreprise_acheteuse'
-          ? '/catalogue/mes-devis'
-          : '/boutique/mes-commandes',
+      retour ??
+        (profileData?.type_compte === 'admin'
+          ? '/admin'
+          : profileData?.type_compte === 'entreprise_acheteuse'
+            ? '/catalogue/mes-devis'
+            : '/boutique/mes-commandes'),
     );
   };
 
@@ -122,7 +136,12 @@ export default function CompteGP() {
       }
       toast.success('Bienvenue sur Maylary !');
       setSignupLoading(false);
-      navigate(typeCompte === 'entreprise_acheteuse' ? '/catalogue/mes-devis' : '/boutique/mes-commandes');
+      navigate(
+        retour ??
+          (typeCompte === 'entreprise_acheteuse'
+            ? '/catalogue/mes-devis'
+            : '/boutique/mes-commandes'),
+      );
     } catch {
       setSignupError('Impossible de contacter le serveur. Veuillez réessayer.');
       setSignupLoading(false);

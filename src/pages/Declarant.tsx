@@ -1,16 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
+import { Link } from 'react-router-dom';
 import {
   supabase,
+  EDGE_FUNCTIONS_URL,
   REGIMES_DOUANIERS_TABLE,
+  CLASSIFICATIONS_HS_TABLE,
   type PositionTec,
   type VerificationTec,
   type RegimeDouanier,
   type Liquidation,
+  type ClassificationHs,
+  type ClassificationEnregistree,
+  type QuotaClassification,
 } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -24,6 +31,10 @@ import {
   ShieldCheck,
   Printer,
   ChevronDown,
+  Sparkles,
+  HelpCircle,
+  BookOpen,
+  History,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -74,13 +85,23 @@ const ligneVide = (numero: string): LigneSaisie => ({
  * exactement le visiteur qu'on veut.
  */
 export default function Declarant() {
-  const [onglet, setOnglet] = useState<'position' | 'liquidation'>('position');
+  const [onglet, setOnglet] = useState<'position' | 'classer' | 'liquidation'>('position');
 
   /* ---- Recherche de position ---- */
   const [requete, setRequete] = useState('');
   const [resultats, setResultats] = useState<PositionTec[] | null>(null);
   const [verification, setVerification] = useState<VerificationTec | null>(null);
   const [cherche, setCherche] = useState(false);
+
+  /* ---- Classification assistée ----
+   * Le modèle propose un code ; le corpus TEC le confirme ou le refuse. Les
+   * deux moments restent distincts à l'écran, parce qu'ils n'engagent pas la
+   * même chose : la proposition est un avis, la vérification est un fait. */
+  const [marchandise, setMarchandise] = useState('');
+  const [classification, setClassification] = useState<ClassificationHs | null>(null);
+  const [classe, setClasse] = useState(false);
+  const [quota, setQuota] = useState<QuotaClassification | null>(null);
+  const [historique, setHistorique] = useState<ClassificationEnregistree[] | null>(null);
 
   /* ---- Liquidation ---- */
   const [regimes, setRegimes] = useState<RegimeDouanier[]>([]);
@@ -121,6 +142,67 @@ export default function Declarant() {
     () => regimes.find((r) => r.code === regime) ?? null,
     [regimes, regime],
   );
+
+  /* Quota et historique se lisent ensemble : l'un dit ce qu'il reste, l'autre
+   * ce qui a déjà été demandé. Les deux dépendent du compte connecté, donc on
+   * les relit à chaque passage sur l'onglet plutôt qu'une fois au montage. */
+  const chargerClassifications = async () => {
+    const { data: q } = await supabase.rpc('app_e08c374bc4_quota_classification');
+    const quotaLu = q as QuotaClassification | null;
+    setQuota(quotaLu);
+    if (!quotaLu?.connecte) {
+      setHistorique(null);
+      return;
+    }
+    const { data } = await supabase
+      .from(CLASSIFICATIONS_HS_TABLE)
+      .select('id, description, code_propose, designation_tec, verifie_en_base, taux_dd, cree_le')
+      .order('cree_le', { ascending: false })
+      .limit(20);
+    setHistorique((data as ClassificationEnregistree[]) ?? []);
+  };
+
+  useEffect(() => {
+    if (onglet === 'classer') void chargerClassifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onglet]);
+
+  const classer = async () => {
+    const texte = marchandise.trim();
+    if (texte.length < 3) return;
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      toast.error('Connectez-vous pour utiliser la classification assistée.');
+      return;
+    }
+
+    setClasse(true);
+    setClassification(null);
+    try {
+      const reponse = await fetch(`${EDGE_FUNCTIONS_URL}/app_e08c374bc4_classification_hs`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ description: texte }),
+      });
+      const corps = await reponse.json();
+      if (!reponse.ok) {
+        toast.error(corps?.erreur ?? "La classification n'a pas abouti.");
+        return;
+      }
+      setClassification(corps as ClassificationHs);
+      void chargerClassifications();
+    } catch {
+      toast.error('Le service est injoignable. Vérifiez votre connexion.');
+    } finally {
+      setClasse(false);
+    }
+  };
 
   const chercher = async () => {
     const texte = requete.trim();
@@ -236,6 +318,14 @@ export default function Declarant() {
           >
             <Search className="mr-1.5 h-4 w-4" />
             Position tarifaire
+          </Button>
+          <Button
+            variant={onglet === 'classer' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setOnglet('classer')}
+          >
+            <Sparkles className="mr-1.5 h-4 w-4" />
+            Classer une marchandise
           </Button>
           <Button
             variant={onglet === 'liquidation' ? 'default' : 'outline'}
@@ -386,6 +476,241 @@ export default function Declarant() {
                     </tbody>
                   </table>
                 )}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ================= CLASSIFICATION ASSISTÉE ================= */}
+        {onglet === 'classer' && (
+          <section className="mt-6 space-y-4">
+            <div className="rounded-md border bg-muted/30 p-4">
+              <p className="text-sm text-foreground">
+                Décrivez la marchandise comme vous la décririez à un collègue : la matière, la
+                fonction, l'usage. L'assistant propose une position et le raisonnement qui la
+                soutient — <strong>puis le code proposé est confronté au TEC officiel</strong>. Le
+                taux ne vient jamais de l'assistant : il vient du corpus, ou il n'est pas affiché.
+              </p>
+            </div>
+
+            {quota && !quota.connecte && (
+              <div className="rounded-md border border-primary/40 bg-primary/5 p-4">
+                <p className="text-sm font-medium text-foreground">
+                  Connectez-vous pour utiliser la classification assistée.
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  L'outil reste gratuit. Le compte sert seulement à tenir le quota de{' '}
+                  {quota.plafond} classifications par jour et à garder votre historique.
+                </p>
+                <Button asChild size="sm" className="mt-3">
+                  <Link to="/boutique/compte?retour=/declarant">Se connecter</Link>
+                </Button>
+              </div>
+            )}
+
+            {quota?.connecte && !quota.actif && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/5 p-4 text-sm text-foreground">
+                La classification assistée est momentanément désactivée. La recherche par mots-clés
+                et le calcul des droits restent disponibles.
+              </div>
+            )}
+
+            <form
+              className="space-y-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                classer();
+              }}
+            >
+              <Label htmlFor="marchandise">Description de la marchandise</Label>
+              <Textarea
+                id="marchandise"
+                rows={3}
+                value={marchandise}
+                maxLength={2000}
+                onChange={(e) => setMarchandise(e.target.value)}
+                placeholder="Ex. : groupe électrogène diesel insonorisé 15 kVA, triphasé, sur châssis avec réservoir"
+                disabled={quota?.connecte === false}
+              />
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">
+                  {quota?.connecte
+                    ? `${quota.restant} classification${quota.restant > 1 ? 's' : ''} restante${
+                        quota.restant > 1 ? 's' : ''
+                      } aujourd'hui sur ${quota.plafond}.`
+                    : 'Matière, fonction et usage : ce sont eux qui décident du classement.'}
+                </p>
+                <Button
+                  type="submit"
+                  disabled={classe || marchandise.trim().length < 3 || quota?.connecte === false}
+                >
+                  {classe ? (
+                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="mr-1.5 h-4 w-4" />
+                  )}
+                  Classer
+                </Button>
+              </div>
+            </form>
+
+            {classification && (
+              <article className="space-y-4 rounded-md border p-4">
+                {/* Le résultat du corpus d'abord : c'est le seul fait de la page. */}
+                {classification.verifie_en_base ? (
+                  <div className="rounded-md border border-primary/40 bg-primary/5 p-4">
+                    <p className="flex flex-wrap items-center gap-2 font-display text-lg font-extrabold text-foreground">
+                      <CheckCircle2 className="h-5 w-5 shrink-0 text-primary" />
+                      <span className="tabular-nums">{classification.code_propose}</span>
+                      <Badge variant="secondary">Vérifié au TEC</Badge>
+                    </p>
+                    <p className="mt-2 text-sm text-foreground">{classification.designation_tec}</p>
+                    <dl className="mt-3 grid max-w-lg grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-4">
+                      <dt className="text-muted-foreground">Droit de douane</dt>
+                      <dd className="font-semibold tabular-nums text-foreground">
+                        {classification.taux_dd} %
+                      </dd>
+                      <dt className="text-muted-foreground">Unité statistique</dt>
+                      <dd className="text-foreground">{classification.unite_us ?? '—'}</dd>
+                    </dl>
+                    <p className="mt-3 text-xs text-muted-foreground">{classification.mention}</p>
+                    <Button
+                      size="sm"
+                      className="mt-3"
+                      onClick={() =>
+                        reprendre(
+                          classification.code_propose!,
+                          classification.designation_tec ?? classification.description,
+                        )
+                      }
+                    >
+                      Utiliser dans le calcul
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="rounded-md border border-destructive/40 bg-destructive/5 p-4">
+                    <p className="flex items-center gap-2 font-display font-bold text-foreground">
+                      <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
+                      {classification.code_propose
+                        ? `${classification.code_propose} — non confirmé, aucun taux affiché`
+                        : 'Aucun code proposé — description insuffisante'}
+                    </p>
+                    {/* Sans code proposé, la mention du corpus parlerait d'« un
+                        code non confirmé » qui n'a jamais existé. */}
+                    <p className="mt-1.5 text-sm text-muted-foreground">
+                      {classification.code_propose
+                        ? classification.mention
+                        : "L'assistant n'a pas pu trancher à partir de cette description. Précisez la matière, la fonction et l'usage de l'article, puis relancez."}
+                    </p>
+                    {classification.code_proche_indicatif && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Code voisin au corpus, à titre indicatif :{' '}
+                        <span className="font-medium text-foreground">
+                          {classification.code_proche_indicatif}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {classification.question && (
+                  <div className="rounded-md border border-dashed p-3">
+                    <p className="flex items-start gap-2 text-sm text-foreground">
+                      <HelpCircle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                      <span>{classification.question}</span>
+                    </p>
+                  </div>
+                )}
+
+                {/* Ensuite l'avis du modèle, présenté comme tel. */}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {(
+                    [
+                      ['Section', classification.section],
+                      ['Chapitre', classification.chapitre],
+                      ['Position', classification.position_sh],
+                      ['Sous-position', classification.sous_position],
+                    ] as [string, string | null][]
+                  )
+                    .filter(([, valeur]) => Boolean(valeur))
+                    .map(([libelle, valeur]) => (
+                      <div key={libelle}>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                          {libelle}
+                        </p>
+                        <p className="text-sm text-foreground">{valeur}</p>
+                      </div>
+                    ))}
+                </div>
+
+                {classification.caracteristiques && (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Caractéristiques retenues
+                    </p>
+                    <p className="mt-0.5 text-sm text-foreground">
+                      {classification.caracteristiques}
+                    </p>
+                  </div>
+                )}
+
+                {classification.raisonnement_rgi && (
+                  <div>
+                    <p className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted-foreground">
+                      <BookOpen className="h-3.5 w-3.5" />
+                      Règles générales interprétatives appliquées
+                    </p>
+                    <p className="mt-0.5 whitespace-pre-line text-sm text-foreground">
+                      {classification.raisonnement_rgi}
+                    </p>
+                  </div>
+                )}
+
+                {classification.notes_declarant && (
+                  <div className="rounded-md bg-muted/40 p-3">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      À vérifier au dossier
+                    </p>
+                    <p className="mt-0.5 text-sm text-foreground">
+                      {classification.notes_declarant}
+                    </p>
+                  </div>
+                )}
+
+                <p className="border-t pt-3 text-xs text-muted-foreground">
+                  Proposition établie par un modèle de langage ({classification.modele}) et
+                  confrontée au corpus TEC. La classification tarifaire engage le déclarant :
+                  contrôlez la position avant dépôt, et sollicitez un renseignement tarifaire
+                  contraignant auprès de la Direction générale des douanes en cas de doute.
+                </p>
+              </article>
+            )}
+
+            {historique && historique.length > 0 && (
+              <div className="rounded-md border">
+                <p className="flex items-center gap-1.5 border-b px-3 py-2 text-sm font-medium text-foreground">
+                  <History className="h-4 w-4 text-muted-foreground" />
+                  Vos dernières classifications
+                </p>
+                <ul className="divide-y">
+                  {historique.map((h) => (
+                    <li key={h.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-3 py-2 text-sm">
+                      <span className="whitespace-nowrap font-medium tabular-nums text-foreground">
+                        {h.code_propose ?? '—'}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-muted-foreground">
+                        {h.description}
+                      </span>
+                      {h.verifie_en_base ? (
+                        <span className="whitespace-nowrap font-semibold tabular-nums text-foreground">
+                          {h.taux_dd} %
+                        </span>
+                      ) : (
+                        <Badge variant="secondary">non confirmé</Badge>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </section>
