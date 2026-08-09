@@ -305,6 +305,48 @@
 .cascade > *:nth-child(9)  { animation-delay: 320ms; }
 .cascade > *:nth-child(n+10) { animation-delay: 360ms; }
 
+/* Révélation au défilement.
+   ------------------------------------------------------------------
+   Le masquage n'existe que sous `.revelation-active`, drapeau posé par le
+   script SEULEMENT quand l'observateur tourne. Sans script, sans support de
+   l'IntersectionObserver, ou si le visiteur a demandé moins d'animation, la
+   classe n'apparaît jamais et le contenu reste visible. Une page ne doit
+   jamais rester blanche à cause d'un effet décoratif. */
+.revelation-active [data-revele] {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 520ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+.revelation-active [data-revele][data-vu] {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Les enfants d'un bloc révélé se suivent, comme dans une cascade — mais
+   déclenchés par l'entrée dans l'écran plutôt qu'au montage. */
+.revelation-active [data-revele-cascade] > * {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 460ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.revelation-active [data-revele-cascade][data-vu] > * {
+  opacity: 1;
+  transform: none;
+}
+.revelation-active [data-revele-cascade][data-vu] > *:nth-child(1) { transition-delay: 0ms; }
+.revelation-active [data-revele-cascade][data-vu] > *:nth-child(2) { transition-delay: 60ms; }
+.revelation-active [data-revele-cascade][data-vu] > *:nth-child(3) { transition-delay: 120ms; }
+.revelation-active [data-revele-cascade][data-vu] > *:nth-child(4) { transition-delay: 180ms; }
+.revelation-active [data-revele-cascade][data-vu] > *:nth-child(5) { transition-delay: 240ms; }
+.revelation-active [data-revele-cascade][data-vu] > *:nth-child(6) { transition-delay: 300ms; }
+.revelation-active [data-revele-cascade][data-vu] > *:nth-child(n+7) { transition-delay: 340ms; }
+
 /* Carte réactive au survol : léger soulèvement, ombre plus marquée. */
 .carte-reactive {
   transition:
