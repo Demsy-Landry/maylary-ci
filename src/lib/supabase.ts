@@ -631,6 +631,23 @@ export interface Liquidation {
 export const CLASSIFICATIONS_HS_TABLE = 'app_e08c374bc4_classifications_hs';
 
 /**
+ * Visuels de marque, remplaçables sans redéploiement.
+ *
+ * Un visuel n'est servi que lorsqu'il est marqué actif — c'est-à-dire lorsque
+ * quelqu'un l'a regardé. Les images produites dans Canva arrivent inactives.
+ */
+export const VISUELS_MARQUE_TABLE = 'app_e08c374bc4_visuels_marque';
+
+export interface VisuelMarque {
+  cle: string;
+  libelle: string;
+  url: string;
+  actif: boolean;
+  source: string | null;
+  note: string | null;
+}
+
+/**
  * Le résultat d'une classification assistée.
  *
  * La séparation entre ce que le modèle propose et ce que le corpus confirme est

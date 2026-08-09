@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   PackageSearch,
@@ -16,11 +17,34 @@ import {
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import BandeServices from '@/components/BandeServices';
 import SiteFooter from '@/components/SiteFooter';
-import { STORAGE_PUBLIC_URL } from '@/lib/supabase';
+import { STORAGE_PUBLIC_URL, VISUELS_MARQUE_TABLE, supabase } from '@/lib/supabase';
 
 const STORAGE_BASE = `${STORAGE_PUBLIC_URL}/app_e08c374bc4_produit_photos/accueil`;
 
 const HERO_IMPORT_IMAGE = `${STORAGE_BASE}/hero-import-maritime.jpg`;
+
+/**
+ * Le bandeau d'accueil peut être remplacé depuis la base, sans redéploiement.
+ *
+ * Les visuels de marque sont produits dans Canva et rapatriés dans le stockage.
+ * Tant qu'un visuel n'a pas été activé par quelqu'un qui l'a regardé, l'écran
+ * garde celui d'origine : une image jamais vue ne s'affiche pas d'elle-même.
+ */
+function useVisuelMarque(cle: string, defaut: string): string {
+  const [url, setUrl] = useState(defaut);
+  useEffect(() => {
+    supabase
+      .from(VISUELS_MARQUE_TABLE)
+      .select('url')
+      .eq('cle', cle)
+      .eq('actif', true)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.url) setUrl(data.url as string);
+      });
+  }, [cle]);
+  return url;
+}
 const HERO_EXPORT_IMAGE = `${STORAGE_BASE}/hero-export-aerien.jpg`;
 
 const MODES_TRANSPORT = [
@@ -122,6 +146,8 @@ const ATOUTS_EXPORT = [
 ];
 
 export default function Index() {
+  const heroAccueil = useVisuelMarque('accueil_hero', HERO_IMPORT_IMAGE);
+
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
@@ -129,7 +155,7 @@ export default function Index() {
       <main>
         <section className="relative overflow-hidden border-b text-background">
           <img
-            src={HERO_IMPORT_IMAGE}
+            src={heroAccueil}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
           />
