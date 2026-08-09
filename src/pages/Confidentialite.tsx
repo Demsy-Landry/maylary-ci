@@ -211,6 +211,37 @@ export default function Confidentialite() {
 
           <section>
             <h2 className="flex items-center gap-2 font-display text-lg font-bold text-foreground">
+              <Server className="h-5 w-5 text-primary" />
+              Ce qui part vers l'assistant automatique
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Quand vous décrivez une marchandise à classer ou posez une question au Déclarant,{' '}
+              <strong className="text-foreground">le texte que vous écrivez</strong> est transmis au
+              fournisseur du modèle de langage pour être traité. Rien d'autre ne part : ni votre nom,
+              ni votre adresse, ni vos commandes, ni votre identifiant de compte.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Les résultats consultés par l'assistant dans nos bases — positions tarifaires, taux,
+              régimes — accompagnent ce texte, parce qu'il doit les lire pour vous répondre. Ce sont
+              des données publiques de référence, pas les vôtres.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Vos classifications et vos échanges sont conservés sur votre compte pour que vous
+              puissiez les retrouver et défendre un classement des mois plus tard. Vous pouvez les
+              supprimer vous-même à tout moment. Nous enregistrons également le volume consommé par
+              chaque requête, pour tenir votre quota et connaître notre coût — jamais le contenu à
+              cette fin.
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Une conséquence pratique, et elle mérite d'être dite franchement : n'écrivez pas à
+              l'assistant ce que vous ne confieriez pas à un tiers. Décrire une marchandise ne pose
+              aucun problème ; y recopier un contrat, un relevé bancaire ou les coordonnées d'un
+              client en pose un.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold text-foreground">
               <Clock className="h-5 w-5 text-primary" />
               Combien de temps nous les gardons
             </h2>
