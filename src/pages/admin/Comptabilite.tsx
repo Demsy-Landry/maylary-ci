@@ -27,7 +27,7 @@ const debutExercice = () => `${new Date().getFullYear()}-01-01`;
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 
 /**
- * Les comptes de Maylary.
+ * Les comptes de MayLary Group.
  *
  * Trois lectures d'un même journal : les écritures dans l'ordre où elles se
  * sont produites, la balance qui les totalise par compte, et le compte de

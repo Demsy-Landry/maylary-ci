@@ -85,7 +85,7 @@ const ligneVide = (numero: string): LigneSaisie => ({
 /**
  * Le Déclarant — recherche de position tarifaire et liquidation.
  *
- * Reconstruction dans Maylary de l'outil qui vivait sur `le-declarant.com`.
+ * Reconstruction dans MayLary Group de l'outil qui vivait sur `le-declarant.com`.
  * Deux règles gouvernent cet écran, et elles ne se négocient pas :
  *
  *  1. **Aucun taux qui ne vienne du corpus officiel.** Si un code n'est pas

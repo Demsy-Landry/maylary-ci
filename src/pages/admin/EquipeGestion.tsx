@@ -95,7 +95,7 @@ export default function AdminEquipeGestion() {
       <header className="border-b bg-card">
         <div className="mx-auto max-w-screen-xl space-y-2 px-4 py-4 sm:px-6">
           <AdminNav />
-          <h1 className="font-display text-lg font-bold text-foreground">Admin — Équipe Maylary</h1>
+          <h1 className="font-display text-lg font-bold text-foreground">Admin — Équipe MayLary Group</h1>
         </div>
       </header>
 
@@ -124,7 +124,7 @@ export default function AdminEquipeGestion() {
             <section className="carte-reactive rounded-lg border bg-card p-4">
               <h2 className="text-sm font-semibold text-foreground">Ajouter un membre</h2>
               <p className="mt-1 text-xs text-muted-foreground">
-                La personne crée d'abord son compte sur Maylary, puis vous lui attribuez un rôle.
+                La personne crée d'abord son compte sur MayLary Group, puis vous lui attribuez un rôle.
                 Ainsi son mot de passe reste le sien et ne transite jamais par vous.
               </p>
               <div className="mt-3 flex gap-2">

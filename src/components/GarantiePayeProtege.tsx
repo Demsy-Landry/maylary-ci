@@ -26,7 +26,7 @@ export default function GarantiePayeProtege({
         {variante === 'client' ? (
           <p className="mt-0.5 text-muted-foreground">
             Pour un article vendu par une entreprise partenaire, votre règlement est retenu par
-            Maylary jusqu'à ce que vous confirmiez avoir reçu votre commande. Vous payez d'avance
+            MayLary Group jusqu'à ce que vous confirmiez avoir reçu votre commande. Vous payez d'avance
             sans payer à l'aveugle.
           </p>
         ) : (

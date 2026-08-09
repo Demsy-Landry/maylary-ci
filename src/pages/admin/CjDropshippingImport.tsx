@@ -237,7 +237,7 @@ export default function CjDropshippingImport() {
         </div>
         <p className="mt-1.5 text-xs text-muted-foreground">
           {destination === 'pro'
-            ? 'Les articles paraissent sous l’enseigne « Maylary Import » du secteur choisi, avec leur grille de prix dégressive.'
+            ? 'Les articles paraissent sous l’enseigne « MayLary Group Import » du secteur choisi, avec leur grille de prix dégressive.'
             : 'Les articles paraissent dans la boutique grand public, au prix de détail.'}
         </p>
 

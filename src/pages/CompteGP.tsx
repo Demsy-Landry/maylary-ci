@@ -134,7 +134,7 @@ export default function CompteGP() {
         setSignupLoading(false);
         return;
       }
-      toast.success('Bienvenue sur Maylary !');
+      toast.success('Bienvenue sur MayLary Group !');
       setSignupLoading(false);
       navigate(
         retour ??
@@ -157,7 +157,7 @@ export default function CompteGP() {
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
               <User className="h-6 w-6 text-primary" />
             </div>
-            <CardTitle className="text-2xl">Mon compte Maylary</CardTitle>
+            <CardTitle className="text-2xl">Mon compte MayLary Group</CardTitle>
             <CardDescription>Connectez-vous ou créez votre compte pour commander</CardDescription>
           </CardHeader>
           <CardContent>
@@ -295,7 +295,7 @@ export default function CompteGP() {
                 to="/admin/connexion"
                 className="text-xs text-muted-foreground hover:text-foreground hover:underline"
               >
-                Vous êtes de l'équipe Maylary ? Se connecter en tant qu'admin
+                Vous êtes de l'équipe MayLary Group ? Se connecter en tant qu'admin
               </Link>
             </div>
           </CardContent>

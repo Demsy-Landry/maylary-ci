@@ -30,7 +30,7 @@ export default function Confidentialite() {
         </p>
 
         <p className="mt-6 text-sm text-foreground">
-          Maylary vend en ligne et organise des transports internationaux. Les deux exigent de
+          MayLary Group vend en ligne et organise des transports internationaux. Les deux exigent de
           savoir qui vous êtes et où livrer. Cette page dit exactement ce que nous gardons, pourquoi,
           combien de temps, et ce que vous pouvez exiger de nous.
         </p>

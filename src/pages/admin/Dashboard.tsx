@@ -88,7 +88,7 @@ export default function AdminDashboard() {
         ruptures: ruptures.count ?? 0,
       });
 
-      // Ce que Maylary doit encore aux vendeurs : le net de leurs ventes moins
+      // Ce que MayLary Group doit encore aux vendeurs : le net de leurs ventes moins
       // ce qui a déjà été versé.
       const du = (lignes.data ?? []).reduce(
         (s: number, l: { net_vendeur_fcfa: number | null }) => s + Number(l.net_vendeur_fcfa ?? 0),

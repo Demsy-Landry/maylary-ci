@@ -26,7 +26,7 @@ interface Service {
 }
 
 /**
- * Les six métiers de Maylary, dans l'ordre où ils comptent pour un visiteur qui
+ * Les six métiers de MayLary Group, dans l'ordre où ils comptent pour un visiteur qui
  * arrive : ce qu'il vient chercher d'abord, puis ce qu'il ne savait pas qu'on
  * faisait.
  */
@@ -83,7 +83,7 @@ const SERVICES: Service[] = [
   },
   {
     to: '/vendre',
-    titre: 'Vendre sur Maylary',
+    titre: 'Vendre sur MayLary Group',
     phrase:
       "Entreprise ivoirienne ? Ouvrez votre boutique sans abonnement : vous êtes payé, nous prenons une commission sur la vente.",
     icone: Store,
@@ -118,7 +118,7 @@ export default function BandeServices() {
     <section className="border-b bg-muted/30">
       <div className="mx-auto max-w-screen-xl px-4 py-10 sm:px-6">
         <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
-          Tout ce que Maylary fait pour vous
+          Tout ce que MayLary Group fait pour vous
         </h2>
         <p className="mx-auto mt-1 max-w-prose text-center text-sm text-muted-foreground">
           Six services, un seul interlocuteur, de la recherche du fournisseur jusqu'à votre porte.

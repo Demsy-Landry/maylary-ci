@@ -3,7 +3,7 @@ import { STORAGE_PUBLIC_URL } from '@/lib/supabase';
 
 /**
  * Illustrations figuratives par secteur — codées en dur en SVG (aucune photo
- * disponible). But : montrer concrètement ce que Maylary vend, secteur par
+ * disponible). But : montrer concrètement ce que MayLary Group vend, secteur par
  * secteur, plutôt qu'une composition abstraite. Chaque illustration flotte
  * doucement (voir .animate-float-drift dans index.css), désactivé pour
  * prefers-reduced-motion.

@@ -93,7 +93,7 @@ export default function ConfirmerReception({
         <div className="min-w-0 text-sm">
           <p className="font-medium text-foreground">Avez-vous bien reçu votre commande ?</p>
           <p className="mt-0.5 text-muted-foreground">
-            Votre règlement est retenu par Maylary tant que vous ne l'avez pas confirmé. Si
+            Votre règlement est retenu par MayLary Group tant que vous ne l'avez pas confirmé. Si
             quelque chose ne va pas, signalez-le nous avant de confirmer.
             {limite && ` Sans réponse de votre part, la commande sera considérée comme reçue le ${limite}.`}
           </p>

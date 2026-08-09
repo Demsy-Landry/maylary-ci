@@ -31,7 +31,7 @@ export interface ParametresCoutImport {
 }
 
 export interface RepartitionIncoterm {
-  /** Fraction du fret restant à la charge de Maylary (0 = tout est payé par le fournisseur). */
+  /** Fraction du fret restant à la charge de MayLary Group (0 = tout est payé par le fournisseur). */
   part_fret: number;
   /** Faux sous CIF/CIP : le fournisseur assure déjà, inutile de doubler la prime. */
   assurance_a_charge: boolean;
