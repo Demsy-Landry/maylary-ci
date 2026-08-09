@@ -27,7 +27,16 @@
  * et des paramètres, pour être remplacés par le devis réel du transitaire.
  */
 
-/** Rapports d'équivalence entre volume et poids, par mode de transport. */
+/**
+ * Rapports d'équivalence entre volume et poids, par mode de transport.
+ *
+ * ⚠️ Ces trois nombres existent aussi en base, dans
+ * `app_e08c374bc4_equivalences_fret`, que lit le moteur de cotation SQL
+ * `app_e08c374bc4_coter`. C'est la table qui fait autorité : un module Deno ne
+ * se corrige qu'au redéploiement, une ligne se corrige tout de suite. Toute
+ * modification ici doit y être reportée, sinon le simulateur de groupage et le
+ * devis du client cesseront de dire la même chose sans que rien ne le signale.
+ */
 export const EQUIVALENCE_KG_PAR_M3 = {
   /** Usage maritime : l'unité payante est le plus grand entre le m³ et la tonne. */
   maritime: 1000,
