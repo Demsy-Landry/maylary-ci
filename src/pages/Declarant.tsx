@@ -57,6 +57,21 @@ interface LigneSaisie {
   poids_brut: string;
 }
 
+/**
+ * Les régimes se groupent par sens d'opération.
+ *
+ * Depuis que l'exportation se liquide, une liste unique mélangerait une mise à
+ * la consommation et une réexportation, qui n'ont ni le même formulaire ni le
+ * même montant. L'ordre est celui de l'usage : on importe plus souvent qu'on
+ * n'exporte, et on place rarement sous transit.
+ */
+const GROUPES_REGIME = [
+  { sens: 'import', libelle: 'Importation' },
+  { sens: 'export', libelle: 'Exportation' },
+  { sens: 'transit', libelle: 'Transit' },
+  { sens: 'special', libelle: 'Régimes particuliers' },
+] as const;
+
 const ligneVide = (numero: string): LigneSaisie => ({
   cle: Date.now() + Math.random(),
   numero,
@@ -301,8 +316,8 @@ export default function Declarant() {
           <div className="min-w-0">
             <h1 className="font-display text-2xl font-extrabold text-foreground">Le Déclarant</h1>
             <p className="mt-1 max-w-prose text-sm text-muted-foreground">
-              Trouvez la position tarifaire d'une marchandise et calculez les droits et taxes dus à
-              l'importation en Côte d'Ivoire. Les taux viennent du{' '}
+              Trouvez la position tarifaire d'une marchandise et calculez les droits et taxes dus
+              en Côte d'Ivoire, à l'importation comme à l'exportation. Les taux viennent du{' '}
               <strong className="text-foreground">TEC UEMOA officiel</strong> — 6 298 codes, aucun
               taux estimé.
             </p>
@@ -781,15 +796,21 @@ export default function Declarant() {
                   value={regime}
                   onChange={(e) => setRegime(e.target.value)}
                 >
-                  <optgroup label="Régimes calculés">
-                    {regimes
-                      .filter((r) => r.liquidation_supportee)
-                      .map((r) => (
-                        <option key={r.code} value={r.code}>
-                          {r.code} — {r.libelle}
-                        </option>
-                      ))}
-                  </optgroup>
+                  {GROUPES_REGIME.map(({ sens, libelle }) => {
+                    const liste = regimes.filter(
+                      (r) => r.liquidation_supportee && r.sens === sens,
+                    );
+                    if (liste.length === 0) return null;
+                    return (
+                      <optgroup key={sens} label={libelle}>
+                        {liste.map((r) => (
+                          <option key={r.code} value={r.code}>
+                            {r.code} — {r.libelle}
+                          </option>
+                        ))}
+                      </optgroup>
+                    );
+                  })}
                   <optgroup label="Référentiel — calcul non proposé">
                     {regimes
                       .filter((r) => !r.liquidation_supportee)

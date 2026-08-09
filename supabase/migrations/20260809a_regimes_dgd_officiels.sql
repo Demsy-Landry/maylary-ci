@@ -287,11 +287,19 @@ begin
     -- Le taux saisi l'emporte : un déclarant qui corrige sait ce qu'il fait.
     v_taux_dd := coalesce(v_saisi, v_tec.taux_dd / 100.0);
 
+    -- Le taux n'est exigé que là où il sert. Sous un régime qui n'appelle
+    -- aucun droit — une exportation, un transit — réclamer une position au
+    -- corpus TEC bloquerait une liquidation dont le résultat ne dépend pas
+    -- d'elle. La règle du « jamais de taux inventé » est intacte : ce zéro
+    -- n'est pas une estimation du droit, c'est l'absence de droit.
     if v_taux_dd is null then
-      raise exception
-        'Ligne « % » : droit de douane inconnu. Le code % n''est pas dans la base TEC — vérification manuelle nécessaire, ou saisissez le taux.',
-        coalesce(v_ligne->>'designation', '?'), coalesce(nullif(v_code, ''), '(vide)')
-        using errcode = '22023';
+      if v_regime.droits_exigibles then
+        raise exception
+          'Ligne « % » : droit de douane inconnu. Le code % n''est pas dans la base TEC — vérification manuelle nécessaire, ou saisissez le taux.',
+          coalesce(v_ligne->>'designation', '?'), coalesce(nullif(v_code, ''), '(vide)')
+          using errcode = '22023';
+      end if;
+      v_taux_dd := 0;
     end if;
 
     -- Le fret se répartit au poids : sans poids renseigné nulle part, on ne
