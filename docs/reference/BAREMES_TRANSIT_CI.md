@@ -95,3 +95,27 @@ qu'il en manque un.
   ce qui serait faux.
 - **Délais réels par origine**, pour que le devis annonce un temps en même temps
   qu'un prix. Un client qui compare deux offres sans voir les délais compare mal.
+
+
+## Génération d'images — état au 9 août 2026
+
+Le fondateur veut de vraies images générées, pas des illustrations vectorielles.
+La chaîne est construite et déployée (`app_e08c374bc4_generer_visuel`), réservée
+à l'administrateur parce que chaque appel consomme du crédit.
+
+Ce que le diagnostic a établi, modèle par modèle et clé par clé :
+
+| Modèle | Clé gratuite | Clé principale |
+|---|---|---|
+| `nano-banana-pro-preview` | 429 quota dépassé | 429 crédits épuisés |
+| `gemini-3-pro-image-preview` | 429 quota dépassé | 429 crédits épuisés |
+| `gemini-2.5-flash-image` | 429 quota dépassé | 429 crédits épuisés |
+| `imagen-4.0-generate-001` | 404 — pas exposé sur `generateContent` | idem |
+
+Lecture : **les modèles d'image sont bien accessibles aux deux clés** — ils ne
+renvoient pas « modèle inconnu ». Ils refusent pour une seule raison : le
+crédit. La génération d'images n'est pas au palier gratuit, et le compte
+principal est à zéro.
+
+Il n'y a donc rien à corriger dans le code. Dès qu'un crédit est déposé sur le
+compte Google, la fonction produit les visuels et les dépose dans le stockage.
