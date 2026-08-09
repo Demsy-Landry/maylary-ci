@@ -45,6 +45,7 @@ import MentionsLegales from '@/pages/MentionsLegales';
 import Confidentialite from '@/pages/Confidentialite';
 import PageIntrouvable from '@/pages/PageIntrouvable';
 import TransitionDePage from '@/components/TransitionDePage';
+import AssistantDeclarant from '@/components/AssistantDeclarant';
 import AdminParametres from '@/pages/admin/AdminParametres';
 import MonCompte from '@/pages/MonCompte';
 
@@ -204,6 +205,9 @@ function App() {
                 <Route path="*" element={<PageIntrouvable />} />
               </Routes>
               </TransitionDePage>
+              {/* Le Déclarant suit l'utilisateur sur tous les écrans : il est
+                  dans le routeur pour connaître la page d'où l'on parle. */}
+              <AssistantDeclarant />
             </BrowserRouter>
             <Toaster />
           </CartProvider>
