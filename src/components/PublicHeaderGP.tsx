@@ -6,7 +6,6 @@ import MenuServices from '@/components/MenuServices';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
 import {
-  Boxes,
   ShoppingCart,
   User,
   Building2,
