@@ -139,11 +139,25 @@ Deno.serve(async (req: Request) => {
     });
 
     if (!appel.ok) {
-      console.error('anthropic', appel.status);
+      // Le corps d'erreur d'Anthropic décrit la requête, jamais l'en-tête
+      // d'authentification : il est sans risque, et sans lui un 400 ne dit rien.
+      // On ne remonte que le type et le message, pas la réponse entière.
+      let motif: string | null = null;
+      let genre: string | null = null;
+      try {
+        const corps = await appel.json();
+        genre = corps?.error?.type ?? null;
+        motif = corps?.error?.message ?? null;
+      } catch {
+        motif = null;
+      }
+      console.error('anthropic', appel.status, genre, motif);
       return json(
         {
           erreur: 'Le service de classification est indisponible. Réessayez dans un instant.',
           statut_amont: appel.status,
+          genre_amont: genre,
+          motif_amont: motif,
         },
         502,
       );
