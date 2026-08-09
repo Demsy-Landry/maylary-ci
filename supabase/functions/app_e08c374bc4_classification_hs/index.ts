@@ -10,12 +10,16 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
  * inventerait aussi son taux, et un taux inventé coûte un redressement au
  * client.
  *
- * Un seul modèle, jamais deux qui votent. La fiabilité ne vient pas d'un second
- * avis mais de la vérification en base, qui est un fait et non une opinion.
+ * Deux fournisseurs, une seule sortie. Le choix se règle en base et ne change
+ * rien à la fiabilité : elle vient de la vérification en corpus, pas du modèle.
+ * C'est précisément pourquoi la bascule peut être un réglage et non un choix
+ * d'architecture.
  *
  * Aucune erreur interne ne ressort d'ici. Un message d'erreur peut contenir la
  * valeur qui l'a provoquée — une clé mal collée, par exemple — et se retrouver
- * dans un journal ou une réponse HTTP.
+ * dans un journal ou une réponse HTTP. Le corps d'erreur renvoyé par le
+ * fournisseur, lui, décrit la requête et jamais l'en-tête d'authentification :
+ * il est remonté, parce que sans lui un refus ne dit rien.
  */
 
 const CORS = {
@@ -54,17 +58,101 @@ Réponds uniquement en JSON valide, sans texte autour et sans balises de code :
  * milieu de la clé. On les retire, sinon l'en-tête HTTP est refusé et le
  * message d'erreur cite la clé en clair.
  */
-const cleAssainie = () => (Deno.env.get('ANTHROPIC_API_KEY') ?? '').replace(/\s+/g, '');
+const secret = (nom: string) => (Deno.env.get(nom) ?? '').replace(/\s+/g, '');
+
+interface Refus {
+  statut: number;
+  genre: string | null;
+  motif: string | null;
+}
+
+interface Proposition {
+  texte: string;
+  arret: string | null;
+}
+
+/** Ce que les deux fournisseurs rendent en commun : du texte, ou un refus. */
+type Reponse = { ok: true; valeur: Proposition } | { ok: false; refus: Refus };
+
+async function lireRefus(reponse: Response, chemin: string[]): Promise<Refus> {
+  let genre: string | null = null;
+  let motif: string | null = null;
+  try {
+    const corps = await reponse.json();
+    let noeud: unknown = corps;
+    for (const cle of chemin) noeud = (noeud as Record<string, unknown> | null)?.[cle];
+    genre = (noeud as { type?: string; status?: string })?.type
+      ?? (noeud as { status?: string })?.status
+      ?? null;
+    motif = (noeud as { message?: string })?.message ?? null;
+  } catch {
+    motif = null;
+  }
+  return { statut: reponse.status, genre, motif };
+}
+
+async function interrogerAnthropic(modele: string, description: string): Promise<Reponse> {
+  const cle = secret('ANTHROPIC_API_KEY');
+  const appel = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': cle,
+      'anthropic-version': '2023-06-01',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: modele,
+      max_tokens: 4000,
+      system: CONSIGNE,
+      messages: [{ role: 'user', content: `Classe cette marchandise : ${description}` }],
+    }),
+  });
+
+  if (!appel.ok) return { ok: false, refus: await lireRefus(appel, ['error']) };
+
+  const corps = await appel.json();
+  // La réponse peut commencer par un bloc de raisonnement : on concatène les
+  // blocs de texte plutôt que de lire le premier, qui n'est pas toujours le JSON.
+  const texte: string = (corps?.content ?? [])
+    .filter((b: { type?: string }) => b?.type === 'text')
+    .map((b: { text?: string }) => b.text ?? '')
+    .join('');
+  return { ok: true, valeur: { texte, arret: corps?.stop_reason ?? null } };
+}
+
+async function interrogerGoogle(modele: string, description: string): Promise<Reponse> {
+  const cle = secret('GOOGLE_API_KEY');
+  const appel = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modele)}:generateContent`,
+    {
+      method: 'POST',
+      headers: { 'x-goog-api-key': cle, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: CONSIGNE }] },
+        contents: [
+          { role: 'user', parts: [{ text: `Classe cette marchandise : ${description}` }] },
+        ],
+        // Le mode JSON natif évite d'avoir à extraire le JSON d'un texte
+        // enrobé — l'échec de lecture le plus fréquent côté modèle.
+        generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 4000 },
+      }),
+    },
+  );
+
+  if (!appel.ok) return { ok: false, refus: await lireRefus(appel, ['error']) };
+
+  const corps = await appel.json();
+  const candidat = corps?.candidates?.[0];
+  const texte: string = (candidat?.content?.parts ?? [])
+    .map((p: { text?: string }) => p?.text ?? '')
+    .join('');
+  return { ok: true, valeur: { texte, arret: candidat?.finishReason ?? null } };
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
   try {
-    const cle = cleAssainie();
-    if (!cle.startsWith('sk-ant-api')) {
-      return json({ erreur: "La clé de classification n'est pas configurée. Contactez Maylary." }, 503);
-    }
-
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -102,6 +190,18 @@ Deno.serve(async (req: Request) => {
       return json({ erreur: 'La classification assistée est momentanément désactivée.' }, 503);
     }
 
+    const fournisseur: string = parametres.fournisseur ?? 'google';
+    const modele: string =
+      fournisseur === 'anthropic' ? parametres.modele_anthropic : parametres.modele_google;
+
+    const cleAttendue = fournisseur === 'anthropic' ? 'ANTHROPIC_API_KEY' : 'GOOGLE_API_KEY';
+    if (secret(cleAttendue).length === 0) {
+      return json(
+        { erreur: "La clé de classification n'est pas configurée. Contactez Maylary." },
+        503,
+      );
+    }
+
     // Chaque appel coûte de l'argent et la page est publique : le plafond
     // journalier est ce qui empêche un robot de vider le compte.
     const debutJour = new Date();
@@ -123,57 +223,40 @@ Deno.serve(async (req: Request) => {
     }
 
     // --- Le modèle propose ---
-    const appel = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': cle,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: parametres.modele,
-        max_tokens: 1600,
-        system: CONSIGNE,
-        messages: [{ role: 'user', content: `Classe cette marchandise : ${description}` }],
-      }),
-    });
+    const reponse =
+      fournisseur === 'anthropic'
+        ? await interrogerAnthropic(modele, description)
+        : await interrogerGoogle(modele, description);
 
-    if (!appel.ok) {
-      // Le corps d'erreur d'Anthropic décrit la requête, jamais l'en-tête
-      // d'authentification : il est sans risque, et sans lui un 400 ne dit rien.
-      // On ne remonte que le type et le message, pas la réponse entière.
-      let motif: string | null = null;
-      let genre: string | null = null;
-      try {
-        const corps = await appel.json();
-        genre = corps?.error?.type ?? null;
-        motif = corps?.error?.message ?? null;
-      } catch {
-        motif = null;
-      }
-      console.error('anthropic', appel.status, genre, motif);
+    if (!reponse.ok) {
+      console.error('fournisseur', fournisseur, reponse.refus.statut, reponse.refus.genre);
       return json(
         {
           erreur: 'Le service de classification est indisponible. Réessayez dans un instant.',
-          statut_amont: appel.status,
-          genre_amont: genre,
-          motif_amont: motif,
+          fournisseur,
+          statut_amont: reponse.refus.statut,
+          genre_amont: reponse.refus.genre,
+          motif_amont: reponse.refus.motif,
         },
         502,
       );
     }
 
-    const reponse = await appel.json();
-    const texte: string = reponse?.content?.[0]?.text ?? '';
-
     let propose: Record<string, unknown>;
     try {
+      const { texte } = reponse.valeur;
       const debut = texte.indexOf('{');
       const fin = texte.lastIndexOf('}');
       propose = JSON.parse(debut >= 0 && fin > debut ? texte.slice(debut, fin + 1) : texte);
     } catch {
-      console.error('reponse non json');
-      return json({ erreur: "La réponse n'a pas pu être interprétée. Reformulez la description." }, 502);
+      console.error('reponse non json', fournisseur, reponse.valeur.arret);
+      return json(
+        {
+          erreur: "La réponse n'a pas pu être interprétée. Reformulez la description.",
+          arret_amont: reponse.valeur.arret,
+        },
+        502,
+      );
     }
 
     const brut = typeof propose.code_hs === 'string' ? propose.code_hs : '';
@@ -201,7 +284,8 @@ Deno.serve(async (req: Request) => {
       raisonnement_rgi: propose.raisonnement_rgi ?? null,
       notes_declarant: propose.notes_declarant ?? null,
       question: propose.question ?? null,
-      modele: parametres.modele,
+      fournisseur,
+      modele,
       verifie_en_base: trouve,
       designation_tec: trouve ? verification.designation : null,
       unite_us: trouve ? verification.unite_us : null,
@@ -230,7 +314,8 @@ Deno.serve(async (req: Request) => {
         caracteristiques: resultat.caracteristiques,
         raisonnement_rgi: resultat.raisonnement_rgi,
         notes_declarant: resultat.notes_declarant,
-        modele: resultat.modele,
+        fournisseur,
+        modele,
         verifie_en_base: resultat.verifie_en_base,
         designation_tec: resultat.designation_tec,
         unite_us: resultat.unite_us,
