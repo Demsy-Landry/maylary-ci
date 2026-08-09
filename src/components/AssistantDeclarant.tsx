@@ -61,6 +61,10 @@ export default function AssistantDeclarant() {
   const [message, setMessage] = useState('');
   const [tours, setTours] = useState<Tour[]>([]);
   const [envoi, setEnvoi] = useState(false);
+  // Ce qu'il reste de questions pour la journée. Le serveur le renvoie avec
+  // chaque réponse : l'afficher évite au client de découvrir son plafond en s'y
+  // cognant.
+  const [restant, setRestant] = useState<number | null>(null);
   const finRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -107,6 +111,7 @@ export default function AssistantDeclarant() {
         body: JSON.stringify({ message: texte, historique, contexte: contexteDeLaRoute(pathname) }),
       });
       const corps = await reponse.json();
+      if (typeof corps.restant === 'number') setRestant(corps.restant);
       setTours((t) => [
         ...t,
         reponse.ok
@@ -148,7 +153,9 @@ export default function AssistantDeclarant() {
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-foreground">Le Déclarant</span>
             <span className="block truncate text-xs text-muted-foreground">
-              Logisticien MayLary Group · {contexteDeLaRoute(pathname)}
+              {restant === null
+                ? `Logisticien MayLary Group · ${contexteDeLaRoute(pathname)}`
+                : `${restant} question${restant > 1 ? 's' : ''} restante${restant > 1 ? 's' : ''} aujourd'hui`}
             </span>
           </span>
         </span>
