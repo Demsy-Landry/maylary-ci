@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Boxes } from 'lucide-react';
+import { MarqueMaylary } from '@/components/MarqueMaylary';
 
 const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
   {
@@ -49,9 +49,9 @@ export default function SiteFooter() {
           <div>
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <Boxes className="h-4 w-4" />
+                <MarqueMaylary className="h-4 w-4" />
               </div>
-              <span className="text-base font-semibold tracking-tight">Maylary</span>
+              <span className="text-base font-semibold tracking-tight">MayLary Group</span>
             </div>
             <p className="mt-3 max-w-xs text-sm text-background/70">
               Vos achats et votre approvisionnement professionnel, livrés partout en Côte
@@ -76,7 +76,7 @@ export default function SiteFooter() {
         </div>
 
         <div className="mt-10 flex flex-wrap items-center justify-between gap-2 border-t border-background/15 pt-6 text-xs text-background/60">
-          <span>© {new Date().getFullYear()} Maylary. Tous droits réservés.</span>
+          <span>© {new Date().getFullYear()} MayLary Group. Tous droits réservés.</span>
           <Link to="/admin/connexion" className="hover:text-background hover:underline">
             Connexion admin
           </Link>

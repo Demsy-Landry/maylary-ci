@@ -118,7 +118,7 @@ export default function CatalogueGrandPublic() {
       <PublicHeaderGP />
       <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Boutique Maylary</h1>
+          <h1 className="text-2xl font-bold text-foreground">Boutique MayLary Group</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Des produits tendance, livrés chez vous. Parcourez les catégories ou recherchez directement.
           </p>
@@ -260,7 +260,7 @@ export default function CatalogueGrandPublic() {
             Vous êtes une entreprise ivoirienne ?
           </h2>
           <p className="mx-auto mt-1 max-w-xl text-sm text-muted-foreground">
-            Vendez vos produits sur Maylary. L'inscription et la publication de votre catalogue sont
+            Vendez vos produits sur MayLary Group. L'inscription et la publication de votre catalogue sont
             gratuites — nous ne prenons une commission que sur les ventes que nous vous apportons.
           </p>
           <Button asChild variant="outline" className="mt-4">

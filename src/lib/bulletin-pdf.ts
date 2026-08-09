@@ -20,7 +20,7 @@ import type { Liquidation, LigneLiquidee } from '@/lib/supabase';
  * Un document émis par une société privée sous les armoiries de la République
  * et le timbre de la Direction Générale des Douanes se ferait prendre pour un
  * acte officiel, quelle que soit la mention qu'on y ajoute. L'émetteur affiché
- * est donc Maylary, et la mention du § 6.2 barre le haut de chaque page.
+ * est donc MayLary Group, et la mention du § 6.2 barre le haut de chaque page.
  *
  * Format paysage : une ligne porte huit taxes ; en portrait elles ne tiennent
  * pas sur un rang, et un déclarant qui rapproche ce document de son bulletin
@@ -136,7 +136,7 @@ function dessinerEnTete(doc: jsPDF, reference: string, date: Date) {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15);
   doc.setTextColor(...ENCRE);
-  doc.text('Maylary', MARGE + 17, MARGE + 6);
+  doc.text('MayLary Group', MARGE + 17, MARGE + 6);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.5);
@@ -472,7 +472,7 @@ export function construireBulletinPdf(
     doc.text(
       `${liquidation.tarif.libelle} — version du ${new Date(
         liquidation.tarif.date_version,
-      ).toLocaleDateString('fr-FR')}. Établi par Maylary (Dems'Inc), Abidjan. ` +
+      ).toLocaleDateString('fr-FR')}. Établi par MayLary Group (Dems'Inc), Abidjan. ` +
         `La déclaration officielle doit être saisie dans le système douanier.`,
       MARGE,
       HAUTEUR_PAGE - 6,

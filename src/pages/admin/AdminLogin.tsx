@@ -64,7 +64,7 @@ export default function AdminLogin() {
             <ShieldCheck className="h-6 w-6 text-primary" />
           </div>
           <CardTitle className="text-2xl">Espace Administration</CardTitle>
-          <CardDescription>Réservé à l'équipe Maylary</CardDescription>
+          <CardDescription>Réservé à l'équipe MayLary Group</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,7 +102,7 @@ export default function AdminLogin() {
           <div className="mt-6 flex items-center justify-center gap-1.5 border-t pt-4 text-xs text-muted-foreground">
             <Boxes className="h-3.5 w-3.5" />
             <Link to="/" className="hover:text-foreground hover:underline">
-              Retour au site Maylary
+              Retour au site MayLary Group
             </Link>
           </div>
         </CardContent>

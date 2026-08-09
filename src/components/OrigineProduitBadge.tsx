@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * Indique au client si l'article part d'un stock local (livraison rapide) ou
- * s'il est commandé à l'international par Maylary (délai plus long). C'est
+ * s'il est commandé à l'international par MayLary Group (délai plus long). C'est
  * l'information dont il a besoin pour choisir en connaissance de cause ; le
  * fournisseur réel n'est jamais nommé.
  */

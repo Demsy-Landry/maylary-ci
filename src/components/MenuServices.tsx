@@ -21,7 +21,7 @@ const SERVICES: { to: string; titre: string; icone: LucideIcon }[] = [
   { to: '/catalogue', titre: 'Espace Pro', icone: Building2 },
   { to: '/boutique/sourcing', titre: 'Sourcing sur demande', icone: Search },
   { to: '/boutique/achats-groupes', titre: 'Achats groupés', icone: Users },
-  { to: '/vendre', titre: 'Vendre sur Maylary', icone: Store },
+  { to: '/vendre', titre: 'Vendre sur MayLary Group', icone: Store },
   { to: '/declarant', titre: 'Le Déclarant — douane', icone: ShieldCheck },
 ];
 

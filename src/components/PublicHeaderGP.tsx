@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { MarqueMaylary } from '@/components/MarqueMaylary';
 import { Button } from '@/components/ui/button';
 import MenuServices from '@/components/MenuServices';
 import { useAuth } from '@/hooks/useAuth';
@@ -45,9 +46,11 @@ export default function PublicHeaderGP() {
         <div className="flex items-center justify-between gap-3 xl:contents">
           <Link to="/" className="flex shrink-0 items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <Boxes className="h-5 w-5" />
+              <MarqueMaylary className="h-5 w-5" />
             </div>
-            <span className="hidden text-lg font-semibold tracking-tight sm:inline">Maylary</span>
+            <span className="hidden text-lg font-semibold tracking-tight sm:inline">
+              MayLary<span className="font-normal opacity-80"> Group</span>
+            </span>
           </Link>
 
           {/* `shrink-0` empêchait la barre de céder, et `flex-wrap` seul ne

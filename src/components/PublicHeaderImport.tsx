@@ -1,8 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { MarqueMaylary } from '@/components/MarqueMaylary';
 import { Button } from '@/components/ui/button';
 import MenuServices from '@/components/MenuServices';
 import { useAuth } from '@/hooks/useAuth';
-import { Boxes, ShieldCheck, LogOut, User, ShoppingBag, Building2, PackageSearch, Ship } from 'lucide-react';
+import { ShieldCheck, LogOut, User, ShoppingBag, Building2, PackageSearch, Ship } from 'lucide-react';
 
 export default function PublicHeaderImport() {
   const { user, isAdmin, signOut } = useAuth();
@@ -18,9 +19,9 @@ export default function PublicHeaderImport() {
       <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Boxes className="h-5 w-5" />
+            <MarqueMaylary className="h-5 w-5" />
           </div>
-          <span className="text-lg font-semibold tracking-tight">Maylary</span>
+          <span className="text-lg font-semibold tracking-tight">MayLary Group</span>
         </Link>
 
         <nav className="flex flex-wrap items-center gap-1 sm:gap-2">

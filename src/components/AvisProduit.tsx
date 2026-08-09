@@ -48,7 +48,7 @@ export default function AvisProduit({ produitId }: AvisProduitProps) {
       {/* Ce que valent ces avis tient à leur provenance : ils ne viennent que de
           commandes livrées, et un client ne peut noter que ce qu'il a reçu. */}
       <p className="mt-1 text-xs text-muted-foreground">
-        Avis de clients Maylary ayant reçu cet article.
+        Avis de clients MayLary Group ayant reçu cet article.
       </p>
 
       <div className="mt-4 space-y-3">

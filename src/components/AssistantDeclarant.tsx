@@ -10,7 +10,7 @@ import { ShieldCheck, X, Send, Loader2, Sparkles } from 'lucide-react';
  * Le Déclarant, présent sur toutes les pages.
  *
  * Ce n'est pas un widget de support : c'est le logisticien de la maison. Il
- * connaît les services de Maylary, il conseille sur l'incoterm, le mode, le
+ * connaît les services de MayLary Group, il conseille sur l'incoterm, le mode, le
  * montage du dossier — et dès qu'un chiffre est en jeu, il interroge les
  * moteurs plutôt que sa mémoire.
  *
@@ -43,9 +43,9 @@ const contexteDeLaRoute = (chemin: string): string => {
   if (chemin.startsWith('/boutique/sourcing')) return 'sourcing sur demande';
   if (chemin.startsWith('/boutique')) return 'boutique';
   if (chemin.startsWith('/catalogue')) return 'espace professionnel';
-  if (chemin.startsWith('/admin')) return 'administration Maylary';
+  if (chemin.startsWith('/admin')) return 'administration MayLary Group';
   if (chemin.startsWith('/mon-compte')) return 'espace client';
-  return "accueil Maylary";
+  return "accueil MayLary Group";
 };
 
 const SUGGESTIONS = [
@@ -148,7 +148,7 @@ export default function AssistantDeclarant() {
           <span className="min-w-0">
             <span className="block text-sm font-semibold text-foreground">Le Déclarant</span>
             <span className="block truncate text-xs text-muted-foreground">
-              Logisticien Maylary · {contexteDeLaRoute(pathname)}
+              Logisticien MayLary Group · {contexteDeLaRoute(pathname)}
             </span>
           </span>
         </span>

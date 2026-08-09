@@ -1,9 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { MarqueMaylary } from '@/components/MarqueMaylary';
 import { Button } from '@/components/ui/button';
 import MenuServices from '@/components/MenuServices';
 import { useAuth } from '@/hooks/useAuth';
 import { useCart } from '@/hooks/useCart';
-import { Boxes, ClipboardList, User, ShoppingBag, LogOut, PackageSearch, Ship } from 'lucide-react';
+import { ClipboardList, User, ShoppingBag, LogOut, PackageSearch, Ship } from 'lucide-react';
 
 export default function PublicHeaderPro() {
   const { user, isAdmin, signOut } = useAuth();
@@ -23,9 +24,9 @@ export default function PublicHeaderPro() {
       <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:gap-3 sm:px-6">
         <Link to="/" className="flex min-w-0 shrink items-center gap-2">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Boxes className="h-5 w-5" />
+            <MarqueMaylary className="h-5 w-5" />
           </div>
-          <span className="truncate text-lg font-semibold tracking-tight">Maylary</span>
+          <span className="truncate text-lg font-semibold tracking-tight">MayLary Group</span>
           <span className="hidden rounded-full bg-background/10 px-2 py-0.5 text-xs font-medium sm:inline">
             Espace Pro
           </span>

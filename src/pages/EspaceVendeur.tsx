@@ -153,7 +153,7 @@ export default function EspaceVendeur() {
   }, [user]);
 
   /**
-   * Ce que Maylary doit au vendeur : le net de ses ventes, moins ce qui lui a
+   * Ce que MayLary Group doit au vendeur : le net de ses ventes, moins ce qui lui a
    * déjà été versé. Calculé à l'affichage plutôt que stocké, pour qu'un chiffre
    * périmé ne puisse pas s'installer.
    */
@@ -293,9 +293,9 @@ export default function EspaceVendeur() {
         <PublicHeaderGP />
         <main className="entree-page mx-auto max-w-screen-md px-4 py-16 text-center sm:px-6">
           <Store className="mx-auto h-10 w-10 text-primary" />
-          <h1 className="mt-4 text-2xl font-bold text-foreground">Vendez sur Maylary</h1>
+          <h1 className="mt-4 text-2xl font-bold text-foreground">Vendez sur MayLary Group</h1>
           <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
-            Inscription gratuite, publication gratuite. Maylary ne se rémunère que sur les ventes
+            Inscription gratuite, publication gratuite. MayLary Group ne se rémunère que sur les ventes
             réellement conclues.
           </p>
           <Button className="mt-6" onClick={() => navigate('/boutique/compte')}>
@@ -317,7 +317,7 @@ export default function EspaceVendeur() {
           <div className="flex items-center gap-2">
             <Store className="h-5 w-5 text-primary" />
             <h1 className="text-2xl font-bold text-foreground">
-              {vendeur ? vendeur.nom_entreprise : 'Vendre sur Maylary'}
+              {vendeur ? vendeur.nom_entreprise : 'Vendre sur MayLary Group'}
             </h1>
           </div>
           {vendeur && (

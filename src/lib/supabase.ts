@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Coordonnées du projet Supabase de Maylary.
+// Coordonnées du projet Supabase de MayLary Group.
 //
 // Ces deux valeurs sont publiques par construction : elles partent dans le
 // paquet envoyé au navigateur, l'URL figure déjà en clair dans l'en-tête
@@ -195,10 +195,10 @@ export const ORIGINE_PRODUIT_LABELS: Record<OrigineProduit, string> = {
 
 export const ORIGINE_PRODUIT_DESCRIPTIONS: Record<OrigineProduit, string> = {
   import_international:
-    "Article commandé à l'international par Maylary : comptez un délai de livraison plus long, mais un prix négocié à la source.",
+    "Article commandé à l'international par MayLary Group : comptez un délai de livraison plus long, mais un prix négocié à la source.",
   local: 'Article déjà disponible en Côte d’Ivoire : livraison rapide après confirmation de votre commande.',
   vendeur_local:
-    'Article proposé par une entreprise ivoirienne inscrite sur Maylary. Maylary sécurise le paiement et suit la livraison.',
+    'Article proposé par une entreprise ivoirienne inscrite sur MayLary Group. MayLary Group sécurise le paiement et suit la livraison.',
 };
 
 export type Fiabilite = 'a_verifier' | 'fiable' | 'tres_fiable';
@@ -279,7 +279,7 @@ export interface Enseigne {
 }
 
 export interface Profile {
-  /** Rôle interne Maylary. Null pour un client. */
+  /** Rôle interne MayLary Group. Null pour un client. */
   role_equipe: RoleEquipe | null;
   id: string;
   user_id: string;
@@ -360,7 +360,7 @@ export const TYPE_CANAL_LABELS: Record<TypeCanalPaiement, string> = {
 };
 
 /**
- * Un moyen d'encaissement de Maylary. Plusieurs coexistent : en Côte d'Ivoire
+ * Un moyen d'encaissement de MayLary Group. Plusieurs coexistent : en Côte d'Ivoire
  * un commerçant encaisse sur Wave, Orange Money, MTN, Moov et par virement, et
  * imposer un seul canal revient à refuser les clients des autres.
  */
@@ -429,7 +429,7 @@ export interface ParametresImport {
   updated_at: string;
 }
 
-/** Répartition du fret et de l'assurance entre fournisseur et Maylary, par incoterm. */
+/** Répartition du fret et de l'assurance entre fournisseur et MayLary Group, par incoterm. */
 export interface ParametresIncoterm {
   incoterm: Incoterm;
   libelle: string;
@@ -962,12 +962,12 @@ export interface CandidatSourcing {
 }
 
 /**
- * Marketplace : une entreprise ivoirienne vend sur Maylary. L'inscription et la
- * publication sont gratuites ; Maylary ne facture que son service, prélevé sur
+ * Marketplace : une entreprise ivoirienne vend sur MayLary Group. L'inscription et la
+ * publication sont gratuites ; MayLary Group ne facture que son service, prélevé sur
  * chaque vente conclue.
  */
 /**
- * Rôle interne Maylary. « admin » était tout ou rien : confier les commandes à
+ * Rôle interne MayLary Group. « admin » était tout ou rien : confier les commandes à
  * un associé lui donnait aussi la main sur les marges et les versements.
  */
 export type RoleEquipe = 'proprietaire' | 'operations' | 'catalogue';
@@ -1019,7 +1019,7 @@ export const STATUT_VENDEUR_MESSAGES: Record<StatutVendeur, string> = {
   en_attente:
     'Nous v\u00e9rifions votre dossier. Vous pourrez publier votre catalogue d\u00e8s la validation \u2014 comptez un jour ouvr\u00e9.',
   valide:
-    'Votre boutique est en ligne. Publiez vos articles : ils apparaissent imm\u00e9diatement dans la boutique Maylary.',
+    'Votre boutique est en ligne. Publiez vos articles : ils apparaissent imm\u00e9diatement dans la boutique MayLary Group.',
   suspendu:
     'Votre catalogue est retir\u00e9 de la vitrine. Le motif est indiqu\u00e9 ci-dessous ; contactez-nous pour r\u00e9tablir la situation.',
   refuse: 'Nous n\u2019avons pas pu retenir votre dossier. Le motif est indiqu\u00e9 ci-dessous.',

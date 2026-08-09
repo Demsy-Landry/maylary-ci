@@ -13,7 +13,7 @@ export default function MentionsLegales() {
           <section>
             <h2 className="font-display text-lg font-bold text-foreground">Éditeur du site</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Le site Maylary est édité par Demsy Landry, développeur indépendant exerçant sous le
+              Le site MayLary Group est édité par Demsy Landry, développeur indépendant exerçant sous le
               nom commercial Dems'Inc (entreprise individuelle, non immatriculée en société).
               <br />
               Localité : Abidjan, Côte d'Ivoire.
@@ -49,7 +49,7 @@ export default function MentionsLegales() {
           <section>
             <h2 className="font-display text-lg font-bold text-foreground">Responsabilité</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Maylary agit en tant qu'intermédiaire pour le sourcing, l'achat, le transport et le
+              MayLary Group agit en tant qu'intermédiaire pour le sourcing, l'achat, le transport et le
               dédouanement des marchandises de ses clients. Les estimations indicatives affichées
               avant cotation ferme peuvent varier selon les conditions réelles du marché, du fret
               et de la douane.

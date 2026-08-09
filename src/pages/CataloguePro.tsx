@@ -33,7 +33,7 @@ export default function CataloguePro() {
           <h1 className="font-display text-2xl font-bold text-foreground">Espace Pro</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Mobilier, quincaillerie, automobile, tech, textile professionnel — demandez un devis
-            auprès des enseignes référencées sur Maylary.
+            auprès des enseignes référencées sur MayLary Group.
           </p>
         </div>
 

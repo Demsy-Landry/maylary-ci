@@ -84,7 +84,7 @@ export const chiffre = (v: number) =>
     .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const jour = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
 
-/** Marque Maylary dessinée en vectoriel : carré orange + pyramide de colis. */
+/** Marque MayLary Group dessinée en vectoriel : carré orange + pyramide de colis. */
 export function dessinerLogo(doc: jsPDF, x: number, y: number, taille: number) {
   doc.setFillColor(...ORANGE);
   doc.roundedRect(x, y, taille, taille, taille * 0.22, taille * 0.22, 'F');
@@ -105,7 +105,7 @@ function dessinerEnTete(doc: jsPDF, facture: Facture) {
   doc.setTextColor(...ENCRE);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
-  doc.text(e.nom_commercial || 'Maylary', MARGE + 19, 21);
+  doc.text(e.nom_commercial || 'MayLary Group', MARGE + 19, 21);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
@@ -147,7 +147,7 @@ function dessinerPiedDePage(doc: jsPDF, facture: Facture, page: number, total: n
   doc.setTextColor(...GRIS);
 
   const mentions =
-    e.mentions_bas_page || `${e.nom_commercial || 'Maylary'} — ${[e.ville, e.pays].filter(Boolean).join(', ')}`;
+    e.mentions_bas_page || `${e.nom_commercial || 'MayLary Group'} — ${[e.ville, e.pays].filter(Boolean).join(', ')}`;
   doc.text(doc.splitTextToSize(mentions, 130), MARGE, HAUTEUR_PAGE - 13);
   doc.text(`Page ${page} / ${total}`, BORD_DROIT, HAUTEUR_PAGE - 13, { align: 'right' });
 }
@@ -233,7 +233,7 @@ export function construireFacturePdf(facture: Facture): jsPDF {
   if (facture.client_ville) client.push(facture.client_ville);
   if (facture.client_telephone) client.push(`Tél. ${facture.client_telephone}`);
   if (facture.client_email) client.push(facture.client_email);
-  if (client.length === 0) client.push('Client Maylary');
+  if (client.length === 0) client.push('Client MayLary Group');
 
   let yClient = yBloc + 6;
   client.forEach((ligne, index) => {

@@ -106,7 +106,7 @@ export default function MesDevis() {
       <PublicHeaderPro />
       <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <h1 className="font-display text-2xl font-bold text-foreground">Mes devis</h1>
-        <p className="text-sm text-muted-foreground">Suivi de vos demandes auprès des enseignes Maylary</p>
+        <p className="text-sm text-muted-foreground">Suivi de vos demandes auprès des enseignes MayLary Group</p>
 
         {loading ? (
           <div className="mt-6 space-y-2">

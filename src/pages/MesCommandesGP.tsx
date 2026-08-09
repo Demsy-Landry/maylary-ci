@@ -128,7 +128,7 @@ export default function MesCommandesGP() {
       <PublicHeaderGP />
       <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <h1 className="text-2xl font-bold text-foreground">Mes commandes</h1>
-        <p className="text-sm text-muted-foreground">Suivi de vos achats sur la boutique Maylary</p>
+        <p className="text-sm text-muted-foreground">Suivi de vos achats sur la boutique MayLary Group</p>
 
         {loading ? (
           <div className="mt-6 space-y-2">

@@ -138,7 +138,7 @@ export default function Index() {
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
                 <PackageSearch className="h-3.5 w-3.5" />
-                Maylary Import
+                MayLary Group Import
               </span>
               <h1 className="font-display mt-4 text-3xl font-extrabold leading-tight sm:text-5xl">
                 Achetez n'importe où dans le monde.
@@ -204,7 +204,7 @@ export default function Index() {
         <section className="border-y bg-muted/40">
           <div className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
             <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
-              Pourquoi Maylary Import
+              Pourquoi MayLary Group Import
             </h2>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {ATOUTS_IMPORT.map((atout) => (
@@ -258,7 +258,7 @@ export default function Index() {
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
                 <Globe className="h-3.5 w-3.5" />
-                Maylary Export
+                MayLary Group Export
               </span>
               <h2 className="font-display mt-4 text-3xl font-extrabold leading-tight sm:text-4xl">
                 Vous produisez en Côte d'Ivoire ? Exportez vers le monde entier.
@@ -289,7 +289,7 @@ export default function Index() {
 
         <section id="comment-exporter" className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
           <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
-            Comment exporter avec Maylary
+            Comment exporter avec MayLary Group
           </h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {ETAPES_EXPORT.map((etape) => (
@@ -308,7 +308,7 @@ export default function Index() {
         <section className="border-y bg-muted/40">
           <div className="mx-auto max-w-screen-xl px-4 py-14 sm:px-6">
             <h2 className="font-display text-center text-xl font-extrabold uppercase tracking-tight text-foreground sm:text-2xl">
-              Pourquoi exporter avec Maylary
+              Pourquoi exporter avec MayLary Group
             </h2>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {ATOUTS_EXPORT.map((atout) => (
