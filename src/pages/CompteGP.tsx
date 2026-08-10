@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { supabase, EDGE_FUNCTIONS_URL, PROFILES_TABLE } from '@/lib/supabase';
 import { messageDeConnexion } from '@/lib/erreurs-auth';
+import { verifierMotDePasse } from '@/lib/force-mot-de-passe';
 import { Loader2, Building2, User } from 'lucide-react';
 
 type TypeCompte = 'particulier' | 'entreprise_acheteuse';
@@ -99,8 +100,9 @@ export default function CompteGP() {
       setSignupError('Veuillez saisir une adresse email valide.');
       return;
     }
-    if (password.length < 8) {
-      setSignupError('Le mot de passe doit contenir au moins 8 caractères.');
+    const faiblesse = verifierMotDePasse(password);
+    if (faiblesse) {
+      setSignupError(faiblesse);
       return;
     }
 
