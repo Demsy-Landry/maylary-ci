@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 import { supabase, PROFILES_TABLE } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { messageDeConnexion } from '@/lib/erreurs-auth';
 import { Loader2, ShieldCheck, Boxes } from 'lucide-react';
 
 export default function AdminLogin() {
@@ -32,16 +33,28 @@ export default function AdminLogin() {
       password,
     });
     if (signInError) {
-      setError('Email ou mot de passe incorrect.');
+      setError(messageDeConnexion(signInError));
       setLoading(false);
       return;
     }
 
-    const { data: profileData } = await supabase
+    const { data: profileData, error: profileError } = await supabase
       .from(PROFILES_TABLE)
       .select('type_compte')
       .eq('user_id', data.user.id)
       .maybeSingle();
+
+    // La lecture a échoué : on ignore le rôle, on ne l'infirme pas. Déconnecter
+    // ici — ce que faisait la version précédente — annonçait « ce compte n'est
+    // pas administrateur » à un administrateur dont la requête avait simplement
+    // échoué. La session est valide : on la garde et on invite à réessayer.
+    if (profileError) {
+      setError(
+        "Connexion établie, mais vos droits n'ont pas pu être vérifiés. Réessayez dans un instant.",
+      );
+      setLoading(false);
+      return;
+    }
 
     if (profileData?.type_compte !== 'admin') {
       await supabase.auth.signOut();

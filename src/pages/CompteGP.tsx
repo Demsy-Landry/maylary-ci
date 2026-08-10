@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { supabase, EDGE_FUNCTIONS_URL, PROFILES_TABLE } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
+import { messageDeConnexion } from '@/lib/erreurs-auth';
 import { Loader2, Building2, User } from 'lucide-react';
 
 type TypeCompte = 'particulier' | 'entreprise_acheteuse';
@@ -58,7 +58,7 @@ export default function CompteGP() {
       password: loginPassword,
     });
     if (error) {
-      setLoginError('Email ou mot de passe incorrect.');
+      setLoginError(messageDeConnexion(error));
       setLoginLoading(false);
       return;
     }
