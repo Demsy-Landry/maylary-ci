@@ -25,6 +25,7 @@ import PanierDevis from '@/pages/PanierDevis';
 import MesDevis from '@/pages/MesDevis';
 import CjDropshippingImport from '@/pages/admin/CjDropshippingImport';
 import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
+import Fournisseurs from '@/pages/admin/Fournisseurs';
 import QualiteFournisseurs from '@/pages/admin/QualiteFournisseurs';
 import Comptabilite from '@/pages/admin/Comptabilite';
 import AdminCommandesGP from '@/pages/admin/CommandesGP';
@@ -115,6 +116,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/cj-dropshipping">
                       <CjDropshippingImport />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/fournisseurs"
+                  element={
+                    <AdminRoute ecran="/admin/fournisseurs">
+                      <Fournisseurs />
                     </AdminRoute>
                   }
                 />

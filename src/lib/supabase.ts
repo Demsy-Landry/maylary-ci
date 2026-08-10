@@ -366,6 +366,66 @@ export interface ProduitAdmin extends Produit {
   fournisseur_id: string | null;
 }
 
+/**
+ * Le régime d'origine d'une marchandise, et ce qu'il change au droit de douane.
+ *
+ * Ce n'est pas le pays du fournisseur : c'est l'accord commercial dont la
+ * marchandise peut se réclamer, à condition d'en fournir la preuve. Un
+ * fournisseur italien qui ne sait pas produire d'EUR.1 paie le tarif plein,
+ * exactement comme un fournisseur chinois.
+ */
+export type CodeRegimeOrigine = 'droit_commun' | 'ape_ue' | 'zlecaf' | 'cedeao';
+
+export const REGIME_ORIGINE_LABELS: Record<CodeRegimeOrigine, string> = {
+  droit_commun: 'Droit commun (TEC)',
+  ape_ue: 'APE Union européenne',
+  zlecaf: 'ZLECAf',
+  cedeao: 'CEDEAO',
+};
+
+/** La question éliminatoire : sans preuve d'origine, aucune préférence. */
+export type PreuveOrigine = 'inconnu' | 'oui' | 'non' | 'sur_demande';
+
+export const PREUVE_ORIGINE_LABELS: Record<PreuveOrigine, string> = {
+  inconnu: 'À demander',
+  oui: 'Fournit la preuve',
+  non: 'Ne fournit pas',
+  sur_demande: 'Sur demande',
+};
+
+/**
+ * Comment on achète chez ce fournisseur — et c'est ce qui décide de la marge.
+ *
+ * `gros` : on achète EXW ou FOB, on groupe, on dédouane et on livre. C'est le
+ * seul modèle où l'agrément de commissionnaire en douane se transforme en
+ * marge, et le seul qui permette de réclamer une préférence tarifaire.
+ *
+ * `dropshipping` : le fournisseur expédie colis par colis. Simple, sans
+ * trésorerie immobilisée, mais aucune preuve d'origine n'est possible.
+ */
+export type ModeleFournisseur = 'gros' | 'dropshipping' | 'annuaire' | 'organisme';
+
+export const MODELE_FOURNISSEUR_LABELS: Record<ModeleFournisseur, string> = {
+  gros: 'Gros (EXW/FOB)',
+  dropshipping: 'Dropshipping',
+  annuaire: 'Annuaire',
+  organisme: 'Organisme',
+};
+
+export interface RegimeOrigine {
+  code: CodeRegimeOrigine;
+  libelle: string;
+  zone: string;
+  document_requis: string | null;
+  base_legale: string | null;
+  positions_confirmees: boolean;
+  cout_preuve_fcfa: number | null;
+  delai_preuve_jours: number | null;
+  ordre: number;
+  actif: boolean;
+  note: string | null;
+}
+
 export interface Fournisseur {
   id: string;
   nom: string;
@@ -375,7 +435,36 @@ export interface Fournisseur {
   actif: boolean;
   created_at: string;
   updated_at: string;
+  pays: string | null;
+  ville: string | null;
+  regime_origine: CodeRegimeOrigine | null;
+  preuve_origine: PreuveOrigine;
+  incoterm_defaut: string | null;
+  devise: string;
+  delai_production_jours: number | null;
+  delai_transport_jours: number | null;
+  minimum_commande_fcfa: number | null;
+  mode_transport: string | null;
+  site_web: string | null;
+  modele: ModeleFournisseur;
+  note: string | null;
 }
+
+/** Ce que rend `app_e08c374bc4_arbitrage_origine`. */
+export interface ArbitrageOrigine {
+  calculable: boolean;
+  motif?: string;
+  economie_droits_fcfa?: number;
+  cout_preuve_connu?: boolean;
+  cout_preuve_fcfa?: number;
+  gain_net_fcfa?: number;
+  seuil_rentabilite_caf_fcfa?: number;
+  delai_supplementaire_jours?: number | null;
+  verdict?: 'vaut_la_peine' | 'ne_vaut_pas_la_peine' | 'a_chiffrer' | 'sans_objet';
+  message?: string;
+}
+
+export const REGIMES_ORIGINE_TABLE = 'app_e08c374bc4_regimes_origine';
 
 export interface CategorieGP {
   id: string;
@@ -1050,6 +1139,7 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin/export': ['proprietaire', 'operations'],
   '/admin/devis': ['proprietaire', 'operations'],
   '/admin/cj-dropshipping': ['proprietaire', 'catalogue'],
+  '/admin/fournisseurs': ['proprietaire', 'operations', 'catalogue'],
   '/admin/prospection': ['proprietaire', 'catalogue'],
   '/admin/qualite-fournisseurs': ['proprietaire', 'operations', 'catalogue'],
   // Les comptes de l'entreprise : le propriétaire seul.
