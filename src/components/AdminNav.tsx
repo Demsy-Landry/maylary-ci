@@ -14,6 +14,7 @@ const LINKS = [
   { to: '/admin/achats-groupes', label: 'Achats groupés' },
   { to: '/admin/devis', label: 'Demandes de devis' },
   { to: '/admin/cj-dropshipping', label: 'Catalogue CJ Dropshipping' },
+  { to: '/admin/fournisseurs', label: 'Fournisseurs et origines' },
   { to: '/admin/prospection', label: 'Prospection fournisseurs' },
   { to: '/admin/qualite-fournisseurs', label: 'Qualité fournisseurs' },
   { to: '/admin/comptabilite', label: 'Comptabilité' },
