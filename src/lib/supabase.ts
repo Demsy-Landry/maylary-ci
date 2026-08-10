@@ -22,7 +22,43 @@ const CLE_ANON =
 const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string) || URL_PROJET;
 const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string) || CLE_ANON;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+/**
+ * Une requête qui ne revient jamais est pire qu'une requête qui échoue : l'écran
+ * garde son rond qui tourne et personne ne sait quoi faire. Sur une liaison
+ * mobile ivoirienne, une connexion peut rester ouverte sans jamais répondre.
+ * On borne donc l'attente, et l'appelant reçoit une erreur qu'il sait traiter.
+ *
+ * Les envois de fichiers ont leur propre borne, bien plus large : une photo de
+ * produit sur un réseau lent met légitimement plus d'une minute.
+ */
+const DELAI_REQUETE_MS = 60_000;
+const DELAI_TELEVERSEMENT_MS = 300_000;
+
+const fetchBorne: typeof fetch = (entree, init) => {
+  const adresse = typeof entree === 'string' ? entree : entree instanceof URL ? entree.href : entree.url;
+  const limite = adresse.includes('/storage/v1/object') ? DELAI_TELEVERSEMENT_MS : DELAI_REQUETE_MS;
+
+  // Un appelant qui gère déjà son annulation reste maître de son délai.
+  if (init?.signal) return fetch(entree, init);
+
+  const arret = new AbortController();
+  const minuteur = setTimeout(() => arret.abort(), limite);
+  return fetch(entree, { ...init, signal: arret.signal }).finally(() => clearTimeout(minuteur));
+};
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    // Réglages explicites plutôt que par défaut : ce sont eux qui décident si
+    // une session survit à un rechargement de page, et on ne veut pas qu'une
+    // montée de version de la bibliothèque les change dans notre dos.
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    // La clé de stockage reste celle par défaut, dérivée de l'identifiant du
+    // projet : la changer déconnecterait d'un coup toutes les sessions en cours.
+  },
+  global: { fetch: fetchBorne },
+});
 
 /**
  * Racine des fichiers publics (photos produits, visuels d'accueil, secteurs).
