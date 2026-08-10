@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import ScenePortAbidjan from '@/components/illustrations/ScenePortAbidjan';
+import EmplacementPublicitaire from '@/components/EmplacementPublicitaire';
 import BandeServices from '@/components/BandeServices';
 import SiteFooter from '@/components/SiteFooter';
 import { STORAGE_PUBLIC_URL, VISUELS_MARQUE_TABLE, supabase } from '@/lib/supabase';
@@ -147,9 +148,10 @@ const ATOUTS_EXPORT = [
 ];
 
 export default function Index() {
-  // Vide par défaut : l'illustration dessinée sert, sauf si un visuel a été
-  // activé en base.
-  const heroAccueil = useVisuelMarque('accueil_hero', '');
+  // La photographie d'origine reste le fond par défaut. L'illustration dessinée
+  // ne sert que si la photo venait à manquer — elle évite une page nue, elle ne
+  // la remplace pas.
+  const heroAccueil = useVisuelMarque('accueil_hero', HERO_IMPORT_IMAGE);
 
   return (
     <div className="min-h-screen bg-background">
@@ -169,10 +171,7 @@ export default function Index() {
           ) : (
             <ScenePortAbidjan className="absolute inset-0 h-full w-full" />
           )}
-          {/* Le voile est léger : l'illustration porte déjà le sien, calculé pour
-              que la gauche reste lisible. Les superposer écrasait la scène —
-              elle devenait une tache sombre derrière le titre. */}
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/45 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/50" />
           <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24">
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
@@ -369,6 +368,13 @@ export default function Index() {
             </div>
           </div>
         </section>
+
+        {/* Emplacement publicitaire : rien ne s'affiche tant qu'aucune annonce
+            n'est vendue. Un cadre « espace disponible » dirait surtout que nous
+            n'avons pas d'annonceurs. */}
+        <div data-revele className="mx-auto max-w-screen-xl px-4 pb-14 sm:px-6">
+          <EmplacementPublicitaire code="accueil_bas" />
+        </div>
 
       </main>
 
