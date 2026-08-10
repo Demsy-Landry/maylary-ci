@@ -163,8 +163,6 @@ export default function Fournisseurs() {
           comme n'importe qui — l'écran le signale.
         </p>
 
-        <ArbitrageOrigineCarte regimes={regimes} />
-
         <section>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-display text-base font-semibold text-foreground">
@@ -288,6 +286,11 @@ export default function Fournisseurs() {
             </div>
           )}
         </section>
+
+        {/* L'arbitrage APE vient après la liste, et non avant : la procédure
+            normale passe d'abord, la préférence tarifaire est un plus qu'on
+            propose une fois le dossier ordinaire maîtrisé. */}
+        <ArbitrageOrigineCarte regimes={regimes} />
 
         {brouillon && (
           <Card>

@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import AlerteMarchandiseReglementee from '@/components/AlerteMarchandiseReglementee';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, ImagePlus, X, PackageSearch, Calculator, FileText, FilePlus2 } from 'lucide-react';
@@ -229,6 +230,10 @@ export default function NouvelleDemandeImport() {
               rows={3}
               placeholder="ex: 200 casques audio Bluetooth, modèle X, référence fournisseur..."
             />
+            {/* L'alerte tombe pendant la saisie, avant même l'envoi de la
+                demande — c'est le seul moment où elle épargne encore de
+                l'argent au client. */}
+            <AlerteMarchandiseReglementee designation={descriptionProduit} className="pt-1" />
           </div>
 
           <div className="space-y-1.5">

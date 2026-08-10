@@ -466,6 +466,46 @@ export interface ArbitrageOrigine {
 
 export const REGIMES_ORIGINE_TABLE = 'app_e08c374bc4_regimes_origine';
 
+/**
+ * Une marchandise soumise à autorisation préalable.
+ *
+ * Le registre est ce que la maison y a mis, pas le droit ivoirien tout entier :
+ * l'absence de fiche ne vaut jamais autorisation d'importer.
+ */
+export interface MarchandiseReglementee {
+  code: string;
+  libelle: string;
+  famille: string;
+  sens: 'import' | 'export' | 'les_deux';
+  autorite: string;
+  autorite_sigle: string | null;
+  base_legale: string;
+  document_requis: string;
+  personnes_morales_autorisees: string[];
+  pieces_du_dossier: string[];
+  exemplaires: number | null;
+  adresse_depot: string | null;
+  contact: string | null;
+  site_web: string | null;
+  /** 1 formalité · 2 dossier exigeant · 3 à éviter quand on démarre. */
+  difficulte: number;
+  conseil_demarrage: string | null;
+  mots_cles: string[];
+  positions_sh: string[];
+  actif: boolean;
+  note: string | null;
+}
+
+/** Ce que rend `app_e08c374bc4_marchandise_reglementee`. */
+export interface ControleReglementaire {
+  trouve: boolean;
+  fiches: MarchandiseReglementee[];
+  avertissement: string;
+}
+
+export const MARCHANDISES_REGLEMENTEES_TABLE = 'app_e08c374bc4_marchandises_reglementees';
+
+
 export interface CategorieGP {
   id: string;
   nom: string;

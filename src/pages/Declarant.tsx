@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
+import AlerteMarchandiseReglementee from '@/components/AlerteMarchandiseReglementee';
 import SiteFooter from '@/components/SiteFooter';
 import { Link } from 'react-router-dom';
 import {
@@ -568,6 +569,15 @@ export default function Declarant() {
                 </Button>
               </div>
             </form>
+
+            {/* Avant le classement, avant le calcul : savoir si la marchandise
+                peut seulement entrer. Une position tarifaire juste sur une
+                marchandise qu'on n'a pas le droit d'importer ne sert à rien. */}
+            <AlerteMarchandiseReglementee
+              designation={marchandise}
+              codeSh={classification?.code_propose ?? null}
+              className="space-y-2"
+            />
 
             {classification && (
               <article className="space-y-4 rounded-md border p-4">
