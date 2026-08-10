@@ -6,6 +6,8 @@ import AdminNav from '@/components/AdminNav';
 import ScenePortAbidjan from '@/components/illustrations/ScenePortAbidjan';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import {
   ShoppingCart,
   ClipboardList,
@@ -20,6 +22,7 @@ import {
   Boxes,
   Globe,
   TrendingUp,
+  Loader2,
 } from 'lucide-react';
 
 /**
@@ -91,12 +94,31 @@ export default function AdminDashboard() {
   const { profile } = useAuth();
   const [tb, setTb] = useState<TableauDeBord | null>(null);
   const [solde, setSolde] = useState<number | null>(null);
+  const [demo, setDemo] = useState<{ actif: boolean; imports: number; exports: number } | null>(null);
+  const [demoEnCours, setDemoEnCours] = useState(false);
+
+  const charger = () =>
+    Promise.all([
+      supabase.rpc('app_e08c374bc4_tableau_de_bord'),
+      supabase.rpc('app_e08c374bc4_demonstration', { p_action: 'etat' }),
+    ]).then(([t, d]) => {
+      if (t.data) setTb(t.data as TableauDeBord);
+      if (d.data) setDemo(d.data as { actif: boolean; imports: number; exports: number });
+    });
 
   useEffect(() => {
-    supabase.rpc('app_e08c374bc4_tableau_de_bord').then(({ data }) => {
-      if (data) setTb(data as TableauDeBord);
-    });
+    void charger();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const basculerDemo = async (action: 'charger' | 'purger') => {
+    setDemoEnCours(true);
+    const { error } = await supabase.rpc('app_e08c374bc4_demonstration', { p_action: action });
+    if (error) toast.error('Action impossible : ' + error.message);
+    else toast.success(action === 'charger' ? 'Jeu de démonstration chargé.' : 'Démonstration purgée.');
+    await charger();
+    setDemoEnCours(false);
+  };
 
   // Le solde fournisseur conditionne toute transmission de commande : sa place
   // est sur la première page. Son absence n'empêche rien, on ne bloque pas.
@@ -162,6 +184,29 @@ export default function AdminDashboard() {
       </header>
 
       <main className="mx-auto max-w-screen-xl space-y-8 px-4 py-8 sm:px-6">
+        {/* Le bandeau ne se referme pas. Tant qu'une seule ligne fictive existe,
+            personne ne doit pouvoir confondre ces chiffres avec de l'activité —
+            c'est la contrepartie du droit de remplir la base pour montrer
+            l'outil. */}
+        {demo?.actif && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-amber-500/50 bg-amber-500/10 p-3">
+            <p className="text-sm text-foreground">
+              <span className="font-semibold">Mode démonstration actif</span> — {demo.imports} dossier
+              {demo.imports > 1 ? 's' : ''} d'import et {demo.exports} d'export fictifs, marqués
+              « DEMO ». Ces montants ne sont pas de l'activité réelle.
+            </p>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={demoEnCours}
+              onClick={() => void basculerDemo('purger')}
+            >
+              {demoEnCours && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+              Purger
+            </Button>
+          </div>
+        )}
+
         {!tb ? (
           <div className="space-y-4">
             <Skeleton className="h-24 w-full" />
@@ -321,6 +366,29 @@ export default function AdminDashboard() {
                 </Link>
               )}
             </section>
+
+            {/* La démonstration se pilote depuis la tour de contrôle plutôt que
+                depuis un écran de réglages : c'est là qu'on la regarde. */}
+            {!demo?.actif && (
+              <section className="rounded-lg border border-dashed p-4">
+                <p className="text-sm font-medium text-foreground">Présenter l'outil</p>
+                <p className="mt-1 max-w-2xl text-xs text-muted-foreground">
+                  Charge une douzaine de dossiers fictifs répartis sur toutes les étapes du pipeline,
+                  datés pour que les alertes de délai se déclenchent. Tout est marqué « DEMO » et se
+                  purge en un clic. À utiliser pour une présentation, jamais devant un client.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-3"
+                  disabled={demoEnCours}
+                  onClick={() => void basculerDemo('charger')}
+                >
+                  {demoEnCours && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+                  Charger le jeu de démonstration
+                </Button>
+              </section>
+            )}
           </>
         )}
       </main>
