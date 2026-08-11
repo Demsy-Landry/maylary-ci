@@ -20,12 +20,17 @@
  */
 
 const MARQUEUR = 'revelation-active';
+const SELECTEUR = '[data-revele]:not([data-vu]), [data-revele-cascade]:not([data-vu])';
 
 let observateur: IntersectionObserver | null = null;
 
 function observerLesNouveaux() {
   if (!observateur) return;
-  document.querySelectorAll<HTMLElement>('[data-revele]:not([data-vu])').forEach((el) => {
+  // Les deux attributs, et non le seul `data-revele` : `data-revele-cascade`
+  // en est un autre, que ce sélecteur ne captait pas. La feuille de style
+  // masquait donc ses enfants sans que rien ne vienne jamais les révéler —
+  // une page entière de blocs invisibles, découverte à la capture d'écran.
+  document.querySelectorAll<HTMLElement>(SELECTEUR).forEach((el) => {
     observateur!.observe(el);
   });
 }
@@ -81,7 +86,7 @@ export function demarrerRevelation(): () => void {
   let planifie = false;
   const balayer = () => {
     planifie = false;
-    const restants = document.querySelectorAll<HTMLElement>('[data-revele]:not([data-vu])');
+    const restants = document.querySelectorAll<HTMLElement>(SELECTEUR);
     if (restants.length === 0) {
       window.removeEventListener('scroll', auDefilement);
       return;
