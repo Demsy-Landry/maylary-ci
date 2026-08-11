@@ -500,3 +500,29 @@ select {
 .pastille-animee {
   animation: pastille-saut 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* ---------------------------------------------------------------------------
+   Le convoi de la page de couverture.
+
+   Un défilement continu, sans à-coup au bouclage : la bande contient deux fois
+   la même liste et se translate d'exactement la moitié de sa largeur. Au
+   moment où l'animation reprend à zéro, l'image sous l'œil est la même — la
+   boucle est invisible.
+
+   L'animation s'arrête au survol pour qu'on puisse lire un libellé, et ne
+   démarre pas du tout si le visiteur a demandé moins de mouvement.
+--------------------------------------------------------------------------- */
+@keyframes convoi {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.convoi {
+  animation: convoi 48s linear infinite;
+  will-change: transform;
+}
+.convoi:hover { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce) {
+  .convoi { animation: none; }
+}

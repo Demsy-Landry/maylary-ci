@@ -7,6 +7,7 @@ import { CartGPProvider } from '@/hooks/useCartGP';
 import { CartProvider } from '@/hooks/useCart';
 import AdminRoute from '@/components/AdminRoute';
 import Index from '@/pages/Index';
+import Couverture from '@/pages/Couverture';
 import CatalogueGrandPublic from '@/pages/CatalogueGrandPublic';
 import CatalogueCategorieGP from '@/pages/CatalogueCategorieGP';
 import ProduitDetailGP from '@/pages/ProduitDetailGP';
@@ -66,7 +67,10 @@ function App() {
             <BrowserRouter>
               <TransitionDePage>
               <Routes>
-                <Route path="/" element={<Index />} />
+                {/* La couverture ouvre l'application ; l'ancienne page d'accueil,
+                    qui présente les services un à un, devient la seconde. */}
+                <Route path="/" element={<Couverture />} />
+                <Route path="/services" element={<Index />} />
                 <Route path="/import" element={<NouvelleDemandeImport />} />
                 <Route path="/import/nouvelle-demande" element={<NouvelleDemandeImport />} />
                 <Route path="/import/mes-demandes" element={<MesDemandesImport />} />
