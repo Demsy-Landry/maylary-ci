@@ -385,7 +385,7 @@ export default function AdminImportGestion() {
                   <span>Incoterm : {gestion.incoterm ? INCOTERM_LABELS[gestion.incoterm] : '—'}</span>
                   <span>Transport : {MODE_TRANSPORT_LABELS[gestion.mode_transport]}</span>
                   <span>Transporteur : {gestion.transporteur_souhaite ?? '—'}</span>
-                  <span>Délai : {gestion.delai_souhaite ?? '—'}</span>
+                  <span>Contrainte de date annoncée : {gestion.delai_souhaite ?? 'aucune'}</span>
                   <span>Poids : {gestion.poids_estime_kg ?? '—'} kg</span>
                   <span>Volume : {gestion.volume_estime_m3 ?? '—'} m³</span>
                   <span>
