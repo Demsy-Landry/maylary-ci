@@ -1437,6 +1437,7 @@ export interface DemandeImport {
   incoterm: Incoterm | null;
   mode_transport: ModeTransport;
   transporteur_souhaite: string | null;
+  /** @deprecated Plus demandé au client : le délai ne dépend pas de nous, il s'annonce avec le devis. Conservé pour l'historique. */
   delai_souhaite: string | null;
   notes_client: string | null;
   poids_estime_kg: number | null;
@@ -1617,6 +1618,7 @@ export interface DemandeExport {
   incoterm: Incoterm | null;
   mode_transport: ModeTransport;
   transporteur_souhaite: string | null;
+  /** @deprecated Plus demandé au client : le délai ne dépend pas de nous, il s'annonce avec le devis. Conservé pour l'historique. */
   delai_souhaite: string | null;
   notes_client: string | null;
   poids_estime_kg: number | null;

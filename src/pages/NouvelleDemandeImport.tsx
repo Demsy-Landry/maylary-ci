@@ -44,7 +44,6 @@ export default function NouvelleDemandeImport() {
   const [incoterm, setIncoterm] = useState<Incoterm | ''>('');
   const [modeTransport, setModeTransport] = useState<ModeTransport>('maritime');
   const [transporteurSouhaite, setTransporteurSouhaite] = useState('');
-  const [delaiSouhaite, setDelaiSouhaite] = useState('');
   const [poidsEstime, setPoidsEstime] = useState('');
   const [volumeEstime, setVolumeEstime] = useState('');
   const [valeurEstimee, setValeurEstimee] = useState('');
@@ -131,7 +130,6 @@ export default function NouvelleDemandeImport() {
         incoterm: incoterm || null,
         mode_transport: modeTransport,
         transporteur_souhaite: transporteurSouhaite.trim() || null,
-        delai_souhaite: delaiSouhaite.trim() || null,
         notes_client: notesClient.trim() || null,
         poids_estime_kg: poidsEstime ? parseFloat(poidsEstime) : null,
         volume_estime_m3: volumeEstime ? parseFloat(volumeEstime) : null,
@@ -419,14 +417,22 @@ export default function NouvelleDemandeImport() {
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="delai">Délai souhaité (optionnel)</Label>
-            <Input
-              id="delai"
-              value={delaiSouhaite}
-              onChange={(e) => setDelaiSouhaite(e.target.value)}
-              placeholder="ex: sous 4 semaines"
-            />
+          {/* On ne demande pas au client sous combien de temps il veut sa
+              marchandise : le délai ne dépend pas de nous. Il dépend de la
+              ligne, du départ réservé, du dédouanement et du transit local.
+              Poser la question, c'est laisser croire qu'on la maîtrise — et
+              c'est prendre un engagement qu'on ne tiendra pas.
+
+              Ce qui dépend de nous, c'est de l'annoncer avec le devis, une
+              fois la compagnie confirmée. */}
+          <div className="rounded-md border border-dashed p-4">
+            <p className="text-sm font-medium text-foreground">Et le délai ?</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Il vous sera annoncé avec le devis, une fois le départ confirmé par la compagnie.
+              Nous ne l'inventons pas : il dépend de la ligne, de la date de départ réservée, du
+              dédouanement et du transit local. Si vous avez une contrainte de date, dites-le en
+              note ci-dessous — nous vous dirons franchement si elle est tenable.
+            </p>
           </div>
 
           <div className="space-y-1.5">

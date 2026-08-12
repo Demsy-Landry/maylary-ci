@@ -375,7 +375,7 @@ export default function AdminExportGestion() {
                   <span>Acheteur : {gestion.acheteur_destinataire ?? '—'}</span>
                   <span>Contact acheteur : {gestion.contact_acheteur ?? '—'}</span>
                   <span>Transporteur : {gestion.transporteur_souhaite ?? '—'}</span>
-                  <span>Délai : {gestion.delai_souhaite ?? '—'}</span>
+                  <span>Contrainte de date annoncée : {gestion.delai_souhaite ?? 'aucune'}</span>
                   <span>Poids : {gestion.poids_estime_kg ?? '—'} kg</span>
                   <span>Volume : {gestion.volume_estime_m3 ?? '—'} m³</span>
                   <span>
