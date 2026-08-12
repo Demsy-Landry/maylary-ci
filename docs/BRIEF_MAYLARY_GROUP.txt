@@ -1,0 +1,415 @@
+BRIEF MAYLARY GROUP — état du projet, risques juridiques et décisions à prendre
+Établi le 10 août 2026. Document de travail, à utiliser pour élaborer le business plan.
+
+Ce document est écrit pour être lu par quelqu'un qui ne connaît pas le projet.
+Il sépare volontairement trois choses : ce qui est vérifié, ce qui est supposé,
+et ce qui n'a pas pu être vérifié. Cette séparation est la même discipline que
+celle appliquée dans l'application aux taux de douane.
+
+
+==============================================================================
+1. LE PROJET EN QUELQUES LIGNES
+==============================================================================
+
+MayLary Group est une plateforme numérique de logistique et de commerce, basée
+à Abidjan, portée par Dems'Inc.
+
+Elle fait quatre métiers sur un seul moteur de calcul :
+  - Transit : import et export pour compte de tiers, de la cotation à la
+    livraison.
+  - Négoce : une boutique grand public et un espace professionnel dont les prix
+    sont bâtis sur le coût réel rendu Abidjan.
+  - Sourcing : trouver le fournisseur, comparer les origines, arbitrer le droit
+    de douane.
+  - Conseil : « Le Déclarant », outil de calcul douanier ouvert à tous, y
+    compris aux confrères transitaires, en abonnement.
+
+Priorité déclarée par le fondateur : l'AÉRIEN, l'EXPRESS, et le
+GROUPAGE/DÉGROUPAGE maritime et aérien. C'est son secteur d'activité.
+
+La règle qui gouverne tout le produit : ne jamais afficher un chiffre qui n'a
+pas été vérifié. Si une position tarifaire n'est pas dans le corpus officiel,
+l'application n'affiche rien — pas même une estimation.
+
+
+==============================================================================
+2. LE FONDATEUR ET SA POSITION RÉELLE
+==============================================================================
+
+Demsy Landry est TRANSITAIRE, responsable adjoint Aérien / Dégroupage & Express
+au sein d'une entreprise de transit à Abidjan.
+
+IL N'EST PAS commissionnaire en douane agréé. C'est une correction importante :
+une version antérieure de la présentation le disait, à tort.
+
+Le montage prévu : MayLary Group s'appuie sur un COMMISSIONNAIRE EN DOUANE
+AGRÉÉ (CAD) partenaire pour la signature de la déclaration et l'acquittement
+des droits et taxes. MayLary prend en charge tout le reste de la chaîne.
+L'obtention d'un agrément propre est un objectif de long terme, financé par la
+croissance.
+
+Conséquence financière majeure : la réforme entrée en vigueur au 1er janvier
+2026 a porté la caution d'agrément de 30 à 50 millions FCFA et le crédit
+d'enlèvement de 50 à 100 millions FCFA. MayLary n'a besoin d'AUCUN des deux
+pour démarrer, puisqu'elle s'adosse.
+
+
+==============================================================================
+3. LE POINT SOULEVÉ PAR LE FONDATEUR : COMMERÇANT ET TRANSITAIRE
+==============================================================================
+
+Question posée : « selon la loi on ne peut pas être commerçant et être
+propriétaire d'une société de transit ».
+
+CE QUE JE N'AI PAS PU VÉRIFIER
+Je n'ai pas pu ouvrir le Code des douanes ivoirien ni les textes d'agrément :
+les sites douanes.ci et les bases juridiques africaines sont inaccessibles
+depuis mon environnement de travail. Je REFUSE d'affirmer le contenu d'un
+article que je n'ai pas lu. La question doit être tranchée par un juriste
+ivoirien, textes en main.
+
+CE QU'IL FAUT LUI DEMANDER, PRÉCISÉMENT
+  a) Y a-t-il une incompatibilité légale entre la qualité de commerçant
+     (achat-revente pour compte propre) et la détention ou la direction d'une
+     société de transit / de commission en douane en Côte d'Ivoire ?
+  b) L'incompatibilité, si elle existe, porte-t-elle sur la PERSONNE (le
+     dirigeant), sur la SOCIÉTÉ (son objet social), ou seulement sur le
+     TITULAIRE DE L'AGRÉMENT CAD ?
+  c) Le décret n° 90-663 du 22 août 1990 (conditions d'agrément du
+     commissionnaire en douane) pose-t-il des conditions d'incompatibilité ?
+  d) Une même personne peut-elle diriger deux sociétés distinctes, l'une
+     commerçante, l'autre de transit ?
+
+LA RÉPONSE STRUCTURELLE QUI FONCTIONNE DANS TOUS LES CAS
+Quelle que soit la réponse juridique exacte, la bonne architecture est la
+SÉPARATION DES PERSONNES MORALES :
+
+    MAYLARY GROUP (structure de tête / holding)
+        |
+        +-- Entité A — LE COMMERCE
+        |   Marketplace, boutique, espace pro, négoce pour compte propre.
+        |   Qualité : commerçant. Achète et revend en son nom.
+        |
+        +-- Entité B — LA PRESTATION LOGISTIQUE
+            Transit, sourcing, cotation, groupage, conseil.
+            Qualité : prestataire de services. Ne possède pas la marchandise
+            des clients. Travaille avec un CAD partenaire aujourd'hui,
+            candidate à son propre agrément demain.
+
+Trois raisons de le faire même si la loi l'autorisait :
+
+  1. LE CONFLIT D'INTÉRÊT. Quand MayLary vend une marchandise qu'elle possède,
+     elle est vendeur. Quand elle traite le dossier d'un client, elle est
+     mandataire. Mélangé dans une seule entité, le client ne sait plus si le
+     prix de fret qu'on lui annonce est celui d'un mandataire fidèle ou d'un
+     fournisseur qui prend sa marge. C'est le cœur de la promesse du projet —
+     il ne faut pas l'abîmer.
+
+  2. LA RESPONSABILITÉ. Le commissionnaire en douane est solidairement
+     responsable du paiement des droits. Cumuler cette responsabilité avec
+     celle d'un commerçant sur ses propres stocks concentre deux risques
+     lourds sur une seule structure.
+
+  3. LA COMPTABILITÉ ET LA TVA. Ce ne sont pas les mêmes régimes. Chez le
+     commerçant : TVA collectée sur la vente, marge taxable. Chez le
+     prestataire de transit : TVA sur la prestation, et les DÉBOURS (droits et
+     taxes avancés pour le compte du client, refacturés à l'identique) ne sont
+     pas du chiffre d'affaires. Les mélanger dans une seule comptabilité rend
+     tout contrôle fiscal difficile et coûteux à défendre.
+
+
+==============================================================================
+4. TROIS AUTRES RISQUES JURIDIQUES QUE NOUS N'AVIONS JAMAIS ÉVOQUÉS
+==============================================================================
+
+Le fondateur a demandé qu'on creuse. Voici ce que la revue fait remonter, par
+ordre de gravité. Aucun n'a été vérifié auprès d'un juriste : ce sont des
+questions à poser, pas des conclusions.
+
+--- RISQUE 1 : L'ENCAISSEMENT DE FONDS POUR LE COMPTE DE TIERS ---
+C'est probablement le plus sérieux, et il touche le cœur du produit.
+
+La garantie « payé, protégé » retient l'argent d'un acheteur jusqu'à ce qu'il
+confirme avoir reçu sa marchandise, puis le reverse au vendeur tiers. Cela
+s'appelle du séquestre, et c'est de l'INTERMÉDIATION EN PAIEMENT.
+
+Dans l'espace UEMOA, la collecte et la détention de fonds pour le compte de
+tiers est une activité réglementée par la BCEAO. Une place de marché qui
+encaisse pour ses vendeurs doit généralement soit passer par un établissement
+agréé (banque, établissement de monnaie électronique, opérateur de mobile
+money) qui porte les fonds, soit obtenir elle-même un statut.
+
+Questions à poser :
+  - Un statut ou une convention est-il nécessaire pour retenir des fonds
+    destinés à des vendeurs tiers ?
+  - Le passage par un opérateur mobile money agréé (Wave, Orange Money, MTN)
+    avec un compte de cantonnement suffit-il ?
+  - Faut-il un compte séquestre bancaire distinct du compte d'exploitation ?
+
+Conséquence si mal traité : gel d'activité, voire sanction. Conséquence si bien
+traité : c'est un argument commercial fort, car peu d'acteurs locaux le font
+proprement.
+
+--- RISQUE 2 : LA SITUATION PERSONNELLE DU FONDATEUR VIS-À-VIS DE SON EMPLOYEUR ---
+Le fondateur est salarié d'une entreprise de transit à Abidjan. Il crée une
+structure qui exerce, en partie, le même métier.
+
+Questions à poser, de préférence avant toute immatriculation :
+  - Le contrat de travail contient-il une clause d'exclusivité, de
+    non-concurrence, ou une obligation de loyauté renforcée ?
+  - Une déclaration à l'employeur est-elle requise ?
+  - Le partenariat envisagé avec un CAD peut-il être conclu AVEC l'employeur
+    actuel, ce qui transformerait un risque en alliance ?
+
+Cette dernière option mérite d'être examinée sérieusement. Un employeur qui
+devient partenaire et apporteur d'agrément neutralise le risque juridique et
+apporte la crédibilité. C'est peut-être la meilleure porte de sortie.
+
+--- RISQUE 3 : LA RESPONSABILITÉ SUR LES MARCHANDISES VENDUES ---
+Quand MayLary importe et revend, elle devient l'importateur de mise à la
+consommation : conformité, sécurité, garantie légale, rappel produit.
+Ce risque est différent de celui du transitaire, qui ne fait que transporter.
+
+Questions à poser :
+  - Quelles obligations de conformité pèsent sur l'importateur-revendeur ?
+  - Quelle assurance responsabilité civile produit prévoir ?
+  - Pour les vendeurs tiers de la marketplace : qui est responsable vis-à-vis
+    de l'acheteur, la plateforme ou le vendeur ? Les CGV doivent le dire.
+
+--- POINTS SECONDAIRES, À CONFIRMER ÉGALEMENT ---
+  - Déclaration ARTCI pour le traitement de données personnelles (obligatoire).
+  - Textes ivoiriens sur les transactions électroniques et la protection des
+    données : à identifier précisément avec le juriste.
+  - Assurance responsabilité civile professionnelle du transitaire.
+  - Règles applicables aux avis clients publiés (interdiction des faux avis).
+  - Régie publicitaire : mentions obligatoires, ce qui est déjà traité dans
+    l'application (chaque annonce est signalée comme telle).
+
+
+==============================================================================
+5. CE QUI EST DÉJÀ CONSTRUIT ET EN PRODUCTION
+==============================================================================
+
+L'application est en ligne et fonctionne sur des données réelles.
+
+MODULES
+  - Le Déclarant : recherche de position tarifaire, classification assistée par
+    IA vérifiée contre le corpus officiel, liquidation complète des droits et
+    taxes, bulletin imprimable.
+  - Import : demande client, atelier de cotation, suivi sur dix étapes,
+    documents, facturation.
+  - Export : même chaîne sur neuf étapes, avec la liquidation propre au régime
+    export (timbre statistique de 20 000 FCFA par déclaration, pas de RPI).
+  - Boutique grand public : catalogue, panier, fret séparé du prix des
+    articles, choix du transporteur, garantie « payé, protégé ».
+  - Espace Pro : seize rayons professionnels, paliers de prix dégressifs,
+    demandes de devis.
+  - Achat groupé : campagnes à objectif de quantité, conversion automatique en
+    commandes quand l'objectif est atteint.
+  - Sourcing sur demande.
+  - Marketplace vendeurs : inscription, validation, avis clients, fiche qualité
+    fournisseur, reversements.
+  - Fournisseurs et origines : fiches par pays, régime d'origine, preuve
+    d'origine, calcul d'arbitrage.
+  - Tour de contrôle administrateur : pipeline import/export, valeur engagée,
+    alertes de délai.
+  - Comptabilité : grand livre, balance, compte de résultat, écritures
+    équilibrées vérifiées en base.
+  - Facturation : proforma et facture définitive, numérotation continue, PDF.
+  - Calculateur public de poids taxable (aérien, express, maritime, routier).
+
+SOCLE RÉGLEMENTAIRE CHARGÉ
+  - 6 298 positions du Tarif Extérieur Commun UEMOA avec taux et unité
+    statistique.
+  - Régimes douaniers officiels de la DGD.
+  - Quatre régimes d'origine : droit commun, APE Union européenne, ZLECAf,
+    CEDEAO, avec le document exigé pour chacun.
+  - Trois fiches de marchandises à procédure particulière (AIRP) : laits et
+    farines infantiles, compléments alimentaires, cosmétiques à allégation de
+    santé.
+  - Règles de procédure : seuil RFCV, franchise de magasinage, surestaries,
+    obligation d'assurance et ses sanctions.
+  - Barème d'assurance réel de l'assureur : (FOB + fret) x 110 % x 0,15 % +
+    2 500 FCFA, puis + 7 % de taxe.
+
+SÉCURITÉ
+  Un audit du 10 août 2026 a trouvé et fermé une faille exploitable : 30 des 46
+  fonctions de la base étaient appelables sans authentification. Tout a été
+  fermé, puis rouvert sur une liste blanche de vingt fonctions.
+
+
+==============================================================================
+6. LE MODÈLE ÉCONOMIQUE
+==============================================================================
+
+Cinq sources de revenu, toutes déjà outillées dans l'application :
+
+  1. Commission de transit — honoraires par dossier + refacturation des
+     débours. Relevé commercial indicatif : 150 000 à 300 000 FCFA par dossier,
+     à confirmer.
+  2. Marge de négoce — achat EXW/FOB, groupage, dédouanement, revente au prix
+     du marché local. La marge porte sur la chaîne, pas sur l'article.
+  3. Abonnement au Déclarant — trois formules déjà en base (Découverte,
+     Professionnel, Cabinet), prix non encore fixés.
+  4. Commission marketplace — prélèvement sur les ventes des vendeurs tiers.
+  5. Régie publicitaire — emplacements vendus à des annonceurs choisis.
+
+AUCUN PRÉVISIONNEL CHIFFRÉ N'EST FOURNI, et c'est délibéré : sans volume
+observé, toute projection serait une multiplication d'hypothèses présentée
+comme un résultat.
+
+CE QUI EST MESURABLE, EN REVANCHE — l'économie unitaire :
+Sur un dossier calculé par le moteur (marchandise 15 000 000 FCFA FOB,
+groupage maritime France, position à 20 % de droit) :
+    Valeur en douane (CAF) ............ 16 901 935 FCFA
+    Droit de douane 20 % ..............  3 380 387
+    TVA 18 % ..........................  3 681 241
+    Autres droits et redevances .......    555 048
+    TOTAL DÛ AU TRÉSOR ................  7 616 676 FCFA
+
+Si la même marchandise est d'origine européenne avec un certificat EUR.1 sur
+une ligne couverte par la phase 4 de l'APE : le droit de douane tombe à zéro,
+soit 3 380 387 FCFA économisés sur une seule expédition.
+
+La question commerciale n'est donc pas « combien facturons-nous » mais « quelle
+fraction de ce gain restons-nous capables de capter ».
+
+
+==============================================================================
+7. LE MARCHÉ — CHIFFRES RÉELS RELEVÉS
+==============================================================================
+
+  - Port d'Abidjan 2025 : 46,6 millions de tonnes, contre 40,1 Mt en 2024,
+    soit +16,1 %.
+  - Conteneurs : 1 697 131 EVP en 2025. Objectif annoncé : 2 millions en 2027.
+  - Trafic national : 28,5 Mt en 2024 à 34,2 Mt en 2025, soit +19,8 %.
+
+TROIS FENÊTRES OUVERTES EN MÊME TEMPS
+  - APE Côte d'Ivoire–UE, phase 4 en vigueur depuis le 1er janvier 2026 :
+    1 074 lignes tarifaires supplémentaires exonérées de droit de douane pour
+    les produits originaires de l'Union européenne. Démantèlement en cinq
+    phases de 2019 à 2029.
+  - ZLECAf : la Tunisie délivre déjà des certificats d'origine nommément pour
+    la Côte d'Ivoire. Le Maghreb devient une alternative à l'Asie, à une
+    semaine de mer contre quarante jours.
+  - Réforme douanière du 1er janvier 2026 : caution d'agrément portée de 30 à
+    50 millions, crédit d'enlèvement de 50 à 100 millions. La barrière à
+    l'entrée du métier vient de doubler pour tout nouvel entrant.
+
+FORMALITÉS DE CRÉATION D'ENTREPRISE (tarifs publics 2026)
+  - Immatriculation SARL au CEPICI, capital ≤ 10 M FCFA : 42 000 FCFA.
+  - Registre du Commerce (RCCM) : 10 000 FCFA.
+  - Frais de notaire : à chiffrer.
+  - Délai annoncé 24 à 48 h ; délai réel constaté 4 à 8 semaines.
+
+COÛT DE LA PLATEFORME
+  - Base de données et hébergement, paliers professionnels : environ 45 USD
+    par mois au total (tarifs publics annoncés, à confirmer).
+  - L'application tourne aujourd'hui sur les paliers gratuits.
+  - Conclusion importante : le coût technologique est dérisoire. Le coût réel
+    du projet est le FONDS DE ROULEMENT MARCHANDISE et la STRUCTURE JURIDIQUE.
+
+
+==============================================================================
+8. CORRECTIONS DÉJÀ APPORTÉES SUR REMARQUE DU FONDATEUR
+==============================================================================
+
+Ces corrections illustrent la méthode et méritent d'être connues de quiconque
+reprend le dossier : chaque fois, une remarque de terrain a révélé une erreur
+de conception, pas seulement d'affichage.
+
+  - « Le fret n'est pas fixe, il change selon les périodes. »
+    → Tout taux de fret porte désormais une date de fin de validité. Passé
+    cette date, le moteur refuse de chiffrer et renvoie vers la compagnie. Un
+    taux « indicatif » n'entre jamais dans un prix ferme.
+
+  - « On ne demande pas à un client le délai qu'il souhaite, rien ne dépend de
+    nous. »
+    → Le champ « délai souhaité » a été retiré des formulaires d'import et
+    d'export. Le délai est annoncé avec le devis, une fois le départ confirmé.
+    Le client peut exprimer une contrainte de date en note ; on lui répond
+    franchement si elle est tenable.
+
+  - « Le TEC et la documentation, c'est de l'interne. »
+    → La page d'accueil ne parle plus de douane. Elle parle de la boutique.
+
+  - « Le marketplace, c'est par là que MayLary se fera connaître, car
+    accessible à tous. »
+    → La page de couverture est centrée sur la boutique, avec de vrais produits
+    et de vrais prix. Le transit passe après.
+
+  - « C'est pas fast. »
+    → 45 images chargées au premier écran, ramenées à 10. Chargement complet en
+    377 ms.
+
+  - « Je ne suis pas commissionnaire agréé, je suis transitaire. »
+    → Toute la présentation a été reprise autour de l'adossement à un CAD.
+
+  - « Il y a des marchandises qui ont des démarches particulières, il faut
+    faire la nuance avant que quelqu'un importe ce genre de marchandise. »
+    → Détection pendant la saisie de la demande, avec les qualités requises du
+    demandeur et le conseil de démarrage.
+
+
+==============================================================================
+9. CE QUI RESTE OUVERT, CÔTÉ PRODUIT
+==============================================================================
+
+  - Liste officielle des positions exonérées par phase de l'APE, à obtenir
+    auprès de la DGD. C'est ce qui débloque le calcul réel de la préférence.
+  - Barème de transit local confirmé : douze postes bloquent aujourd'hui toute
+    cotation complète, car le moteur refuse de totaliser un devis incomplet.
+  - Taux de fret réels à charger dans la table (la mécanique est prête, la
+    table est vide).
+  - Droit Unique de Sortie sur cacao, café, cajou : taux et positions inconnus.
+  - Registre réglementaire à élargir : médicaments, produits phytosanitaires,
+    équipements radio (ARTCI), denrées animales, produits chimiques.
+  - Connecteurs fournisseurs : vidaXL (accès gratuit sur demande à
+    b2bperformance@vidaxl.com), BigBuy (nécessite un pack payant).
+  - Encaissement en ligne : clé API opérateur mobile money — à traiter en même
+    temps que le risque 1 ci-dessus.
+  - Mise en avant des articles : impossible d'afficher « en vogue » sans
+    données de trafic. Deux solutions honnêtes proposées — les plus demandés
+    mesurés sur les demandes réelles (sourcing, devis, achats groupés), et une
+    mise en avant pilotée manuellement par le fondateur.
+
+
+==============================================================================
+10. LES DÉCISIONS À PRENDRE, PAR ORDRE
+==============================================================================
+
+  1. Trancher la question de structure juridique avec un juriste ivoirien :
+     une entité ou deux, et qui détient quoi. Tout le reste en dépend.
+  2. Vérifier la situation du fondateur vis-à-vis de son employeur, et
+     examiner l'hypothèse d'un partenariat avec lui.
+  3. Traiter la question de l'encaissement pour compte de tiers avec un
+     établissement agréé.
+  4. Formaliser par écrit la convention d'adossement au CAD : périmètre,
+     rétrocession, responsabilités, exclusivité éventuelle.
+  5. Immatriculer, une fois 1 à 4 clarifiés.
+  6. Faire valider le plan comptable par un expert-comptable, en séparant dès
+     le départ les débours du chiffre d'affaires.
+  7. Obtenir la liste APE et les barèmes de transit — gratuits, ce sont des
+     démarches.
+
+
+==============================================================================
+11. AVERTISSEMENT SUR CE DOCUMENT
+==============================================================================
+
+Ce que ce document contient de vérifié : l'état de l'application, les chiffres
+du port d'Abidjan, les tarifs CEPICI, les références légales des fiches AIRP et
+de la circulaire d'assurance, la liquidation de la section 6 (produite par le
+moteur lui-même).
+
+Ce qu'il contient de non vérifié et signalé comme tel : toutes les questions
+juridiques de la section 3 et 4. Elles sont formulées comme des questions à
+poser, jamais comme des réponses.
+
+Ce qu'il ne contient volontairement pas : un prévisionnel de chiffre
+d'affaires, des noms de fournisseurs individuels non vérifiés, et des montants
+inventés pour combler un tableau. Les postes non chiffrés sont marqués
+« à chiffrer ».
+
+Personne n'a encore relu ce projet avec des textes juridiques en main. C'est
+l'étape suivante, et elle doit précéder l'immatriculation.
