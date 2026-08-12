@@ -22,7 +22,7 @@ import {
   Ship,
   Plane,
   PackageSearch,
-  Calculator,
+  Scale,
   Search,
 } from 'lucide-react';
 
@@ -397,17 +397,21 @@ export default function Couverture() {
               Et si vous importez vous-même
             </h2>
             <p className="mt-3 text-background/70">
-              MayLary Group est né dans le transit. Pour les professionnels, les mêmes équipes
-              prennent en charge le dossier complet — du fournisseur à votre entrepôt.
+              MayLary Group est né dans le transit aérien, l’express et le dégroupage. Pour les
+              professionnels, les mêmes équipes prennent en charge le dossier complet — du
+              fournisseur à votre entrepôt.
             </p>
           </div>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-revele-cascade>
             {[
-              { icone: Ship, titre: 'Importer', texte: 'Devis complet avant de commander.', lien: '/import' },
-              { icone: Plane, titre: 'Exporter', texte: 'Cacao, karité, cajou, coton.', lien: '/export' },
+              // L'ordre suit le métier de la maison : l'aérien et l'express
+              // d'abord, puis le groupage. C'est là qu'est la spécialité, et
+              // c'est ce qu'on met devant.
+              { icone: Plane, titre: 'Aérien & Express', texte: 'Notre spécialité. Du colis urgent au fret de ligne.', lien: '/import/nouvelle-demande' },
+              { icone: Ship, titre: 'Groupage & dégroupage', texte: 'Maritime et aérien. Vous ne payez que votre part.', lien: '/import' },
+              { icone: Scale, titre: 'Poids taxable', texte: 'Ce que la compagnie vous facturera vraiment. Gratuit.', lien: '/poids-taxable' },
               { icone: PackageSearch, titre: 'Sourcing', texte: 'Nous trouvons ce qui est introuvable.', lien: '/boutique/sourcing' },
-              { icone: Calculator, titre: 'Le Déclarant', texte: 'Vos droits de douane, calculés gratuitement.', lien: '/declarant' },
             ].map((s) => {
               const Icone = s.icone;
               return (
