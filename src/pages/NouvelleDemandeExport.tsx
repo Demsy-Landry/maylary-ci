@@ -184,7 +184,7 @@ export default function NouvelleDemandeExport() {
     return (
       <div className="min-h-screen bg-background">
         <PublicHeaderImport />
-        <main className="mx-auto max-w-screen-md px-4 py-16 text-center sm:px-6">
+        <main className="entree-page mx-auto max-w-screen-md px-4 py-16 text-center sm:px-6">
           <div className="rounded-lg border bg-card p-8">
             <Ship className="mx-auto h-8 w-8 text-primary" />
             <h1 className="mt-3 text-xl font-bold text-foreground">Demande d'export envoyée !</h1>
@@ -209,7 +209,7 @@ export default function NouvelleDemandeExport() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
-      <main className="mx-auto max-w-screen-md px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-md px-4 py-8 sm:px-6">
         <h1 className="font-display text-2xl font-bold text-foreground">Faire une demande d'export</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Décrivez ce que vous voulez exporter — nous nous occupons de la collecte, de la douane,

@@ -99,7 +99,7 @@ export default function PanierDevis() {
     return (
       <div className="min-h-screen bg-background">
         <PublicHeaderPro />
-        <main className="mx-auto max-w-screen-md px-4 py-16 text-center sm:px-6">
+        <main className="entree-page mx-auto max-w-screen-md px-4 py-16 text-center sm:px-6">
           <div className="rounded-lg border bg-card p-8">
             <h1 className="text-xl font-bold text-foreground">Demande de devis envoyée !</h1>
             <p className="mt-2 text-sm text-muted-foreground">

@@ -119,7 +119,7 @@ export default function PoidsTaxable() {
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
 
-      <main className="mx-auto max-w-screen-lg px-4 py-10 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-lg px-4 py-10 sm:px-6">
         <div className="max-w-2xl">
           <h1 className="font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Combien pèse vraiment votre envoi ?

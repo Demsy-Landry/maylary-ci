@@ -28,7 +28,7 @@ export default function CataloguePro() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderPro />
-      <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <div className="mb-6">
           <h1 className="font-display text-2xl font-bold text-foreground">Espace Pro</h1>
           <p className="mt-1 text-sm text-muted-foreground">

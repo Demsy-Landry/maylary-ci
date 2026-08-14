@@ -117,9 +117,9 @@ export default function CatalogueGrandPublic() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
-      <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Boutique MayLary Group</h1>
+          <h1 className="trait-anime text-2xl font-bold text-foreground">Boutique MayLary Group</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Des produits tendance, livrés chez vous. Parcourez les catégories ou recherchez directement.
           </p>
@@ -331,15 +331,15 @@ export function ProductCardGP({ produit }: { produit: Produit }) {
   return (
     <Link
       to={`/boutique/produit/${produit.id}`}
-      className="carte-reactive group flex flex-col overflow-hidden rounded-lg border bg-card"
+      className="carte-reactive reflet groupe-zoom group flex flex-col overflow-hidden rounded-lg border bg-card hover:border-primary/40"
     >
-      <div className="aspect-square w-full overflow-hidden bg-white p-2">
+      <div className="cadre-zoom aspect-square w-full bg-white p-2">
         {produit.photos?.[0] && !imgError ? (
           <img
             src={produit.photos[0]}
             alt={produit.nom}
             onError={() => setImgError(true)}
-            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-contain"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-muted">

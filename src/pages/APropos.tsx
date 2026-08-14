@@ -84,7 +84,7 @@ export default function APropos() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
-      <main className="mx-auto max-w-screen-lg px-4 py-12 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-lg px-4 py-12 sm:px-6">
         <div className="flex items-start gap-4">
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <MarqueMaylary className="h-8 w-8" />

@@ -311,7 +311,7 @@ export default function Declarant() {
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
 
-      <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <div className="flex items-start gap-3">
           <ShieldCheck className="mt-1 h-6 w-6 shrink-0 text-primary" />
           <div className="min-w-0">

@@ -720,7 +720,18 @@ Deno.serve(async (req: Request) => {
     try {
       const corps = (await req.json()) as { message?: string; historique?: Tour[]; contexte?: string };
       message = String(corps.message ?? '').trim();
-      historique = Array.isArray(corps.historique) ? corps.historique.slice(-12) : [];
+      // L'historique vient du navigateur : il peut être ancien, tronqué, ou
+      // porter un tour vide. Un seul tour sans texte suffisait à faire refuser
+      // toute la requête par le fournisseur — « messages.0.content: Field
+      // required » — et le client lisait « Le Déclarant est momentanément
+      // injoignable », ce qui est faux et le pousse à réessayer en boucle avec
+      // le même historique cassé. On écarte les tours inutilisables plutôt que
+      // de laisser passer une conversation qui ne peut pas aboutir.
+      historique = (Array.isArray(corps.historique) ? corps.historique : [])
+        .filter((t): t is Tour =>
+          !!t && typeof t.texte === 'string' && t.texte.trim().length > 0)
+        .map((t) => ({ role: t.role === 'model' ? 'model' : 'user', texte: t.texte.trim() }))
+        .slice(-12);
       contexte = String(corps.contexte ?? '').slice(0, 400);
     } catch {
       return json({ erreur: 'Requête illisible.' }, 400);

@@ -125,43 +125,46 @@ export default function Couverture() {
           Une seule image chargée en priorité sur toute la page. Le reste vient
           après, et seulement quand il approche de l'écran. */}
       <section className="relative flex min-h-[34rem] items-center overflow-hidden bg-foreground sm:min-h-[86vh]">
-        {/* L'ouverture portait jusqu'ici la couverture Facebook de la marque,
-            une bannière de 735 x 272 pixels étirée sur une hauteur d'écran :
-            à cette échelle elle était floue et recadrée n'importe comment.
-            Une photographie de boutique, au format paysage, dit ce que le
-            visiteur vient chercher.
-
-            Sur un téléphone, une image paysage tenue sur 86 % de la hauteur
-            d'écran se recadre si violemment qu'on n'y reconnaît plus rien :
-            d'où la hauteur fixe en dessous de 640 pixels de large, et le
-            cadrage calé sur le centre haut plutôt que sur le milieu. */}
+        {/* L'image d'ouverture est servie par le site, pas par le stockage
+            distant : même origine, une connexion de moins à ouvrir, et elle
+            arrive avant tout le reste. C'est le premier écran d'un groupe —
+            il n'a pas le droit d'être lent. */}
         <img
-          src={photo('carousel-1-boutique.jpg')}
+          src="/visuels/fret-aerien-abidjan.jpg"
           alt=""
-          width={1600}
-          height={900}
+          width={1168}
+          height={784}
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
-          onError={(e) => {
-            e.currentTarget.src = photo('carousel-3-livraison.jpg');
-          }}
+          className="absolute inset-0 h-full w-full scale-105 object-cover object-[60%_center] motion-safe:animate-[respiration_24s_ease-in-out_infinite]"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/25" />
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
+        {/* Deux voiles superposés plutôt qu'un seul aplat : le premier assure
+            la lisibilité du texte à gauche, le second rattache le bas de
+            l'image au fond de la page. La photographie reste visible — c'est
+            elle qui dit le métier. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/95 via-foreground/75 to-foreground/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-foreground/40" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent" />
 
         <div className="relative mx-auto w-full max-w-screen-xl px-4 py-24 sm:px-6">
-          <div className="max-w-2xl">
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-              Livré partout en Côte d’Ivoire
+          {/* `rideau` plutôt que `data-revele` : ce bloc est déjà à l'écran
+              quand la page arrive. La révélation au défilement ne se
+              déclencherait donc sur rien de visible — il faut une entrée au
+              montage, échelonnée dans l'ordre de lecture. */}
+          <div className="rideau max-w-2xl">
+            <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-primary sm:text-xs">
+              Aérien · Express · Groupage — Abidjan
             </p>
-            <h1 className="mt-4 font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-white sm:text-6xl">
-              Achetez ici ce qui vient
-              <span className="block text-primary">de partout ailleurs.</span>
+            <h1 className="mt-5 font-display text-[2.6rem] font-extrabold leading-[0.98] tracking-tight text-white sm:text-7xl">
+              Le monde produit.
+              <span className="mt-1 block bg-gradient-to-r from-primary via-amber-300 to-primary bg-clip-text text-transparent">
+                Nous vous l’apportons.
+              </span>
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/85">
-              Électroménager, quincaillerie, mobilier, informatique — déjà dédouanés, prix
-              affiché toutes taxes comprises, payé seulement si vous recevez.
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
+              Transitaires de métier, commerçants par vocation. Nous achetons à la source,
+              groupons, dédouanons et livrons. Vous ne voyez qu’une chose : un prix, une
+              date, et votre marchandise devant vous.
             </p>
 
             {/* La recherche mène directement à la boutique : c'est le geste
@@ -207,7 +210,7 @@ export default function Couverture() {
       <section className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            <h2 className="trait-anime font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               Déjà en boutique
             </h2>
             <p className="mt-1.5 text-muted-foreground">
@@ -239,23 +242,23 @@ export default function Couverture() {
                 <Link
                   key={p.id}
                   to={`/boutique/produit/${p.id}`}
-                  className="group overflow-hidden rounded-lg border bg-card transition hover:shadow-md"
+                  className="groupe-zoom carte-reactive reflet block overflow-hidden rounded-lg border bg-card hover:border-primary/40"
                 >
                   {/* `object-contain`, et non `object-cover` : un article se
                       montre en entier. Recadrer au carré coupait les pieds
                       d'un meuble et la moitié d'un réfrigérateur — sur un
                       téléphone, où la vignette est deux fois plus petite,
                       cela donnait des images qui ne ressemblaient à rien. */}
-                  <div className="aspect-square overflow-hidden bg-white p-3">
+                  <div className="cadre-zoom aspect-square bg-white p-3">
                     <img
                       src={p.photos![0]}
                       alt=""
                       loading="lazy"
                       decoding="async"
-                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                      className="h-full w-full object-contain"
                     />
                   </div>
-                  <div className="p-3">
+                  <div className="relative z-[2] p-3">
                     <p className="line-clamp-2 text-sm leading-snug text-foreground">{p.nom}</p>
                     <p className="mt-1.5 font-display font-bold tabular-nums text-foreground">
                       {fcfa(p.prix_unitaire_fcfa)}
@@ -307,7 +310,7 @@ export default function Couverture() {
       <section className="border-y bg-muted/40">
         <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6">
           <h2
-            className="max-w-2xl font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+            className="trait-anime max-w-2xl font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
             data-revele
           >
             Acheter en ligne sans se faire avoir
@@ -367,7 +370,7 @@ export default function Couverture() {
           fournisseur et la porte du client. */}
       <section className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6">
         <div className="max-w-2xl" data-revele>
-          <h2 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h2 className="trait-anime font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Entre l’usine et votre porte, ce que nous faisons
           </h2>
           <p className="mt-2 text-muted-foreground">
@@ -379,7 +382,10 @@ export default function Couverture() {
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-revele-cascade>
           {[
             {
-              image: 'service-sourcing.jpg',
+              // Servie par le site et non par le stockage distant : c'est le
+              // visuel de sourcing fourni par le fondateur, et il remplace
+              // partout l'ancienne photographie d'échantillons sur un bureau.
+              image: '/visuels/sourcing-entrepot.jpg',
               etape: '1',
               titre: 'On trouve la marchandise',
               texte:
@@ -407,12 +413,19 @@ export default function Couverture() {
                 'Transit local jusqu’à votre adresse. Vous confirmez la réception, et c’est seulement là que le vendeur est réglé.',
             },
           ].map((e) => (
-            <div key={e.etape} className="overflow-hidden rounded-xl border bg-card">
+            <div
+              key={e.etape}
+              className="groupe-zoom carte-reactive overflow-hidden rounded-xl border bg-card hover:border-primary/40"
+            >
               {/* Rapport fixe : quelle que soit la taille de la photo d'origine,
                   la vignette garde la même forme et ne déforme jamais l'image. */}
-              <div className="aspect-[4/3] overflow-hidden bg-muted">
+              <div className="cadre-zoom aspect-[4/3] bg-muted">
                 <img
-                  src={photo(e.image)}
+                  // Une étape peut porter une image du site (chemin absolu) ou
+                  // une photographie du stockage distant (simple nom de
+                  // fichier). Le test sur la barre oblique évite de préfixer
+                  // deux fois la première.
+                  src={e.image.startsWith('/') ? e.image : photo(e.image)}
                   alt=""
                   loading="lazy"
                   decoding="async"
@@ -438,7 +451,7 @@ export default function Couverture() {
             <p className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Vous vendez déjà quelque chose ?
             </p>
-            <h2 className="mt-3 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            <h2 className="trait-anime mt-3 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               Ouvrez votre boutique sur MayLary
             </h2>
             <p className="mt-4 text-muted-foreground">
@@ -459,7 +472,7 @@ export default function Couverture() {
             </Button>
           </div>
 
-          <div className="relative overflow-hidden rounded-xl border" data-revele>
+          <div className="cadre-zoom relative rounded-xl border" data-revele>
             <img
               src={photo('service-vendre.jpg')}
               alt="Un commerçant prépare une commande"
@@ -490,7 +503,7 @@ export default function Couverture() {
         <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/50" />
         <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6">
           <div className="max-w-2xl" data-revele>
-            <h2 className="font-display text-2xl font-bold tracking-tight text-background sm:text-3xl">
+            <h2 className="trait-anime font-display text-2xl font-bold tracking-tight text-background sm:text-3xl">
               Et si vous importez vous-même
             </h2>
             <p className="mt-3 text-background/70">
@@ -515,7 +528,7 @@ export default function Couverture() {
                 <Link
                   key={s.titre}
                   to={s.lien}
-                  className="group rounded-lg border border-background/15 p-5 transition hover:border-primary/60 hover:bg-background/5"
+                  className="carte-reactive reflet group rounded-lg border border-background/15 p-5 hover:border-primary/60 hover:bg-background/5"
                 >
                   <Icone className="h-5 w-5 text-primary" />
                   <h3 className="mt-3 flex items-center gap-1.5 font-display text-base font-bold text-background">

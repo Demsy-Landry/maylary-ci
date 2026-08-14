@@ -21,7 +21,7 @@ export default function Confidentialite() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
-      <main className="mx-auto max-w-screen-md px-4 py-12 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-md px-4 py-12 sm:px-6">
         <h1 className="font-display text-3xl font-extrabold text-foreground">
           Protection de vos données personnelles
         </h1>

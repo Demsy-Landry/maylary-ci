@@ -157,7 +157,7 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
 
-      <main>
+      <main className="entree-page">
         <section className="relative overflow-hidden border-b text-background">
           {/* L'illustration remplace la photographie de fond : dessinée pour
               cette page, elle garde sa gauche sombre pour le titre et reste
