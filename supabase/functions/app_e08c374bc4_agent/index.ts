@@ -23,7 +23,12 @@ const json = (corps: unknown, status = 200) =>
   });
 
 const secret = (nom: string) => (Deno.env.get(nom) ?? '').replace(/\s+/g, '');
-const CLES_GOOGLE = ['GOOGLE_API_KEY', 'GOOGLE_API_KEY2'];
+// Le Déclarant tourne sur Claude. Le fournisseur précédent a coupé sans
+// prévenir — crédit épuisé, assistant muet pour tout le monde — et cette
+// panne a coûté une journée de service. On garde donc la possibilité de
+// déposer une seconde clé : si la première est refusée pour cause de quota,
+// la seconde prend le relais sans intervention.
+const CLES_IA = ['ANTHROPIC_API_KEY', 'ANTHROPIC_API_KEY2'];
 
 const PERSONNAGE = `Tu es « Le Déclarant », le logisticien de MayLary Group.
 
@@ -368,127 +373,7 @@ const ETAPES_EXPORT: Record<string, string> = {
   annulee: 'Annulée',
 };
 
-const CJ_BASE = 'https://developers.cjdropshipping.com/api2.0/v1';
 
-/**
- * Le jeton CJ, mis en cache en base.
- *
- * CJ limite la création de jetons à environ un toutes les cinq minutes par
- * compte. Tant que seul l'administrateur cherchait, la contrainte ne se voyait
- * pas. Dès lors que Le Déclarant cherche pour un client, en redemander un à
- * chaque appel condamnerait la fonction au deuxième client de la journée.
- */
-async function jetonCJ(sb: Client): Promise<string | null> {
-  const { data } = await sb
-    .from('app_e08c374bc4_jetons_fournisseurs')
-    .select('jeton, expire_le')
-    .eq('fournisseur', 'cj')
-    .maybeSingle();
-
-  // On renouvelle une heure avant l'échéance : un jeton qui expire pendant la
-  // requête coûte un aller-retour et un message d'erreur au client.
-  if (data?.jeton && new Date(data.expire_le as string).getTime() - Date.now() > 3_600_000) {
-    return data.jeton as string;
-  }
-
-  const email = secret('CJ_DROPSHIPPING_EMAIL');
-  const cle = secret('CJ_DROPSHIPPING_API_KEY');
-  if (!email || !cle) return null;
-
-  const r = await fetch(`${CJ_BASE}/authentication/getAccessToken`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password: cle }),
-  });
-  const corps = await r.json().catch(() => null);
-  const jeton = corps?.data?.accessToken as string | undefined;
-  if (!jeton) return null;
-
-  const echeance = corps?.data?.accessTokenExpiryDate
-    ? new Date(String(corps.data.accessTokenExpiryDate))
-    : new Date(Date.now() + 10 * 24 * 3_600_000);
-
-  await sb
-    .from('app_e08c374bc4_jetons_fournisseurs')
-    .upsert({ fournisseur: 'cj', jeton, expire_le: echeance.toISOString(), obtenu_le: new Date().toISOString() });
-
-  return jeton;
-}
-
-/**
- * Le catalogue CJ n'est indexé qu'en anglais : une recherche en français n'y
- * accroche que des morceaux de mots au hasard. Si la traduction échoue, on
- * cherche avec le mot d'origine plutôt que de ne rien chercher du tout.
- */
-async function versAnglais(texte: string): Promise<string> {
-  try {
-    const url = new URL('https://api.mymemory.translated.net/get');
-    url.searchParams.set('q', texte);
-    url.searchParams.set('langpair', 'fr|en');
-    const r = await fetch(url);
-    const d = await r.json().catch(() => null);
-    const t = d?.responseData?.translatedText;
-    return typeof t === 'string' && t.trim() ? t.trim() : texte;
-  } catch {
-    return texte;
-  }
-}
-
-interface ArticleFournisseur {
-  fournisseur: string;
-  reference: string;
-  nom: string;
-  photo: string | null;
-  prix_achat: number | null;
-  devise: string;
-  stock: number | null;
-}
-
-async function chercherChezCJ(sb: Client, mots: string): Promise<
-  { ouvert: false; motif: string } | { ouvert: true; articles: ArticleFournisseur[]; mots_traduits: string }
-> {
-  const jeton = await jetonCJ(sb);
-  if (!jeton) return { ouvert: false, motif: "identifiants CJ non déposés ou refusés" };
-
-  const motsEn = await versAnglais(mots);
-  const url = new URL(`${CJ_BASE}/product/list`);
-  url.searchParams.set('pageNum', '1');
-  url.searchParams.set('pageSize', '8');
-  url.searchParams.set('productNameEn', motsEn);
-
-  const r = await fetch(url, { headers: { 'CJ-Access-Token': jeton } });
-  const corps = await r.json().catch(() => null);
-  if (!r.ok || !corps?.result) {
-    return { ouvert: false, motif: 'CJ a refusé la requête ou est indisponible' };
-  }
-
-  const liste: unknown[] = corps?.data?.list ?? [];
-  const articles = liste.map((brut) => {
-    const p = brut as Record<string, unknown>;
-    const prixBrut = p.sellPrice ?? p.sellPriceMin ?? p.price;
-    let prix: number | null = null;
-    if (typeof prixBrut === 'number') prix = prixBrut;
-    else if (typeof prixBrut === 'string') {
-      const m = prixBrut.match(/[\d.]+/);
-      prix = m ? Number.parseFloat(m[0]) : null;
-    }
-    const stockBrut = p.stock ?? p.inventoryNum ?? p.stockNum;
-    return {
-      fournisseur: 'CJ Dropshipping (Chine)',
-      reference: String(p.pid ?? p.productId ?? p.id ?? ''),
-      nom: String(p.productNameEn ?? p.productName ?? p.nameEn ?? 'Article sans nom'),
-      photo:
-        (p.productImage as string) ??
-        (Array.isArray(p.productImageSet) ? (p.productImageSet[0] as string) : null) ??
-        null,
-      prix_achat: prix,
-      devise: 'USD',
-      stock: typeof stockBrut === 'number' ? stockBrut : null,
-    };
-  });
-
-  return { ouvert: true, articles, mots_traduits: motsEn };
-}
 
 /**
  * `sb` porte la clé de service : il sert aux lectures publiques (le tarif, les
@@ -661,35 +546,22 @@ async function executer(
         return { erreur: "Précisez ce que le client cherche, en quelques mots." };
       }
 
-      // On dit toujours qui a été consulté et qui ne l'a pas été. Un client à
-      // qui l'on répond « je n'ai rien trouvé » sans dire où l'on a cherché
-      // n'a aucun moyen de juger la réponse.
-      const { data: portes } = await sb
-        .from('app_e08c374bc4_fournisseurs')
-        .select('nom, pays, api_statut')
-        .eq('actif', true)
-        .not('api_statut', 'is', null)
-        .neq('api_statut', 'aucune');
-
-      const enAttente = (portes ?? [])
-        .filter((f) => f.api_statut !== 'branchee')
-        .map((f) => `${f.nom} (${f.pays})`);
-
-      const cj = await chercherChezCJ(sb, designation);
-
-      return {
-        recherche: designation,
-        consultes: cj.ouvert ? ['CJ Dropshipping (Chine)'] : [],
-        non_consultes: [
-          ...(cj.ouvert ? [] : [`CJ Dropshipping (Chine) — ${cj.motif}`]),
-          ...enAttente.map((f) => `${f} — accès pas encore ouvert`),
-        ],
-        articles: cj.ouvert ? cj.articles : [],
-        avertissement:
-          "Les prix rendus sont des PRIX D'ACHAT chez le fournisseur, hors fret, hors assurance, hors droits de douane, hors transit local et hors livraison. Ils ne doivent jamais être présentés au client comme un prix de vente.",
-        suite:
-          "Pour donner un prix rendu Abidjan, ouvrir une recherche de sourcing avec ouvrir_une_recherche_sourcing.",
-      };
+      // La recherche fournisseur vit dans sa propre fonction : sa logique bouge
+      // souvent — une API qui change, une traduction à corriger — et on ne
+      // redéploie pas tout l'assistant pour ça.
+      const r = await fetch(
+        `${Deno.env.get('SUPABASE_URL')}/functions/v1/app_e08c374bc4_recherche_fournisseurs`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: sbClient.rest.headers.Authorization ?? '',
+          },
+          body: JSON.stringify({ designation }),
+        },
+      );
+      const corps = await r.json().catch(() => null);
+      return corps ?? { erreur: 'La recherche fournisseur est injoignable.' };
     }
     case 'ouvrir_une_recherche_sourcing': {
       const designation = String(args.designation ?? '').trim();
@@ -749,33 +621,70 @@ interface Tour {
   texte: string;
 }
 
-async function appelerGoogle(modele: string, corps: unknown) {
-  const disponibles = CLES_GOOGLE.filter((n) => secret(n).length > 0);
-  let dernier: { statut: number; genre: string | null; motif: string | null; cle: string | null } = {
-    statut: 503, genre: null, motif: 'Aucune clé Google configurée.', cle: null,
+/**
+ * Les outils, dans la forme attendue par l'API Claude.
+ *
+ * Ils sont décrits une seule fois, plus haut, dans la forme JSON Schema. Seule
+ * la clé change d'un fournisseur à l'autre : `parameters` chez l'un,
+ * `input_schema` chez l'autre. On convertit ici plutôt que d'entretenir deux
+ * listes qui finiraient par diverger.
+ */
+const OUTILS_CLAUDE = OUTILS.map((o) => ({
+  name: o.name,
+  description: o.description,
+  input_schema: o.parameters,
+}));
+
+interface ReponseIA {
+  ok: true;
+  corps: {
+    content: { type: string; text?: string; id?: string; name?: string; input?: Record<string, unknown> }[];
+    stop_reason?: string;
+    usage?: { input_tokens?: number; output_tokens?: number };
   };
+  cle: string;
+}
+
+async function appelerClaude(
+  corps: Record<string, unknown>,
+): Promise<ReponseIA | { ok: false; refus: { statut: number; genre: string | null; motif: string | null; cle: string | null } }> {
+  const disponibles = CLES_IA.filter((n) => secret(n).length > 0);
+  let dernier = {
+    statut: 503,
+    genre: null as string | null,
+    motif: 'Aucune clé Anthropic configurée dans les secrets du projet.',
+    cle: null as string | null,
+  };
+
   for (const nom of disponibles) {
-    const r = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modele)}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'x-goog-api-key': secret(nom), 'Content-Type': 'application/json' },
-        body: JSON.stringify(corps),
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': secret(nom),
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
       },
-    );
-    if (r.ok) return { ok: true as const, corps: await r.json(), cle: nom };
+      body: JSON.stringify(corps),
+    });
+
+    if (r.ok) return { ok: true, corps: await r.json(), cle: nom };
+
     let genre: string | null = null;
     let motif: string | null = null;
     try {
       const e = (await r.json())?.error;
-      genre = e?.status ?? null;
+      genre = e?.type ?? null;
       motif = e?.message ?? null;
     } catch { /* corps illisible */ }
     dernier = { statut: r.status, genre, motif, cle: nom };
-    const quota = r.status === 429 || genre === 'RESOURCE_EXHAUSTED';
+
+    // Seule une panne de quota justifie d'essayer la clé suivante : une clé
+    // invalide le restera, et une erreur de requête aussi.
+    const quota = r.status === 429 || genre === 'rate_limit_error' || genre === 'overloaded_error';
     if (!quota) break;
   }
-  return { ok: false as const, refus: dernier };
+
+  return { ok: false, refus: dernier };
 }
 
 Deno.serve(async (req: Request) => {
@@ -828,7 +737,7 @@ Deno.serve(async (req: Request) => {
     if (!parametres?.actif) {
       return json({ erreur: 'L’assistant est momentanément indisponible.' }, 503);
     }
-    const modele: string = parametres.modele_google ?? 'gemini-3.6-flash';
+    const modele: string = parametres.modele_anthropic ?? 'claude-sonnet-5';
 
     // La place se réserve AVANT l'appel. Vérifier puis appeler puis écrire
     // laisserait deux requêtes simultanées passer toutes deux le contrôle, et
@@ -879,9 +788,13 @@ Deno.serve(async (req: Request) => {
       .filter(Boolean)
       .join('\n\n');
 
-    const contents = [
-      ...historique.map((t) => ({ role: t.role, parts: [{ text: t.texte }] })),
-      { role: 'user', parts: [{ text: message }] },
+    // Claude attend « assistant » là où l'historique de l'écran dit « model ».
+    const messages: { role: 'user' | 'assistant'; content: unknown }[] = [
+      ...historique.map((t) => ({
+        role: (t.role === 'model' ? 'assistant' : 'user') as 'user' | 'assistant',
+        content: t.texte,
+      })),
+      { role: 'user' as const, content: message },
     ];
 
     const outilsAppeles: string[] = [];
@@ -889,22 +802,19 @@ Deno.serve(async (req: Request) => {
     // trois outils coûte trois appels, et c'est ce total qui décide du prix.
     let jetonsEntree = 0;
     let jetonsSortie = 0;
-    const compter = (corps: { usageMetadata?: { promptTokenCount?: number; candidatesTokenCount?: number } }) => {
-      jetonsEntree += corps?.usageMetadata?.promptTokenCount ?? 0;
-      jetonsSortie += corps?.usageMetadata?.candidatesTokenCount ?? 0;
-    };
 
     for (let tour = 0; tour < 6; tour++) {
-      const reponse = await appelerGoogle(modele, {
-        system_instruction: { parts: [{ text: consigne }] },
-        contents,
-        tools: [{ function_declarations: OUTILS }],
-        generationConfig: { maxOutputTokens: 4000 },
+      const reponse = await appelerClaude({
+        model: modele,
+        max_tokens: 4000,
+        system: consigne,
+        messages,
+        tools: OUTILS_CLAUDE,
       });
 
       if (!reponse.ok) {
         console.error('agent amont', reponse.refus.statut, reponse.refus.genre);
-        // Le fournisseur a refusé : la question n'a rien coûté, on rend le
+        // Le fournisseur a refusé : la question n'a rien produit, on rend le
         // crédit au lieu de facturer une panne au client.
         await mesurer(jetonsEntree, jetonsSortie, outilsAppeles.length, false);
         return json(
@@ -919,14 +829,16 @@ Deno.serve(async (req: Request) => {
         );
       }
 
-      compter(reponse.corps);
-      const candidat = reponse.corps?.candidates?.[0];
-      const parts = candidat?.content?.parts ?? [];
-      const appels = parts.filter((p: { functionCall?: unknown }) => p?.functionCall);
+      jetonsEntree += reponse.corps.usage?.input_tokens ?? 0;
+      jetonsSortie += reponse.corps.usage?.output_tokens ?? 0;
+
+      const blocs = reponse.corps.content ?? [];
+      const appels = blocs.filter((b) => b.type === 'tool_use');
 
       if (appels.length === 0) {
-        const texte = parts
-          .map((p: { text?: string }) => p?.text ?? '')
+        const texte = blocs
+          .filter((b) => b.type === 'text')
+          .map((b) => b.text ?? '')
           .join('')
           .trim();
         await mesurer(jetonsEntree, jetonsSortie, outilsAppeles.length, true);
@@ -938,16 +850,21 @@ Deno.serve(async (req: Request) => {
         });
       }
 
-      contents.push({ role: 'model', parts });
+      // On renvoie le tour du modèle tel quel, puis les résultats d'outils :
+      // c'est ce que l'API attend pour poursuivre la même conversation.
+      messages.push({ role: 'assistant', content: blocs });
 
       const resultats = [];
-      for (const p of appels) {
-        const { name, args } = p.functionCall as { name: string; args: Record<string, unknown> };
-        outilsAppeles.push(name);
-        const sortie = await executer(sb, name, args ?? {}, sbClient);
-        resultats.push({ functionResponse: { name, response: { resultat: sortie } } });
+      for (const appel of appels) {
+        outilsAppeles.push(appel.name!);
+        const sortie = await executer(sb, appel.name!, appel.input ?? {}, sbClient);
+        resultats.push({
+          type: 'tool_result',
+          tool_use_id: appel.id,
+          content: JSON.stringify(sortie),
+        });
       }
-      contents.push({ role: 'user', parts: resultats });
+      messages.push({ role: 'user', content: resultats });
     }
 
     // Le budget d'outils est épuisé. On redemande une réponse en retirant les
@@ -957,16 +874,19 @@ Deno.serve(async (req: Request) => {
     // vérifier, puis coter — consommait ses six tours et rendait la main sur un
     // message d'échec, alors que tous les résultats étaient déjà là. C'était le
     // cas le plus utile de l'agent, et c'était précisément celui qui échouait.
-    const conclusion = await appelerGoogle(modele, {
-      system_instruction: { parts: [{ text: consigne }] },
-      contents,
-      generationConfig: { maxOutputTokens: 4000 },
+    const conclusion = await appelerClaude({
+      model: modele,
+      max_tokens: 4000,
+      system: consigne,
+      messages,
     });
 
     if (conclusion.ok) {
-      compter(conclusion.corps);
-      const texte = (conclusion.corps?.candidates?.[0]?.content?.parts ?? [])
-        .map((p: { text?: string }) => p?.text ?? '')
+      jetonsEntree += conclusion.corps.usage?.input_tokens ?? 0;
+      jetonsSortie += conclusion.corps.usage?.output_tokens ?? 0;
+      const texte = (conclusion.corps.content ?? [])
+        .filter((b) => b.type === 'text')
+        .map((b) => b.text ?? '')
         .join('')
         .trim();
       if (texte) {
