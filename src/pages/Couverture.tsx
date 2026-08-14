@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import {
   supabase,
   STORAGE_PUBLIC_URL,
-  LOGO_BUCKET,
   PRODUIT_PHOTOS_BUCKET,
   PRODUITS_PUBLIC_VIEW,
   CATEGORIES_GP_TABLE,
@@ -52,7 +51,6 @@ import {
  */
 
 const photo = (nom: string) => `${STORAGE_PUBLIC_URL}/${PRODUIT_PHOTOS_BUCKET}/accueil/${nom}`;
-const marque = (nom: string) => `${STORAGE_PUBLIC_URL}/${LOGO_BUCKET}/marque/${nom}`;
 
 interface Vitrine {
   id: string;
@@ -127,8 +125,13 @@ export default function Couverture() {
           Une seule image chargée en priorité sur toute la page. Le reste vient
           après, et seulement quand il approche de l'écran. */}
       <section className="relative flex min-h-[86vh] items-center overflow-hidden bg-foreground">
+        {/* L'ouverture portait jusqu'ici la couverture Facebook de la marque,
+            une bannière de 735 x 272 pixels étirée sur une hauteur d'écran :
+            à cette échelle elle était floue et recadrée n'importe comment.
+            Une vraie photographie de livraison, au bon format, tient la
+            promesse écrite juste à côté — « livré partout en Côte d'Ivoire ». */}
         <img
-          src={marque('maylary-group-accueil.png')}
+          src={photo('carousel-3-livraison.jpg')}
           alt=""
           width={1600}
           height={900}
@@ -136,7 +139,7 @@ export default function Couverture() {
           decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
           onError={(e) => {
-            e.currentTarget.src = photo('hero-import-maritime.jpg');
+            e.currentTarget.src = photo('mode-aerien.jpg');
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/25" />
@@ -376,7 +379,7 @@ export default function Couverture() {
 
           <div className="relative overflow-hidden rounded-xl border" data-revele>
             <img
-              src={photo('service-espace-pro.jpg')}
+              src={photo('service-vendre.jpg')}
               alt="Un commerçant prépare une commande"
               loading="lazy"
               decoding="async"
@@ -390,8 +393,20 @@ export default function Couverture() {
           Il reste le métier de la maison, mais il n'est plus la porte
           d'entrée : quelqu'un qui arrive par hasard vient acheter, pas
           dédouaner. */}
-      <section className="border-y bg-foreground">
-        <div className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6">
+      <section className="relative overflow-hidden border-y bg-foreground">
+        {/* Une photographie d'aérien plutôt qu'un aplat : c'est le métier
+            d'origine de la maison, et le fond reste assez sombre pour que le
+            texte garde son contraste. Chargée en différé, elle n'entre pas
+            dans le temps d'affichage du premier écran. */}
+        <img
+          src={photo('mode-aerien.jpg')}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover opacity-25"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/50" />
+        <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6">
           <div className="max-w-2xl" data-revele>
             <h2 className="font-display text-2xl font-bold tracking-tight text-background sm:text-3xl">
               Et si vous importez vous-même
