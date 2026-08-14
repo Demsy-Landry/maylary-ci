@@ -14,15 +14,59 @@ inventé n'entre dans un prix.
 | `regimes_origine` (droit commun, APE, ZLECAf, CEDEAO) | **4** ✅ |
 | `produits` (catalogue) | **60** ✅ |
 | `marchandises_reglementees` (fiches AIRP) | **3** ⚠️ à élargir |
-| `frais_transit_local` | 12 postes, **12 en « contractuel »**, 0 confirmé ❌ |
+| `frais_transit_local` | 15 postes, **4 confirmés**, 11 à confirmer ⚠️ |
 | `taux_fret` | **0 ligne** ❌ |
-| `commandes_gp` | 7 créées, **0 payée de bout en bout** ❌ |
+| `commandes_gp` | **0** — les 7 commandes d'essai ont été supprimées le 14/08 ✅ |
 | `ecritures` (comptabilité) | **0** ❌ |
 | `vendeurs` (marketplace) | **0** ❌ |
 
 ---
 
 ## P0 — Sans ça, la boucle de vente ne peut pas être prouvée
+
+### 00. VERCEL REFUSE DE CONSTRUIRE — le site ne reçoit plus aucune mise à jour
+
+**Mesuré le 14 août 2026 au soir.** Les cinq derniers déploiements de
+production sont en `ERROR`. Ce n'est pas notre code : le build local passe en
+1,6 seconde, et côté Vercel il n'y a **aucun journal de construction** — la
+construction n'a jamais démarré.
+
+| Déploiement | Durée | Erreur |
+|---|---|---|
+| `dadaab7` (le travail de ce soir) | 0,5 s | `BUILD_FAILED — Resource provisioning failed` |
+| `917a806` | 0,6 s | idem |
+| `9483116` | 0,6 s | idem |
+| `2587fdf` | 0,6 s | idem |
+| `560c1a9` | 0,6 s | idem |
+
+Cinq échecs identiques, instantanés, sans journal : la construction est
+refusée **avant** d'être lancée. Le dernier déploiement réussi est
+`70ac9d9`, il y a environ quatre heures.
+
+**Conséquence : tout ce qui a été livré depuis est en ligne dans la base et
+dans le dépôt, mais PAS sur le site.** Les nouvelles images de couverture, le
+message d'accueil, les animations — vous ne les verrez pas tant que ceci n'est
+pas réglé.
+
+**Ce qu'il faut regarder, dans cet ordre :**
+
+1. **La limite quotidienne du plan Hobby** — 100 déploiements par 24 heures.
+   Nous avons beaucoup poussé aujourd'hui, et chaque commit déclenche DEUX
+   déploiements (la branche et la production). C'est l'explication la plus
+   probable, et elle se règle toute seule au bout de 24 heures.
+2. **L'état du compte** sur [vercel.com](https://vercel.com/demsy-landrys-projects/maylary-ci)
+   — un moyen de paiement expiré ou un plan suspendu donne exactement ce
+   symptôme.
+3. Si ni l'un ni l'autre : le bouton **Redeploy** sur le dernier déploiement.
+
+**Dites-moi ce que la page affiche**, et je reprends. Je ne peux pas lire
+l'état de facturation de votre compte depuis ici.
+
+*Note au passage : le site n'est aujourd'hui accessible que derrière
+l'authentification Vercel (`vercel.com/sso`), et aucun nom de domaine propre
+n'est rattaché au projet. Avant l'ouverture au public il faudra brancher
+`maylary.ci` et lever cette protection.*
+
 
 ### 0. LE CRÉDIT GOOGLE AI — Le Déclarant est ARRÊTÉ
 
@@ -67,26 +111,54 @@ réel que vous facturez (ou que votre CAD partenaire vous facture), l'unité
 (par dossier / par tonne / par m³ / par conteneur / par kg), et si le montant
 change selon le mode (aérien, maritime, express).
 
-1. Honoraires de transit et de déclaration
-2. Frais de dossier
-3. Acconage et manutention portuaire
-4. Manutention et magasinage aéroport
-5. Magasinage et stationnement
-6. Passage au scanner
-7. Bordereau de suivi des cargaisons (BSC/BESC)
-8. Dégroupage et déconsolidation
-9. Groupage et empotage au départ
-10. Transport terrestre jusqu'au lieu de livraison
-11. Formalités et attestations à l'export
-12. Débours et frais divers
+**Quatre sont tombés le 14 août**, tirés de votre cotation DEMCI du 20/05/2025
+et recoupés en partie double contre le devis lui-même :
+
+| Poste | Montant | Assiette |
+|---|---|---|
+| Honoraires (H.A.D.) | **100 000** | par dossier |
+| Tirage de la déclaration | **70 000** | par dossier |
+| Apurement D3 | **20 000** | par dossier |
+| Frais d'agio | **10 000** | par dossier |
+| | **200 000** | **par dossier** |
+
+*Pourquoi je les ai retenus sans vous redemander confirmation :* le bloc
+douane de votre devis fait 509 187, le bloc divers 386 654, et la somme tombe
+sur 895 841 — exactement le montant écrit en toutes lettres au bas de la page.
+Une seule erreur d'affectation ferait tomber ce total à côté. Il tombe juste.
+
+**Ce qui reste à confirmer — onze postes :**
+
+1. Frais de dossier
+2. Acconage et manutention portuaire
+3. Manutention et magasinage aéroport
+4. Magasinage et stationnement *(votre devis dit 150 000, mais ce poste croît
+   avec les jours passés sous douane — je l'ai noté sans le confirmer, pour ne
+   pas annoncer 150 000 à un dossier qui dormira trois semaines)*
+5. Passage au scanner
+6. Bordereau de suivi des cargaisons (BSC/BESC)
+7. Dégroupage et déconsolidation
+8. Groupage et empotage au départ
+9. Transport terrestre jusqu'au lieu de livraison
+10. Formalités et attestations à l'export
+11. Débours et frais divers
 
 **Forme la plus simple :** une photo d'un de vos devis réels, ou une liste
 écrite au fil de la plume. Je m'occupe de la mise en forme.
 
-**Ce que ça débloque :** les douze sont aujourd'hui marqués « contractuel »,
-c'est-à-dire non confirmés. Tant qu'ils le sont, le moteur **refuse de
-totaliser un devis de transit** — il affiche les postes manquants au lieu
-d'inventer un total. C'est le seul blocage du module transit.
+**Deux choses que votre cotation soulève, et sur lesquelles j'ai besoin de vous :**
+
+- **Le RPI y figure à 70 000.** La règle codée dans le moteur est
+  *FOB × 0,75 %, plancher 100 000 par déclaration*. Sur cette cotation, ni le
+  taux ni le plancher ne rendent 70 000. Est-ce un forfait de votre CAD, une
+  ancienne règle, ou ai-je mal lu la ligne ?
+- **La TVA du bloc « débours divers » est de 36 654.** Elle correspond à 18 %
+  d'une base de 203 633, que je n'arrive pas à reconstituer à partir des lignes
+  visibles. Sur quoi porte-t-elle exactement ?
+
+**Les deux autres pièces jointes sont des scans** que mon environnement ne sait
+pas lire — seule la première contient du texte. Retapez les montants, ou
+envoyez-les en photo JPEG : les images, je les lis directement.
 
 ### 3. Des taux de fret réels, avec leur date de validité
 
@@ -100,10 +172,40 @@ Maroc, Tunisie → Abidjan) :
 
 **Forme :** une capture d'écran de la cotation reçue de la compagnie suffit.
 
-**Ce que ça débloque :** la table est vide. La mécanique est en place — vous
-avez eu raison de dire que le fret change selon les périodes, et le moteur
-refuse désormais de chiffrer sur un taux périmé. Mais sans une seule ligne, il
-n'a rien à refuser : il ne chiffre pas du tout.
+**Votre règle du plafond prudent est en place depuis le 14 août.** Vous
+m'aviez dit : *« le fret est demandé à la compagnie, je ne peux pas avoir un
+tarif réel… on ne peut que se baser sur les normes, dans l'extrême vigilance,
+en mettant l'estimation au-dessus de la moyenne, en le signifiant au client. »*
+
+Le moteur connaît désormais une quatrième nature de taux, « plafond ». Elle se
+distingue des trois autres sur deux questions séparées : *puis-je graver ce
+montant dans une facture* (non) et *puis-je l'annoncer au client* (oui, avec la
+réserve). Votre phrase est portée par la base elle-même, pas par une consigne
+de rédaction — une consigne s'oublie, une valeur qui doit être là ne s'oublie
+pas :
+
+> « Sous réserve de la confirmation par la compagnie : elle peut diminuer ou
+> être ce montant, mais jamais plus. »
+
+**Ce qu'il me manque, et que je ne peux pas inventer : les plafonds.** Pour
+chaque liaison que vous traitez, le montant au-dessus duquel vous êtes certain
+de ne jamais être dépassé :
+
+| Mode | Origine | Unité | Votre plafond |
+|---|---|---|---|
+| Aérien | Chine → Abidjan | par kg | ? |
+| Express | Chine → Abidjan | par kg | ? |
+| Groupage maritime | Chine → Abidjan | par unité payante | ? |
+| Aérien | France → Abidjan | par kg | ? |
+| Groupage maritime | Europe → Abidjan | par unité payante | ? |
+
+Ajoutez les liaisons qui manquent, retirez celles que vous ne faites pas. Ces
+chiffres viennent de votre métier — c'est exactement le genre de valeur que je
+refuse de produire à votre place.
+
+**Ce que ça débloque :** aujourd'hui la table est vide, donc le moteur ne
+chiffre aucun fret. Avec vos plafonds, il cote — avec la réserve, à chaque
+fois.
 
 ### 4. La liste officielle des positions exonérées par l'APE
 
