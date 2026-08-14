@@ -36,7 +36,23 @@ const NOM_OUTILS: Record<string, string> = {
   mes_commandes: 'lecture de vos commandes',
   mes_dossiers_transit: 'lecture de vos dossiers',
   passer_la_main: 'transmis à l’équipe',
+  chercher_chez_les_fournisseurs: 'recherche chez nos fournisseurs',
+  ouvrir_une_recherche_sourcing: 'recherche de sourcing ouverte',
 };
+
+/**
+ * Ouvrir Le Déclarant depuis n'importe où, avec une question déjà écrite.
+ *
+ * La boutique s'en sert quand une recherche ne donne rien : plutôt que de
+ * laisser le visiteur sur « aucun résultat », elle lui propose de faire
+ * chercher l'article chez les fournisseurs, et lui passe la main sans qu'il
+ * ait à retaper ce qu'il cherchait.
+ */
+export const EVENEMENT_DECLARANT = 'maylary:declarant';
+
+export function ouvrirLeDeclarant(question: string) {
+  window.dispatchEvent(new CustomEvent(EVENEMENT_DECLARANT, { detail: { question } }));
+}
 
 /** Le nom de l'écran, pour que la réponse tienne compte d'où l'on parle. */
 const contexteDeLaRoute = (chemin: string): string => {
@@ -86,6 +102,17 @@ export default function AssistantDeclarant() {
   useEffect(() => {
     if (ouvert) finRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [tours, ouvert, envoi]);
+
+  // Une autre page peut demander l'ouverture avec une question déjà rédigée.
+  useEffect(() => {
+    const surDemande = (e: Event) => {
+      const question = (e as CustomEvent<{ question?: string }>).detail?.question ?? '';
+      setOuvert(true);
+      if (question) setMessage(question);
+    };
+    window.addEventListener(EVENEMENT_DECLARANT, surDemande);
+    return () => window.removeEventListener(EVENEMENT_DECLARANT, surDemande);
+  }, []);
 
   // L'assistant n'a rien à faire par-dessus l'écran de connexion.
   if (pathname.startsWith('/admin/connexion') || pathname.startsWith('/boutique/compte')) {

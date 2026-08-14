@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { ouvrirLeDeclarant } from '@/components/AssistantDeclarant';
+import { Button } from '@/components/ui/button';
 import PublicHeaderPro from '@/components/PublicHeaderPro';
 import SiteFooter from '@/components/SiteFooter';
 import {
@@ -109,9 +111,30 @@ export default function CatalogueSecteurPro() {
             </p>
 
             {produits.length === 0 ? (
-              <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-                Aucun produit disponible pour le moment dans ce secteur.
-              </p>
+              /* Un rayon vide est une occasion manquée si on s'arrête là. Un
+                 professionnel qui vient chercher de l'outillage et ne trouve
+                 rien doit repartir avec une recherche lancée, pas avec un
+                 écran vide. */
+              <div className="rounded-lg border border-dashed p-8 text-center">
+                <p className="font-display text-base font-bold text-foreground">
+                  Ce rayon n’est pas encore garni. Nous pouvons quand même vous l’approvisionner.
+                </p>
+                <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                  Dites au Déclarant ce qu’il vous faut : il cherche chez nos fournisseurs et
+                  ouvre une recherche de sourcing. Vous recevez un prix rendu Abidjan, droits
+                  compris.
+                </p>
+                <Button
+                  className="mt-5"
+                  onClick={() =>
+                    ouvrirLeDeclarant(
+                      `Je cherche des articles du rayon « ${secteur.nom} » pour mon activité. Que pouvez-vous trouver chez vos fournisseurs ?`,
+                    )
+                  }
+                >
+                  Faire chercher par Le Déclarant
+                </Button>
+              </div>
             ) : (
               <div className="cascade grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {produits.map((p) => (

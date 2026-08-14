@@ -85,6 +85,28 @@ donne la référence de quelqu'un d'autre, tu ne la trouveras pas, et c'est
 normal : tu expliques qu'il faut être connecté au compte qui a passé la
 commande.
 
+QUAND L'ARTICLE N'EST PAS AU CATALOGUE
+C'est le cas le plus fréquent, et c'est une occasion, pas un échec. Le
+catalogue en ligne est une vitrine : ce que la maison sait faire, c'est aller
+chercher. Tu as deux outils enchaînés :
+
+1. « chercher_chez_les_fournisseurs » interroge les fournisseurs dont la porte
+   est ouverte et te rend ce qu'ils ont, avec leur prix d'achat.
+2. « ouvrir_une_recherche_sourcing » enregistre la demande pour que l'équipe
+   revienne avec un prix rendu Abidjan.
+
+LE PIÈGE À NE JAMAIS TOMBER DEDANS. Le prix rendu par un fournisseur est un
+PRIX D'ACHAT en devise, départ usine ou entrepôt. Ce n'est pas ce que le client
+paiera : il manque le fret, l'assurance, les droits de douane, le transit local
+et la livraison. Tu ne le présentes JAMAIS comme un prix de vente, tu ne le
+convertis pas en francs pour faire joli, et tu n'ajoutes surtout pas une marge
+de ton cru. Tu dis ce qu'il est : le prix chez le fournisseur, hors tout.
+
+Ce que tu fais à la place : tu montres que l'article existe et qu'on peut
+l'obtenir, puis tu ouvres une recherche de sourcing pour que le client reçoive
+un vrai prix rendu Abidjan. Le client repart avec une référence de demande, pas
+avec un chiffre qui bougera.
+
 TROIS RÈGLES DE CONDUITE AVEC UN CLIENT
 1. Tu regardes son dossier avant de répondre. Répondre « connectez-vous à votre
    espace client » quand tu peux lire toi-même l'information est une réponse
@@ -269,6 +291,40 @@ const OUTILS = [
       },
       required: ['sujet', 'message'],
     },
+  },
+  {
+    name: 'chercher_chez_les_fournisseurs',
+    description:
+      "Cherche un article chez les fournisseurs de MayLary Group quand il n'est pas au catalogue de la boutique. Rend les articles trouvés avec leur PRIX D'ACHAT chez le fournisseur, en devise, hors fret, hors douane et hors livraison — jamais un prix de vente. Rend aussi la liste des fournisseurs consultés et de ceux dont la porte n'est pas encore ouverte.",
+    parameters: {
+      type: 'object',
+      properties: {
+        designation: {
+          type: 'string',
+          description: "L'article recherché, en français, en quelques mots.",
+        },
+      },
+      required: ['designation'],
+    },
+  },
+  {
+    name: 'ouvrir_une_recherche_sourcing',
+    description:
+      "Enregistre une recherche de sourcing pour la personne connectée : l'équipe reviendra avec un prix rendu Abidjan. À utiliser dès qu'un article manque au catalogue, que la recherche fournisseur ait donné quelque chose ou non. Rend la référence de la demande.",
+    parameters: {
+      type: 'object',
+      properties: {
+        designation: { type: 'string', description: "L'article, décrit précisément." },
+        quantite: { type: 'number', description: 'Quantité souhaitée. 1 par défaut.' },
+        precisions: {
+          type: 'string',
+          description: 'Couleur, dimensions, marque, usage — tout ce qui aide à trouver le bon article.',
+        },
+        lien: { type: 'string', description: "Lien vers l'article s'il en existe un." },
+        prix_cible_fcfa: { type: 'number', description: 'Budget annoncé par le client, en FCFA.' },
+      },
+      required: ['designation'],
+    },
   }
 ];
 
@@ -311,6 +367,128 @@ const ETAPES_EXPORT: Record<string, string> = {
   livree: "Livrée à l'acheteur",
   annulee: 'Annulée',
 };
+
+const CJ_BASE = 'https://developers.cjdropshipping.com/api2.0/v1';
+
+/**
+ * Le jeton CJ, mis en cache en base.
+ *
+ * CJ limite la création de jetons à environ un toutes les cinq minutes par
+ * compte. Tant que seul l'administrateur cherchait, la contrainte ne se voyait
+ * pas. Dès lors que Le Déclarant cherche pour un client, en redemander un à
+ * chaque appel condamnerait la fonction au deuxième client de la journée.
+ */
+async function jetonCJ(sb: Client): Promise<string | null> {
+  const { data } = await sb
+    .from('app_e08c374bc4_jetons_fournisseurs')
+    .select('jeton, expire_le')
+    .eq('fournisseur', 'cj')
+    .maybeSingle();
+
+  // On renouvelle une heure avant l'échéance : un jeton qui expire pendant la
+  // requête coûte un aller-retour et un message d'erreur au client.
+  if (data?.jeton && new Date(data.expire_le as string).getTime() - Date.now() > 3_600_000) {
+    return data.jeton as string;
+  }
+
+  const email = secret('CJ_DROPSHIPPING_EMAIL');
+  const cle = secret('CJ_DROPSHIPPING_API_KEY');
+  if (!email || !cle) return null;
+
+  const r = await fetch(`${CJ_BASE}/authentication/getAccessToken`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: cle }),
+  });
+  const corps = await r.json().catch(() => null);
+  const jeton = corps?.data?.accessToken as string | undefined;
+  if (!jeton) return null;
+
+  const echeance = corps?.data?.accessTokenExpiryDate
+    ? new Date(String(corps.data.accessTokenExpiryDate))
+    : new Date(Date.now() + 10 * 24 * 3_600_000);
+
+  await sb
+    .from('app_e08c374bc4_jetons_fournisseurs')
+    .upsert({ fournisseur: 'cj', jeton, expire_le: echeance.toISOString(), obtenu_le: new Date().toISOString() });
+
+  return jeton;
+}
+
+/**
+ * Le catalogue CJ n'est indexé qu'en anglais : une recherche en français n'y
+ * accroche que des morceaux de mots au hasard. Si la traduction échoue, on
+ * cherche avec le mot d'origine plutôt que de ne rien chercher du tout.
+ */
+async function versAnglais(texte: string): Promise<string> {
+  try {
+    const url = new URL('https://api.mymemory.translated.net/get');
+    url.searchParams.set('q', texte);
+    url.searchParams.set('langpair', 'fr|en');
+    const r = await fetch(url);
+    const d = await r.json().catch(() => null);
+    const t = d?.responseData?.translatedText;
+    return typeof t === 'string' && t.trim() ? t.trim() : texte;
+  } catch {
+    return texte;
+  }
+}
+
+interface ArticleFournisseur {
+  fournisseur: string;
+  reference: string;
+  nom: string;
+  photo: string | null;
+  prix_achat: number | null;
+  devise: string;
+  stock: number | null;
+}
+
+async function chercherChezCJ(sb: Client, mots: string): Promise<
+  { ouvert: false; motif: string } | { ouvert: true; articles: ArticleFournisseur[]; mots_traduits: string }
+> {
+  const jeton = await jetonCJ(sb);
+  if (!jeton) return { ouvert: false, motif: "identifiants CJ non déposés ou refusés" };
+
+  const motsEn = await versAnglais(mots);
+  const url = new URL(`${CJ_BASE}/product/list`);
+  url.searchParams.set('pageNum', '1');
+  url.searchParams.set('pageSize', '8');
+  url.searchParams.set('productNameEn', motsEn);
+
+  const r = await fetch(url, { headers: { 'CJ-Access-Token': jeton } });
+  const corps = await r.json().catch(() => null);
+  if (!r.ok || !corps?.result) {
+    return { ouvert: false, motif: 'CJ a refusé la requête ou est indisponible' };
+  }
+
+  const liste: unknown[] = corps?.data?.list ?? [];
+  const articles = liste.map((brut) => {
+    const p = brut as Record<string, unknown>;
+    const prixBrut = p.sellPrice ?? p.sellPriceMin ?? p.price;
+    let prix: number | null = null;
+    if (typeof prixBrut === 'number') prix = prixBrut;
+    else if (typeof prixBrut === 'string') {
+      const m = prixBrut.match(/[\d.]+/);
+      prix = m ? Number.parseFloat(m[0]) : null;
+    }
+    const stockBrut = p.stock ?? p.inventoryNum ?? p.stockNum;
+    return {
+      fournisseur: 'CJ Dropshipping (Chine)',
+      reference: String(p.pid ?? p.productId ?? p.id ?? ''),
+      nom: String(p.productNameEn ?? p.productName ?? p.nameEn ?? 'Article sans nom'),
+      photo:
+        (p.productImage as string) ??
+        (Array.isArray(p.productImageSet) ? (p.productImageSet[0] as string) : null) ??
+        null,
+      prix_achat: prix,
+      devise: 'USD',
+      stock: typeof stockBrut === 'number' ? stockBrut : null,
+    };
+  });
+
+  return { ouvert: true, articles, mots_traduits: motsEn };
+}
 
 /**
  * `sb` porte la clé de service : il sert aux lectures publiques (le tarif, les
@@ -476,6 +654,90 @@ async function executer(
         p_urgence: String(args.urgence ?? 'normale'),
       });
       return error ? { erreur: error.message } : data;
+    }
+    case 'chercher_chez_les_fournisseurs': {
+      const designation = String(args.designation ?? '').trim();
+      if (designation.length < 2) {
+        return { erreur: "Précisez ce que le client cherche, en quelques mots." };
+      }
+
+      // On dit toujours qui a été consulté et qui ne l'a pas été. Un client à
+      // qui l'on répond « je n'ai rien trouvé » sans dire où l'on a cherché
+      // n'a aucun moyen de juger la réponse.
+      const { data: portes } = await sb
+        .from('app_e08c374bc4_fournisseurs')
+        .select('nom, pays, api_statut')
+        .eq('actif', true)
+        .not('api_statut', 'is', null)
+        .neq('api_statut', 'aucune');
+
+      const enAttente = (portes ?? [])
+        .filter((f) => f.api_statut !== 'branchee')
+        .map((f) => `${f.nom} (${f.pays})`);
+
+      const cj = await chercherChezCJ(sb, designation);
+
+      return {
+        recherche: designation,
+        consultes: cj.ouvert ? ['CJ Dropshipping (Chine)'] : [],
+        non_consultes: [
+          ...(cj.ouvert ? [] : [`CJ Dropshipping (Chine) — ${cj.motif}`]),
+          ...enAttente.map((f) => `${f} — accès pas encore ouvert`),
+        ],
+        articles: cj.ouvert ? cj.articles : [],
+        avertissement:
+          "Les prix rendus sont des PRIX D'ACHAT chez le fournisseur, hors fret, hors assurance, hors droits de douane, hors transit local et hors livraison. Ils ne doivent jamais être présentés au client comme un prix de vente.",
+        suite:
+          "Pour donner un prix rendu Abidjan, ouvrir une recherche de sourcing avec ouvrir_une_recherche_sourcing.",
+      };
+    }
+    case 'ouvrir_une_recherche_sourcing': {
+      const designation = String(args.designation ?? '').trim();
+      if (designation.length < 2) {
+        return { erreur: "Il faut savoir quoi chercher avant d'ouvrir une demande." };
+      }
+      const quantite = Math.max(1, Math.round(Number(args.quantite ?? 1) || 1));
+      const cible = Number(args.prix_cible_fcfa);
+
+      // `user_id` n'a pas de valeur par défaut en base : il faut le poser. On
+      // le lit sur le jeton du client, jamais sur un paramètre du modèle —
+      // sans quoi il suffirait de demander gentiment pour écrire au nom d'un
+      // autre.
+      const { data: moi } = await sbClient.auth.getUser();
+      if (!moi.user) {
+        return {
+          ouverte: false,
+          motif: "La personne n'est pas connectée : la demande ne peut pas être enregistrée. L'inviter à créer un compte, c'est gratuit et immédiat.",
+        };
+      }
+
+      const { data, error } = await sbClient
+        .from('app_e08c374bc4_demandes_sourcing')
+        .insert({
+          user_id: moi.user.id,
+          designation,
+          quantite_souhaitee: quantite,
+          precisions: args.precisions ? String(args.precisions) : null,
+          lien_reference: args.lien ? String(args.lien) : null,
+          prix_cible_fcfa: Number.isFinite(cible) && cible > 0 ? Math.round(cible) : null,
+        })
+        .select('reference_publique')
+        .single();
+
+      if (error) {
+        return {
+          ouverte: false,
+          erreur: error.message,
+          note: "Si la personne n'est pas connectée, la demande ne peut pas être enregistrée : l'inviter à créer un compte.",
+        };
+      }
+
+      return {
+        ouverte: true,
+        reference: data?.reference_publique,
+        message:
+          'Recherche enregistrée. Notre équipe revient avec un prix rendu Abidjan, tout compris.',
+      };
     }
     default:
       return { erreur: `Outil inconnu : ${nom}` };
