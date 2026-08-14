@@ -9,6 +9,7 @@ const LINKS = [
   { to: '/admin/import', label: "Demandes d'import" },
   { to: '/admin/export', label: "Demandes d'export" },
   { to: '/admin/commandes', label: 'Commandes Boutique' },
+  { to: '/admin/assistance', label: 'Assistance client' },
   { to: '/admin/sourcing', label: 'Sourcing sur demande' },
   { to: '/admin/vendeurs', label: 'Vendeurs marketplace' },
   { to: '/admin/achats-groupes', label: 'Achats groupés' },

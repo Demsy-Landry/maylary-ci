@@ -37,6 +37,7 @@ import AdminAchatsGroupesGestion from '@/pages/admin/AchatsGroupesGestion';
 import AdminEquipeGestion from '@/pages/admin/EquipeGestion';
 import AdminDevisGestion from '@/pages/admin/DevisGestion';
 import AdminDashboard from '@/pages/admin/Dashboard';
+import AdminAssistance from '@/pages/admin/Assistance';
 import AdminImportGestion from '@/pages/admin/ImportGestion';
 import NouvelleDemandeImport from '@/pages/NouvelleDemandeImport';
 import MesDemandesImport from '@/pages/MesDemandesImport';
@@ -106,6 +107,14 @@ function App() {
                   element={
                     <AdminRoute>
                       <AdminDashboard />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/assistance"
+                  element={
+                    <AdminRoute ecran="/admin/assistance">
+                      <AdminAssistance />
                     </AdminRoute>
                   }
                 />

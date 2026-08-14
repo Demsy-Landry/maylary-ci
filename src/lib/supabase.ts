@@ -1173,6 +1173,7 @@ export const ROLE_EQUIPE_DESCRIPTIONS: Record<RoleEquipe, string> = {
 export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin': ['proprietaire', 'operations', 'catalogue'],
   '/admin/commandes': ['proprietaire', 'operations'],
+  '/admin/assistance': ['proprietaire', 'operations'],
   '/admin/sourcing': ['proprietaire', 'operations'],
   '/admin/vendeurs': ['proprietaire', 'operations'],
   '/admin/import': ['proprietaire', 'operations'],

@@ -33,6 +33,9 @@ const NOM_OUTILS: Record<string, string> = {
   chiffrer_operation: 'chiffrage complet',
   regles_de_procedure: 'règles de procédure',
   regimes_douaniers: 'régimes douaniers',
+  mes_commandes: 'lecture de vos commandes',
+  mes_dossiers_transit: 'lecture de vos dossiers',
+  passer_la_main: 'transmis à l’équipe',
 };
 
 /** Le nom de l'écran, pour que la réponse tienne compte d'où l'on parle. */
@@ -48,10 +51,15 @@ const contexteDeLaRoute = (chemin: string): string => {
   return "accueil MayLary Group";
 };
 
+// Les suggestions décident de l'idée que le client se fait de l'assistant. Les
+// deux premières sont des questions de client, pas de douanier : c'est ce que
+// l'on recevra le plus souvent, et c'est ce à quoi Le Déclarant doit répondre
+// avant tout le reste.
 const SUGGESTIONS = [
+  'Où en est ma commande ?',
+  'J’ai payé, avez-vous bien reçu ?',
   'Quel incoterm choisir pour un premier import de Chine ?',
   'Combien coûtent les droits sur des pneus de tourisme ?',
-  'Quels documents pour exporter du cacao ?',
 ];
 
 export default function AssistantDeclarant() {
