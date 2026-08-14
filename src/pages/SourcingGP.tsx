@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,7 +40,10 @@ export default function SourcingGP() {
   const [envoi, setEnvoi] = useState(false);
   const [reponseEnCours, setReponseEnCours] = useState<string | null>(null);
 
-  const [designation, setDesignation] = useState('');
+  // La boutique renvoie ici avec ce que le visiteur cherchait : lui faire
+  // retaper son article après une recherche infructueuse, c'est le perdre.
+  const [parametres] = useSearchParams();
+  const [designation, setDesignation] = useState(parametres.get('designation') ?? '');
   const [lien, setLien] = useState('');
   const [quantite, setQuantite] = useState('1');
   const [prixCible, setPrixCible] = useState('');

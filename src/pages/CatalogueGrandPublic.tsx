@@ -16,9 +16,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Search, ImageOff, ShoppingCart } from 'lucide-react';
+import { Search, ImageOff, ShoppingCart, PackageSearch } from 'lucide-react';
 import SectorIllustration, { guessSector } from '@/components/illustrations/SectorIllustration';
 import OrigineProduitBadge from '@/components/OrigineProduitBadge';
+import { ouvrirLeDeclarant } from '@/components/AssistantDeclarant';
 import { useCartGP } from '@/hooks/useCartGP';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -170,9 +171,37 @@ export default function CatalogueGrandPublic() {
               {searchResults.length} résultat(s) pour « {search} »
             </p>
             {searchResults.length === 0 ? (
-              <p className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-                Aucun produit ne correspond à votre recherche.
-              </p>
+              /* Une recherche vide n'est pas une impasse : c'est le moment où
+                 la maison a quelque chose à offrir que la boutique n'a pas.
+                 Le catalogue en ligne est une vitrine ; le métier, c'est
+                 d'aller chercher. */
+              <div className="rounded-lg border border-dashed p-8 text-center">
+                <PackageSearch className="mx-auto h-8 w-8 text-primary" />
+                <p className="mt-3 font-display text-base font-bold text-foreground">
+                  Ce n’est pas en boutique. Ça ne veut pas dire qu’on ne peut pas l’avoir.
+                </p>
+                <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                  Notre catalogue en ligne est une vitrine. Le Déclarant peut chercher
+                  « {search.trim()} » directement chez nos fournisseurs et lancer une recherche
+                  de sourcing : vous recevez un prix rendu Abidjan, droits et livraison compris.
+                </p>
+                <div className="mt-5 flex flex-wrap justify-center gap-3">
+                  <Button
+                    onClick={() =>
+                      ouvrirLeDeclarant(
+                        `Je cherche « ${search.trim()} ». Ce n'est pas dans votre boutique : pouvez-vous le chercher chez vos fournisseurs ?`,
+                      )
+                    }
+                  >
+                    Faire chercher par Le Déclarant
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link to={`/boutique/sourcing?designation=${encodeURIComponent(search.trim())}`}>
+                      Remplir une demande de sourcing
+                    </Link>
+                  </Button>
+                </div>
+              </div>
             ) : (
               <div className="cascade grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
                 {searchResults.map((p) => (
