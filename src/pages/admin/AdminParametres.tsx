@@ -8,6 +8,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import AdminNav from '@/components/AdminNav';
 import CanauxPaiementCard from '@/components/admin/CanauxPaiementCard';
+import ConsigneDeclarantCard from '@/components/admin/ConsigneDeclarantCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -91,6 +92,8 @@ export default function AdminParametres() {
         <CanauxPaiementCard />
 
         <ParametresFacturationCard />
+
+        <ConsigneDeclarantCard />
 
         <Card>
           <CardHeader>

@@ -108,12 +108,20 @@ brief, 3 380 387 FCFA d'économie sur une seule expédition.
 
 ### 5. Le canal de service client
 
-**Ce qu'il me faut :** le numéro WhatsApp Business de MayLary, et si vous
-l'avez, l'accès à l'API WhatsApp Business (Meta). Sinon, un simple numéro
-suffit pour commencer — je poserai un lien direct depuis chaque commande.
+**Ce qui est déjà fait.** Le Déclarant sait maintenant lire vos commandes et
+vos dossiers, répondre « où en est ma marchandise », et — quand il ne peut pas
+résoudre — ouvrir une demande d'assistance visible dans **Admin → Assistance
+client**, avec le résumé de ce qu'il a déjà vérifié. Le délai annoncé au client
+est de 24 heures ouvrées, et l'écran signale en rouge les demandes qui le
+dépassent.
 
-**Et une décision de votre part :** le délai de réponse que vous vous engagez
-à tenir. Il sera affiché. Mieux vaut « sous 24 h » tenu que « immédiat » raté.
+**Ce qu'il me faut :** le numéro WhatsApp Business de MayLary. Un simple numéro
+suffit pour commencer — je poserai un lien direct depuis chaque commande et
+depuis chaque demande d'assistance.
+
+**Et une décision de votre part :** confirmez-vous les 24 heures ouvrées, ou
+préférez-vous un autre délai ? Il est écrit en base, il se change en une ligne.
+Mieux vaut « sous 48 h » tenu que « sous 24 h » raté.
 
 ### 6. Vos conditions générales, et qui répond de quoi
 
@@ -139,25 +147,48 @@ une belle mécanique vide. Une seule commande réellement livrée, avec son
 regarde. C'est le critère de sortie H0 de votre propre schéma directeur, et je
 suis d'accord avec vous : c'est ce qui compte le plus.
 
-### 8. Le Droit Unique de Sortie
+### 8. L'export : quelles marchandises, au juste
 
-**Ce qu'il me faut :** les taux et les positions du DUS sur cacao, café, cajou,
-et les autres produits concernés.
+**Correction.** J'avais mis en tête de liste le Droit Unique de Sortie sur le
+cacao, le café et le cajou. C'était une erreur de ma part, et vous l'avez dit :
+ces filières supposent un agrément d'exportateur, des quotas et un contrôle
+qualité propres à chaque filière. Ce n'est pas un démarrage, c'est un métier
+à part entière, et s'y risquer sans l'agrément expose à bien pire qu'un
+mauvais devis.
 
-**Ce que ça débloque :** la liquidation export est complète sauf sur ce point.
-Aujourd'hui, sur un produit soumis au DUS, l'application le signale mais ne
-peut pas le chiffrer.
+**Ce qui est fait :** Le Déclarant a désormais pour consigne d'écarter ces
+filières, d'expliquer en deux phrases ce qu'elles exigent, et d'orienter vers
+l'organisme compétent — sans monter de dossier ni chiffrer quoi que ce soit.
+
+**Ce qu'il me faut à la place :** votre liste des marchandises d'export que
+vous acceptez réellement de traiter aujourd'hui. Ma proposition, à corriger :
+effets personnels, échantillons commerciaux, pièces et équipements, produits
+manufacturés, colis express vers la diaspora. Le DUS reviendra le jour où
+l'agrément filière sera là — pas avant.
 
 ---
 
 ## P2 — Pour élargir
 
-### 9. Les accès fournisseurs
+### 9. Les accès fournisseurs — à décider, pas à faire
 
-- **vidaXL** : écrire à `b2bperformance@vidaxl.com` pour un accès B2B gratuit.
-  Le connecteur est écrit et déployé ; il attend `VIDAXL_EMAIL` et
-  `VIDAXL_API_KEY` dans les secrets Supabase.
-- **BigBuy** : nécessite un pack payant. À décider — ce n'est pas urgent.
+**Correction, et je l'assume.** vidaXL et BigBuy étaient MON initiative, pas
+une de vos demandes. Je les avais proposés pour élargir le catalogue au-delà
+de CJ en Chine ; j'ai continué à les inscrire comme s'ils étaient décidés.
+Ils ne le sont pas.
+
+Où on en est réellement : le connecteur vidaXL est écrit et déployé, mais il
+**ne fait rien** tant qu'aucun identifiant n'est déposé — il répond « pas
+prêt » et dit ce qui manque. Il ne consomme rien et ne gêne rien.
+
+**Ce que je vous demande :** un simple oui ou non.
+- *Non* → je retire le connecteur et je n'en reparle plus. Le catalogue reste
+  sur CJ et sur vos propres fournisseurs.
+- *Oui* → vous écrivez à leur service B2B, et vous déposez les identifiants
+  reçus dans les secrets Supabase.
+
+Aucun des deux n'est nécessaire pour vendre. Le catalogue compte déjà
+60 références.
 
 ### 10. Le crédit Google AI
 

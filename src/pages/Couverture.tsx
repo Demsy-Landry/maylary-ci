@@ -124,22 +124,27 @@ export default function Couverture() {
       {/* ---------- Ouverture ----------
           Une seule image chargée en priorité sur toute la page. Le reste vient
           après, et seulement quand il approche de l'écran. */}
-      <section className="relative flex min-h-[86vh] items-center overflow-hidden bg-foreground">
+      <section className="relative flex min-h-[34rem] items-center overflow-hidden bg-foreground sm:min-h-[86vh]">
         {/* L'ouverture portait jusqu'ici la couverture Facebook de la marque,
             une bannière de 735 x 272 pixels étirée sur une hauteur d'écran :
             à cette échelle elle était floue et recadrée n'importe comment.
-            Une vraie photographie de livraison, au bon format, tient la
-            promesse écrite juste à côté — « livré partout en Côte d'Ivoire ». */}
+            Une photographie de boutique, au format paysage, dit ce que le
+            visiteur vient chercher.
+
+            Sur un téléphone, une image paysage tenue sur 86 % de la hauteur
+            d'écran se recadre si violemment qu'on n'y reconnaît plus rien :
+            d'où la hauteur fixe en dessous de 640 pixels de large, et le
+            cadrage calé sur le centre haut plutôt que sur le milieu. */}
         <img
-          src={photo('carousel-3-livraison.jpg')}
+          src={photo('carousel-1-boutique.jpg')}
           alt=""
           width={1600}
           height={900}
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
           onError={(e) => {
-            e.currentTarget.src = photo('mode-aerien.jpg');
+            e.currentTarget.src = photo('carousel-3-livraison.jpg');
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/25" />
@@ -236,13 +241,18 @@ export default function Couverture() {
                   to={`/boutique/produit/${p.id}`}
                   className="group overflow-hidden rounded-lg border bg-card transition hover:shadow-md"
                 >
-                  <div className="aspect-square overflow-hidden bg-muted">
+                  {/* `object-contain`, et non `object-cover` : un article se
+                      montre en entier. Recadrer au carré coupait les pieds
+                      d'un meuble et la moitié d'un réfrigérateur — sur un
+                      téléphone, où la vignette est deux fois plus petite,
+                      cela donnait des images qui ne ressemblaient à rien. */}
+                  <div className="aspect-square overflow-hidden bg-white p-3">
                     <img
                       src={p.photos![0]}
                       alt=""
                       loading="lazy"
                       decoding="async"
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-3">
@@ -266,7 +276,7 @@ export default function Couverture() {
                       alt=""
                       loading="lazy"
                       decoding="async"
-                      className="h-12 w-12 rounded object-cover"
+                      className="h-12 w-12 rounded bg-white object-contain p-0.5"
                     />
                     <span className="whitespace-nowrap text-sm tabular-nums text-muted-foreground">
                       {fcfa(p.prix_unitaire_fcfa)}
@@ -346,6 +356,78 @@ export default function Couverture() {
               <Link to="/boutique/achats-groupes">Voir les achats groupés</Link>
             </Button>
           </div>
+        </div>
+      </section>
+
+      {/* ---------- Ce qu'on fait, en images ----------
+          Le fondateur a eu raison de dire que les photographies n'illustraient
+          pas le métier : trois images de décor ne racontent pas une chaîne
+          logistique. Ici chaque photo porte une étape, et les quatre étapes
+          mises bout à bout sont exactement ce que la maison exécute entre le
+          fournisseur et la porte du client. */}
+      <section className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6">
+        <div className="max-w-2xl" data-revele>
+          <h2 className="font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Entre l’usine et votre porte, ce que nous faisons
+          </h2>
+          <p className="mt-2 text-muted-foreground">
+            Vous voyez un prix et une date. Derrière, il y a quatre métiers — et c’est
+            précisément ce que vous n’avez pas à apprendre.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-revele-cascade>
+          {[
+            {
+              image: 'service-sourcing.jpg',
+              etape: '1',
+              titre: 'On trouve la marchandise',
+              texte:
+                'Chine, Turquie, Europe, Maghreb. On compare les fournisseurs, on vérifie l’origine, et on choisit celle qui coûte le moins cher droits compris.',
+            },
+            {
+              image: 'mode-aerien.jpg',
+              etape: '2',
+              titre: 'On groupe et on expédie',
+              texte:
+                'Aérien, express, groupage maritime. Votre colis voyage avec d’autres : vous ne payez que la place qu’il occupe.',
+            },
+            {
+              image: 'service-importer.jpg',
+              etape: '3',
+              titre: 'On dédouane',
+              texte:
+                'Position tarifaire, valeur en douane, droits et taxes. La déclaration est signée par notre commissionnaire agréé partenaire.',
+            },
+            {
+              image: 'carousel-3-livraison.jpg',
+              etape: '4',
+              titre: 'On livre chez vous',
+              texte:
+                'Transit local jusqu’à votre adresse. Vous confirmez la réception, et c’est seulement là que le vendeur est réglé.',
+            },
+          ].map((e) => (
+            <div key={e.etape} className="overflow-hidden rounded-xl border bg-card">
+              {/* Rapport fixe : quelle que soit la taille de la photo d'origine,
+                  la vignette garde la même forme et ne déforme jamais l'image. */}
+              <div className="aspect-[4/3] overflow-hidden bg-muted">
+                <img
+                  src={photo(e.image)}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="p-4">
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+                  Étape {e.etape}
+                </p>
+                <h3 className="mt-1.5 font-display text-base font-bold text-foreground">{e.titre}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{e.texte}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

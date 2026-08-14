@@ -28,9 +28,17 @@ const CLES_GOOGLE = ['GOOGLE_API_KEY', 'GOOGLE_API_KEY2'];
 const PERSONNAGE = `Tu es « Le Déclarant », le logisticien de MayLary Group.
 
 QUI TU ES
-Commissionnaire en douane et logisticien senior, plus de dix ans dans le transit et
-l'approvisionnement international, formé sur les grands corridors africains et
-particulièrement sur la Côte d'Ivoire. Tu as vu passer des milliers de dossiers :
+Transitaire et logisticien senior de MayLary Group, plus de dix ans dans le
+transit et l'approvisionnement international, formé sur les grands corridors
+africains et particulièrement sur la Côte d'Ivoire. Spécialité de la maison :
+l'aérien, l'express, et le groupage-dégroupage maritime et aérien.
+
+Tu n'es PAS commissionnaire en douane agréé, et tu ne le laisses jamais croire.
+La déclaration en détail est signée par le commissionnaire agréé partenaire de
+MayLary Group. C'est le seul acte que la loi lui réserve ; tout le reste de la
+chaîne, MayLary Group le prend en charge.
+
+Tu as vu passer des milliers de dossiers :
 tu sais ce qui bloque un conteneur à Abidjan, ce qu'un fournisseur chinois
 accepte de négocier, à quel moment un client se fait avoir sur un incoterm, et
 pourquoi un dossier qui traîne trois jours coûte plus cher qu'une remise
@@ -56,6 +64,37 @@ CE QUE MAYLARY GROUP SAIT FAIRE, ET QUE TU DOIS CONNAÎTRE
   un prix de gros.
 - Garantie « payé, protégé » : le paiement du fournisseur est retenu jusqu'à la
   confirmation de livraison par le client.
+
+TON PREMIER MÉTIER : ACCUEILLIR, RÉSOUDRE, ET SUIVRE JUSQU'À LA LIVRAISON
+Avant d'être un expert en tarif douanier, tu es la personne que le client
+trouve quand il a une question. La plupart des questions qu'on te posera ne
+seront pas des questions de douane : « où est ma commande ? », « j'ai payé,
+vous avez reçu ? », « c'est quoi ce montant ? », « je peux annuler ? »,
+« quand je serai livré ? ».
+
+Tu as des outils pour ça, et tu t'en sers AVANT de répondre :
+- « mes_commandes » : les commandes boutique de la personne connectée, leur
+  statut, leur transporteur, leur numéro de suivi, leur date de livraison.
+- « mes_dossiers_transit » : ses demandes d'import et d'export, l'étape en cours,
+  le montant du devis.
+- « passer_la_main » : quand tu ne peux pas résoudre, tu ouvres une demande
+  d'assistance pour l'équipe, avec un résumé de ce que tu as compris.
+
+Ces outils ne voient QUE les dossiers de la personne qui te parle. Si elle te
+donne la référence de quelqu'un d'autre, tu ne la trouveras pas, et c'est
+normal : tu expliques qu'il faut être connecté au compte qui a passé la
+commande.
+
+TROIS RÈGLES DE CONDUITE AVEC UN CLIENT
+1. Tu regardes son dossier avant de répondre. Répondre « connectez-vous à votre
+   espace client » quand tu peux lire toi-même l'information est une réponse
+   inutile.
+2. Tu n'annonces jamais une date de livraison que tu n'as pas lue. Le délai
+   dépend de la compagnie, pas de nous. Tu dis l'étape où en est le dossier, et
+   ce qui vient après.
+3. Tu ne laisses jamais une conversation se terminer sans issue. Si tu n'as pas
+   la réponse, tu ouvres une demande d'assistance avec « passer_la_main » et tu
+   annonces le délai que l'outil te rend — jamais un délai que tu inventes.
 
 RÈGLE ABSOLUE, QUI PRIME SUR TOUT LE RESTE
 Tu ne donnes JAMAIS de mémoire :
@@ -184,11 +223,109 @@ const OUTILS = [
       required: [],
     },
   },
+  {
+    name: 'mes_commandes',
+    description:
+      "Rend les commandes boutique de la personne connectée : référence, statut, montant, transporteur, numéro de suivi, dates. À appeler dès qu'un client parle de SA commande, de son paiement ou de sa livraison. Ne voit que ses propres commandes.",
+    parameters: {
+      type: 'object',
+      properties: {
+        reference: {
+          type: 'string',
+          description: "Référence précise à retrouver. Laisser vide pour lister les commandes récentes.",
+        },
+      },
+    },
+  },
+  {
+    name: 'mes_dossiers_transit',
+    description:
+      "Rend les demandes d'import et d'export de la personne connectée : référence, sens, étape en cours, montant du devis. À appeler dès qu'un client parle de SON dossier, de son devis ou de sa marchandise en cours d'acheminement.",
+    parameters: {
+      type: 'object',
+      properties: {
+        reference: {
+          type: 'string',
+          description: "Référence précise à retrouver. Laisser vide pour lister les dossiers récents.",
+        },
+      },
+    },
+  },
+  {
+    name: 'passer_la_main',
+    description:
+      "Ouvre une demande d'assistance pour l'équipe MayLary Group quand tu ne peux pas résoudre toi-même : réclamation, retard, erreur de montant, annulation, ou toute question qui demande une décision humaine. Rend le délai de réponse à annoncer au client. N'invente jamais ce délai.",
+    parameters: {
+      type: 'object',
+      properties: {
+        sujet: { type: 'string', description: 'Le problème en une ligne.' },
+        message: { type: 'string', description: 'La demande du client, dans ses mots.' },
+        reference: { type: 'string', description: 'Référence du dossier concerné, si elle existe.' },
+        resume: {
+          type: 'string',
+          description: "Ce que tu as déjà vérifié et compris, pour que l'équipe ne reparte pas de zéro.",
+        },
+        urgence: { type: 'string', description: "'bloquante' si le client est arrêté, sinon 'normale'." },
+      },
+      required: ['sujet', 'message'],
+    },
+  }
 ];
 
 type Client = ReturnType<typeof createClient>;
 
-async function executer(sb: Client, nom: string, args: Record<string, unknown>): Promise<unknown> {
+/** Libellés d'étape, pour que l'assistant ne les reformule pas à sa façon. */
+const ETAPES_COMMANDE: Record<string, string> = {
+  en_attente_paiement: 'En attente de paiement',
+  paiement_recu_verification: 'Paiement reçu, vérification en cours',
+  paiement_confirme: 'Paiement confirmé',
+  en_preparation: 'En préparation',
+  expediee: 'Expédiée',
+  livree: 'Livrée',
+  annulee: 'Annulée',
+};
+
+const ETAPES_IMPORT: Record<string, string> = {
+  nouvelle: 'Demande reçue',
+  en_cotation: 'En cours de cotation',
+  devis_envoye: 'Devis envoyé, en attente de votre validation',
+  validee: 'Devis validé',
+  achat_effectue: 'Achat effectué auprès du fournisseur',
+  expedition_internationale: 'En transport international',
+  arrivee_ci: "Arrivée en Côte d'Ivoire",
+  dedouanement: 'Dédouanement en cours',
+  transit_local: 'En transit local vers votre adresse',
+  livree: 'Livrée',
+  annulee: 'Annulée',
+};
+
+const ETAPES_EXPORT: Record<string, string> = {
+  nouvelle: 'Demande reçue',
+  en_cotation: 'En cours de cotation',
+  devis_envoye: 'Devis envoyé, en attente de votre validation',
+  validee: 'Devis validé',
+  collecte_effectuee: 'Collecte effectuée',
+  dedouanement_export: 'Dédouanement export en cours',
+  expedition_internationale: 'En transport international',
+  arrivee_destination: 'Arrivée à destination',
+  livree: "Livrée à l'acheteur",
+  annulee: 'Annulée',
+};
+
+/**
+ * `sb` porte la clé de service : il sert aux lectures publiques (le tarif, les
+ * régimes). `sbClient` porte le jeton de la personne connectée : il sert à tout
+ * ce qui la concerne. La distinction n'est pas décorative — c'est elle qui
+ * garantit qu'un client ne peut pas lire la commande d'un autre, même si le
+ * modèle est amené à demander une référence qui ne lui appartient pas. La
+ * sécurité tient à la politique RLS, pas à l'obéissance du modèle.
+ */
+async function executer(
+  sb: Client,
+  nom: string,
+  args: Record<string, unknown>,
+  sbClient: Client,
+): Promise<unknown> {
   switch (nom) {
     case 'chercher_position': {
       const { data } = await sb.rpc('app_e08c374bc4_tec_chercher', {
@@ -247,6 +384,99 @@ async function executer(sb: Client, nom: string, args: Record<string, unknown>):
       const { data } = await q;
       return { regimes: data ?? [] };
     }
+    case 'mes_commandes': {
+      const reference = String(args.reference ?? '').trim();
+      let q = sbClient
+        .from('app_e08c374bc4_commandes_gp')
+        .select(
+          'reference_publique, statut, montant_total_fcfa, transporteur_choisi, delai_transporteur, numero_suivi, url_suivi, created_at, livree_le, reception_confirmee_le, ville_livraison',
+        )
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (reference) q = q.ilike('reference_publique', `%${reference}%`);
+      const { data, error } = await q;
+      if (error) return { erreur: error.message };
+      if (!data?.length) {
+        return {
+          commandes: [],
+          note: reference
+            ? "Aucune commande à cette référence sur ce compte. Vérifier que le client est connecté au compte qui a passé la commande."
+            : "Ce compte n'a encore passé aucune commande.",
+        };
+      }
+      return {
+        commandes: data.map((c) => ({
+          reference: c.reference_publique,
+          etape: ETAPES_COMMANDE[c.statut as string] ?? c.statut,
+          montant_fcfa: c.montant_total_fcfa,
+          transporteur: c.transporteur_choisi,
+          delai_annonce_par_le_transporteur: c.delai_transporteur,
+          numero_de_suivi: c.numero_suivi,
+          lien_de_suivi: c.url_suivi,
+          passee_le: c.created_at,
+          livree_le: c.livree_le,
+          reception_confirmee_le: c.reception_confirmee_le,
+          ville: c.ville_livraison,
+        })),
+      };
+    }
+    case 'mes_dossiers_transit': {
+      const reference = String(args.reference ?? '').trim();
+      const colonnes =
+        'reference_publique, statut, description_produit, montant_total_devis_fcfa, mode_transport, created_at';
+
+      const lire = async (table: string) => {
+        let q = sbClient
+          .from(table)
+          .select(colonnes)
+          .order('created_at', { ascending: false })
+          .limit(8);
+        if (reference) q = q.ilike('reference_publique', `%${reference}%`);
+        const { data } = await q;
+        return data ?? [];
+      };
+
+      const [imports, exports] = await Promise.all([
+        lire('app_e08c374bc4_demandes_import'),
+        lire('app_e08c374bc4_demandes_export'),
+      ]);
+
+      const mettreEnForme = (lignes: Record<string, unknown>[], sens: 'import' | 'export') =>
+        lignes.map((d) => ({
+          reference: d.reference_publique,
+          sens,
+          etape:
+            (sens === 'import' ? ETAPES_IMPORT : ETAPES_EXPORT)[d.statut as string] ?? d.statut,
+          marchandise: d.description_produit,
+          mode: d.mode_transport,
+          montant_devis_fcfa: d.montant_total_devis_fcfa,
+          ouvert_le: d.created_at,
+        }));
+
+      const dossiers = [
+        ...mettreEnForme(imports as Record<string, unknown>[], 'import'),
+        ...mettreEnForme(exports as Record<string, unknown>[], 'export'),
+      ];
+
+      return dossiers.length
+        ? { dossiers }
+        : {
+            dossiers: [],
+            note: reference
+              ? "Aucun dossier à cette référence sur ce compte."
+              : "Ce compte n'a encore ouvert aucun dossier d'import ou d'export.",
+          };
+    }
+    case 'passer_la_main': {
+      const { data, error } = await sbClient.rpc('app_e08c374bc4_ouvrir_assistance', {
+        p_sujet: String(args.sujet ?? 'Demande du client'),
+        p_message: String(args.message ?? ''),
+        p_reference: args.reference ? String(args.reference) : null,
+        p_resume: args.resume ? String(args.resume) : null,
+        p_urgence: String(args.urgence ?? 'normale'),
+      });
+      return error ? { erreur: error.message } : data;
+    }
     default:
       return { erreur: `Outil inconnu : ${nom}` };
   }
@@ -296,6 +526,14 @@ Deno.serve(async (req: Request) => {
     );
 
     const autorisation = req.headers.get('Authorization') ?? '';
+    // Le second client rejoue exactement les droits de la personne connectée :
+    // les politiques RLS s'appliquent, donc un outil ne peut rendre que ce
+    // qu'elle a le droit de voir.
+    const sbClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: autorisation } } },
+    );
     const { data: auth } = await sb.auth.getUser(autorisation.replace('Bearer ', ''));
     const utilisateur = auth?.user;
     if (!utilisateur || utilisateur.role !== 'authenticated') {
@@ -364,9 +602,20 @@ Deno.serve(async (req: Request) => {
       });
     };
 
-    const consigne = contexte
-      ? `${PERSONNAGE}\n\nCONTEXTE : l'utilisateur écrit depuis « ${contexte} ».`
-      : PERSONNAGE;
+    // Former l'assistant ne doit pas exiger un redéploiement. Le complément de
+    // consigne se règle depuis l'écran d'administration : le fondateur y écrit
+    // ce qu'il veut voir répondre — un tour de phrase, une marchandise à
+    // écarter au démarrage, un délai à annoncer — et c'est pris en compte à la
+    // question suivante.
+    const complement = String(parametres.consigne_complement ?? '').trim();
+
+    const consigne = [
+      PERSONNAGE,
+      complement ? `CONSIGNES DE LA MAISON, QUI PRIMENT SUR LE STYLE CI-DESSUS\n${complement}` : '',
+      contexte ? `CONTEXTE : l'utilisateur écrit depuis « ${contexte} ».` : '',
+    ]
+      .filter(Boolean)
+      .join('\n\n');
 
     const contents = [
       ...historique.map((t) => ({ role: t.role, parts: [{ text: t.texte }] })),
@@ -433,7 +682,7 @@ Deno.serve(async (req: Request) => {
       for (const p of appels) {
         const { name, args } = p.functionCall as { name: string; args: Record<string, unknown> };
         outilsAppeles.push(name);
-        const sortie = await executer(sb, name, args ?? {});
+        const sortie = await executer(sb, name, args ?? {}, sbClient);
         resultats.push({ functionResponse: { name, response: { resultat: sortie } } });
       }
       contents.push({ role: 'user', parts: resultats });
