@@ -48,10 +48,19 @@ des droits et taxes. MayLary prend en charge tout le reste de la chaîne.
 L'obtention d'un agrément propre est un objectif de long terme, financé par la
 croissance.
 
-Conséquence financière majeure : la réforme entrée en vigueur au 1er janvier
-2026 a porté la caution d'agrément de 30 à 50 millions FCFA et le crédit
-d'enlèvement de 50 à 100 millions FCFA. MayLary n'a besoin d'AUCUN des deux
-pour démarrer, puisqu'elle s'adosse.
+Conséquence financière majeure : devenir CAD suppose un capital entièrement
+libéré, une caution et un crédit d'enlèvement bancaires. MayLary n'a besoin
+d'AUCUN des trois pour démarrer, puisqu'elle s'adosse.
+
+ATTENTION, CHIFFRES À TRANCHER. La page officielle de la douane publie
+aujourd'hui : capital minimum 25 millions, caution minimum 30 millions,
+crédit d'enlèvement minimum 25 millions. Une note antérieure de ce dossier
+annonçait une réforme au 1er janvier 2026 portant la caution à 50 millions et
+le crédit d'enlèvement à 100 millions. Les deux ne concordent pas — la page de
+la douane peut ne pas avoir été mise à jour, ou l'information de réforme peut
+être inexacte. Ne pas utiliser ces montants dans le business plan avant de les
+avoir fait confirmer par la DGD. Cela ne change rien au démarrage : le montage
+retenu ne demande pas l'agrément.
 
 
 ==============================================================================
@@ -61,24 +70,79 @@ pour démarrer, puisqu'elle s'adosse.
 Question posée : « selon la loi on ne peut pas être commerçant et être
 propriétaire d'une société de transit ».
 
-CE QUE JE N'AI PAS PU VÉRIFIER
-Je n'ai pas pu ouvrir le Code des douanes ivoirien ni les textes d'agrément :
-les sites douanes.ci et les bases juridiques africaines sont inaccessibles
-depuis mon environnement de travail. Je REFUSE d'affirmer le contenu d'un
-article que je n'ai pas lu. La question doit être tranchée par un juriste
-ivoirien, textes en main.
+CE QUE J'AI PU LIRE, FINALEMENT — ET CE QUE ÇA DIT
+J'ai fini par lire deux sources officielles, directement sur le site de la
+Direction générale des douanes.
 
-CE QU'IL FAUT LUI DEMANDER, PRÉCISÉMENT
-  a) Y a-t-il une incompatibilité légale entre la qualité de commerçant
-     (achat-revente pour compte propre) et la détention ou la direction d'une
-     société de transit / de commission en douane en Côte d'Ivoire ?
-  b) L'incompatibilité, si elle existe, porte-t-elle sur la PERSONNE (le
+1) LA PAGE OFFICIELLE DES CONDITIONS D'AGRÉMENT (décret n° 90-663 du 22 août
+   1990), qui énumère douze conditions pour devenir commissionnaire en douane
+   agréé :
+     - être constituée en S.A. ou S.A.R.L., capital minimum 25 000 000 FCFA
+       entièrement libéré ;
+     - caution bancaire ou d'assurance d'un minimum de 30 000 000 FCFA ;
+     - engagement d'une banque de mettre à disposition un crédit d'enlèvement
+       d'un minimum de 25 000 000 FCFA ;
+     - agrément nominatif du gérant (pièce d'identité, acte de naissance,
+       casier judiciaire) ;
+     - agrément nominatif du déclarant, avec CINQ ANS d'expérience comme
+       déclarant-signataire ;
+     - siège social justifié.
+   AUCUNE de ces douze conditions ne mentionne une incompatibilité avec la
+   qualité de commerçant.
+
+2) LE CODE DES DOUANES IVOIRIEN, PARTIE LÉGISLATIVE (le texte complet, environ
+   533 000 caractères). Recherche mot à mot : les termes « transitaire »,
+   « commerçant » et « incompatib… » N'Y FIGURENT PAS UNE SEULE FOIS.
+
+   Ce que le Code dit, en revanche, et qui est le vrai sujet :
+     - « Nul ne peut faire profession d'accomplir au nom et pour le compte
+       d'autrui les formalités de douane concernant la déclaration en douane
+       des marchandises s'il n'a été agréé comme commissionnaire en douane. »
+     - « Les personnes désirant effectuer leurs propres déclarations en douane
+       doivent justifier et présenter les mêmes garanties financières que les
+       commissionnaires en douane agréés. »
+     - « En dehors de la déclaration en douane, pour laquelle la représentation
+       ne peut se faire que par un commissionnaire en douane agréé, toute
+       personne intéressée peut se faire représenter auprès de
+       l'Administration douanière pour l'accomplissement des actes et
+       formalités prévus par la législation douanière. »
+     - « Les conditions d'agrément et d'organisation des commissionnaires en
+       douane sont fixées conformément à la réglementation communautaire. »
+
+CE QU'IL FAUT EN CONCLURE, PRUDEMMENT
+Le monopole porte sur UN SEUL ACTE : signer la déclaration en détail pour le
+compte d'autrui. Tout le reste de ce que fait MayLary — vendre, acheter,
+grouper, coter, transporter, conseiller, représenter le client sur les autres
+formalités — n'est pas réservé par ces textes.
+
+L'affirmation « on ne peut pas être commerçant et propriétaire d'une société de
+transit » n'est donc PAS confirmée par les deux sources officielles que j'ai
+pu lire. Ce n'est pas une preuve qu'elle est fausse : c'est une preuve qu'elle
+ne vient pas de là.
+
+CE QUI RESTE À VÉRIFIER, ET OÙ CHERCHER
+Le Code renvoie explicitement les conditions d'agrément à LA RÉGLEMENTATION
+COMMUNAUTAIRE — c'est-à-dire au texte UEMOA sur les commissionnaires en douane
+agréés. Je n'ai pas pu le lire. S'il existe une incompatibilité quelque part,
+c'est là qu'elle se trouve, ou dans le décret 90-663 lui-même dont je n'ai lu
+que le résumé publié par la douane.
+
+CE QU'IL FAUT DEMANDER AU JURISTE, PRÉCISÉMENT
+  a) Le règlement UEMOA sur les commissionnaires en douane agréés pose-t-il une
+     condition d'objet social exclusif, ou une incompatibilité avec l'activité
+     commerciale ?
+  b) Le texte intégral du décret n° 90-663 du 22 août 1990 en pose-t-il une,
+     au-delà des douze conditions publiées ?
+  c) L'incompatibilité, si elle existe, porte-t-elle sur la PERSONNE (le
      dirigeant), sur la SOCIÉTÉ (son objet social), ou seulement sur le
      TITULAIRE DE L'AGRÉMENT CAD ?
-  c) Le décret n° 90-663 du 22 août 1990 (conditions d'agrément du
-     commissionnaire en douane) pose-t-il des conditions d'incompatibilité ?
   d) Une même personne peut-elle diriger deux sociétés distinctes, l'une
      commerçante, l'autre de transit ?
+
+À noter : aucune de ces questions ne bloque le démarrage, puisque MayLary ne
+demande pas l'agrément et s'adosse à un CAD. Elles deviennent bloquantes le
+jour où le groupe demandera son propre agrément — et c'est justement pour ce
+jour-là qu'il faut avoir séparé les entités dès le départ.
 
 LA RÉPONSE STRUCTURELLE QUI FONCTIONNE DANS TOUS LES CAS
 Quelle que soit la réponse juridique exacte, la bonne architecture est la
@@ -292,9 +356,11 @@ TROIS FENÊTRES OUVERTES EN MÊME TEMPS
   - ZLECAf : la Tunisie délivre déjà des certificats d'origine nommément pour
     la Côte d'Ivoire. Le Maghreb devient une alternative à l'Asie, à une
     semaine de mer contre quarante jours.
-  - Réforme douanière du 1er janvier 2026 : caution d'agrément portée de 30 à
-    50 millions, crédit d'enlèvement de 50 à 100 millions. La barrière à
-    l'entrée du métier vient de doubler pour tout nouvel entrant.
+  - Barrière à l'entrée du métier de CAD : capital 25 M, caution 30 M, crédit
+    d'enlèvement 25 M (chiffres publiés par la douane ; une hausse annoncée au
+    1er janvier 2026 reste à confirmer, voir section 2). Dans tous les cas, un
+    nouvel entrant doit immobiliser plusieurs dizaines de millions — ce que
+    l'adossement à un CAD partenaire évite entièrement.
 
 FORMALITÉS DE CRÉATION D'ENTREPRISE (tarifs publics 2026)
   - Immatriculation SARL au CEPICI, capital ≤ 10 M FCFA : 42 000 FCFA.
@@ -400,11 +466,15 @@ de conception, pas seulement d'affichage.
 Ce que ce document contient de vérifié : l'état de l'application, les chiffres
 du port d'Abidjan, les tarifs CEPICI, les références légales des fiches AIRP et
 de la circulaire d'assurance, la liquidation de la section 6 (produite par le
-moteur lui-même).
+moteur lui-même), et — lus directement sur le site de la Direction générale des
+douanes — les douze conditions d'agrément du commissionnaire en douane ainsi
+que le texte de la partie législative du Code des douanes cité en section 3.
 
-Ce qu'il contient de non vérifié et signalé comme tel : toutes les questions
-juridiques de la section 3 et 4. Elles sont formulées comme des questions à
-poser, jamais comme des réponses.
+Ce qu'il contient de non vérifié et signalé comme tel : le règlement UEMOA sur
+les commissionnaires en douane, le texte intégral du décret 90-663, les
+montants de la réforme de janvier 2026, et toutes les questions de la
+section 4. Elles sont formulées comme des questions à poser, jamais comme des
+réponses.
 
 Ce qu'il ne contient volontairement pas : un prévisionnel de chiffre
 d'affaires, des noms de fournisseurs individuels non vérifiés, et des montants
