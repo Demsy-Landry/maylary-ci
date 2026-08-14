@@ -19,7 +19,7 @@ export default function MentionsLegales() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
-      <main className="mx-auto max-w-screen-md px-4 py-12 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-md px-4 py-12 sm:px-6">
         <h1 className="font-display text-3xl font-extrabold text-foreground">Mentions légales</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Dernière mise à jour : 9 août 2026

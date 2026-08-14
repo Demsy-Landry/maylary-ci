@@ -243,7 +243,7 @@ export default function MonCompte() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
-      <main className="mx-auto max-w-screen-lg px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-lg px-4 py-8 sm:px-6">
         <h1 className="font-display text-2xl font-bold text-foreground">Mon compte</h1>
         <p className="text-sm text-muted-foreground">
           Vos informations, vos documents et l'historique de toutes vos demandes, en un seul endroit.

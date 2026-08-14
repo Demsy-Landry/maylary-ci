@@ -124,7 +124,7 @@ export default function AchatsGroupes() {
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
 
-      <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <h1 className="font-display text-2xl font-extrabold text-foreground">Achats groupés</h1>
         <p className="mt-2 max-w-prose text-sm text-muted-foreground">
           Importer coûte cher à l’unité à cause de ce qui ne dépend pas de la quantité : assurance,

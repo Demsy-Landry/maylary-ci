@@ -415,7 +415,15 @@ a {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: none; }
 }
-.animate-page {
+.animate-page,
+/* `entree-page` était écrit dans le `className` de six écrans — sourcing,
+   espace vendeur, et quatre écrans d'administration — alors que seule
+   l'ANIMATION portait ce nom, jamais la classe. Ces pages n'avaient donc
+   aucune entrée : elles apparaissaient d'un bloc, et personne ne pouvait
+   s'en apercevoir en lisant le code, puisque la chaîne existait bien dans la
+   feuille de style. On déclare les deux noms plutôt que de corriger six
+   fichiers : le nom naturel est celui que l'on a spontanément écrit six fois. */
+.entree-page {
   animation: entree-page 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -525,4 +533,147 @@ select {
 
 @media (prefers-reduced-motion: reduce) {
   .convoi { animation: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   La respiration de l'image d'ouverture.
+
+   Une photographie fixe sur le premier écran d'un groupe donne une impression
+   d'affiche imprimée. Un mouvement très lent — vingt-quatre secondes pour un
+   aller-retour de trois pour cent — suffit à faire vivre l'image sans que
+   personne ne le remarque consciemment : c'est exactement l'effet recherché.
+
+   L'échelle ne descend jamais sous 1,05 : l'image est déjà agrandie dans le
+   cadre, ce qui laisse la marge nécessaire au déplacement sans jamais
+   découvrir un bord.
+--------------------------------------------------------------------------- */
+@keyframes respiration {
+  0%,
+  100% {
+    transform: scale(1.05) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: scale(1.11) translate3d(-1.2%, -0.8%, 0);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Le lever de rideau de l'ouverture.
+
+   Les blocs du premier écran ne peuvent pas compter sur la révélation au
+   défilement : ils sont déjà à l'écran quand la page arrive. Ils s'annoncent
+   donc au montage, l'un après l'autre, du haut vers le bas. L'ordre compte —
+   surtitre, titre, phrase, recherche, garanties — parce qu'il est celui dans
+   lequel on lit.
+--------------------------------------------------------------------------- */
+@keyframes ouverture-montee {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+.rideau > * {
+  animation: ouverture-montee 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.rideau > *:nth-child(1) { animation-delay: 60ms; }
+.rideau > *:nth-child(2) { animation-delay: 160ms; }
+.rideau > *:nth-child(3) { animation-delay: 280ms; }
+.rideau > *:nth-child(4) { animation-delay: 400ms; }
+.rideau > *:nth-child(5) { animation-delay: 520ms; }
+.rideau > *:nth-child(n+6) { animation-delay: 600ms; }
+
+/* ---------------------------------------------------------------------------
+   Le passage de lumière.
+
+   Un reflet qui traverse une carte au survol. C'est le seul effet purement
+   décoratif de la feuille, et il est assumé : sur une vitrine, la matière se
+   voit à la façon dont la lumière glisse dessus. Il ne se déclenche qu'au
+   survol réel — jamais au doigt, où il retarderait le tap sans rien apporter.
+--------------------------------------------------------------------------- */
+.reflet {
+  position: relative;
+  overflow: hidden;
+}
+.reflet::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    color-mix(in oklab, white 38%, transparent) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  opacity: 0;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .reflet:hover::before {
+    animation: reflet-passage 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+@keyframes reflet-passage {
+  from { transform: translateX(-120%); opacity: 0.9; }
+  to   { transform: translateX(120%);  opacity: 0; }
+}
+
+/* ---------------------------------------------------------------------------
+   Le soulignement qui se trace.
+
+   Sur les titres de section : un trait qui part de la gauche à l'entrée dans
+   l'écran. Il ne dit rien de plus que le titre, mais il donne au défilement
+   un rythme — chaque section s'ouvre au lieu d'apparaître.
+
+   Comme partout ailleurs dans cette feuille, l'état par défaut est l'état
+   VISIBLE : le trait est tracé, et il n'est réduit à zéro que sous
+   `.revelation-active`, dans un bloc que l'observateur n'a pas encore vu.
+   Un titre qui porte le trait sans être dans un bloc révélé garde donc son
+   soulignement — l'effet ne peut pas effacer ce qu'il décore.
+--------------------------------------------------------------------------- */
+.trait-anime {
+  --largeur-trait: 4.5rem;
+}
+.trait-anime::after {
+  content: '';
+  display: block;
+  height: 3px;
+  width: var(--largeur-trait);
+  margin-top: 0.85rem;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--primary, currentColor), transparent);
+  transition: width 780ms cubic-bezier(0.22, 1, 0.36, 1) 140ms;
+}
+.revelation-active [data-revele]:not([data-vu]) .trait-anime::after,
+.revelation-active [data-revele]:not([data-vu]).trait-anime::after {
+  width: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Le zoom lent d'une vignette au survol de sa carte.
+
+   Déclaré ici plutôt qu'en classes utilitaires parce qu'il porte une durée
+   longue — 700 ms — que Tailwind n'expose pas, et parce que la même règle
+   sert dans une dizaine d'écrans.
+--------------------------------------------------------------------------- */
+.cadre-zoom {
+  overflow: hidden;
+}
+.cadre-zoom img {
+  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+@media (hover: hover) {
+  .groupe-zoom:hover .cadre-zoom img,
+  .cadre-zoom:hover img {
+    transform: scale(1.07);
+  }
 }

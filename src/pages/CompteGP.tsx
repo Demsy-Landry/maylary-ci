@@ -153,7 +153,7 @@ export default function CompteGP() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
-      <main className="flex items-center justify-center px-4 py-10">
+      <main className="entree-page flex items-center justify-center px-4 py-10">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="space-y-2 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">

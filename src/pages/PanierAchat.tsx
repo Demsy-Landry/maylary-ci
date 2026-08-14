@@ -14,7 +14,7 @@ export default function PanierAchat() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
-      <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <h1 className="text-2xl font-bold text-foreground">Mon panier</h1>
 
         {items.length === 0 ? (

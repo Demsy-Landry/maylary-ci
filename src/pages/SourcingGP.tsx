@@ -146,15 +146,48 @@ export default function SourcingGP() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
-      <main className="entree-page mx-auto max-w-screen-lg px-4 py-8 sm:px-6">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Vous ne trouvez pas votre article ?</h1>
+
+      {/* ---------- Ouverture ----------
+          Le sourcing arrivait jusqu'ici par un titre nu sur fond blanc, alors
+          que c'est le service qui demande le plus de confiance : on demande à
+          quelqu'un de nous confier une recherche et de nous croire sur le prix
+          qui reviendra. Une image d'entrepôt dit en une seconde ce que trois
+          paragraphes n'établissent pas — qu'il y a des vraies marchandises,
+          des vrais fournisseurs et une maison derrière. */}
+      <section className="relative overflow-hidden bg-foreground">
+        <img
+          src="/visuels/sourcing-entrepot.jpg"
+          alt=""
+          width={1168}
+          height={784}
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 h-full w-full scale-105 object-cover motion-safe:animate-[respiration_26s_ease-in-out_infinite]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/95 via-foreground/80 to-foreground/35" />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-transparent" />
+        <div className="relative mx-auto max-w-screen-lg px-4 py-16 sm:px-6 sm:py-20">
+          <div className="rideau max-w-xl">
+            <p className="flex items-center gap-2 font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-primary sm:text-xs">
+              <Sparkles className="h-4 w-4" />
+              Sourcing sur demande
+            </p>
+            <h1 className="mt-4 font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
+              Vous ne trouvez pas votre article&nbsp;?
+              <span className="mt-1 block bg-gradient-to-r from-primary via-amber-300 to-primary bg-clip-text text-transparent">
+                Nous allons le chercher.
+              </span>
+            </h1>
+            <p className="mt-5 text-base leading-relaxed text-white/80">
+              Décrivez-le : nous le cherchons chez nos fournisseurs et nous vous annonçons un prix
+              ferme, transport et assurance compris. Vous décidez ensuite — rien n'est engagé
+              avant votre accord.
+            </p>
+          </div>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Décrivez-le : nous le cherchons chez nos fournisseurs et vous annonçons un prix ferme,
-          transport et assurance compris. Vous décidez ensuite — rien n'est engagé avant votre accord.
-        </p>
+      </section>
+
+      <main className="entree-page mx-auto max-w-screen-lg px-4 py-8 sm:px-6">
 
         <section className="carte-reactive mt-6 rounded-lg border bg-card p-4 sm:p-5">
           <div className="grid gap-4 sm:grid-cols-2">

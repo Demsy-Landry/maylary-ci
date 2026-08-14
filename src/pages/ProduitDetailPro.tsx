@@ -137,7 +137,7 @@ export default function ProduitDetailPro() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderPro />
-      <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <Link
           to="/catalogue"
           className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
