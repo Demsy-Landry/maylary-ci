@@ -24,6 +24,25 @@ inventé n'entre dans un prix.
 
 ## P0 — Sans ça, la boucle de vente ne peut pas être prouvée
 
+### 0. LE CRÉDIT GOOGLE AI — Le Déclarant est ARRÊTÉ
+
+**Mesuré le 14 août 2026**, en interrogeant l'assistant avec un vrai compte
+client. Réponse du fournisseur, sur les deux clés configurées :
+
+> `RESOURCE_EXHAUSTED — Your prepayment credits are depleted.`
+
+**Conséquence : l'assistant ne répond plus à personne.** Le message affiché au
+client est correct (« Le Déclarant est momentanément injoignable ») et la
+question ne lui est pas décomptée, mais le service est à l'arrêt.
+
+**Ce qu'il faut faire :** recharger le projet sur
+[AI Studio](https://ai.studio/projects), puis me dire que c'est fait. Ou
+déposer une nouvelle clé dans les secrets Supabase sous `GOOGLE_API_KEY`.
+
+C'est le premier de la liste parce que **tout ce qu'on vient de construire
+autour de l'assistant en dépend** : l'accueil client, le suivi de commande, le
+passage de main à l'équipe, et la recherche chez les fournisseurs.
+
 ### 1. Les identifiants de l'opérateur de paiement (Wave en priorité)
 
 **Ce qu'il me faut :** un compte marchand Wave Business (ou Orange Money /
@@ -190,15 +209,9 @@ prêt » et dit ce qui manque. Il ne consomme rien et ne gêne rien.
 Aucun des deux n'est nécessaire pour vendre. Le catalogue compte déjà
 60 références.
 
-### 10. Le crédit Google AI
+### 10. Le crédit Google AI — remonté en tête de liste
 
-**Ce qu'il me faut :** une clé d'API Google AI Studio, déposée dans les secrets
-Supabase sous `GOOGLE_AI_API_KEY`.
-
-**Ce que ça débloque :** la classification tarifaire assistée. Elle fonctionne
-déjà, mais sur un quota gratuit qui s'épuise. Un seul modèle est utilisé, et
-sa proposition est **toujours** vérifiée contre les 6 298 positions
-officielles — l'IA propose, le corpus tranche.
+Voir le point 0. Le crédit est épuisé et l'assistant est arrêté.
 
 ### 11. Les marchandises réglementées à ajouter
 
