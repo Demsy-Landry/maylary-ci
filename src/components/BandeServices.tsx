@@ -78,9 +78,10 @@ const SERVICES: Service[] = [
       "L'article que vous cherchez n'est pas au catalogue ? Décrivez-le : nous allons le chercher chez le fournisseur et nous vous chiffrons.",
     icone: Search,
     // Visuel fourni par le fondateur, servi par le site : le sourcing se
-    // montre dans l'entrepôt, pas sur un bureau d'échantillons.
-    image: '/visuels/sourcing-entrepot.jpg',
-    alt: "Entrepôt de sourcing : marchandises préparées et contrôlées avant expédition.",
+    // montre au moment du choix — des références posées côte à côte et
+    // quelqu'un qui arbitre.
+    image: '/visuels/sourcing-selection.jpg',
+    alt: "Acheteuse comparant des références de produits avant de passer commande.",
     famille: 'Sur demande',
   },
   {
