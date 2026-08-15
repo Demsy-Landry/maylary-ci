@@ -24,6 +24,51 @@ inventé n'entre dans un prix.
 
 ## P0 — Sans ça, la boucle de vente ne peut pas être prouvée
 
+### 000. Un jeton Supabase, pour que je puisse redéployer les fonctions
+
+**2 minutes, et ça débloque tout un pan du travail.**
+
+Je peux modifier le code des fonctions serveur, mais **je ne peux pas les
+déployer moi-même** : l'outil dont je dispose exige que je recopie le fichier
+entier dans la commande. Pour la fonction du Déclarant, cela représente 37 000
+caractères et 920 lignes. Recopier ça à la main, c'est prendre le risque
+d'abîmer un assistant qui tourne pour une seule ligne à corriger — je ne le
+fais pas.
+
+La ligne de commande officielle de Supabase, elle, envoie le fichier depuis le
+disque, sans recopie et sans risque. Il lui manque une seule chose : un jeton.
+
+**Ce qu'il faut faire :**
+
+1. Sur [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens),
+   générez un jeton d'accès personnel.
+2. Ajoutez-le comme **variable d'environnement de l'environnement Claude Code**
+   (pas dans les secrets des Edge Functions — c'est un autre endroit), sous le
+   nom exact :
+
+```
+SUPABASE_ACCESS_TOKEN
+```
+
+3. Dites-moi seulement « c'est déposé ». Comme pour les autres clés, je n'ai
+   pas besoin de le voir.
+
+⚠️ **Ce jeton donne accès à votre compte Supabase.** Traitez-le comme un mot de
+passe : jamais dans une conversation, jamais dans une capture d'écran, jamais
+dans le dépôt de code. Il se révoque d'un clic depuis la même page.
+
+**Ce que ça débloque :** toute correction sur Le Déclarant, la recherche
+fournisseurs, le serveur MCP, la facturation — sept fonctions serveur qui, pour
+l'instant, ne peuvent être mises à jour que par vous.
+
+**En attente, ce qui reste à déployer :** le garde-fou d'historique du
+Déclarant. Un tour de conversation vide envoyé par un client autre que le
+navigateur fait répondre « Le Déclarant est momentanément injoignable » — un
+message faux. Mesuré en production le 15 août : le défaut est bien vivant. Le
+correctif est écrit, commité et testé ; l'application, elle, ne peut plus
+produire ce cas depuis le 15 août — le même garde-fou est posé côté navigateur.
+
+
 ### 00. ~~Vercel refuse de construire~~ — RÉGLÉ le 14 août au soir
 
 **Le projet Supabase était en pause.** Le fondateur l'a trouvé et relancé, puis
