@@ -472,7 +472,7 @@ export default function NouvelleDemandeImport() {
                       size="sm"
                       className="mt-3 h-auto whitespace-normal py-2 text-left"
                     >
-                      <Link to="/declarant">Montant exact avec Le Déclarant</Link>
+                      <Link to="/declarant/atelier">Montant exact avec Le Déclarant</Link>
                     </Button>
                   </div>
                 </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
+import NavDeclarant from '@/components/NavDeclarant';
 import AlerteMarchandiseReglementee from '@/components/AlerteMarchandiseReglementee';
 import SiteFooter from '@/components/SiteFooter';
 import { Link } from 'react-router-dom';
@@ -36,6 +37,7 @@ import {
   HelpCircle,
   BookOpen,
   History,
+  Archive,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -127,6 +129,14 @@ export default function Declarant() {
   const [lignes, setLignes] = useState<LigneSaisie[]>([ligneVide('1')]);
   const [liquidation, setLiquidation] = useState<Liquidation | null>(null);
   const [calcul, setCalcul] = useState(false);
+
+  /* ---- Archivage de la liquidation ----
+   * L'enregistrement est un GESTE, pas un effet de bord du calcul. Un
+   * déclarant ajuste son fret trois fois avant d'arrêter un chiffre ;
+   * archiver chaque essai remplirait son historique de brouillons numérotés
+   * et brûlerait la numérotation. Il enregistre quand il a fini. */
+  const [numeroArchive, setNumeroArchive] = useState<string | null>(null);
+  const [archivage, setArchivage] = useState(false);
 
   /* ---- En-tête du document imprimable ----
    * Rien ici n'entre dans le calcul : ces champs habillent le bulletin pour
@@ -281,6 +291,7 @@ export default function Declarant() {
       return;
     }
     setCalcul(true);
+    setNumeroArchive(null);
     const { data, error } = await supabase.rpc('app_e08c374bc4_liquider_declaration', {
       p_lignes: utiles.map((l) => ({
         numero: l.numero,
@@ -304,12 +315,54 @@ export default function Declarant() {
     setLiquidation(data as Liquidation);
   };
 
+  /**
+   * Archiver la liquidation telle qu'elle vient d'être calculée.
+   *
+   * On envoie le RÉSULTAT COMPLET, pas seulement le total : le bulletin doit
+   * pouvoir ressortir à l'identique des mois plus tard. Les taux du tarif
+   * changent, et un recalcul ultérieur donnerait un autre chiffre — l'archive
+   * mentirait sur ce qui a été remis au client.
+   *
+   * Ni le numéro ni le propriétaire ne partent d'ici : la fonction serveur les
+   * pose elle-même. Un client qui les choisirait pourrait écrire au nom d'un
+   * autre.
+   */
+  const archiver = async () => {
+    if (!liquidation) return;
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('Connectez-vous pour conserver cette liquidation dans votre historique.');
+      return;
+    }
+    setArchivage(true);
+    const { data, error } = await supabase.rpc('app_e08c374bc4_enregistrer_liquidation', {
+      p_lignee: lignes.filter((l) => Number(l.fob) > 0),
+      p_resultat: liquidation,
+      p_regime: regime,
+      p_fret: Number(fret) || 0,
+      p_assurance: Number(assurance) || 0,
+      p_intitule: entete.importateur || entete.reference || null,
+    });
+    setArchivage(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    const numero = (data as { numero: string }).numero;
+    setNumeroArchive(numero);
+    if (!entete.reference) setEntete((e) => ({ ...e, reference: numero }));
+    toast.success(`Liquidation enregistrée sous ${numero}.`);
+  };
+
   const majLigne = (cle: number, champ: keyof LigneSaisie, valeur: string) =>
     setLignes((l) => l.map((x) => (x.cle === cle ? { ...x, [champ]: valeur } : x)));
 
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
+      <NavDeclarant />
 
       <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <div className="flex items-start gap-3">
@@ -1066,6 +1119,32 @@ export default function Declarant() {
                     <Printer className="mr-1.5 h-4 w-4" />
                     Télécharger le bulletin (PDF)
                   </Button>
+
+                  {/* L'archivage est proposé une fois, et cesse de l'être une
+                      fois fait : un second clic créerait un doublon numéroté. */}
+                  {numeroArchive ? (
+                    <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                      Enregistrée sous{' '}
+                      <strong className="tabular-nums text-foreground">{numeroArchive}</strong>
+                      <Link
+                        to="/declarant/historique"
+                        className="font-medium text-primary hover:underline"
+                      >
+                        Voir l'historique
+                      </Link>
+                    </p>
+                  ) : (
+                    <Button variant="outline" onClick={archiver} disabled={archivage}>
+                      {archivage ? (
+                        <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Archive className="mr-1.5 h-4 w-4" />
+                      )}
+                      Enregistrer dans mon historique
+                    </Button>
+                  )}
+
                   <p className="text-xs text-muted-foreground">
                     Cases numérotées, détail par ligne et zone de signature. Renseignez l'en-tête
                     ci-dessus pour un document complet.

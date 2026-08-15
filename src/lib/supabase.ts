@@ -1177,6 +1177,8 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin/sourcing': ['proprietaire', 'operations'],
   '/admin/vendeurs': ['proprietaire', 'operations'],
   '/admin/dossiers': ['proprietaire', 'operations'],
+  // Le Déclarant est un produit vendu : ses tarifs regardent le propriétaire.
+  '/admin/declarant': ['proprietaire'],
   '/admin/import': ['proprietaire', 'operations'],
   '/admin/export': ['proprietaire', 'operations'],
   '/admin/devis': ['proprietaire', 'operations'],
@@ -1824,4 +1826,114 @@ export interface EtatDossier {
   pieces: PieceDossier[];
   manquantes: string[];
   complet: boolean;
+}
+
+/* ---------------------------------------------------------------------------
+   Le Déclarant — le service, ses formules, sa production.
+
+   Directive du fondateur : « c'est un service à part entière, un produit à
+   valoriser ». D'où des types propres plutôt que des objets anonymes : ce qui
+   a un nom dans le métier doit avoir un nom dans le code.
+--------------------------------------------------------------------------- */
+
+export const FORMULES_IA_TABLE = 'app_e08c374bc4_formules_ia';
+export const ABONNEMENTS_IA_TABLE = 'app_e08c374bc4_abonnements_ia';
+export const LIQUIDATIONS_TABLE = 'app_e08c374bc4_liquidations';
+
+export interface FormuleIA {
+  code: string;
+  libelle: string;
+  prix_mensuel_fcfa: number;
+  requetes_par_jour: number;
+  avantages: string[] | null;
+  ordre: number;
+  actif: boolean;
+}
+
+/** Une liquidation archivée. Le résultat complet est conservé : les taux du
+ *  TEC changent, et un recalcul ultérieur ferait mentir l'archive. */
+export interface LiquidationEnregistree {
+  id: string;
+  numero: string;
+  intitule: string | null;
+  regime: string;
+  fret_fcfa: number;
+  assurance_fcfa: number;
+  lignes: unknown[];
+  resultat: Record<string, unknown>;
+  caf_fcfa: number | null;
+  total_a_payer_fcfa: number | null;
+  nombre_lignes: number | null;
+  cree_le: string;
+}
+
+export interface TableauDeBordDeclarant {
+  formule: {
+    code: string;
+    libelle: string;
+    prix_mensuel_fcfa: number;
+    requetes_par_jour: number;
+    avantages: string[] | null;
+    abonnement_actif: boolean;
+  };
+  aujourdhui: { utilisees: number; plafond: number; restant: number };
+  production: { classifications: number; liquidations: number; droits_calcules_fcfa: number };
+  consommation_30j: { jour: string; n: number }[];
+  dernieres_classifications: {
+    id: string;
+    description: string | null;
+    code: string | null;
+    taux_dd: number | null;
+    verifie: boolean | null;
+    cree_le: string;
+  }[];
+  dernieres_liquidations: {
+    id: string;
+    numero: string;
+    intitule: string | null;
+    regime: string;
+    caf_fcfa: number | null;
+    total_a_payer_fcfa: number | null;
+    nombre_lignes: number | null;
+    cree_le: string;
+  }[];
+}
+
+/**
+ * Le service vu depuis la maison.
+ *
+ * `recette_mensuelle_fcfa` est un PRODUIT DE MULTIPLICATION — prix × abonnés
+ * actifs —, pas un encaissement constaté. Tant que la souscription se fait de
+ * la main à la main, la comptabilité reste la seule source de ce qui est
+ * réellement entré en caisse.
+ */
+export interface FormuleIAAdmin extends FormuleIA {
+  abonnes: number;
+  recette_mensuelle_fcfa: number;
+}
+
+export interface ApercuDeclarantAdmin {
+  formules: FormuleIAAdmin[];
+  activite: {
+    requetes_aujourdhui: number;
+    requetes_30j: number;
+    classifications: number;
+    liquidations: number;
+    droits_calcules_fcfa: number;
+    comptes_actifs_30j: number;
+  };
+  consommation_30j: { jour: string; n: number }[];
+  plus_actifs: {
+    utilisateur_id: string;
+    nom: string;
+    type_compte: string | null;
+    requetes_30j: number;
+    formule: string;
+  }[];
+  abonnes: {
+    utilisateur_id: string;
+    nom: string;
+    formule: string;
+    actif_jusquau: string | null;
+  }[];
 }
