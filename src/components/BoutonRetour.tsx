@@ -52,6 +52,7 @@ function parent(chemin: string): { vers: string; nom: string } | null {
     '/declarant': { vers: '/', nom: "l'accueil" },
     '/poids-taxable': { vers: '/services', nom: 'nos services' },
     '/mon-compte': { vers: '/', nom: "l'accueil" },
+    '/mot-de-passe-oublie': { vers: '/boutique/compte', nom: 'la connexion' },
     '/a-propos': { vers: '/', nom: "l'accueil" },
     '/mentions-legales': { vers: '/', nom: "l'accueil" },
     '/confidentialite': { vers: '/', nom: "l'accueil" },

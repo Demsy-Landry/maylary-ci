@@ -238,7 +238,17 @@ export default function CompteGP() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password-gp">Mot de passe</Label>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <Label htmlFor="login-password-gp">Mot de passe</Label>
+                      {/* Sans ce lien, un client qui oublie son mot de passe
+                          n'a aucun moyen de revenir : il faut téléphoner. */}
+                      <Link
+                        to="/mot-de-passe-oublie"
+                        className="text-xs font-medium text-primary hover:underline"
+                      >
+                        Mot de passe oublié ?
+                      </Link>
+                    </div>
                     <Input
                       id="login-password-gp"
                       type="password"

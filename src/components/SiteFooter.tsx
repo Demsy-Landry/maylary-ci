@@ -35,8 +35,10 @@ const COLUMNS: { title: string; links: { label: string; to: string }[] }[] = [
       { label: 'Paiement (Mobile Money, virement)', to: '/boutique/compte' },
       { label: 'Livraison en Côte d’Ivoire', to: '/boutique' },
       { label: 'À propos', to: '/a-propos' },
+      { label: 'Conditions générales de vente', to: '/conditions-generales' },
       { label: 'Mentions légales', to: '/mentions-legales' },
       { label: 'Données personnelles', to: '/confidentialite' },
+      { label: 'Cookies', to: '/cookies' },
     ],
   },
 ];

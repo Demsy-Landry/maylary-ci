@@ -2,14 +2,31 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>MayLary Group — Transit, import et export en Côte d'Ivoire</title>
     <meta
       name="description"
       content="MayLary Group accompagne entreprises et particuliers pour importer et exporter leurs marchandises depuis Abidjan : transit, dédouanement, fret aérien et maritime, assurance facultés."
     />
+    <link rel="canonical" href="https://maylary-ci.vercel.app/" />
+
+    <!-- Icônes. Le SVG sert aux navigateurs de bureau, le PNG à iOS qui ne
+         sait pas lire un favicon vectoriel pour l'écran d'accueil. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
     <meta name="theme-color" content="#f2a618" />
+    <meta name="apple-mobile-web-app-title" content="MayLary" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Partage. Sans image déclarée, un lien collé dans WhatsApp — le canal
+         par lequel arrive la moitié du trafic ici — s'affiche en texte nu.
+         L'adresse doit être absolue : les aperçus sont fabriqués par un
+         serveur distant qui ne sait pas d'où vient le chemin relatif. -->
     <meta property="og:site_name" content="MayLary Group" />
     <meta property="og:title" content="MayLary Group — Transit, import et export en Côte d'Ivoire" />
     <meta
@@ -18,9 +35,62 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="fr_CI" />
+    <meta property="og:url" content="https://maylary-ci.vercel.app/" />
+    <meta property="og:image" content="https://maylary-ci.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MayLary Group — import, export, sourcing, transit" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MayLary Group — Transit, import et export en Côte d'Ivoire" />
+    <meta
+      name="twitter:description"
+      content="Transit, dédouanement, fret aérien et maritime. Devis clair et suivi de dossier en ligne."
+    />
+    <meta name="twitter:image" content="https://maylary-ci.vercel.app/og-image.png" />
+
+    <!-- Ce que le moteur affiche à droite des résultats. Il décrit ce que la
+         maison fait réellement : commission de transport et vente en ligne. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "MayLary Group",
+        "legalName": "Dems'Inc",
+        "url": "https://maylary-ci.vercel.app/",
+        "logo": "https://maylary-ci.vercel.app/icone-512.png",
+        "image": "https://maylary-ci.vercel.app/og-image.png",
+        "description": "Transit, import, export, sourcing et vente en ligne depuis Abidjan.",
+        "email": "yaolandry67@gmail.com",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Abidjan",
+          "addressCountry": "CI"
+        },
+        "areaServed": { "@type": "Country", "name": "Côte d'Ivoire" }
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Ce qu'un visiteur voit si le JavaScript ne s'exécute pas : réseau
+         coupé en cours de chargement, navigateur ancien, script bloqué. Sans
+         ce bloc, il regarde une page blanche sans savoir quoi faire. -->
+    <noscript>
+      <div style="font-family: system-ui, sans-serif; max-width: 34rem; margin: 4rem auto; padding: 0 1.5rem; line-height: 1.6">
+        <h1 style="font-size: 1.4rem">MayLary Group</h1>
+        <p>
+          Ce site a besoin de JavaScript pour fonctionner. Activez-le dans les réglages de votre
+          navigateur, puis rechargez la page.
+        </p>
+        <p>
+          Vous pouvez aussi nous écrire directement à
+          <a href="mailto:yaolandry67@gmail.com">yaolandry67@gmail.com</a>.
+        </p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
