@@ -11,7 +11,16 @@ import { toast } from 'sonner';
 import { supabase, EDGE_FUNCTIONS_URL, PROFILES_TABLE } from '@/lib/supabase';
 import { messageDeConnexion } from '@/lib/erreurs-auth';
 import { verifierMotDePasse } from '@/lib/force-mot-de-passe';
-import { Loader2, Building2, User } from 'lucide-react';
+import {
+  Loader2,
+  Building2,
+  User,
+  FileText,
+  FolderCheck,
+  UserCheck,
+  Layers,
+  ShieldCheck,
+} from 'lucide-react';
 
 type TypeCompte = 'particulier' | 'entreprise_acheteuse';
 
@@ -25,6 +34,49 @@ type TypeCompte = 'particulier' | 'entreprise_acheteuse';
  */
 const retourSur = (demande: string | null): string | null =>
   demande && /^\/[^/\\]/.test(demande) ? demande : null;
+
+/**
+ * Ce qu'un compte entreprise ouvre réellement.
+ *
+ * Directive du fondateur : « les connexions entreprise doivent avoir des
+ * avantages et un style particulier, haut de gamme, de pointe ».
+ *
+ * Le style, on peut le poser tout de suite. Les avantages, non — pas
+ * n'importe lesquels. Une remise, un délai de paiement ou une priorité de
+ * traitement sont des engagements commerciaux qui n'existent nulle part dans
+ * le produit : les afficher serait promettre au nom de la maison quelque
+ * chose qu'elle n'a pas décidé.
+ *
+ * Ce panneau ne dit donc que ce que le code fait DÉJÀ pour un compte
+ * entreprise : l'accès aux rayons professionnels, l'atelier de devis, le
+ * dossier de transit numéroté et documenté, et l'interlocuteur unique. Quatre
+ * choses vraies valent mieux que six avantages inventés — un acheteur
+ * professionnel vérifie.
+ */
+const AVANTAGES_ENTREPRISE = [
+  {
+    icone: Layers,
+    titre: 'Les rayons professionnels',
+    texte: "L'Espace Pro et ses références déjà chiffrées vous sont ouverts dès la validation.",
+  },
+  {
+    icone: FileText,
+    titre: "L'atelier de devis",
+    texte:
+      'Constituez un panier de devis, recevez un chiffrage poste par poste — marchandise, fret, assurance, droits, livraison.',
+  },
+  {
+    icone: FolderCheck,
+    titre: 'Un dossier numéroté',
+    texte:
+      "Chaque opération ouvre un dossier qui porte sa documentation jusqu'au bordereau de livraison, puis s'archive.",
+  },
+  {
+    icone: UserCheck,
+    titre: 'Un seul interlocuteur',
+    texte: "Du fournisseur à votre entrepôt, sans renvoi entre prestataires.",
+  },
+];
 
 export default function CompteGP() {
   const navigate = useNavigate();
@@ -153,13 +205,17 @@ export default function CompteGP() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
-      <main className="entree-page flex items-center justify-center px-4 py-10">
-        <Card className="w-full max-w-md shadow-lg">
+      <main className="entree-page mx-auto grid w-full max-w-screen-lg items-start gap-8 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <Card className="w-full shadow-lg">
           <CardHeader className="space-y-2 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-              <User className="h-6 w-6 text-primary" />
+              {typeCompte === 'entreprise_acheteuse' ? (
+                <Building2 className="h-6 w-6 text-primary" />
+              ) : (
+                <User className="h-6 w-6 text-primary" />
+              )}
             </div>
-            <CardTitle className="text-2xl">Mon compte MayLary Group</CardTitle>
+            <CardTitle className="font-display text-2xl">Mon compte MayLary Group</CardTitle>
             <CardDescription>Connectez-vous ou créez votre compte pour commander</CardDescription>
           </CardHeader>
           <CardContent>
@@ -302,6 +358,74 @@ export default function CompteGP() {
             </div>
           </CardContent>
         </Card>
+
+        {/* ---------- La porte entreprise ----------
+            Elle s'allume quand le visiteur choisit « Entreprise » : le panneau
+            passe alors sur fond sombre, comme les écrans d'exploitation. Le
+            reste du temps il reste sobre — un particulier n'a pas à recevoir
+            un argumentaire qui ne le concerne pas. */}
+        <aside
+          className={`carte-reactive sticky top-24 overflow-hidden rounded-xl border transition-colors duration-500 ${
+            typeCompte === 'entreprise_acheteuse'
+              ? 'border-primary/40 bg-foreground text-background'
+              : 'bg-card text-foreground'
+          }`}
+          data-revele
+        >
+          <div className="p-5">
+            <p
+              className={`font-display text-[0.65rem] font-semibold uppercase tracking-[0.28em] ${
+                typeCompte === 'entreprise_acheteuse' ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              Compte entreprise
+            </p>
+            <h2 className="mt-2.5 font-display text-lg font-bold leading-snug">
+              Ce que votre compte ouvre
+            </h2>
+
+            <ul className="mt-5 space-y-4">
+              {AVANTAGES_ENTREPRISE.map((a, i) => {
+                const Icone = a.icone;
+                return (
+                  <li key={a.titre} className="flex gap-3" style={{ animationDelay: `${i * 60}ms` }}>
+                    <span
+                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                        typeCompte === 'entreprise_acheteuse' ? 'bg-primary/15' : 'bg-primary/10'
+                      }`}
+                    >
+                      <Icone className="h-4 w-4 text-primary" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-snug">{a.titre}</p>
+                      <p
+                        className={`mt-0.5 text-xs leading-relaxed ${
+                          typeCompte === 'entreprise_acheteuse'
+                            ? 'text-background/70'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
+                        {a.texte}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <p
+              className={`mt-5 flex items-start gap-2 border-t pt-4 text-xs leading-relaxed ${
+                typeCompte === 'entreprise_acheteuse'
+                  ? 'border-background/15 text-background/60'
+                  : 'text-muted-foreground'
+              }`}
+            >
+              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+              Le compte entreprise est validé par l’équipe avant ouverture des rayons
+              professionnels. Le nom de l’entreprise est donc obligatoire.
+            </p>
+          </div>
+        </aside>
       </main>
       <SiteFooter />
     </div>

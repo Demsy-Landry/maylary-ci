@@ -23,6 +23,8 @@ import {
   Globe,
   TrendingUp,
   Loader2,
+  FolderCheck,
+  ShieldCheck,
 } from 'lucide-react';
 
 /**
@@ -54,6 +56,29 @@ interface EtapePipeline {
   rang: number;
   n: number;
   valeur_fcfa: number;
+}
+
+/** Ce que la tour de contrôle sait des dossiers et de leur documentation. */
+interface TableauDossiers {
+  par_etape: { statut: string; n: number }[];
+  ouverts: number;
+  archives: number;
+  incomplets: {
+    id: string;
+    numero: string;
+    designation: string | null;
+    sens: string;
+    statut: string;
+    jours: number;
+    manquantes: number;
+  }[];
+  pieces_les_plus_absentes: {
+    libelle: string;
+    sigle: string | null;
+    n: number;
+    consequence: string | null;
+  }[];
+  dormants: number;
 }
 
 interface Alerte {
@@ -93,6 +118,7 @@ const abrege = (n: number) => {
 export default function AdminDashboard() {
   const { profile } = useAuth();
   const [tb, setTb] = useState<TableauDeBord | null>(null);
+  const [docs, setDocs] = useState<TableauDossiers | null>(null);
   const [solde, setSolde] = useState<number | null>(null);
   const [demo, setDemo] = useState<{ actif: boolean; imports: number; exports: number } | null>(null);
   const [demoEnCours, setDemoEnCours] = useState(false);
@@ -101,9 +127,11 @@ export default function AdminDashboard() {
     Promise.all([
       supabase.rpc('app_e08c374bc4_tableau_de_bord'),
       supabase.rpc('app_e08c374bc4_demonstration', { p_action: 'etat' }),
-    ]).then(([t, d]) => {
+      supabase.rpc('app_e08c374bc4_tableau_dossiers'),
+    ]).then(([t, d, o]) => {
       if (t.data) setTb(t.data as TableauDeBord);
       if (d.data) setDemo(d.data as { actif: boolean; imports: number; exports: number });
+      if (o.data) setDocs(o.data as TableauDossiers);
     });
 
   useEffect(() => {
@@ -275,7 +303,103 @@ export default function AdminDashboard() {
               />
             </section>
 
-            {/* 3. Le pipeline : c'est là que le métier se voit. */}
+            {/* 3. La documentation : ce qui BLOQUE.
+                Un dossier ne se perd presque jamais sur un prix. Il se perd sur
+                une pièce absente pendant que le magasinage court — d'où la
+                place de ce bloc, avant même le pipeline. */}
+            {docs && (docs.ouverts > 0 || docs.archives > 0) && (
+              <section data-revele>
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <h2 className="trait-anime flex items-center gap-2 font-display text-base font-semibold text-foreground">
+                    <FolderCheck className="h-4 w-4 text-primary" />
+                    Documentation des dossiers
+                  </h2>
+                  <Link
+                    to="/admin/dossiers"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  >
+                    Ouvrir les dossiers
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+
+                <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
+                  {/* Les dossiers bloqués : la liste d'appels du matin, les
+                      plus vieux en tête. */}
+                  <div className="carte-reactive rounded-lg border bg-card p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        Dossiers bloqués par une pièce manquante
+                      </p>
+                      <span className="flex gap-3 text-xs text-muted-foreground">
+                        <span className="tabular-nums">{docs.ouverts} ouvert{docs.ouverts > 1 ? 's' : ''}</span>
+                        {docs.dormants > 0 && (
+                          <span className="tabular-nums text-amber-700">
+                            {docs.dormants} sans mouvement depuis 5 jours
+                          </span>
+                        )}
+                      </span>
+                    </div>
+
+                    {docs.incomplets.length === 0 ? (
+                      <p className="mt-3 flex items-center gap-2 text-sm text-emerald-700">
+                        <ShieldCheck className="h-4 w-4" />
+                        Aucun dossier bloqué. Toutes les pièces obligatoires sont au dossier.
+                      </p>
+                    ) : (
+                      <ul className="cascade mt-3 divide-y">
+                        {docs.incomplets.map((d) => (
+                          <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+                            <div className="min-w-0">
+                              <p className="font-display text-sm font-semibold tabular-nums text-foreground">
+                                {d.numero}
+                              </p>
+                              <p className="truncate text-xs text-muted-foreground">
+                                {d.designation ?? 'Sans désignation'} · ouvert depuis {d.jours} jour
+                                {d.jours > 1 ? 's' : ''}
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="border-amber-500/50 text-amber-700">
+                              {d.manquantes} pièce{d.manquantes > 1 ? 's' : ''}
+                            </Badge>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Celle-ci parle du PROCESSUS, pas des dossiers : si la même
+                      pièce manque partout, ce n'est pas une série d'oublis,
+                      c'est une étape absente des habitudes de la maison. */}
+                  <div className="carte-reactive rounded-lg border bg-card p-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      La pièce qui manque le plus souvent
+                    </p>
+                    {docs.pieces_les_plus_absentes.length === 0 ? (
+                      <p className="mt-3 text-sm text-muted-foreground">Rien à signaler.</p>
+                    ) : (
+                      <ul className="mt-3 space-y-3">
+                        {docs.pieces_les_plus_absentes.map((p) => (
+                          <li key={p.libelle}>
+                            <p className="flex items-baseline justify-between gap-2 text-sm font-medium text-foreground">
+                              <span className="min-w-0 truncate">{p.sigle ?? p.libelle}</span>
+                              <span className="shrink-0 tabular-nums text-muted-foreground">{p.n}</span>
+                            </p>
+                            {p.consequence && (
+                              <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">
+                                {p.consequence}
+                              </p>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* 4. Le pipeline : c'est là que le métier se voit. */}
             <Pipeline
               titre="Dossiers d'import"
               icone={Ship}
@@ -414,7 +538,8 @@ function Chiffre({
   return (
     <div
       className={
-        'rounded-lg border p-4 ' + (accent ? 'border-primary/40 bg-primary/5' : 'bg-card')
+        'carte-reactive reflet rounded-lg border p-4 ' +
+        (accent ? 'border-primary/40 bg-primary/5' : 'bg-card')
       }
     >
       <div className="flex items-center gap-1.5">

@@ -110,7 +110,11 @@ export default function PublicHeaderPro() {
 
       {/* Le retour est posé dans l'en-tête plutôt que dans chaque page : un
           écran ajouté demain l'aura sans qu'on y pense. */}
-      <div className="border-t bg-muted/40">
+      {/* Fond OPAQUE, et non `bg-muted/40` : sur les pages qui ouvrent par une
+          photographie sombre, une bande translucide laissait passer l'image et
+          le libellé devenait illisible — gris sur gris. Un retour qu'on ne lit
+          pas ne sert à rien. */}
+      <div className="border-t bg-card">
         <div className="mx-auto max-w-screen-xl px-2 py-1 sm:px-4">
           <BoutonRetour className="text-xs text-muted-foreground hover:text-foreground" />
         </div>
