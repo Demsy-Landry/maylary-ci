@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
@@ -9,57 +9,75 @@ import AdminRoute from '@/components/AdminRoute';
 import Index from '@/pages/Index';
 import Couverture from '@/pages/Couverture';
 import CatalogueGrandPublic from '@/pages/CatalogueGrandPublic';
-import CatalogueCategorieGP from '@/pages/CatalogueCategorieGP';
-import ProduitDetailGP from '@/pages/ProduitDetailGP';
-import PanierAchat from '@/pages/PanierAchat';
-import CommandeGP from '@/pages/CommandeGP';
-import CompteGP from '@/pages/CompteGP';
-import MesCommandesGP from '@/pages/MesCommandesGP';
-import AchatsGroupes from '@/pages/AchatsGroupes';
-import Declarant from '@/pages/Declarant';
-import DeclarantAccueil from '@/pages/DeclarantAccueil';
-import DeclarantTableauDeBord from '@/pages/DeclarantTableauDeBord';
-import DeclarantHistorique from '@/pages/DeclarantHistorique';
-import DeclarantAbonnement from '@/pages/DeclarantAbonnement';
-import PoidsTaxable from '@/pages/PoidsTaxable';
-import SourcingGP from '@/pages/SourcingGP';
-import EspaceVendeur from '@/pages/EspaceVendeur';
-import CataloguePro from '@/pages/CataloguePro';
-import CatalogueSecteurPro from '@/pages/CatalogueSecteurPro';
-import ProduitDetailPro from '@/pages/ProduitDetailPro';
-import PanierDevis from '@/pages/PanierDevis';
-import MesDevis from '@/pages/MesDevis';
-import CjDropshippingImport from '@/pages/admin/CjDropshippingImport';
-import ProspectionFournisseurs from '@/pages/admin/ProspectionFournisseurs';
-import Fournisseurs from '@/pages/admin/Fournisseurs';
-import QualiteFournisseurs from '@/pages/admin/QualiteFournisseurs';
-import Comptabilite from '@/pages/admin/Comptabilite';
-import AdminCommandesGP from '@/pages/admin/CommandesGP';
-import AdminSourcingGestion from '@/pages/admin/SourcingGestion';
-import AdminVendeursGestion from '@/pages/admin/VendeursGestion';
-import AdminAchatsGroupesGestion from '@/pages/admin/AchatsGroupesGestion';
-import AdminEquipeGestion from '@/pages/admin/EquipeGestion';
-import AdminDevisGestion from '@/pages/admin/DevisGestion';
-import AdminDashboard from '@/pages/admin/Dashboard';
-import AdminAssistance from '@/pages/admin/Assistance';
-import AdminDossiersGestion from '@/pages/admin/DossiersGestion';
-import AdminDeclarantGestion from '@/pages/admin/DeclarantGestion';
-import AdminImportGestion from '@/pages/admin/ImportGestion';
-import NouvelleDemandeImport from '@/pages/NouvelleDemandeImport';
-import MesDemandesImport from '@/pages/MesDemandesImport';
-import AdminExportGestion from '@/pages/admin/ExportGestion';
-import NouvelleDemandeExport from '@/pages/NouvelleDemandeExport';
-import MesDemandesExport from '@/pages/MesDemandesExport';
-import AdminLogin from '@/pages/admin/AdminLogin';
-import APropos from '@/pages/APropos';
-import MentionsLegales from '@/pages/MentionsLegales';
-import Confidentialite from '@/pages/Confidentialite';
+import BandeauStockage from '@/components/BandeauStockage';
 import PageIntrouvable from '@/pages/PageIntrouvable';
 import TransitionDePage from '@/components/TransitionDePage';
 import AssistantDeclarant from '@/components/AssistantDeclarant';
 import { demarrerRevelation } from '@/lib/revelation';
-import AdminParametres from '@/pages/admin/AdminParametres';
-import MonCompte from '@/pages/MonCompte';
+
+/* ---------------------------------------------------------------------------
+   Le chargement à la demande, et pourquoi il fallait le faire maintenant.
+
+   Tout le site partait en un seul fichier de 1,5 Mo — écrans d'administration
+   compris, et avec eux jsPDF et html2canvas qui ne servent qu'à imprimer une
+   facture. Un client d'Abidjan qui ouvre la boutique sur une liaison mobile
+   téléchargeait donc l'atelier de cotation, la comptabilité et le générateur
+   de PDF avant de voir le premier produit.
+
+   Restent chargées d'emblée les trois portes d'entrée réelles — la couverture,
+   la page des services, la boutique — et l'écran d'adresse inconnue. Tout le
+   reste arrive quand on y va.
+--------------------------------------------------------------------------- */
+const APropos = lazy(() => import('@/pages/APropos'));
+const AchatsGroupes = lazy(() => import('@/pages/AchatsGroupes'));
+const AdminAchatsGroupesGestion = lazy(() => import('@/pages/admin/AchatsGroupesGestion'));
+const AdminAssistance = lazy(() => import('@/pages/admin/Assistance'));
+const AdminCommandesGP = lazy(() => import('@/pages/admin/CommandesGP'));
+const AdminDashboard = lazy(() => import('@/pages/admin/Dashboard'));
+const AdminDeclarantGestion = lazy(() => import('@/pages/admin/DeclarantGestion'));
+const AdminDevisGestion = lazy(() => import('@/pages/admin/DevisGestion'));
+const AdminDossiersGestion = lazy(() => import('@/pages/admin/DossiersGestion'));
+const AdminEquipeGestion = lazy(() => import('@/pages/admin/EquipeGestion'));
+const AdminExportGestion = lazy(() => import('@/pages/admin/ExportGestion'));
+const AdminImportGestion = lazy(() => import('@/pages/admin/ImportGestion'));
+const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
+const AdminParametres = lazy(() => import('@/pages/admin/AdminParametres'));
+const AdminSourcingGestion = lazy(() => import('@/pages/admin/SourcingGestion'));
+const AdminVendeursGestion = lazy(() => import('@/pages/admin/VendeursGestion'));
+const CatalogueCategorieGP = lazy(() => import('@/pages/CatalogueCategorieGP'));
+const CataloguePro = lazy(() => import('@/pages/CataloguePro'));
+const CatalogueSecteurPro = lazy(() => import('@/pages/CatalogueSecteurPro'));
+const CjDropshippingImport = lazy(() => import('@/pages/admin/CjDropshippingImport'));
+const CommandeGP = lazy(() => import('@/pages/CommandeGP'));
+const Comptabilite = lazy(() => import('@/pages/admin/Comptabilite'));
+const CompteGP = lazy(() => import('@/pages/CompteGP'));
+const ConditionsGenerales = lazy(() => import('@/pages/ConditionsGenerales'));
+const Confidentialite = lazy(() => import('@/pages/Confidentialite'));
+const Cookies = lazy(() => import('@/pages/Cookies'));
+const Declarant = lazy(() => import('@/pages/Declarant'));
+const DeclarantAbonnement = lazy(() => import('@/pages/DeclarantAbonnement'));
+const DeclarantAccueil = lazy(() => import('@/pages/DeclarantAccueil'));
+const DeclarantHistorique = lazy(() => import('@/pages/DeclarantHistorique'));
+const DeclarantTableauDeBord = lazy(() => import('@/pages/DeclarantTableauDeBord'));
+const EspaceVendeur = lazy(() => import('@/pages/EspaceVendeur'));
+const Fournisseurs = lazy(() => import('@/pages/admin/Fournisseurs'));
+const MentionsLegales = lazy(() => import('@/pages/MentionsLegales'));
+const MesCommandesGP = lazy(() => import('@/pages/MesCommandesGP'));
+const MesDemandesExport = lazy(() => import('@/pages/MesDemandesExport'));
+const MesDemandesImport = lazy(() => import('@/pages/MesDemandesImport'));
+const MesDevis = lazy(() => import('@/pages/MesDevis'));
+const MonCompte = lazy(() => import('@/pages/MonCompte'));
+const MotDePasseOublie = lazy(() => import('@/pages/MotDePasseOublie'));
+const NouvelleDemandeExport = lazy(() => import('@/pages/NouvelleDemandeExport'));
+const NouvelleDemandeImport = lazy(() => import('@/pages/NouvelleDemandeImport'));
+const PanierAchat = lazy(() => import('@/pages/PanierAchat'));
+const PanierDevis = lazy(() => import('@/pages/PanierDevis'));
+const PoidsTaxable = lazy(() => import('@/pages/PoidsTaxable'));
+const ProduitDetailGP = lazy(() => import('@/pages/ProduitDetailGP'));
+const ProduitDetailPro = lazy(() => import('@/pages/ProduitDetailPro'));
+const ProspectionFournisseurs = lazy(() => import('@/pages/admin/ProspectionFournisseurs'));
+const QualiteFournisseurs = lazy(() => import('@/pages/admin/QualiteFournisseurs'));
+const SourcingGP = lazy(() => import('@/pages/SourcingGP'));
 
 const queryClient = new QueryClient();
 
@@ -74,6 +92,21 @@ function App() {
           <CartProvider>
             <BrowserRouter>
               <TransitionDePage>
+              {/* L'attente pendant qu'un écran différé arrive.
+                  Volontairement discrète : sur une bonne liaison, elle dure
+                  cinquante millisecondes, et un grand écran de chargement qui
+                  clignote à chaque navigation est pire que rien. */}
+              <Suspense
+                fallback={
+                  <div
+                    className="flex min-h-screen items-center justify-center bg-background"
+                    role="status"
+                    aria-label="Chargement"
+                  >
+                    <span className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
+                  </div>
+                }
+              >
               <Routes>
                 {/* La couverture ouvre l'application ; l'ancienne page d'accueil,
                     qui présente les services un à un, devient la seconde. */}
@@ -109,9 +142,12 @@ function App() {
                 <Route path="/catalogue/mes-devis" element={<MesDevis />} />
                 <Route path="/mon-compte" element={<MonCompte />} />
                 <Route path="/admin/connexion" element={<AdminLogin />} />
+                <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
                 <Route path="/a-propos" element={<APropos />} />
                 <Route path="/mentions-legales" element={<MentionsLegales />} />
                 <Route path="/confidentialite" element={<Confidentialite />} />
+                <Route path="/cookies" element={<Cookies />} />
+                <Route path="/conditions-generales" element={<ConditionsGenerales />} />
                 <Route
                   path="/admin"
                   element={
@@ -259,10 +295,13 @@ function App() {
                 {/* Toute adresse inconnue aboutit ici plutôt qu'à une page blanche. */}
                 <Route path="*" element={<PageIntrouvable />} />
               </Routes>
+              </Suspense>
               </TransitionDePage>
               {/* Le Déclarant suit l'utilisateur sur tous les écrans : il est
                   dans le routeur pour connaître la page d'où l'on parle. */}
               <AssistantDeclarant />
+              {/* Dans le routeur : le bandeau porte un lien vers /cookies. */}
+              <BandeauStockage />
             </BrowserRouter>
             <Toaster />
           </CartProvider>

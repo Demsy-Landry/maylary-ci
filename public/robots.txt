@@ -1,0 +1,28 @@
+# MayLary Group — ce que les moteurs peuvent parcourir.
+#
+# Les écrans d'administration, les espaces personnels et les paniers n'ont
+# rien à faire dans un index : ils ne servent à personne en résultat de
+# recherche, et une adresse indexée est une adresse que quelqu'un essaiera.
+#
+# Ce fichier n'est PAS une protection : un robot qui l'ignore accède aux
+# mêmes pages. La protection est ailleurs — RLS en base et contrôle de rôle
+# à l'entrée de chaque écran. Ceci ne fait que ranger la vitrine.
+
+User-agent: *
+Allow: /
+
+Disallow: /admin
+Disallow: /admin/
+Disallow: /mon-compte
+Disallow: /boutique/panier
+Disallow: /boutique/commande
+Disallow: /boutique/mes-commandes
+Disallow: /catalogue/devis
+Disallow: /catalogue/mes-devis
+Disallow: /import/mes-demandes
+Disallow: /export/mes-demandes
+Disallow: /mot-de-passe-oublie
+Disallow: /declarant/tableau-de-bord
+Disallow: /declarant/historique
+
+Sitemap: https://maylary-ci.vercel.app/sitemap.xml

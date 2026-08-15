@@ -1,0 +1,52 @@
+{
+  "name": "MayLary Group — Import, export et transit",
+  "short_name": "MayLary",
+  "description": "Importez, exportez et achetez depuis Abidjan. Devis chiffré poste par poste, dossier de transit documenté, suivi en ligne.",
+  "lang": "fr-CI",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#faf7f2",
+  "theme_color": "#f2a618",
+  "categories": ["business", "shopping", "productivity"],
+  "icons": [
+    {
+      "src": "/icone-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icone-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Le Déclarant",
+      "short_name": "Déclarant",
+      "description": "Calculer des droits et taxes de douane",
+      "url": "/declarant/atelier"
+    },
+    {
+      "name": "Faire une demande d'import",
+      "short_name": "Importer",
+      "url": "/import/nouvelle-demande"
+    },
+    {
+      "name": "Mes commandes",
+      "short_name": "Commandes",
+      "url": "/boutique/mes-commandes"
+    }
+  ]
+}

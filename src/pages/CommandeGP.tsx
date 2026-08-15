@@ -658,6 +658,23 @@ export default function CommandeGP() {
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Confirmer la commande
               </Button>
+              {/* L'acceptation est portée par le bouton lui-même plutôt que par
+                  une case à cocher : une case de plus entre le client et le
+                  paiement fait abandonner des commandes, et l'acceptation par
+                  l'acte de commander est celle qui vaut ici. Le lien reste
+                  visible et cliquable avant de valider — c'est ce qui rend les
+                  conditions opposables. */}
+              <p className="text-center text-xs leading-relaxed text-muted-foreground">
+                En confirmant, vous acceptez les{' '}
+                <Link
+                  to="/conditions-generales"
+                  target="_blank"
+                  className="font-medium text-primary hover:underline"
+                >
+                  conditions générales de vente
+                </Link>
+                . Votre paiement est conservé jusqu’à votre confirmation de réception.
+              </p>
             </div>
           </div>
         )}
