@@ -131,7 +131,14 @@ export default function AssistantDeclarant() {
       return;
     }
 
-    const historique = tours.map((t) => ({ role: t.role, texte: t.texte }));
+    // Les tours vides sont écartés AVANT l'envoi. Un seul tour sans texte —
+    // conversation restaurée d'un ancien format, message interrompu — faisait
+    // refuser toute la requête par le fournisseur, et le client lisait « Le
+    // Déclarant est momentanément injoignable » : un message faux, qui le
+    // pousse à réessayer en boucle avec le même historique cassé.
+    const historique = tours
+      .filter((t) => typeof t.texte === 'string' && t.texte.trim().length > 0)
+      .map((t) => ({ role: t.role, texte: t.texte.trim() }));
     setTours((t) => [...t, { role: 'user', texte }]);
     setMessage('');
     setEnvoi(true);
