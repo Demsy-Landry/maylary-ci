@@ -33,6 +33,7 @@ import {
   ShoppingCart,
   Truck,
   TriangleAlert,
+  Ship,
   ExternalLink,
   Copy,
   Check,
@@ -126,6 +127,21 @@ export default function CommandeGP() {
   // Un panier qu'aucun transporteur n'accepte ne doit pas être payé : on le
   // dirait après coup, et il faudrait revenir sur un prix encaissé.
   const panierBloque = remiseGroupage?.expediable === false;
+
+  /* Le chiffrage en groupage reprend les lignes refusées : leur libellé, la
+   * quantité voulue et leur valeur marchande. Le client vient de se voir
+   * refuser sa commande — lui présenter un formulaire vide serait le perdre
+   * une seconde fois. */
+  const lignesRefusees = items.filter((i) =>
+    (remiseGroupage?.articles_en_cause ?? []).includes(i.nom),
+  );
+  const lienGroupage = `/import/nouvelle-demande?${new URLSearchParams({
+    article: (remiseGroupage?.articles_en_cause ?? []).join(' + '),
+    quantite: String(lignesRefusees.reduce((t, i) => t + i.quantite, 0) || 1),
+    valeur: String(
+      Math.round(lignesRefusees.reduce((t, i) => t + prixLigne(i), 0)) || 0,
+    ),
+  }).toString()}`;
 
   const [nomDestinataire, setNomDestinataire] = useState('');
   const [telephoneDestinataire, setTelephoneDestinataire] = useState('');
@@ -487,6 +503,7 @@ export default function CommandeGP() {
                   </h2>
 
                   {panierBloque ? (
+                    <>
                     <div className="mt-2 rounded-md border border-destructive/40 bg-destructive/5 p-3">
                       <p className="flex items-center gap-1.5 text-sm font-semibold text-destructive">
                         <TriangleAlert className="h-4 w-4" />
@@ -503,10 +520,44 @@ export default function CommandeGP() {
                         ))}
                       </ul>
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Retirez-le de votre panier et commandez-le séparément. Nous préférons vous le
-                        dire maintenant plutôt qu'après votre paiement.
+                        Nous préférons vous le dire maintenant plutôt qu'après votre paiement.
                       </p>
                     </div>
+
+                    {/* Ce n'est pas un refus, c'est un changement de mode.
+                        Une armoire ne rentre dans aucun colis express — elle
+                        voyage en groupage maritime, et c'est exactement le
+                        métier de la maison. Renvoyer le client en lui disant
+                        « retirez-le de votre panier » revenait à refuser une
+                        vente qu'on sait faire. */}
+                    <div className="mt-3 rounded-md border border-primary/40 bg-primary/5 p-3">
+                      <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                        <Ship className="h-4 w-4 text-primary" />
+                        Nous pouvons quand même vous l’apporter
+                      </p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                        Les articles volumineux ne partent pas en colis express : ils voyagent en
+                        groupage, par bateau ou par avion. C’est notre métier de transitaire. Nous
+                        vous chiffrons le transport, les droits de douane et la livraison à Abidjan,
+                        poste par poste — vous décidez ensuite.
+                      </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <Button asChild className="bouton-anime">
+                          <Link to={lienGroupage}>
+                            <Ship className="mr-1.5 h-4 w-4" />
+                            Demander un chiffrage en groupage
+                          </Link>
+                        </Button>
+                        <Button asChild variant="outline">
+                          <Link to="/boutique/panier">Retirer l’article du panier</Link>
+                        </Button>
+                      </div>
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Le reste de votre panier vous attend : commandez-le normalement une fois
+                        l’article volumineux retiré.
+                      </p>
+                    </div>
+                    </>
                   ) : remiseEnCours ? (
                     <div className="mt-2 space-y-2">
                       <Skeleton className="h-14 w-full" />
