@@ -69,6 +69,7 @@ function parent(chemin: string): { vers: string; nom: string } | null {
   if (p.startsWith('/import/')) return { vers: '/services', nom: 'nos services' };
   if (p.startsWith('/export/')) return { vers: '/services', nom: 'nos services' };
   if (p.startsWith('/vendre/')) return { vers: '/vendre', nom: "l'espace vendeur" };
+  if (p.startsWith('/declarant/')) return { vers: '/declarant', nom: "l'espace Déclarant" };
 
   const coupe = p.lastIndexOf('/');
   return coupe > 0 ? { vers: p.slice(0, coupe), nom: 'la page précédente' } : { vers: '/', nom: "l'accueil" };

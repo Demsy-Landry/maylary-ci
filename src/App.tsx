@@ -17,6 +17,10 @@ import CompteGP from '@/pages/CompteGP';
 import MesCommandesGP from '@/pages/MesCommandesGP';
 import AchatsGroupes from '@/pages/AchatsGroupes';
 import Declarant from '@/pages/Declarant';
+import DeclarantAccueil from '@/pages/DeclarantAccueil';
+import DeclarantTableauDeBord from '@/pages/DeclarantTableauDeBord';
+import DeclarantHistorique from '@/pages/DeclarantHistorique';
+import DeclarantAbonnement from '@/pages/DeclarantAbonnement';
 import PoidsTaxable from '@/pages/PoidsTaxable';
 import SourcingGP from '@/pages/SourcingGP';
 import EspaceVendeur from '@/pages/EspaceVendeur';
@@ -39,6 +43,7 @@ import AdminDevisGestion from '@/pages/admin/DevisGestion';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import AdminAssistance from '@/pages/admin/Assistance';
 import AdminDossiersGestion from '@/pages/admin/DossiersGestion';
+import AdminDeclarantGestion from '@/pages/admin/DeclarantGestion';
 import AdminImportGestion from '@/pages/admin/ImportGestion';
 import NouvelleDemandeImport from '@/pages/NouvelleDemandeImport';
 import MesDemandesImport from '@/pages/MesDemandesImport';
@@ -88,7 +93,11 @@ function App() {
                 <Route path="/boutique/compte" element={<CompteGP />} />
                 <Route path="/boutique/mes-commandes" element={<MesCommandesGP />} />
                 <Route path="/boutique/achats-groupes" element={<AchatsGroupes />} />
-                <Route path="/declarant" element={<Declarant />} />
+                <Route path="/declarant" element={<DeclarantAccueil />} />
+                <Route path="/declarant/atelier" element={<Declarant />} />
+                <Route path="/declarant/tableau-de-bord" element={<DeclarantTableauDeBord />} />
+                <Route path="/declarant/historique" element={<DeclarantHistorique />} />
+                <Route path="/declarant/abonnement" element={<DeclarantAbonnement />} />
                 <Route path="/poids-taxable" element={<PoidsTaxable />} />
                 <Route path="/boutique/sourcing" element={<SourcingGP />} />
                 <Route path="/vendre" element={<EspaceVendeur />} />
@@ -204,6 +213,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/dossiers">
                       <AdminDossiersGestion />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/declarant"
+                  element={
+                    <AdminRoute ecran="/admin/declarant">
+                      <AdminDeclarantGestion />
                     </AdminRoute>
                   }
                 />
