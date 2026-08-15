@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Compass, LayoutDashboard, History, CreditCard, Wrench } from 'lucide-react';
+import { Compass, LayoutDashboard, History, CreditCard, Wrench, Sparkles, FileText } from 'lucide-react';
 
 /**
  * La barre du service.
@@ -16,6 +16,8 @@ import { Compass, LayoutDashboard, History, CreditCard, Wrench } from 'lucide-re
 const ENTREES = [
   { to: '/declarant', fin: true, libelle: 'Le service', icone: Compass },
   { to: '/declarant/atelier', fin: false, libelle: 'Atelier', icone: Wrench },
+  { to: '/declarant/classer', fin: false, libelle: 'Classer', icone: Sparkles },
+  { to: '/declarant/declaration', fin: false, libelle: 'Déclaration', icone: FileText },
   { to: '/declarant/tableau-de-bord', fin: false, libelle: 'Tableau de bord', icone: LayoutDashboard },
   { to: '/declarant/historique', fin: false, libelle: 'Historique', icone: History },
   { to: '/declarant/abonnement', fin: false, libelle: 'Abonnement', icone: CreditCard },
