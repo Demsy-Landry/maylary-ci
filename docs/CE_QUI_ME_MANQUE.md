@@ -50,8 +50,21 @@ disque, sans recopie et sans risque. Il lui manque une seule chose : un jeton.
 SUPABASE_ACCESS_TOKEN
 ```
 
-3. Dites-moi seulement « c'est déposé ». Comme pour les autres clés, je n'ai
+3. **Ouvrez une NOUVELLE session.** C'est le piège de ce réglage, et il m'a eu :
+   une variable d'environnement est injectée au DÉMARRAGE du conteneur. Ajoutée
+   pendant qu'une session tourne, elle n'y arrive jamais — il faut en ouvrir
+   une autre.
+4. Dites-moi seulement « c'est déposé ». Comme pour les autres clés, je n'ai
    pas besoin de le voir.
+
+Le déploiement lui-même tient alors en une ligne, et le script est déjà écrit :
+
+```
+scripts/deployer-fonctions.sh app_e08c374bc4_agent
+```
+
+Sans argument, il liste les fonctions déployables. Sans jeton, il refuse et
+explique — il ne déploie jamais à moitié.
 
 ⚠️ **Ce jeton donne accès à votre compte Supabase.** Traitez-le comme un mot de
 passe : jamais dans une conversation, jamais dans une capture d'écran, jamais
