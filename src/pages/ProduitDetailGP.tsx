@@ -237,6 +237,60 @@ export default function ProduitDetailGP() {
                 </p>
               )}
 
+              {/* La fiche technique relevée chez le fournisseur. Elle est
+                  courte et factuelle — matière, emballage, poids — donc elle
+                  passe en pastilles plutôt qu'en paragraphe : c'est ce qu'un
+                  acheteur cherche du regard avant de lire quoi que ce soit. */}
+              {(produit.matiere || produit.emballage || produit.poids_produit_g) && (
+                <dl className="mt-4 flex flex-wrap gap-2">
+                  {produit.matiere && (
+                    <div className="rounded-md border bg-muted/40 px-2.5 py-1.5">
+                      <dt className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">
+                        Matière
+                      </dt>
+                      <dd className="text-sm text-foreground">{produit.matiere}</dd>
+                    </div>
+                  )}
+                  {produit.emballage && (
+                    <div className="rounded-md border bg-muted/40 px-2.5 py-1.5">
+                      <dt className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">
+                        Emballage
+                      </dt>
+                      <dd className="text-sm text-foreground">{produit.emballage}</dd>
+                    </div>
+                  )}
+                  {produit.poids_produit_g ? (
+                    <div className="rounded-md border bg-muted/40 px-2.5 py-1.5">
+                      <dt className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">
+                        Poids
+                      </dt>
+                      <dd className="text-sm tabular-nums text-foreground">
+                        {produit.poids_produit_g >= 1000
+                          ? `${(produit.poids_produit_g / 1000).toFixed(2)} kg`
+                          : `${Math.round(produit.poids_produit_g)} g`}
+                      </dd>
+                    </div>
+                  ) : null}
+                </dl>
+              )}
+
+              {/* Le texte du fournisseur, en anglais tant que personne ne l'a
+                  réécrit. Il est présenté comme tel : le donner pour une
+                  description maison serait mentir sur son origine. */}
+              {produit.description_fournisseur && (
+                <details className="mt-4 rounded-md border bg-card p-3">
+                  <summary className="cursor-pointer text-sm font-medium text-foreground">
+                    Détail technique du fabricant
+                  </summary>
+                  <p className="mt-2 whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
+                    {produit.description_fournisseur}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Texte fourni par le fabricant, non traduit.
+                  </p>
+                </details>
+              )}
+
               {produit.quantite_minimum > 1 && (
                 <p className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-foreground">
                   Vendu par lot de <strong>{produit.quantite_minimum}</strong> minimum. Grouper les
