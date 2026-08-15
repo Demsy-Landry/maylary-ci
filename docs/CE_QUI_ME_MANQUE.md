@@ -24,49 +24,28 @@ inventé n'entre dans un prix.
 
 ## P0 — Sans ça, la boucle de vente ne peut pas être prouvée
 
-### 00. VERCEL REFUSE DE CONSTRUIRE — le site ne reçoit plus aucune mise à jour
+### 00. ~~Vercel refuse de construire~~ — RÉGLÉ le 14 août au soir
 
-**Mesuré le 14 août 2026 au soir.** Les cinq derniers déploiements de
-production sont en `ERROR`. Ce n'est pas notre code : le build local passe en
-1,6 seconde, et côté Vercel il n'y a **aucun journal de construction** — la
-construction n'a jamais démarré.
+**Le projet Supabase était en pause.** Le fondateur l'a trouvé et relancé, puis
+a redéployé : la production est repassée en `READY`.
 
-| Déploiement | Durée | Erreur |
-|---|---|---|
-| `dadaab7` (le travail de ce soir) | 0,5 s | `BUILD_FAILED — Resource provisioning failed` |
-| `917a806` | 0,6 s | idem |
-| `9483116` | 0,6 s | idem |
-| `2587fdf` | 0,6 s | idem |
-| `560c1a9` | 0,6 s | idem |
+Ce qu'il faut en retenir pour la prochaine fois, parce que le symptôme était
+trompeur : Vercel ne rendait **aucun journal de construction** et échouait en
+une demi-seconde sur `Resource provisioning failed`. J'en avais déduit une
+limite de plan ou un problème de facturation — **c'était faux**. La preuve que
+le code n'était pas en cause est venue du redéploiement : le MÊME commit
+(`3d163cb`), relancé sans une ligne de changement, est passé.
 
-Cinq échecs identiques, instantanés, sans journal : la construction est
-refusée **avant** d'être lancée. Le dernier déploiement réussi est
-`70ac9d9`, il y a environ quatre heures.
+**La règle à garder :** quand un déploiement échoue sans journal, la première
+chose à vérifier est l'état du projet Supabase
+([tableau de bord](https://supabase.com/dashboard/project/oubowmftzxpruckjzwuq)).
+Un projet en pause après inactivité coupe la base, et le déploiement n'a plus
+de quoi s'appuyer.
 
-**Conséquence : tout ce qui a été livré depuis est en ligne dans la base et
-dans le dépôt, mais PAS sur le site.** Les nouvelles images de couverture, le
-message d'accueil, les animations — vous ne les verrez pas tant que ceci n'est
-pas réglé.
-
-**Ce qu'il faut regarder, dans cet ordre :**
-
-1. **La limite quotidienne du plan Hobby** — 100 déploiements par 24 heures.
-   Nous avons beaucoup poussé aujourd'hui, et chaque commit déclenche DEUX
-   déploiements (la branche et la production). C'est l'explication la plus
-   probable, et elle se règle toute seule au bout de 24 heures.
-2. **L'état du compte** sur [vercel.com](https://vercel.com/demsy-landrys-projects/maylary-ci)
-   — un moyen de paiement expiré ou un plan suspendu donne exactement ce
-   symptôme.
-3. Si ni l'un ni l'autre : le bouton **Redeploy** sur le dernier déploiement.
-
-**Dites-moi ce que la page affiche**, et je reprends. Je ne peux pas lire
-l'état de facturation de votre compte depuis ici.
-
-*Note au passage : le site n'est aujourd'hui accessible que derrière
-l'authentification Vercel (`vercel.com/sso`), et aucun nom de domaine propre
-n'est rattaché au projet. Avant l'ouverture au public il faudra brancher
-`maylary.ci` et lever cette protection.*
-
+*Reste ouvert, et ce n'est pas urgent : le site n'est accessible que derrière
+l'authentification Vercel, et aucun nom de domaine propre n'est rattaché au
+projet. Avant l'ouverture au public, il faudra brancher `maylary.ci` et lever
+cette protection.*
 
 ### 0. LE CRÉDIT GOOGLE AI — Le Déclarant est ARRÊTÉ
 
