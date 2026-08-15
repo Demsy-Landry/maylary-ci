@@ -32,6 +32,7 @@ import {
   EXPORT_DOCUMENTS_BUCKET,
 } from '@/lib/supabase';
 import { GaleriePhotosPrivees, LienDocumentPrive } from '@/components/FichiersPrives';
+import MesDonneesPersonnelles from '@/components/MesDonneesPersonnelles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -440,6 +441,11 @@ export default function MonCompte() {
               )}
             </CardContent>
           </Card>
+
+          {/* Les droits sur ses données, en dernier : on ne met pas « fermer
+              mon compte » en tête d'un écran qui sert surtout à suivre ses
+              commandes. */}
+          <MesDonneesPersonnelles email={user.email ?? ''} />
         </div>
       </main>
       <SiteFooter />
