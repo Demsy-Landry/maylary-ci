@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MarqueMaylary } from '@/components/MarqueMaylary';
 import { Button } from '@/components/ui/button';
 import MenuServices from '@/components/MenuServices';
+import BoutonRetour from '@/components/BoutonRetour';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
 import {
@@ -154,10 +155,18 @@ export default function PublicHeaderGP() {
         </form>
       </div>
 
-      <div className="border-t border-background/10 bg-foreground/95">
-        <div className="mx-auto flex max-w-screen-xl items-center gap-1.5 px-4 py-1.5 text-xs text-background/80 sm:px-6">
-          <MapPin className="h-3.5 w-3.5 shrink-0" />
-          <span>Votre adresse de livraison : Côte d'Ivoire, partout dans le pays</span>
+      {/* La ligne du bas porte deux choses de nature différente — d'où le
+          retour à gauche, l'information de livraison à droite. Le retour vit
+          dans l'en-tête et non dans chaque page : posé une fois ici, il
+          apparaît sur les vingt-huit écrans qui utilisent cet en-tête, et il
+          ne peut plus être oublié sur l'un d'eux. */}
+      <div className="border-t border-background/10 bg-foreground/95 text-background/80">
+        <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-1 text-xs sm:px-6">
+          <BoutonRetour className="-ml-2 text-xs text-background/80 hover:text-background" />
+          <span className="flex items-center gap-1.5">
+            <MapPin className="h-3.5 w-3.5 shrink-0" />
+            <span>Votre adresse de livraison : Côte d'Ivoire, partout dans le pays</span>
+          </span>
         </div>
       </div>
     </header>

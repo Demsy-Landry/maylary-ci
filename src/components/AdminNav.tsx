@@ -3,6 +3,7 @@ import { ChevronLeft, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { ROLES_PAR_ECRAN } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
+import BoutonRetour from '@/components/BoutonRetour';
 
 const LINKS = [
   { to: '/admin', label: 'Tableau de bord' },
@@ -57,6 +58,7 @@ export default function AdminNav() {
           Déconnexion
         </Button>
       </div>
+      <BoutonRetour className="-ml-2 mb-1 text-xs text-muted-foreground hover:text-foreground" />
       <nav className="flex flex-wrap gap-x-4 gap-y-1.5">
         {liens.map((link) => (
           <Link
