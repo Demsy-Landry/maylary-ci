@@ -154,19 +154,28 @@ export default function SourcingGP() {
           qui reviendra. Une image d'entrepôt dit en une seconde ce que trois
           paragraphes n'établissent pas — qu'il y a des vraies marchandises,
           des vrais fournisseurs et une maison derrière. */}
-      <section className="relative overflow-hidden bg-foreground">
+      <section className="relative flex min-h-[24rem] items-center overflow-hidden bg-foreground sm:min-h-[28rem]">
+        {/* Le cadrage est remonté à 26 % : la bande d'ouverture est bien plus
+            large que haute, et un recadrage centré coupait le visage de la
+            personne au profit du plan de travail. On garde les yeux, on perd
+            un peu de sol. */}
         <img
-          src="/visuels/sourcing-entrepot.jpg"
+          src="/visuels/sourcing-selection.jpg"
           alt=""
           width={1168}
           height={784}
           fetchPriority="high"
           decoding="async"
-          className="absolute inset-0 h-full w-full scale-105 object-cover motion-safe:animate-[respiration_26s_ease-in-out_infinite]"
+          className="absolute inset-0 h-full w-full scale-105 object-cover object-[center_26%] motion-safe:animate-[respiration_26s_ease-in-out_infinite]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/95 via-foreground/80 to-foreground/35" />
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-transparent" />
-        <div className="relative mx-auto max-w-screen-lg px-4 py-16 sm:px-6 sm:py-20">
+        {/* `w-full` n'est pas décoratif : la section est en « flex », donc ce
+            conteneur devient un élément flexible et se réduit à la largeur
+            de son contenu. Sans lui, « mx-auto » centre un bloc rétréci et le
+            titre ne s'aligne plus sur le formulaire juste en dessous —
+            deux cents pixels de décalage, visibles à l'œil nu. */}
+        <div className="relative mx-auto w-full max-w-screen-lg px-4 py-16 sm:px-6 sm:py-20">
           <div className="rideau max-w-xl">
             <p className="flex items-center gap-2 font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-primary sm:text-xs">
               <Sparkles className="h-4 w-4" />
@@ -264,9 +273,67 @@ export default function SourcingGP() {
           </div>
         </section>
 
+        {/* ---------- Ce qui se passe après ----------
+            Une demande de sourcing part sur une promesse, et le client la fait
+            à des inconnus : il décrit un article, et il attend. Sans rien lui
+            montrer de la suite, il n'a aucune raison de croire que sa demande
+            va quelque part. Ces trois étapes disent ce qui se passe entre son
+            message et son colis — et la photographie d'entrepôt les ancre dans
+            un lieu réel. C'est le seul argument qui vaut à ce moment-là. */}
+        <section className="mt-12 overflow-hidden rounded-xl border bg-card" data-revele>
+          <div className="grid items-stretch lg:grid-cols-2">
+            <div className="cadre-zoom order-1 min-h-[14rem] lg:order-2 lg:min-h-full">
+              <img
+                src="/visuels/sourcing-entrepot.jpg"
+                alt="Contrôle d'un colis en entrepôt avant expédition."
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="order-2 p-6 lg:order-1 lg:p-8">
+              <h2 className="trait-anime font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                Ce qui se passe après votre demande
+              </h2>
+              <ol className="mt-6 space-y-5" data-revele-cascade>
+                {[
+                  {
+                    n: '1',
+                    titre: 'On cherche à la source',
+                    texte:
+                      "Chine, Turquie, Europe, Maghreb. On interroge plusieurs fournisseurs pour le même article et on retient celui qui revient le moins cher une fois les droits de douane comptés — pas celui qui affiche le prix d'achat le plus bas.",
+                  },
+                  {
+                    n: '2',
+                    titre: 'On contrôle avant d’expédier',
+                    texte:
+                      'La marchandise est vérifiée à notre entrepôt : quantité, référence, état. Un article non conforme ne prend pas l’avion — il repart chez le fournisseur, et vous ne payez pas le fret d’un colis à refuser.',
+                  },
+                  {
+                    n: '3',
+                    titre: 'On vous annonce un prix rendu Abidjan',
+                    texte:
+                      'Marchandise, fret, assurance, douane et livraison dans un seul chiffre. Vous décidez après l’avoir vu — rien n’est engagé avant votre accord.',
+                  },
+                ].map((e) => (
+                  <li key={e.n} className="flex gap-4">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-bold text-primary">
+                      {e.n}
+                    </span>
+                    <div>
+                      <h3 className="font-display text-base font-bold text-foreground">{e.titre}</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{e.texte}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </section>
+
         {user && (
           <section className="mt-8">
-            <h2 className="text-lg font-semibold text-foreground">Mes recherches</h2>
+            <h2 className="trait-anime text-lg font-semibold text-foreground">Mes recherches</h2>
             {loading ? (
               <div className="mt-3 space-y-2">
                 {[1, 2].map((i) => (

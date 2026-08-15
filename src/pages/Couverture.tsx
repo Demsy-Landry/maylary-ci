@@ -382,10 +382,11 @@ export default function Couverture() {
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4" data-revele-cascade>
           {[
             {
-              // Servie par le site et non par le stockage distant : c'est le
-              // visuel de sourcing fourni par le fondateur, et il remplace
-              // partout l'ancienne photographie d'échantillons sur un bureau.
-              image: '/visuels/sourcing-entrepot.jpg',
+              // Servie par le site et non par le stockage distant. Le
+              // sourcing, c'est d'abord CHOISIR : comparer des références,
+              // vérifier une matière, arbitrer un prix. L'entrepôt vient
+              // après — il illustre le contrôle, pas la recherche.
+              image: '/visuels/sourcing-selection.jpg',
               etape: '1',
               titre: 'On trouve la marchandise',
               texte:
