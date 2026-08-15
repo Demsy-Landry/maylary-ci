@@ -1176,6 +1176,7 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin/assistance': ['proprietaire', 'operations'],
   '/admin/sourcing': ['proprietaire', 'operations'],
   '/admin/vendeurs': ['proprietaire', 'operations'],
+  '/admin/dossiers': ['proprietaire', 'operations'],
   '/admin/import': ['proprietaire', 'operations'],
   '/admin/export': ['proprietaire', 'operations'],
   '/admin/devis': ['proprietaire', 'operations'],
@@ -1738,4 +1739,89 @@ export interface Facture {
   date_emission: string;
   date_echeance: string | null;
   created_at: string;
+}
+
+/* ---------------------------------------------------------------------------
+   Le dossier de transit et sa documentation.
+
+   Le fondateur : « Chaque demande doit faire l'ouverture d'un dossier numéroté
+   qui contient toute la documentation jusqu'au bordereau de livraison, puis
+   fermeture du dossier, archivage. »
+--------------------------------------------------------------------------- */
+
+export const DOCUMENTS_PROCEDURE_TABLE = 'app_e08c374bc4_documents_procedure';
+export const DOSSIERS_TABLE = 'app_e08c374bc4_dossiers';
+export const DOSSIER_PIECES_TABLE = 'app_e08c374bc4_dossier_pieces';
+
+export type StatutDossier =
+  | 'ouvert' | 'documentation' | 'declaration' | 'liquidation'
+  | 'enlevement' | 'livraison' | 'clos' | 'archive';
+
+/** L'ordre est celui de la procédure : il sert aussi à trier l'affichage. */
+export const STATUTS_DOSSIER: { code: StatutDossier; libelle: string }[] = [
+  { code: 'ouvert', libelle: 'Ouvert' },
+  { code: 'documentation', libelle: 'Documentation' },
+  { code: 'declaration', libelle: 'Déclaration' },
+  { code: 'liquidation', libelle: 'Liquidation' },
+  { code: 'enlevement', libelle: 'Enlèvement' },
+  { code: 'livraison', libelle: 'Livraison' },
+  { code: 'clos', libelle: 'Clos' },
+  { code: 'archive', libelle: 'Archivé' },
+];
+
+/** Le moment où une pièce intervient. Un BSC pris trop tard coûte une pénalité. */
+export const MOMENTS_DOCUMENT: Record<string, string> = {
+  prealable: 'Préalable',
+  avant_embarquement: 'Avant embarquement',
+  avant_declaration: 'Avant déclaration',
+  a_la_declaration: 'À la déclaration',
+  apres_liquidation: 'Après liquidation',
+  a_la_livraison: 'À la livraison',
+};
+
+export type StatutPiece = 'attendu' | 'demande' | 'recu' | 'valide' | 'sans_objet';
+
+export interface Dossier {
+  id: string;
+  numero: string;
+  sens: 'import' | 'export';
+  mode: string;
+  origine_type: string;
+  origine_id: string | null;
+  user_id: string | null;
+  designation: string | null;
+  statut: StatutDossier;
+  ouvert_le: string;
+  clos_le: string | null;
+  archive_le: string | null;
+  note: string | null;
+}
+
+/** Une pièce telle que la rend `app_e08c374bc4_etat_dossier` : la ligne du
+ *  dossier ET la fiche du document, réunies — l'écran a besoin des deux. */
+export interface PieceDossier {
+  code: string;
+  libelle: string;
+  sigle: string | null;
+  emetteur: string | null;
+  moment: string;
+  obligation: 'obligatoire' | 'conditionnel';
+  condition: string | null;
+  consequence_oubli: string | null;
+  delai_indicatif: string | null;
+  cout_fcfa: number | null;
+  reference: string | null;
+  source: string | null;
+  verifie: boolean;
+  statut: StatutPiece;
+  motif_sans_objet: string | null;
+  fichier_chemin: string | null;
+  recu_le: string | null;
+}
+
+export interface EtatDossier {
+  dossier: Dossier;
+  pieces: PieceDossier[];
+  manquantes: string[];
+  complet: boolean;
 }

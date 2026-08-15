@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import MenuServices from '@/components/MenuServices';
 import { useAuth } from '@/hooks/useAuth';
 import { ShieldCheck, LogOut, User, ShoppingBag, Building2, PackageSearch, Ship } from 'lucide-react';
+import BoutonRetour from '@/components/BoutonRetour';
 
 export default function PublicHeaderImport() {
   const { user, isAdmin, signOut } = useAuth();
@@ -89,6 +90,14 @@ export default function PublicHeaderImport() {
             </Button>
           )}
         </nav>
+      </div>
+
+      {/* Le retour est posé dans l'en-tête plutôt que dans chaque page : un
+          écran ajouté demain l'aura sans qu'on y pense. */}
+      <div className="border-t bg-muted/40">
+        <div className="mx-auto max-w-screen-xl px-2 py-1 sm:px-4">
+          <BoutonRetour className="text-xs text-muted-foreground hover:text-foreground" />
+        </div>
       </div>
     </header>
   );

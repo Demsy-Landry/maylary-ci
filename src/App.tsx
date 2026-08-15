@@ -38,6 +38,7 @@ import AdminEquipeGestion from '@/pages/admin/EquipeGestion';
 import AdminDevisGestion from '@/pages/admin/DevisGestion';
 import AdminDashboard from '@/pages/admin/Dashboard';
 import AdminAssistance from '@/pages/admin/Assistance';
+import AdminDossiersGestion from '@/pages/admin/DossiersGestion';
 import AdminImportGestion from '@/pages/admin/ImportGestion';
 import NouvelleDemandeImport from '@/pages/NouvelleDemandeImport';
 import MesDemandesImport from '@/pages/MesDemandesImport';
@@ -195,6 +196,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/sourcing">
                       <AdminSourcingGestion />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/dossiers"
+                  element={
+                    <AdminRoute ecran="/admin/dossiers">
+                      <AdminDossiersGestion />
                     </AdminRoute>
                   }
                 />
