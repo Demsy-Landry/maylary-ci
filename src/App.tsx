@@ -35,6 +35,7 @@ const AdminAssistance = lazy(() => import('@/pages/admin/Assistance'));
 const AdminCommandesGP = lazy(() => import('@/pages/admin/CommandesGP'));
 const AdminDashboard = lazy(() => import('@/pages/admin/Dashboard'));
 const AdminDeclarantGestion = lazy(() => import('@/pages/admin/DeclarantGestion'));
+const AdminProduitsGestion = lazy(() => import('@/pages/admin/ProduitsGestion'));
 const AdminDevisGestion = lazy(() => import('@/pages/admin/DevisGestion'));
 const AdminDossiersGestion = lazy(() => import('@/pages/admin/DossiersGestion'));
 const AdminEquipeGestion = lazy(() => import('@/pages/admin/EquipeGestion'));
@@ -249,6 +250,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/dossiers">
                       <AdminDossiersGestion />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/produits"
+                  element={
+                    <AdminRoute ecran="/admin/produits">
+                      <AdminProduitsGestion />
                     </AdminRoute>
                   }
                 />

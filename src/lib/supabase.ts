@@ -1177,6 +1177,7 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin/sourcing': ['proprietaire', 'operations'],
   '/admin/vendeurs': ['proprietaire', 'operations'],
   '/admin/dossiers': ['proprietaire', 'operations'],
+  '/admin/produits': ['proprietaire', 'catalogue'],
   // Le Déclarant est un produit vendu : ses tarifs regardent le propriétaire.
   '/admin/declarant': ['proprietaire'],
   '/admin/import': ['proprietaire', 'operations'],

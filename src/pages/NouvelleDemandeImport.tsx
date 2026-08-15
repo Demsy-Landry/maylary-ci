@@ -1,5 +1,5 @@
 import { useMemo, useState, type ChangeEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
 import { useAuth } from '@/hooks/useAuth';
@@ -37,16 +37,34 @@ export default function NouvelleDemandeImport() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [descriptionProduit, setDescriptionProduit] = useState('');
+  /* Le formulaire peut être ouvert depuis le panier, quand un article ne passe
+   * pas en colis express. On reprend alors ce que le client a déjà saisi
+   * plutôt que de le lui redemander : il vient de se voir refuser sa commande,
+   * lui présenter un formulaire vide serait le perdre une seconde fois.
+   *
+   * Seules des données que le client a lui-même mises dans son panier sont
+   * reprises, et elles ne servent qu'à préremplir des champs qu'il peut
+   * corriger — rien ici n'engage un prix. */
+  const [parametres] = useSearchParams();
+
+  const [descriptionProduit, setDescriptionProduit] = useState(
+    () => parametres.get('article')?.slice(0, 500) ?? '',
+  );
   const [lienProduit, setLienProduit] = useState('');
-  const [quantite, setQuantite] = useState('1');
+  const [quantite, setQuantite] = useState(() => {
+    const q = Number(parametres.get('quantite'));
+    return Number.isFinite(q) && q > 0 ? String(Math.floor(q)) : '1';
+  });
   const [paysFournisseur, setPaysFournisseur] = useState('');
   const [incoterm, setIncoterm] = useState<Incoterm | ''>('');
   const [modeTransport, setModeTransport] = useState<ModeTransport>('maritime');
   const [transporteurSouhaite, setTransporteurSouhaite] = useState('');
   const [poidsEstime, setPoidsEstime] = useState('');
   const [volumeEstime, setVolumeEstime] = useState('');
-  const [valeurEstimee, setValeurEstimee] = useState('');
+  const [valeurEstimee, setValeurEstimee] = useState(() => {
+    const v = Number(parametres.get('valeur'));
+    return Number.isFinite(v) && v > 0 ? String(Math.round(v)) : '';
+  });
   const [notesClient, setNotesClient] = useState('');
   const [photos, setPhotos] = useState<File[]>([]);
   const [documents, setDocuments] = useState<DocumentAJoindre[]>([]);
