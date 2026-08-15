@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import AdminNav from '@/components/AdminNav';
-import { supabase } from '@/lib/supabase';
+import { supabase, EDGE_FUNCTIONS_URL } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -17,6 +17,7 @@ import {
   Eye,
   Loader2,
   Languages,
+  Sparkles,
   FileQuestion,
   Truck,
   ImageOff,
@@ -95,6 +96,7 @@ export default function ProduitsGestion() {
   const [edite, setEdite] = useState<string | null>(null);
   const [brouillon, setBrouillon] = useState({ nom: '', description: '', prix: '' });
   const [travail, setTravail] = useState<string | null>(null);
+  const [enrichissement, setEnrichissement] = useState(false);
 
   const charger = useCallback(async () => {
     const { data, error } = await supabase.rpc('app_e08c374bc4_produits_a_corriger');
@@ -166,6 +168,40 @@ export default function ProduitsGestion() {
     void charger();
   };
 
+  /* Le remplissage des fiches depuis le fournisseur.
+   *
+   * Il tourne côté serveur, une référence par seconde et quelques : CJ plafonne
+   * à une requête par seconde, et c'est la seule façon de tenir la cadence.
+   * L'appel rend combien il en reste, pour qu'on sache s'il faut relancer. */
+  const enrichir = async () => {
+    setEnrichissement(true);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) return;
+      const r = await fetch(`${EDGE_FUNCTIONS_URL}/app_e08c374bc4_enrichir_catalogue`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ limite: 40 }),
+      });
+      const corps = await r.json();
+      if (!r.ok) {
+        toast.error(corps?.erreur ?? "Le remplissage n'a pas abouti.");
+        return;
+      }
+      toast.success(corps.message);
+      void charger();
+    } catch {
+      toast.error('Le fournisseur est injoignable.');
+    } finally {
+      setEnrichissement(false);
+    }
+  };
+
   const cherche = filtre.trim().toLowerCase();
   const vus = useMemo(
     () =>
@@ -211,6 +247,21 @@ export default function ProduitsGestion() {
               className="pl-8"
             />
           </div>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="bouton-anime"
+            onClick={() => void enrichir()}
+            disabled={enrichissement}
+            title="Récupère chez le fournisseur la matière, l’emballage, le poids et la description"
+          >
+            {enrichissement ? (
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+            )}
+            Remplir les fiches
+          </Button>
           {(Object.keys(DEFAUTS) as Defaut[]).map((d) => {
             const Icone = DEFAUTS[d].icone;
             const n = compte(d);

@@ -334,6 +334,13 @@ export interface Produit {
   enseigne_id: string | null;
   nom: string;
   description: string | null;
+  /** Détails relevés chez le fournisseur, jamais réécrits par la maison.
+   *  Séparés de `description` : une correction manuelle ne doit pas effacer la
+   *  source, et un réimport ne doit pas effacer la correction. */
+  description_fournisseur?: string | null;
+  matiere?: string | null;
+  emballage?: string | null;
+  poids_produit_g?: number | null;
   prix_unitaire_fcfa: number;
   photos: string[];
   categorie: string | null;
