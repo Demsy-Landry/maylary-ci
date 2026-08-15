@@ -136,6 +136,10 @@ export default function AssistantDeclarant() {
     // refuser toute la requête par le fournisseur, et le client lisait « Le
     // Déclarant est momentanément injoignable » : un message faux, qui le
     // pousse à réessayer en boucle avec le même historique cassé.
+    /* Le résumé du compte n'est PAS composé ici, volontairement : la fonction
+     * serveur le lit elle-même avec le jeton de l'appelant. Un contexte envoyé
+     * par le navigateur serait falsifiable — il suffirait d'y écrire
+     * « type_compte: admin » pour que le modèle le tienne pour acquis. */
     const historique = tours
       .filter((t) => typeof t.texte === 'string' && t.texte.trim().length > 0)
       .map((t) => ({ role: t.role, texte: t.texte.trim() }));

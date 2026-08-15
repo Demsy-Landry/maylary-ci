@@ -58,6 +58,8 @@ const Cookies = lazy(() => import('@/pages/Cookies'));
 const Declarant = lazy(() => import('@/pages/Declarant'));
 const DeclarantAbonnement = lazy(() => import('@/pages/DeclarantAbonnement'));
 const DeclarantAccueil = lazy(() => import('@/pages/DeclarantAccueil'));
+const DeclarantClassification = lazy(() => import('@/pages/DeclarantClassification'));
+const DeclarantDeclaration = lazy(() => import('@/pages/DeclarantDeclaration'));
 const DeclarantHistorique = lazy(() => import('@/pages/DeclarantHistorique'));
 const DeclarantTableauDeBord = lazy(() => import('@/pages/DeclarantTableauDeBord'));
 const EspaceVendeur = lazy(() => import('@/pages/EspaceVendeur'));
@@ -129,6 +131,8 @@ function App() {
                 <Route path="/boutique/achats-groupes" element={<AchatsGroupes />} />
                 <Route path="/declarant" element={<DeclarantAccueil />} />
                 <Route path="/declarant/atelier" element={<Declarant />} />
+                <Route path="/declarant/classer" element={<DeclarantClassification />} />
+                <Route path="/declarant/declaration" element={<DeclarantDeclaration />} />
                 <Route path="/declarant/tableau-de-bord" element={<DeclarantTableauDeBord />} />
                 <Route path="/declarant/historique" element={<DeclarantHistorique />} />
                 <Route path="/declarant/abonnement" element={<DeclarantAbonnement />} />

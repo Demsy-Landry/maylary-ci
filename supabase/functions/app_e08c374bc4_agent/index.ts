@@ -733,6 +733,10 @@ Deno.serve(async (req: Request) => {
         .map((t) => ({ role: t.role === 'model' ? 'model' : 'user', texte: t.texte.trim() }))
         .slice(-12);
       contexte = String(corps.contexte ?? '').slice(0, 400);
+      // `corps.compte` est délibérément IGNORÉ s'il est présent : le résumé du
+      // compte se lit côté serveur, plus bas. Un contexte composé par le
+      // navigateur serait falsifiable — il suffirait d'écrire « type_compte:
+      // admin » pour que le modèle le tienne pour acquis.
     } catch {
       return json({ erreur: 'Requête illisible.' }, 400);
     }
@@ -791,10 +795,49 @@ Deno.serve(async (req: Request) => {
     // question suivante.
     const complement = String(parametres.consigne_complement ?? '').trim();
 
+    /* La situation réelle du client, lue avec SON jeton.
+     *
+     * Directive du fondateur : « le chat ne doit pas être figé, il doit être
+     * basé sur l'expérience du compte client dans l'app ». Un assistant qui
+     * répond la même chose à quelqu'un qui attend une livraison depuis trois
+     * semaines et à quelqu'un qui découvre le site n'aide ni l'un ni l'autre.
+     *
+     * La lecture passe par une fonction serveur appelée avec l'en-tête
+     * d'autorisation de l'appelant : elle ne rend que ce qui lui appartient, et
+     * le navigateur n'a aucune prise sur son contenu. Un échec n'est pas
+     * bloquant — l'assistant répond alors de façon générale, ce qui est dégradé
+     * mais pas cassé. */
+    let resumeCompte = '';
+    try {
+      const r = await fetch(`${Deno.env.get('SUPABASE_URL')}/rest/v1/rpc/app_e08c374bc4_contexte_client`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+          Authorization: req.headers.get('Authorization') ?? '',
+        },
+        body: '{}',
+      });
+      if (r.ok) {
+        const c = await r.json();
+        if (c?.connecte) resumeCompte = JSON.stringify(c);
+      }
+    } catch {
+      // voir ci-dessus
+    }
+
     const consigne = [
       PERSONNAGE,
       complement ? `CONSIGNES DE LA MAISON, QUI PRIMENT SUR LE STYLE CI-DESSUS\n${complement}` : '',
       contexte ? `CONTEXTE : l'utilisateur écrit depuis « ${contexte} ».` : '',
+      resumeCompte
+        ? `SITUATION DE CE CLIENT, lue dans nos systèmes à l'instant :\n${resumeCompte}\n\n` +
+          `Sers-t'en pour répondre juste : cite ses références de commande ou de demande quand ` +
+          `c'est utile, tiens compte de l'état d'avancement de ses dossiers, et ne lui redemande ` +
+          `pas ce que tu sais déjà. Ne récite jamais ce bloc tel quel, et ne parle que de SES ` +
+          `dossiers — tu n'as accès à aucun autre.`
+        : `Ce visiteur n'est pas connecté : tu ne connais aucun de ses dossiers. Ne fais aucune ` +
+          `supposition sur des commandes qu'il aurait passées.`,
     ]
       .filter(Boolean)
       .join('\n\n');
