@@ -4,7 +4,7 @@ import PublicHeaderGP from '@/components/PublicHeaderGP';
 import NavDeclarant from '@/components/NavDeclarant';
 import SiteFooter from '@/components/SiteFooter';
 import ChoixListe, { type OptionListe } from '@/components/ChoixListe';
-import { useReferentiels } from '@/hooks/useReferentiels';
+import { useReferentiels, libellesPourDocument } from '@/hooks/useReferentiels';
 import { useAuth } from '@/hooks/useAuth';
 import {
   supabase,
@@ -356,28 +356,10 @@ export default function DeclarantDeclaration() {
     return (ref[source as keyof typeof ref] as OptionListe[]) ?? [];
   };
 
-  /**
-   * Les libellés du document, rangés par référentiel et non à plat.
-   *
-   * Un code ne vaut que dans sa liste : 1 désigne le maritime en case 25 et
-   * l'achat ferme en case 24. À plat, la dernière liste chargée écrasait les
-   * autres et le document imprimait « Nature de la transaction : 1 — Maritime ».
-   */
-  const libellesCodes = useMemo(() => {
-    const d: Record<string, Record<string, string>> = {};
-    const ranger = (source: string, liste: OptionListe[]) => {
-      d[source] = Object.fromEntries(liste.map((o) => [o.valeur, o.libelle]));
-    };
-    ranger('regimes', ref.regimes);
-    ranger('bureaux', ref.bureaux);
-    ranger('pays', ref.pays);
-    ranger('monnaies', ref.monnaies);
-    ranger('incoterms', ref.incoterms);
-    ranger('naturesTransaction', ref.naturesTransaction);
-    ranger('typesDeclaration', ref.typesDeclaration);
-    d.modesTransport = Object.fromEntries(MODES_TRANSPORT.map((m) => [m.code, m.libelle]));
-    return d;
-  }, [ref]);
+  /* Les libellés du document viennent du module partagé : cet écran et
+   * l'atelier de cotation produisent le MÊME document, et deux tables
+   * construites séparément finiraient par nommer un code différemment. */
+  const libellesCodes = useMemo(() => libellesPourDocument(ref), [ref]);
 
   /* ---------- Archivage et document ---------- */
   const archiver = async () => {

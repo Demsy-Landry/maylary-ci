@@ -1465,6 +1465,13 @@ export interface DemandeImport {
   marge_fcfa: number | null;
   montant_total_devis_fcfa: number | null;
   commentaire_admin_devis: string | null;
+  /**
+   * La saisie ET le résultat complet de la liquidation qui a produit
+   * `douane_estimee_fcfa`. Archivé tel quel : les taux du tarif changent, et
+   * un recalcul ultérieur ferait mentir le devis déjà remis au client.
+   * Non typé ici : la forme appartient à l'atelier de cotation.
+   */
+  chiffrage_douanier: unknown;
   created_at: string;
   updated_at: string;
 }

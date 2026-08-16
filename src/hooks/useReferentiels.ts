@@ -42,6 +42,32 @@ const VIDE: Referentiels = {
   pret: false,
 };
 
+/**
+ * Les libellés du document, rangés par référentiel et non à plat.
+ *
+ * Un code ne vaut que dans sa liste : 1 désigne le maritime en case 25 et
+ * l'achat ferme en case 24. À plat, la dernière liste chargée écrasait les
+ * autres et le document imprimait « Nature de la transaction : 1 — Maritime ».
+ *
+ * Ici plutôt que dans un écran : la déclaration et l'atelier de cotation
+ * produisent le MÊME document, et deux tables de libellés construites
+ * séparément finiraient par nommer le même code différemment.
+ */
+export function libellesPourDocument(r: Referentiels): Record<string, Record<string, string>> {
+  const paires = (liste: OptionListe[]) =>
+    Object.fromEntries(liste.map((o) => [o.valeur, o.libelle]));
+  return {
+    regimes: paires(r.regimes),
+    bureaux: paires(r.bureaux),
+    pays: paires(r.pays),
+    monnaies: paires(r.monnaies),
+    incoterms: paires(r.incoterms),
+    naturesTransaction: paires(r.naturesTransaction),
+    typesDeclaration: paires(r.typesDeclaration),
+    modesTransport: paires(r.modesTransport),
+  };
+}
+
 export function useReferentiels(): Referentiels {
   const [r, setR] = useState<Referentiels>(VIDE);
 
