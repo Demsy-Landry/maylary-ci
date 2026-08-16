@@ -121,10 +121,36 @@ function piedDePage(doc: jsPDF) {
   );
 }
 
+/**
+ * Le libellé d'une valeur codée.
+ *
+ * Depuis que les cases se choisissent dans une liste, elles portent un CODE :
+ * « 1 » pour le maritime, « CN » pour la Chine, « 4000 » pour la mise à la
+ * consommation. Le déposant a besoin du code — c'est lui qu'il ressaisit dans
+ * SYDAM — mais un document où on lit « Mode de transport : 1 » est illisible
+ * pour le client à qui on le remet, et invérifiable par celui qui relit.
+ *
+ * On imprime donc les deux : « 1 — Transport maritime ». C'est exactement ce
+ * que le fondateur demande quand il dit que le détail doit être sur le PDF.
+ */
+export type Libelles = Record<string, string>;
+
 export function telechargerDeclarationPdf(
   valeurs: ValeursDeclaration,
   articles: ArticleDeclaration[],
+  libelles: Libelles = {},
 ) {
+  // La valeur telle qu'elle doit s'imprimer : code et libellé quand les deux
+  // existent, la valeur brute sinon.
+  const afficher = (cle: string, brut: string): string => {
+    const v = (brut ?? '').trim();
+    if (!v) return '';
+    const l = libelles[`${cle}:${v}`];
+    if (!l || l === v) return v;
+    // Un intervenant est déjà multiligne : y accoler son propre nom ferait
+    // doublon.
+    return v.includes('\n') ? v : `${v} — ${l}`;
+  };
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   let y = enTete(doc, 1);
   let page = 1;
@@ -172,7 +198,7 @@ export function telechargerDeclarationPdf(
         hauteur,
         c.numero,
         c.libelle,
-        valeurs[c.cle] ?? '',
+        afficher(c.cle, valeurs[c.cle] ?? ''),
       );
 
       if (pleineLargeur) {
@@ -222,7 +248,7 @@ export function telechargerDeclarationPdf(
         11,
         c.numero,
         c.libelle,
-        String(a[c.cle as keyof ArticleDeclaration] ?? ''),
+        afficher(c.cle, String(a[c.cle as keyof ArticleDeclaration] ?? '')),
       );
     });
     y += 15;

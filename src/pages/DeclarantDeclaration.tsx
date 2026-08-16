@@ -21,6 +21,8 @@ import {
   type CaseDeclaration,
 } from '@/lib/declaration-sydam';
 import { useAuth } from '@/hooks/useAuth';
+import { useReferentiels } from '@/hooks/useReferentiels';
+import ChoixListe, { type OptionListe } from '@/components/ChoixListe';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -78,11 +80,25 @@ export default function DeclarantDeclaration() {
   const [valeurs, setValeurs] = useState<ValeursDeclaration>({
     type_declaration: 'IM',
     regime: '4000',
-    pays_destination: "Côte d'Ivoire",
+    // Le code ISO, pas le nom : c'est lui qui part sur la déclaration depuis
+    // que la case se choisit dans une liste.
+    pays_destination: 'CI',
     taux_change: '655,957 (euro, taux légal fixe)',
   });
   const [articles, setArticles] = useState<ArticleDeclaration[]>([articleVide(1)]);
   const [impression, setImpression] = useState(false);
+
+  /* Les listes viennent toutes de la base : aucune n'est écrite en dur ici.
+   * Le fondateur peut ajouter un bureau de douane sans redéploiement, et la
+   * liste affichée ne peut pas diverger de celle qu'utilise le moteur. */
+  const ref = useReferentiels();
+
+  /* Le carnet d'adresses du compte. Un transitaire retravaille avec les mêmes
+   * vingt fournisseurs : les retaper à chaque déclaration coûte du temps et
+   * produit trois orthographes du même exportateur. */
+  const [carnet, setCarnet] = useState<
+    { role: string; nom: string; adresse: string | null; ville: string | null; pays: string | null; identifiant: string | null }[]
+  >([]);
 
   /* Les archives du compte, pour reprendre un travail déjà fait plutôt que de
    * le refaire. C'est la demande explicite du fondateur : « au lieu de tout
@@ -104,6 +120,12 @@ export default function DeclarantDeclaration() {
       .order('cree_le', { ascending: false })
       .limit(10)
       .then(({ data }) => setClassifications((data as ClassificationEnregistree[]) ?? []));
+    void supabase
+      .from('app_e08c374bc4_intervenants')
+      .select('role, nom, adresse, ville, pays, identifiant')
+      .order('derniere_utilisation', { ascending: false })
+      .limit(120)
+      .then(({ data }) => setCarnet(data ?? []));
   }, [user]);
 
   /* Arrivée depuis la page de classification : on pose le code sur le premier
@@ -178,14 +200,68 @@ export default function DeclarantDeclaration() {
   const imprimer = async () => {
     setImpression(true);
     try {
+      /* On retient les intervenants au moment de l'impression, pas à la
+       * frappe : c'est là que la déclaration est jugée prête, et retenir une
+       * saisie abandonnée remplirait le carnet de brouillons. */
+      for (const [cle, role] of [
+        ['exportateur', 'exportateur'],
+        ['destinataire', 'importateur'],
+        ['declarant', 'declarant'],
+      ] as const) {
+        const brut = (valeurs[cle] ?? '').trim();
+        if (brut.length < 3) continue;
+        const [nom, ...reste] = brut.split('\n');
+        await supabase.rpc('app_e08c374bc4_retenir_intervenant', {
+          p_role: role,
+          p_nom: nom,
+          p_adresse: reste.join('\n') || null,
+          p_pays: valeurs.pays_expedition || null,
+        });
+      }
+
+      /* Le dictionnaire code → libellé, construit depuis les mêmes listes que
+       * le formulaire. Sans lui, le document imprimerait « Mode de transport :
+       * 1 » — juste pour la ressaisie, illisible pour le client à qui on le
+       * remet. */
+      const libelles: Record<string, string> = {};
+      for (const g of GROUPES_DECLARATION) {
+        for (const c of g.cases) {
+          if (!c.liste) continue;
+          for (const o of optionsDe(c.liste)) libelles[`${c.cle}:${o.valeur}`] = o.libelle;
+        }
+      }
+      for (const c of CASES_ARTICLE) {
+        if (!c.liste) continue;
+        for (const o of optionsDe(c.liste)) libelles[`${c.cle}:${o.valeur}`] = o.libelle;
+      }
+
       const { telechargerDeclarationPdf } = await import('@/lib/declaration-pdf');
-      telechargerDeclarationPdf(valeurs, articles);
+      telechargerDeclarationPdf(valeurs, articles, libelles);
       toast.success('Brouillon de déclaration téléchargé.');
     } catch {
       toast.error("Le document n'a pas pu être produit.");
     } finally {
       setImpression(false);
     }
+  };
+
+  /** Le carnet, mis en forme pour la liste : le nom en tête, l'adresse en
+   *  dessous. Ce qu'on retient couvre plusieurs cases à la fois — choisir un
+   *  exportateur remplit son nom ET son adresse. */
+  const optionsCarnet = (role: string): OptionListe[] =>
+    carnet
+      .filter((i) => i.role === role)
+      .map((i) => ({
+        valeur: [i.nom, i.adresse, [i.ville, i.pays].filter(Boolean).join(', '), i.identifiant]
+          .filter(Boolean)
+          .join('\n'),
+        libelle: i.nom,
+        detail: [i.ville, i.pays, i.identifiant].filter(Boolean).join(' · ') || undefined,
+      }));
+
+  const optionsDe = (source: string): OptionListe[] => {
+    if (source.startsWith('intervenant:')) return optionsCarnet(source.split(':')[1]);
+    return (ref[source as keyof typeof ref] as OptionListe[]) ?? [];
   };
 
   const champ = (c: CaseDeclaration) => (
@@ -199,7 +275,25 @@ export default function DeclarantDeclaration() {
           </Badge>
         )}
       </Label>
-      {c.type === 'long' ? (
+      {c.liste ? (
+        <ChoixListe
+          id={c.cle}
+          options={optionsDe(c.liste)}
+          valeur={valeurs[c.cle] ?? ''}
+          onChange={(v) => maj(c.cle, v)}
+          libre={c.libre}
+          placeholder={
+            c.liste.startsWith('intervenant:')
+              ? 'Chercher dans vos contacts, ou saisir'
+              : 'Chercher dans la liste'
+          }
+          aideLibre={
+            c.liste === 'bureaux'
+              ? 'Bureau hors liste — vérifiez son code avant le dépôt.'
+              : undefined
+          }
+        />
+      ) : c.type === 'long' ? (
         <Textarea
           id={c.cle}
           rows={2}

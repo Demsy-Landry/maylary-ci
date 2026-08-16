@@ -27,6 +27,30 @@
 
 export type TypeChamp = 'texte' | 'nombre' | 'date' | 'long';
 
+/**
+ * La liste dans laquelle se choisit une case, quand elle en a une.
+ *
+ * C'est la correction de fond demandée par le fondateur : une case tapée à la
+ * main est fausse une fois sur dix. « Cote d'ivoire », « CIV », « RCI »
+ * désignent le même pays et se ressaisissent différemment dans SYDAM.
+ *
+ * `intervenant:*` n'est pas un référentiel figé mais le carnet d'adresses du
+ * compte : ce qu'on a déjà saisi une fois se propose à la suivante.
+ */
+export type SourceListe =
+  | 'pays'
+  | 'bureaux'
+  | 'monnaies'
+  | 'modesTransport'
+  | 'naturesTransaction'
+  | 'typesColis'
+  | 'typesDeclaration'
+  | 'regimes'
+  | 'incoterms'
+  | 'intervenant:exportateur'
+  | 'intervenant:importateur'
+  | 'intervenant:declarant';
+
 export interface CaseDeclaration {
   /** Le numéro de case du modèle. Il figure à l'écran ET sur le PDF. */
   numero: string;
@@ -37,6 +61,10 @@ export interface CaseDeclaration {
   aide?: string;
   /** Rempli automatiquement depuis la liquidation ou la classification. */
   auto?: boolean;
+  /** Se choisit dans une liste plutôt que de se taper. */
+  liste?: SourceListe;
+  /** La liste aide, mais n'interdit pas une valeur absente. */
+  libre?: boolean;
 }
 
 export interface GroupeCases {
@@ -58,23 +86,23 @@ export const GROUPES_DECLARATION: GroupeCases[] = [
     titre: 'Identification',
     description: 'Qui déclare, pour qui, et sous quel régime.',
     cases: [
-      { numero: '1', cle: 'type_declaration', libelle: 'Type de déclaration', type: 'texte', aide: 'IM pour une importation, EX pour une exportation.' },
+      { numero: '1', cle: 'type_declaration', libelle: 'Type de déclaration', type: 'texte', liste: 'typesDeclaration' },
       { numero: '7', cle: 'numero_reference', libelle: 'Numéro de référence', type: 'texte', aide: 'Votre référence interne de dossier.' },
-      { numero: '2', cle: 'exportateur', libelle: 'Exportateur / Expéditeur', type: 'long', aide: 'Nom et adresse complets du fournisseur étranger.' },
-      { numero: '8', cle: 'destinataire', libelle: 'Destinataire / Importateur', type: 'long', aide: 'Nom, adresse et code importateur.' },
-      { numero: '14', cle: 'declarant', libelle: 'Déclarant / Représentant', type: 'long', aide: 'Le commissionnaire en douane agréé qui signera.' },
-      { numero: '37', cle: 'regime', libelle: 'Régime douanier', type: 'texte', auto: true, aide: 'Code à quatre chiffres — 4000 pour une mise à la consommation.' },
-      { numero: '29', cle: 'bureau', libelle: 'Bureau de douane', type: 'texte', aide: 'Bureau d’entrée ou de sortie.' },
+      { numero: '2', cle: 'exportateur', libelle: 'Exportateur / Expéditeur', type: 'long', liste: 'intervenant:exportateur', libre: true, aide: 'Nom et adresse complets du fournisseur étranger. Mémorisé pour la prochaine fois.' },
+      { numero: '8', cle: 'destinataire', libelle: 'Destinataire / Importateur', type: 'long', liste: 'intervenant:importateur', libre: true, aide: 'Nom, adresse et code importateur. Mémorisé pour la prochaine fois.' },
+      { numero: '14', cle: 'declarant', libelle: 'Déclarant / Représentant', type: 'long', liste: 'intervenant:declarant', libre: true, aide: 'Le commissionnaire en douane agréé qui signera.' },
+      { numero: '37', cle: 'regime', libelle: 'Régime douanier', type: 'texte', auto: true, liste: 'regimes' },
+      { numero: '29', cle: 'bureau', libelle: 'Bureau de douane', type: 'texte', liste: 'bureaux', libre: true },
     ],
   },
   {
     titre: 'Origine et transport',
     description: 'D’où vient la marchandise, par quel moyen, et où elle se trouve.',
     cases: [
-      { numero: '15', cle: 'pays_expedition', libelle: 'Pays d’expédition', type: 'texte' },
-      { numero: '16', cle: 'pays_origine', libelle: 'Pays d’origine', type: 'texte', aide: 'Origine réelle de fabrication — elle décide du régime préférentiel.' },
-      { numero: '17', cle: 'pays_destination', libelle: 'Pays de destination', type: 'texte' },
-      { numero: '25', cle: 'mode_transport', libelle: 'Mode de transport à la frontière', type: 'texte', aide: 'Maritime, aérien, routier.' },
+      { numero: '15', cle: 'pays_expedition', libelle: 'Pays d’expédition', type: 'texte', liste: 'pays' },
+      { numero: '16', cle: 'pays_origine', libelle: 'Pays d’origine', type: 'texte', liste: 'pays', aide: 'Origine réelle de fabrication — elle décide du régime préférentiel.' },
+      { numero: '17', cle: 'pays_destination', libelle: 'Pays de destination', type: 'texte', liste: 'pays' },
+      { numero: '25', cle: 'mode_transport', libelle: 'Mode de transport à la frontière', type: 'texte', liste: 'modesTransport' },
       { numero: '21', cle: 'moyen_transport', libelle: 'Identité du moyen de transport', type: 'texte', aide: 'Nom du navire, numéro de vol, immatriculation.' },
       { numero: '19', cle: 'conteneur', libelle: 'Conteneur', type: 'texte', aide: 'Numéro(s) de conteneur, ou « néant ».' },
       { numero: '27', cle: 'lieu_chargement', libelle: 'Lieu de chargement', type: 'texte' },
@@ -86,10 +114,11 @@ export const GROUPES_DECLARATION: GroupeCases[] = [
     titre: 'Valeur et conditions',
     description: 'Ce qui a été payé, dans quelle monnaie, à quelles conditions.',
     cases: [
-      { numero: '20', cle: 'incoterm', libelle: 'Conditions de livraison (Incoterm)', type: 'texte', aide: 'FOB, CFR, CIF, EXW…' },
-      { numero: '22', cle: 'monnaie_facture', libelle: 'Monnaie et montant total facturé', type: 'texte' },
+      { numero: '20', cle: 'incoterm', libelle: 'Conditions de livraison (Incoterm)', type: 'texte', liste: 'incoterms' },
+      { numero: '22', cle: 'monnaie_facture', libelle: 'Monnaie facturée', type: 'texte', liste: 'monnaies' },
+      { numero: '22', cle: 'montant_facture', libelle: 'Montant total facturé', type: 'nombre', aide: 'Dans la monnaie choisie ci-dessus.' },
       { numero: '23', cle: 'taux_change', libelle: 'Taux de change', type: 'texte', aide: 'Euro : 655,957, taux légal fixe.' },
-      { numero: '24', cle: 'nature_transaction', libelle: 'Nature de la transaction', type: 'texte', aide: 'Achat ferme, échantillon, retour…' },
+      { numero: '24', cle: 'nature_transaction', libelle: 'Nature de la transaction', type: 'texte', liste: 'naturesTransaction' },
       { numero: '12', cle: 'elements_valeur', libelle: 'Éléments de valeur (fret, assurance)', type: 'texte', auto: true },
       { numero: '46', cle: 'valeur_statistique', libelle: 'Valeur statistique (CAF)', type: 'nombre', auto: true },
     ],
@@ -113,7 +142,7 @@ export const CASES_ARTICLE: CaseDeclaration[] = [
   { numero: '32', cle: 'numero', libelle: 'Article n°', type: 'texte', auto: true },
   { numero: '31', cle: 'designation', libelle: 'Désignation des marchandises', type: 'long' },
   { numero: '33', cle: 'position', libelle: 'Code des marchandises', type: 'texte', auto: true },
-  { numero: '34', cle: 'origine', libelle: 'Pays d’origine', type: 'texte' },
+  { numero: '34', cle: 'origine', libelle: 'Pays d’origine', type: 'texte', liste: 'pays' },
   { numero: '35', cle: 'masse_brute', libelle: 'Masse brute (kg)', type: 'nombre' },
   { numero: '38', cle: 'masse_nette', libelle: 'Masse nette (kg)', type: 'nombre' },
   { numero: '36', cle: 'preference', libelle: 'Préférence', type: 'texte', aide: 'Code du régime préférentiel invoqué, ou vide.' },
