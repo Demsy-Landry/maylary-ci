@@ -183,7 +183,7 @@ export default function AssistantDeclarant() {
         type="button"
         onClick={() => setOuvert(true)}
         aria-label="Ouvrir Le Déclarant"
-        className="fixed bottom-4 right-4 z-40 flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition hover:brightness-95"
+        className="fixed bottom-4 right-4 z-40 mb-[env(safe-area-inset-bottom)] flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition hover:brightness-95"
       >
         <ShieldCheck className="h-5 w-5" />
         <span className="hidden sm:inline">Le Déclarant</span>
@@ -192,7 +192,7 @@ export default function AssistantDeclarant() {
   }
 
   return (
-    <div className="fixed inset-x-2 bottom-2 z-40 flex max-h-[85vh] flex-col overflow-hidden rounded-lg border bg-card shadow-2xl sm:inset-x-auto sm:right-4 sm:w-[26rem]">
+    <div className="fixed inset-x-2 bottom-2 z-40 mb-[env(safe-area-inset-bottom)] flex max-h-[85vh] flex-col overflow-hidden rounded-lg border bg-card shadow-2xl sm:inset-x-auto sm:right-4 sm:w-[26rem]">
       <div className="flex items-center justify-between gap-2 border-b bg-muted/40 px-3 py-2">
         <span className="flex min-w-0 items-center gap-2">
           <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />

@@ -16,7 +16,7 @@ export default function PublicHeaderImport() {
   };
 
   return (
-    <header className="sticky top-0 z-10 bg-foreground text-background">
+    <header className="sticky top-0 z-10 bg-foreground pt-[env(safe-area-inset-top)] text-background">
       <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">

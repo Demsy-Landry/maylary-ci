@@ -2,7 +2,12 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- `viewport-fit=cover` laisse la page peindre sous la barre d'état et sous
+         la barre d'accueil : c'est ce qui permet à la photographie d'ouverture
+         de monter jusqu'en haut de l'écran. En contrepartie, tout ce qui se
+         pose au bord doit s'écarter des zones de sécurité — voir les classes
+         `pt-[env(safe-area-inset-top)]` sur les en-têtes. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <title>MayLary Group — Transit, import et export en Côte d'Ivoire</title>
     <meta

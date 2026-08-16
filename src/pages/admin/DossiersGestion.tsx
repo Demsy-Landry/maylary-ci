@@ -198,7 +198,7 @@ export default function DossiersGestion() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+      <header className="border-b bg-card pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex max-w-screen-xl flex-col gap-3 px-4 py-4 sm:px-6">
           <AdminNav />
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -362,7 +362,7 @@ export default function DossiersGestion() {
       {/* ---------- La fiche ---------- */}
       {ouvert && (
         <div
-          className="fixed inset-0 z-40 flex items-end justify-center bg-foreground/60 p-0 sm:items-center sm:p-6"
+          className="fixed inset-0 z-40 flex items-end justify-center bg-foreground/60 p-0 pb-[env(safe-area-inset-bottom)] sm:items-center sm:p-6 sm:pb-6"
           onClick={() => setOuvert(null)}
         >
           <div

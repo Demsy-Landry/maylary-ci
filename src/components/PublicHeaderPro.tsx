@@ -18,7 +18,7 @@ export default function PublicHeaderPro() {
   };
 
   return (
-    <header className="sticky top-0 z-10 bg-foreground text-background">
+    <header className="sticky top-0 z-10 bg-foreground pt-[env(safe-area-inset-top)] text-background">
       {/* Le logo et la barre d'actions étaient tous deux `shrink-0` : plus rien
           ne pouvait céder, et la ligne débordait de l'écran sur mobile. Le logo
           se rétrécit maintenant, la barre passe à la ligne si nécessaire. */}

@@ -45,7 +45,7 @@ export default function BandeauStockage() {
     <div
       role="region"
       aria-label="Information sur le stockage local"
-      className="fixed inset-x-0 bottom-0 z-50 p-3 sm:p-4"
+      className="fixed inset-x-0 bottom-0 z-50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]"
     >
       <div className="mx-auto flex max-w-2xl flex-col gap-3 rounded-xl border bg-card p-4 shadow-lg motion-safe:animate-[ouverture-montee_420ms_cubic-bezier(0.16,1,0.3,1)_both] sm:flex-row sm:items-center">
         <Cookie className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />

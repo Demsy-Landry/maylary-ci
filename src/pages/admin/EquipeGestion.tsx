@@ -92,7 +92,7 @@ export default function AdminEquipeGestion() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+      <header className="border-b bg-card pt-[env(safe-area-inset-top)]">
         <div className="mx-auto max-w-screen-xl space-y-2 px-4 py-4 sm:px-6">
           <AdminNav />
           <h1 className="font-display text-lg font-bold text-foreground">Admin — Équipe MayLary Group</h1>
