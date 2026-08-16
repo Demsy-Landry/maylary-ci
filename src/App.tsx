@@ -42,6 +42,7 @@ const AdminEquipeGestion = lazy(() => import('@/pages/admin/EquipeGestion'));
 const AdminExportGestion = lazy(() => import('@/pages/admin/ExportGestion'));
 const AdminImportGestion = lazy(() => import('@/pages/admin/ImportGestion'));
 const AdminJournalErreurs = lazy(() => import('@/pages/admin/JournalErreurs'));
+const AdminFraisDestination = lazy(() => import('@/pages/admin/FraisDestination'));
 const AdminSuiviExpeditions = lazy(() => import('@/pages/admin/SuiviExpeditions'));
 const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
 const AdminParametres = lazy(() => import('@/pages/admin/AdminParametres'));
@@ -318,6 +319,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/suivi">
                       <AdminSuiviExpeditions />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/frais-destination"
+                  element={
+                    <AdminRoute ecran="/admin/frais-destination">
+                      <AdminFraisDestination />
                     </AdminRoute>
                   }
                 />
