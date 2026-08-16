@@ -38,16 +38,6 @@ const SERVICES: { to: string; titre: string; icone: LucideIcon }[] = [
  */
 export default function MenuServices() {
   const [ouvert, setOuvert] = useState(false);
-  /**
-   * Position du panneau sur mobile, mesurée à l'ouverture.
-   *
-   * Un ancrage purement CSS ne marche pas ici : le bouton se trouve à gauche de
-   * la barre, et un panneau aligné sur son bord droit part hors de l'écran —
-   * il s'affichait tronqué, illisible. On mesure donc le bas du bouton et on
-   * étale le panneau sur toute la largeur, comme le fait n'importe quel menu
-   * mobile.
-   */
-  const [hautPanneau, setHautPanneau] = useState(0);
   const conteneur = useRef<HTMLDivElement>(null);
 
   // Un panneau qui ne se referme qu'en recliquant le bouton passe pour bloqué.
@@ -75,24 +65,31 @@ export default function MenuServices() {
         size="sm"
         aria-expanded={ouvert}
         aria-haspopup="menu"
-        onClick={() => {
-          // Mesuré sur le conteneur et non sur le bouton : `Button` ne transmet
-          // pas de ref, et une ref silencieusement nulle laissait le panneau
-          // collé en haut de l'écran, par-dessus l'en-tête.
-          const rect = conteneur.current?.getBoundingClientRect();
-          if (rect) setHautPanneau(Math.round(rect.bottom + 6));
-          setOuvert((o) => !o);
-        }}
+        onClick={() => setOuvert((o) => !o)}
       >
         <LayoutGrid className="mr-1.5 h-4 w-4" />
         Services
       </Button>
 
+      {/* ANCRÉ AU BOUTON, ET NON À L'ÉCRAN.
+          La version précédente posait le panneau en `fixed` avec un `top`
+          mesuré UNE SEULE FOIS à l'ouverture. Dès qu'on défilait, il restait
+          planté à sa coordonnée d'écran pendant que la page glissait dessous —
+          et sur iPhone, où la barre du navigateur se replie en cours de
+          défilement, il remontait carrément par-dessus l'en-tête, ses deux
+          premières entrées coupées hors de l'écran.
+
+          `absolute left-0 top-full` le raccroche au bouton : il descend avec
+          lui, quel que soit le défilement, sans une ligne de calcul. Aligné à
+          GAUCHE parce que le bouton est à gauche de la barre — un panneau
+          aligné à droite partirait hors de l'écran vers la gauche, ce qui
+          était le motif de la mesure d'origine.
+
+          La largeur ne dépasse jamais l'écran, marges comprises. */}
       {ouvert && (
         <div
           role="menu"
-          style={{ top: hautPanneau }}
-          className="fixed inset-x-2 z-30 overflow-hidden rounded-md border bg-card py-1 text-foreground shadow-lg sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-1 sm:w-60"
+          className="absolute left-0 top-full z-30 mt-1 w-[min(15rem,calc(100vw-1.5rem))] overflow-hidden rounded-md border bg-card py-1 text-foreground shadow-lg"
         >
           {SERVICES.map((s) => {
             const Icone = s.icone;

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PublicHeaderPro from '@/components/PublicHeaderPro';
 import SiteFooter from '@/components/SiteFooter';
+import ImageOuverture from '@/components/ImageOuverture';
 import { supabase, SECTEURS_TABLE, type Secteur } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -86,13 +87,11 @@ export default function CataloguePro() {
 
       {/* ---------- Ouverture ---------- */}
       <section className="relative flex min-h-[22rem] items-center overflow-hidden bg-foreground sm:min-h-[26rem]">
-        <img
+        <ImageOuverture
           src="/visuels/sourcing-entrepot.jpg"
           alt=""
-          width={1168}
-          height={784}
-          fetchPriority="high"
-          decoding="async"
+          largeur={1168}
+          hauteur={784}
           className="absolute inset-0 h-full w-full scale-105 object-cover object-[70%_center] opacity-70 motion-safe:animate-[respiration_28s_ease-in-out_infinite]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/40" />

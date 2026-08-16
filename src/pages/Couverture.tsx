@@ -12,6 +12,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFondDeBarre } from '@/hooks/useFondDeBarre';
 import { LogoMaylary } from '@/components/MarqueMaylary';
 import SiteFooter from '@/components/SiteFooter';
+import SystemeIntelligent from '@/components/SystemeIntelligent';
+import ImageOuverture from '@/components/ImageOuverture';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -150,13 +152,11 @@ export default function Couverture() {
             distant : même origine, une connexion de moins à ouvrir, et elle
             arrive avant tout le reste. C'est le premier écran d'un groupe —
             il n'a pas le droit d'être lent. */}
-        <img
+        <ImageOuverture
           src="/visuels/fret-aerien-abidjan.jpg"
           alt=""
-          width={1168}
-          height={784}
-          fetchPriority="high"
-          decoding="async"
+          largeur={1168}
+          hauteur={784}
           className="absolute inset-0 h-full w-full scale-105 object-cover object-[60%_center] motion-safe:animate-[respiration_24s_ease-in-out_infinite]"
         />
         {/* Deux voiles superposés plutôt qu'un seul aplat : le premier assure
@@ -596,6 +596,12 @@ export default function Couverture() {
           </div>
         </div>
       </section>
+
+      {/* Placée en fin de page, après les services : on montre d'abord ce
+          qu'on fait, on explique ensuite comment. Un visiteur qui descend
+          jusqu'ici cherche à comprendre — c'est le moment de dire où l'IA
+          travaille, et surtout où elle n'entre pas. */}
+      <SystemeIntelligent />
 
       <SiteFooter />
     </div>

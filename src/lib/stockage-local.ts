@@ -10,8 +10,10 @@
  * techniquement (`connect-src` et `script-src` sont limités à nous-mêmes et à
  * Supabase).
  *
- * Trois entrées seulement, toutes en `localStorage`, toutes sur l'appareil, et
- * toutes strictement nécessaires au service que le visiteur demande.
+ * Quatre entrées seulement, toutes en `localStorage`, toutes sur l'appareil.
+ * Trois sont strictement nécessaires au service demandé ; la quatrième — la
+ * place où le visiteur a posé le bouton du Déclarant — est un simple confort
+ * d'affichage, et son absence ne casse rien.
  *
  * POURQUOI IL N'Y A PAS DE BANDEAU DE CONSENTEMENT BLOQUANT
  *
@@ -71,6 +73,13 @@ export const INVENTAIRE_STOCKAGE: EntreeStockage[] = [
     duree: "Jusqu'à l'envoi de la demande, ou le vidage du panier",
     necessaire: true,
   },
+  {
+    cle: 'maylary_position_declarant',
+    libelle: 'La place du bouton du Déclarant',
+    role: "Retenir où vous avez déposé le bouton flottant du Déclarant, pour qu'il ne revienne pas se poser sur ce qu'il gênait. Deux nombres, rien d'autre.",
+    duree: "Jusqu'à ce que vous le remettiez à sa place d'origine",
+    necessaire: false,
+  },
 ];
 
 /** La décision du visiteur sur le bandeau d'information. */
@@ -84,7 +93,7 @@ const CLE_MESURE = 'maylary_consentement_mesure';
  * lecture qui lève au montage ferait tomber toute l'application pour un
  * bandeau d'information — ce serait absurde.
  */
-const lire = (cle: string): string | null => {
+export const lireStockage = (cle: string): string | null => {
   try {
     return localStorage.getItem(cle);
   } catch {
@@ -92,7 +101,7 @@ const lire = (cle: string): string | null => {
   }
 };
 
-const ecrire = (cle: string, valeur: string): void => {
+export const ecrireStockage = (cle: string, valeur: string): void => {
   try {
     localStorage.setItem(cle, valeur);
   } catch {
@@ -102,9 +111,9 @@ const ecrire = (cle: string, valeur: string): void => {
 };
 
 /** Vrai si le visiteur a déjà pris connaissance de l'information. */
-export const informationLue = (): boolean => lire(CLE_INFORMATION) === 'lu';
+export const informationLue = (): boolean => lireStockage(CLE_INFORMATION) === 'lu';
 
-export const marquerInformationLue = (): void => ecrire(CLE_INFORMATION, 'lu');
+export const marquerInformationLue = (): void => ecrireStockage(CLE_INFORMATION, 'lu');
 
 /**
  * Le consentement à une mesure d'audience.
@@ -112,10 +121,10 @@ export const marquerInformationLue = (): void => ecrire(CLE_INFORMATION, 'lu');
  * Rend `false` aujourd'hui dans tous les cas, puisque aucune mesure n'est en
  * place. Tout code qui voudrait déposer un traceur DOIT passer par ici.
  */
-export const consentementMesure = (): boolean => lire(CLE_MESURE) === 'accepte';
+export const consentementMesure = (): boolean => lireStockage(CLE_MESURE) === 'accepte';
 
 export const deciderMesure = (accepte: boolean): void =>
-  ecrire(CLE_MESURE, accepte ? 'accepte' : 'refuse');
+  ecrireStockage(CLE_MESURE, accepte ? 'accepte' : 'refuse');
 
 /**
  * Une liste relue depuis le stockage, dont on a VÉRIFIÉ la forme.
@@ -143,7 +152,7 @@ export const deciderMesure = (accepte: boolean): void =>
  * rendre deux articles, pas un écran d'erreur.
  */
 export function lireListeStockee<T>(cle: string, valide: (e: unknown) => e is T): T[] {
-  const brut = lire(cle);
+  const brut = lireStockage(cle);
   if (!brut) return [];
   try {
     const analyse: unknown = JSON.parse(brut);
@@ -161,7 +170,7 @@ export function lireListeStockee<T>(cle: string, valide: (e: unknown) => e is T)
  * tomber l'écran du client.
  */
 export const ecrireListeStockee = (cle: string, valeur: unknown): void =>
-  ecrire(cle, JSON.stringify(valeur));
+  ecrireStockage(cle, JSON.stringify(valeur));
 
 /** Efface ce que l'application a déposé, hors session en cours. */
 export const effacerStockageNonEssentiel = (): void => {
