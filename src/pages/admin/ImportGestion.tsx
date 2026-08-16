@@ -8,6 +8,7 @@ import {
   type ParametresImport,
   IMPORT_DOCUMENTS_BUCKET,
   DEMANDES_IMPORT_TABLE,
+  DEMANDES_IMPORT_COTATION_VIEW,
   HISTORIQUE_IMPORT_TABLE,
   DOCUMENTS_IMPORT_TABLE,
   PROFILES_TABLE,
@@ -151,7 +152,7 @@ export default function AdminImportGestion() {
   const loadDemandes = async () => {
     setLoading(true);
     const { data } = await supabase
-      .from(DEMANDES_IMPORT_TABLE)
+      .from(DEMANDES_IMPORT_COTATION_VIEW)
       .select('*')
       .order('created_at', { ascending: false });
     const list = (data as DemandeImport[]) ?? [];

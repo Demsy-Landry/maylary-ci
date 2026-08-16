@@ -124,6 +124,97 @@ export const DEMANDES_EXPORT_TABLE = 'app_e08c374bc4_demandes_export';
 export const HISTORIQUE_EXPORT_TABLE = 'app_e08c374bc4_historique_statut_export';
 export const DOCUMENTS_EXPORT_TABLE = 'app_e08c374bc4_documents_export';
 
+/**
+ * NOS COÛTS NE SORTENT PLUS PAR LA LECTURE CLIENT
+ *
+ * Une politique RLS filtre les lignes, jamais les colonnes. Tant que les écrans
+ * lisaient `select('*')`, le navigateur du client recevait notre coût
+ * marchandise, notre fret, notre assurance, notre marge, et jusqu'au document
+ * douanier complet — même sans rien en afficher.
+ *
+ * Le verrou est désormais posé en base (`20260816f`) : `authenticated` n'a plus
+ * le droit de lire ces colonnes du tout. Ces listes ne sont donc PAS la
+ * protection — elles sont ce qui reste lisible, écrit noir sur blanc pour que
+ * personne ne remette un `*` par distraction. Un `*` ne renverrait plus des
+ * chiffres : il renverrait un refus de privilège.
+ *
+ * L'administrateur passe par les vues `…_COTATION_VIEW` / `…_COUT_VIEW`, qui
+ * franchissent la restriction et se gardent elles-mêmes.
+ *
+ * D'UN SEUL TENANT, ET C'EST VOULU
+ *
+ * Ces lignes sont longues parce qu'elles ne peuvent pas être coupées. Découpée
+ * en `'…' + '…'`, la constante perd son type littéral, et `supabase-js` — qui
+ * lit la liste de colonnes AU TYPAGE pour en déduire la forme des lignes — ne
+ * sait plus quoi en faire : la requête compile encore, mais son résultat n'est
+ * plus typé. Une seule chaîne, donc, et le compilateur continue de vérifier.
+ */
+export const COLONNES_DEMANDE_IMPORT_CLIENT =
+  'id, user_id, reference_publique, statut, description_produit, lien_produit, photos, quantite, pays_fournisseur, incoterm, mode_transport, transporteur_souhaite, delai_souhaite, notes_client, poids_estime_kg, volume_estime_m3, valeur_marchandise_estimee_fcfa, estimation_indicative_fcfa, montant_total_devis_fcfa, commentaire_admin_devis, created_at, updated_at, demonstration';
+
+export const COLONNES_DEMANDE_EXPORT_CLIENT =
+  'id, user_id, reference_publique, statut, description_produit, pays_destination, acheteur_destinataire, contact_acheteur, photos, quantite, incoterm, mode_transport, transporteur_souhaite, delai_souhaite, notes_client, poids_estime_kg, volume_estime_m3, valeur_marchandise_estimee_fcfa, estimation_indicative_fcfa, montant_total_devis_fcfa, commentaire_admin_devis, created_at, updated_at, demonstration';
+
+export const COLONNES_COMMANDE_GP_CLIENT =
+  'id, user_id, reference_publique, statut, mode_paiement, montant_total_fcfa, nom_destinataire, telephone_destinataire, adresse_livraison, ville_livraison, notes_client, created_at, updated_at, numero_suivi, transporteur_suivi, suivi_maj_le, url_suivi, remise_groupage_fcfa, fret_facture_articles_fcfa, transporteur_choisi, supplement_transporteur_fcfa, delai_transporteur, canal_paiement_declare, reference_transaction, preuve_paiement_chemin, paiement_declare_le, montant_recu_fcfa, paiement_confirme_le, paiement_confirme_par, note_reglement, montant_declare_fcfa, livree_le, reception_confirmee_le, reception_confirmee_par';
+
+export const COLONNES_LIGNE_COMMANDE_GP_CLIENT =
+  'id, commande_id, produit_id, nom_produit, quantite, prix_unitaire_fcfa, sous_total, vendeur_id, taux_commission_applique, commission_fcfa, net_vendeur_fcfa';
+
+/**
+ * LA FORME QUE LE CLIENT REÇOIT
+ *
+ * Les listes ci-dessus disent au serveur quoi envoyer ; ces types disent au
+ * compilateur ce qui arrive. Sans eux, un écran client pourrait encore écrire
+ * `demande.marge_fcfa` : il compilerait, et afficherait `undefined` — un défaut
+ * silencieux, sur l'écran d'un client, à propos de notre marge.
+ *
+ * Avec eux, la même ligne ne compile pas. La règle n'est plus une consigne, elle
+ * est vérifiée à chaque construction.
+ */
+export type ChampsCoutImport =
+  | 'cout_marchandise_fcfa'
+  | 'cout_fret_fcfa'
+  | 'assurance_fcfa'
+  | 'douane_estimee_fcfa'
+  | 'transit_local_fcfa'
+  | 'livraison_fcfa'
+  | 'marge_fcfa'
+  | 'chiffrage_douanier';
+export type DemandeImportClient = Omit<DemandeImport, ChampsCoutImport>;
+
+export type ChampsCoutExport =
+  | 'transport_local_fcfa'
+  | 'douane_export_fcfa'
+  | 'cout_fret_fcfa'
+  | 'assurance_fcfa'
+  | 'frais_certification_fcfa'
+  | 'livraison_destination_fcfa'
+  | 'marge_fcfa';
+export type DemandeExportClient = Omit<DemandeExport, ChampsCoutExport>;
+
+/** Coût fournisseur et trace d'approvisionnement : rien de tout cela ne regarde le client. */
+export type ChampsCoutCommandeGP =
+  | 'cout_fournisseur_usd'
+  | 'fret_reel_panier_fcfa'
+  | 'reference_fournisseur'
+  | 'statut_fournisseur'
+  | 'envoye_fournisseur_le'
+  | 'erreur_fournisseur';
+/* `fret_reel_panier_fcfa` figure dans la liste bien qu'absent de `CommandeGP` :
+   la colonne existe en base et y est fermée. La citer ici évite qu'on la
+   rouvre en croyant l'ajouter pour la première fois. */
+export type CommandeGPClient = Omit<CommandeGP, ChampsCoutCommandeGP>;
+
+/** Vue d'atelier : la demande d'import avec ses coûts, sa marge et son chiffrage douanier. */
+export const DEMANDES_IMPORT_COTATION_VIEW = 'app_e08c374bc4_demandes_import_cotation';
+/** Vue d'atelier : la demande d'export avec ses coûts et sa marge. */
+export const DEMANDES_EXPORT_COTATION_VIEW = 'app_e08c374bc4_demandes_export_cotation';
+/** Vue d'atelier : la commande boutique avec son coût fournisseur et sa trace d'appro. */
+export const COMMANDES_GP_COUT_VIEW = 'app_e08c374bc4_commandes_gp_cout';
+/** Vue d'atelier : les lignes de commande avec leur coût d'achat. */
+export const LIGNES_COMMANDE_GP_COUT_VIEW = 'app_e08c374bc4_lignes_commande_gp_cout';
+
 export const DEMANDES_SOURCING_TABLE = 'app_e08c374bc4_demandes_sourcing';
 
 export const VENDEURS_TABLE = 'app_e08c374bc4_vendeurs';

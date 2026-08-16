@@ -8,6 +8,7 @@ import {
   supabase,
   EXPORT_DOCUMENTS_BUCKET,
   DEMANDES_EXPORT_TABLE,
+  DEMANDES_EXPORT_COTATION_VIEW,
   HISTORIQUE_EXPORT_TABLE,
   DOCUMENTS_EXPORT_TABLE,
   PROFILES_TABLE,
@@ -127,7 +128,7 @@ export default function AdminExportGestion() {
   const loadDemandes = async () => {
     setLoading(true);
     const { data } = await supabase
-      .from(DEMANDES_EXPORT_TABLE)
+      .from(DEMANDES_EXPORT_COTATION_VIEW)
       .select('*')
       .order('created_at', { ascending: false });
     const list = (data as DemandeExport[]) ?? [];
