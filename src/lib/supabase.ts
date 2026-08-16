@@ -215,6 +215,15 @@ export const COMMANDES_GP_COUT_VIEW = 'app_e08c374bc4_commandes_gp_cout';
 /** Vue d'atelier : les lignes de commande avec leur coût d'achat. */
 export const LIGNES_COMMANDE_GP_COUT_VIEW = 'app_e08c374bc4_lignes_commande_gp_cout';
 
+/**
+ * Frais dus à l'arrivée, hors droits et taxes : acconage, échange de
+ * connaissement, magasinage, retrait documentaire. Coût de revient pur —
+ * lecture réservée à l'administration par sa politique.
+ */
+export const FRAIS_DESTINATION_TABLE = 'app_e08c374bc4_frais_destination';
+/** Fourchettes de fret du marché : minimum, courant, maximum, par origine et conditionnement. */
+export const REPERES_FRET_MARCHE_TABLE = 'app_e08c374bc4_reperes_fret_marche';
+
 export const DEMANDES_SOURCING_TABLE = 'app_e08c374bc4_demandes_sourcing';
 
 export const VENDEURS_TABLE = 'app_e08c374bc4_vendeurs';
@@ -1399,6 +1408,9 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   /* Une pile d'appels décrit la structure interne de l'application : elle ne
    * regarde que le propriétaire, comme les comptes. */
   '/admin/journal-erreurs': ['proprietaire'],
+  /* Acconage, magasinage, échange de connaissement : c'est notre coût de
+   * revient à l'arrivée. Même traitement que la comptabilité. */
+  '/admin/frais-destination': ['proprietaire'],
 };
 
 export type StatutVendeur = 'en_attente' | 'valide' | 'suspendu' | 'refuse';

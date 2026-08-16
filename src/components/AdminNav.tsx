@@ -26,6 +26,7 @@ const LINKS = [
   { to: '/admin/comptabilite', label: 'Comptabilité' },
   { to: '/admin/equipe', label: 'Équipe' },
   { to: '/admin/parametres', label: 'Paramètres' },
+  { to: '/admin/frais-destination', label: 'Frais de destination' },
   { to: '/admin/journal-erreurs', label: 'Écrans cassés' },
 ];
 
