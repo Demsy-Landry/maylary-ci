@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
+import ImageOuverture from '@/components/ImageOuverture';
 import { useAuth } from '@/hooks/useAuth';
 import {
   supabase,
@@ -159,13 +160,11 @@ export default function SourcingGP() {
             large que haute, et un recadrage centré coupait le visage de la
             personne au profit du plan de travail. On garde les yeux, on perd
             un peu de sol. */}
-        <img
+        <ImageOuverture
           src="/visuels/sourcing-selection.jpg"
           alt=""
-          width={1168}
-          height={784}
-          fetchPriority="high"
-          decoding="async"
+          largeur={1168}
+          hauteur={784}
           className="absolute inset-0 h-full w-full scale-105 object-cover object-[center_26%] motion-safe:animate-[respiration_26s_ease-in-out_infinite]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/95 via-foreground/80 to-foreground/35" />
@@ -283,13 +282,20 @@ export default function SourcingGP() {
         <section className="mt-12 overflow-hidden rounded-xl border bg-card" data-revele>
           <div className="grid items-stretch lg:grid-cols-2">
             <div className="cadre-zoom order-1 min-h-[14rem] lg:order-2 lg:min-h-full">
-              <img
-                src="/visuels/sourcing-entrepot.jpg"
-                alt="Contrôle d'un colis en entrepôt avant expédition."
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover"
-              />
+              {/* Celle-ci est différée : elle est en bas de page. Elle gagne
+                  le WebP comme les autres, mais garde `loading="lazy"` — lui
+                  donner la priorité volerait de la bande passante à ce que le
+                  visiteur regarde vraiment. */}
+              <picture>
+                <source srcSet="/visuels/sourcing-entrepot.webp" type="image/webp" />
+                <img
+                  src="/visuels/sourcing-entrepot.jpg"
+                  alt="Contrôle d'un colis en entrepôt avant expédition."
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
+              </picture>
             </div>
             <div className="order-2 p-6 lg:order-1 lg:p-8">
               <h2 className="trait-anime font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">

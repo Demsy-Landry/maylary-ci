@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { informationLue, marquerInformationLue } from '@/lib/stockage-local';
@@ -27,12 +27,45 @@ import { Cookie, X } from 'lucide-react';
  */
 export default function BandeauStockage() {
   const [visible, setVisible] = useState(false);
+  const boite = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (informationLue()) return;
     const minuteur = setTimeout(() => setVisible(true), 1100);
     return () => clearTimeout(minuteur);
   }, []);
+
+  /**
+   * Sa hauteur, annoncée au reste de l'application.
+   *
+   * LE DÉFAUT QU'ELLE CORRIGE
+   *
+   * Le bandeau se pose en bas, au-dessus du bouton du Déclarant — plus haut
+   * dans l'empilement ET rendu après lui. Résultat : à la toute première
+   * visite, le bouton était non seulement caché mais INATTEignABLE, le bandeau
+   * captant les appuis à sa place. Constaté au navigateur, pas déduit.
+   *
+   * Plutôt que de jouer à qui sera au-dessus — ce qui aurait mis le bouton
+   * par-dessus le texte du bandeau — le bandeau publie sa hauteur et le bouton
+   * s'en écarte. Les deux restent lisibles et cliquables.
+   */
+  useEffect(() => {
+    const racine = document.documentElement;
+    if (!visible) {
+      racine.style.removeProperty('--hauteur-bandeau');
+      return;
+    }
+    const mesurer = () => {
+      const h = boite.current?.getBoundingClientRect().height ?? 0;
+      racine.style.setProperty('--hauteur-bandeau', `${Math.round(h)}px`);
+    };
+    mesurer();
+    window.addEventListener('resize', mesurer);
+    return () => {
+      window.removeEventListener('resize', mesurer);
+      racine.style.removeProperty('--hauteur-bandeau');
+    };
+  }, [visible]);
 
   if (!visible) return null;
 
@@ -43,6 +76,7 @@ export default function BandeauStockage() {
 
   return (
     <div
+      ref={boite}
       role="region"
       aria-label="Information sur le stockage local"
       className="fixed inset-x-0 bottom-0 z-50 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:p-4 sm:pb-[calc(1rem+env(safe-area-inset-bottom))]"

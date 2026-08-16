@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { supabase, EDGE_FUNCTIONS_URL } from '@/lib/supabase';
+import { useBoutonDeplacable } from '@/hooks/useBoutonDeplacable';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, X, Send, Loader2, Sparkles } from 'lucide-react';
+import { ShieldCheck, X, Send, Loader2, Sparkles, RotateCcw } from 'lucide-react';
 
 /**
  * Le Déclarant, présent sur toutes les pages.
@@ -80,6 +81,8 @@ const SUGGESTIONS = [
 
 export default function AssistantDeclarant() {
   const { pathname } = useLocation();
+  const deplacable = useBoutonDeplacable();
+  const { position, enDeplacement, clicAnnule, reinitialiser, gestes } = deplacable;
   const [ouvert, setOuvert] = useState(false);
   const [connecte, setConnecte] = useState<boolean | null>(null);
   const [message, setMessage] = useState('');
@@ -178,12 +181,40 @@ export default function AssistantDeclarant() {
   };
 
   if (!ouvert) {
+    /* Le bouton se déplace où le visiteur veut. Tant qu'il ne l'a pas déplacé,
+     * `position` est nulle et il garde sa place d'origine, en bas à droite,
+     * décrite en classes — on ne fixe des coordonnées que lorsqu'il y en a. */
+    const place = position
+      ? { left: position.x, top: position.y, right: 'auto', bottom: 'auto' }
+      : /* Au repos, il se pose au-dessus du bandeau d'information quand celui-ci
+           est là, et redescend dès qu'il disparaît. `--hauteur-bandeau` vaut
+           zéro le reste du temps. */
+        {
+          bottom:
+            'calc(1rem + env(safe-area-inset-bottom) + var(--hauteur-bandeau, 0px))',
+        };
+
     return (
       <button
+        ref={deplacable.element}
         type="button"
-        onClick={() => setOuvert(true)}
-        aria-label="Ouvrir Le Déclarant"
-        className="fixed bottom-4 right-4 z-40 mb-[env(safe-area-inset-bottom)] flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition hover:brightness-95"
+        onClick={() => {
+          // Un déplacement de trois pixels ne doit pas ouvrir le panneau.
+          if (clicAnnule()) return;
+          setOuvert(true);
+        }}
+        {...gestes}
+        style={place}
+        aria-label="Ouvrir Le Déclarant — maintenez pour le déplacer"
+        title="Maintenez pour déplacer"
+        className={
+          'fixed right-4 z-40 flex touch-none items-center gap-2 ' +
+          'rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-lg ' +
+          'hover:brightness-95 ' +
+          /* Pas de transition pendant le geste : elle ferait traîner le bouton
+             derrière le doigt, et le déplacement paraîtrait mou. */
+          (enDeplacement ? 'scale-105 cursor-grabbing shadow-2xl' : 'cursor-grab transition')
+        }
       >
         <ShieldCheck className="h-5 w-5" />
         <span className="hidden sm:inline">Le Déclarant</span>
@@ -192,7 +223,12 @@ export default function AssistantDeclarant() {
   }
 
   return (
-    <div className="fixed inset-x-2 bottom-2 z-40 mb-[env(safe-area-inset-bottom)] flex max-h-[85vh] flex-col overflow-hidden rounded-lg border bg-card shadow-2xl sm:inset-x-auto sm:right-4 sm:w-[26rem]">
+    <div
+      style={{
+        bottom: 'calc(0.5rem + env(safe-area-inset-bottom) + var(--hauteur-bandeau, 0px))',
+      }}
+      className="fixed inset-x-2 z-40 flex max-h-[85vh] flex-col overflow-hidden rounded-lg border bg-card shadow-2xl sm:inset-x-auto sm:right-4 sm:w-[26rem]"
+    >
       <div className="flex items-center justify-between gap-2 border-b bg-muted/40 px-3 py-2">
         <span className="flex min-w-0 items-center gap-2">
           <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
@@ -205,14 +241,30 @@ export default function AssistantDeclarant() {
             </span>
           </span>
         </span>
-        <button
-          type="button"
-          onClick={() => setOuvert(false)}
-          aria-label="Fermer"
-          className="rounded p-1 text-muted-foreground hover:bg-muted"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <span className="flex shrink-0 items-center gap-1">
+          {/* Un bouton déplacé sur un coin malcommode doit pouvoir revenir.
+              Proposé seulement s'il a bougé : une commande qui ne sert à rien
+              encombre autant qu'un bouton mal placé. */}
+          {position && (
+            <button
+              type="button"
+              onClick={reinitialiser}
+              aria-label="Remettre le bouton à sa place"
+              title="Remettre le bouton en bas à droite"
+              className="rounded p-1 text-muted-foreground hover:bg-muted"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setOuvert(false)}
+            aria-label="Fermer"
+            className="rounded p-1 text-muted-foreground hover:bg-muted"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </span>
       </div>
 
       <div className="flex-1 space-y-3 overflow-y-auto p-3">
