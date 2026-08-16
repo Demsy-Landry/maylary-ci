@@ -171,7 +171,15 @@ export interface DonneesDocument {
   libelles: Record<string, Record<string, string>>;
 }
 
-export function telechargerDeclarationPdf(d: DonneesDocument) {
+/**
+ * Le document, construit mais pas encore remis.
+ *
+ * Il sert deux usages qui ne veulent pas la même chose : le déclarant le
+ * TÉLÉCHARGE, l'atelier de cotation le JOINT au devis du client. Un module qui
+ * n'aurait su que déclencher un téléchargement aurait obligé l'atelier à
+ * recopier le dessin, et deux dessins finissent toujours par diverger.
+ */
+export function construireDeclarationPdf(d: DonneesDocument): jsPDF {
   const { valeurs, lignes, liquidation, libelles } = d;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
@@ -290,7 +298,9 @@ export function telechargerDeclarationPdf(d: DonneesDocument) {
     rangee([['—', 'Désignation tarifaire officielle', l.designation_tec ?? '—']], 13);
     rangee([
       ['—', 'Taux DD', l.verifie_en_base ? pourcent(l.taux_dd) : 'non confirmé'],
-      ['41', 'Unités supplémentaires', saisie ? `${saisie.quantite || '—'} ${saisie.unite}` : '—'],
+      // Sans quantité, l'unité seule ne dit rien : « — u » se lit comme une
+      // coquille. On n'imprime l'unité que lorsqu'elle compte quelque chose.
+      ['41', 'Unités supplémentaires', saisie?.quantite ? `${saisie.quantite} ${saisie.unite}` : '—'],
       ['35', 'Masse brute (kg)', String(l.poids_brut_kg ?? '')],
       ['38', 'Masse nette (kg)', saisie?.poids_net || '—'],
     ]);
@@ -397,5 +407,20 @@ export function telechargerDeclarationPdf(d: DonneesDocument) {
   });
 
   piedDePage(doc);
-  doc.save(`declaration-${(valeurs.reference || 'simulation').replace(/[^\w-]/g, '-')}.pdf`);
+  return doc;
+}
+
+/** Le nom sous lequel le document se range, dans un dossier comme sur un disque. */
+export function nomDeclarationPdf(reference: string | undefined): string {
+  return `declaration-${(reference || 'simulation').replace(/[^\w-]/g, '-')}.pdf`;
+}
+
+/** Remise directe au déclarant : le navigateur enregistre le fichier. */
+export function telechargerDeclarationPdf(d: DonneesDocument) {
+  construireDeclarationPdf(d).save(nomDeclarationPdf(d.valeurs.reference));
+}
+
+/** Remise indirecte : le document part au stockage, joint au devis du client. */
+export function declarationPdfBlob(d: DonneesDocument): Blob {
+  return construireDeclarationPdf(d).output('blob');
 }

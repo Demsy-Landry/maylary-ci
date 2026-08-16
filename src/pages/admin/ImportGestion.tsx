@@ -20,9 +20,12 @@ import {
   type StatutImport,
   type TypeDocumentImport,
   type Profile,
+  type ModeTransport,
   IMPORT_PHOTOS_BUCKET,
 } from '@/lib/supabase';
+import { useReferentiels, libellesPourDocument } from '@/hooks/useReferentiels';
 import { GaleriePhotosPrivees, LienDocumentPrive } from '@/components/FichiersPrives';
+import ChiffrageDouanierPanneau, { type ChiffrageDouanier } from '@/components/ChiffrageDouanier';
 import AdminNav from '@/components/AdminNav';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,7 +34,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, Pencil, Send, Upload, FileText, ExternalLink } from 'lucide-react';
+import { Loader2, Pencil, Send, Upload, FileText, ExternalLink, Paperclip } from 'lucide-react';
 
 const STATUT_BADGE_VARIANT: Record<StatutImport, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   nouvelle: 'outline',
@@ -45,6 +48,20 @@ const STATUT_BADGE_VARIANT: Record<StatutImport, 'default' | 'secondary' | 'outl
   transit_local: 'default',
   livree: 'default',
   annulee: 'destructive',
+};
+
+/**
+ * Le mode de transport du dossier, dit dans la langue de la douane.
+ *
+ * Le module d'import parle en mots (« maritime ») parce qu'un client remplit
+ * un formulaire, pas une déclaration. La case 25 du modèle SYDAM attend le
+ * code du Document Administratif Unique. La traduction se fait ici, une fois,
+ * plutôt que dans le document.
+ */
+const MODE_TRANSPORT_CODE: Record<ModeTransport, string> = {
+  maritime: '1',
+  routier: '3',
+  aerien: '4',
 };
 
 const STATUTS_POST_VALIDATION: StatutImport[] = [
@@ -82,6 +99,7 @@ const emptyCotation: CotationForm = {
 };
 
 export default function AdminImportGestion() {
+  const referentiels = useReferentiels();
   const [demandes, setDemandes] = useState<DemandeImport[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
@@ -92,6 +110,8 @@ export default function AdminImportGestion() {
   const [docType, setDocType] = useState<TypeDocumentImport>('facture_fournisseur');
   const [uploading, setUploading] = useState(false);
   const [parametresAssurance, setParametresAssurance] = useState<ParametresImport | null>(null);
+  const [chiffrage, setChiffrage] = useState<ChiffrageDouanier | null>(null);
+  const [documentEnCours, setDocumentEnCours] = useState(false);
 
   useEffect(() => {
     supabase
@@ -165,6 +185,7 @@ export default function AdminImportGestion() {
       marge_fcfa: d.marge_fcfa != null ? String(d.marge_fcfa) : '',
       commentaire_admin_devis: d.commentaire_admin_devis ?? '',
     });
+    setChiffrage((d.chiffrage_douanier as ChiffrageDouanier | null) ?? null);
     const { data } = await supabase.from(DOCUMENTS_IMPORT_TABLE).select('*').eq('demande_import_id', d.id);
     setDocuments((data as DocumentImport[]) ?? []);
   };
@@ -173,6 +194,7 @@ export default function AdminImportGestion() {
     setGestion(null);
     setDocuments([]);
     setCotation(emptyCotation);
+    setChiffrage(null);
   };
 
   const clientLabel = (userId: string) => {
@@ -192,6 +214,101 @@ export default function AdminImportGestion() {
       cotation.marge_fcfa,
     ];
     return values.reduce((sum, v) => sum + (parseFloat(v) || 0), 0);
+  };
+
+  /**
+   * Le chiffrage retenu : il remplit « Douane estimée » et se range avec la
+   * demande. On archive la SAISIE et le RÉSULTAT, pas seulement le total —
+   * sans quoi personne ne saurait plus, dans trois mois, d'où sort le chiffre
+   * qu'on a facturé.
+   */
+  const retenirChiffrage = async (c: ChiffrageDouanier) => {
+    if (!gestion) return;
+    setChiffrage(c);
+    setCotation((f) => ({ ...f, douane_estimee_fcfa: String(Math.round(c.liquidation.total_a_payer_fcfa)) }));
+    const { error } = await supabase
+      .from(DEMANDES_IMPORT_TABLE)
+      .update({ chiffrage_douanier: c })
+      .eq('id', gestion.id);
+    if (error) {
+      toast.error('Chiffrage reporté à l’écran mais non enregistré.');
+      return;
+    }
+    toast.success('Douane estimée mise à jour depuis le calcul officiel.');
+  };
+
+  /**
+   * Le document douanier, joint au devis.
+   *
+   * Il part dans le même dépôt que les autres pièces du dossier et s'inscrit
+   * dans la liste des documents de la demande : le client le retrouve dans son
+   * espace, à côté de son devis, sans qu'on ait à le lui envoyer.
+   */
+  const joindreDocumentDouanier = async () => {
+    if (!gestion || !chiffrage) return;
+    setDocumentEnCours(true);
+    try {
+      const { declarationPdfBlob, nomDeclarationPdf } = await import('@/lib/declaration-pdf');
+
+      const valeurs = {
+        type_declaration: 'IM',
+        reference: gestion.reference_publique,
+        regime: chiffrage.regime,
+        date: new Date().toISOString().slice(0, 10),
+        importateur: clientLabel(gestion.user_id),
+        pays_origine: chiffrage.pays_origine,
+        pays_expedition: chiffrage.pays_origine,
+        pays_destination: 'CI',
+        mode_transport: MODE_TRANSPORT_CODE[gestion.mode_transport] ?? '',
+        incoterm: gestion.incoterm ?? '',
+        declarant: 'MayLary Group — Dems’Inc, Abidjan',
+        devise: 'XOF',
+        taux_change: '1',
+        masse_brute: gestion.poids_estime_kg != null ? String(gestion.poids_estime_kg) : '',
+        documents_joints: 'Devis MayLary Group — pièces du dossier en cours de constitution.',
+      };
+
+      const blob = declarationPdfBlob({
+        valeurs,
+        lignes: chiffrage.lignes,
+        liquidation: chiffrage.liquidation,
+        libelles: libellesPourDocument(referentiels),
+      });
+
+      const nom = nomDeclarationPdf(gestion.reference_publique);
+      const path = `${gestion.id}/${crypto.randomUUID()}-${nom}`;
+      const { error: uploadError } = await supabase.storage
+        .from(IMPORT_DOCUMENTS_BUCKET)
+        .upload(path, blob, { contentType: 'application/pdf' });
+      if (uploadError) {
+        toast.error("Le document n'a pas pu être déposé.");
+        return;
+      }
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const { data: doc, error: insertError } = await supabase
+        .from(DOCUMENTS_IMPORT_TABLE)
+        .insert({
+          demande_import_id: gestion.id,
+          type_document: 'declaration_douaniere',
+          nom_fichier: nom,
+          url: path,
+          uploaded_by: user?.id ?? null,
+        })
+        .select('*')
+        .single();
+
+      if (insertError || !doc) {
+        toast.error("Document déposé mais impossible de l'enregistrer.");
+        return;
+      }
+      setDocuments((prev) => [...prev, doc as DocumentImport]);
+      toast.success('Document douanier joint au dossier du client.');
+    } finally {
+      setDocumentEnCours(false);
+    }
   };
 
   const majStatut = async (statut: StatutImport, extra: Record<string, unknown> = {}) => {
@@ -458,6 +575,14 @@ export default function AdminImportGestion() {
                         value={cotation.douane_estimee_fcfa}
                         onChange={(e) => setCotation((c) => ({ ...c, douane_estimee_fcfa: e.target.value }))}
                       />
+                      {chiffrage && (
+                        <p className="text-[11px] leading-relaxed text-muted-foreground">
+                          Chiffré au tarif le{' '}
+                          {new Date(chiffrage.calcule_le).toLocaleDateString('fr-FR')} sur{' '}
+                          {chiffrage.lignes.length} article{chiffrage.lignes.length > 1 ? 's' : ''} —
+                          régime {chiffrage.regime}.
+                        </p>
+                      )}
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs">Transit local (FCFA)</Label>
@@ -484,6 +609,43 @@ export default function AdminImportGestion() {
                       />
                     </div>
                   </div>
+                  {/* Le chiffrage douanier prend la place où l'on devinait un
+                      nombre. Il est sous la grille des coûts parce qu'il a
+                      besoin du fret et de l'assurance déjà saisis au-dessus. */}
+                  <ChiffrageDouanierPanneau
+                    key={gestion.id}
+                    referentiels={referentiels}
+                    descriptionProduit={gestion.description_produit}
+                    valeurMarchandiseFcfa={
+                      parseFloat(cotation.cout_marchandise_fcfa) ||
+                      gestion.valeur_marchandise_estimee_fcfa ||
+                      0
+                    }
+                    poidsKg={gestion.poids_estime_kg}
+                    paysFournisseur={gestion.pays_fournisseur}
+                    fretFcfa={parseFloat(cotation.cout_fret_fcfa) || 0}
+                    assuranceFcfa={parseFloat(cotation.assurance_fcfa) || 0}
+                    initial={chiffrage}
+                    onRetenir={retenirChiffrage}
+                  />
+
+                  {chiffrage && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={joindreDocumentDouanier}
+                      disabled={documentEnCours}
+                    >
+                      {documentEnCours ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Paperclip className="mr-2 h-4 w-4" />
+                      )}
+                      Joindre le document douanier au dossier
+                    </Button>
+                  )}
+
                   <div className="space-y-1">
                     <Label className="text-xs">Commentaire (visible par le client)</Label>
                     <Textarea
