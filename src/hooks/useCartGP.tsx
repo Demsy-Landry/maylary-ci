@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { prixPourQuantite, type PalierPrix } from '@/lib/cout-import';
+import { lireListeStockee, ecrireListeStockee } from '@/lib/stockage-local';
 
 export interface CartItemGP {
   produit_id: string;
@@ -35,18 +36,30 @@ interface CartGPContextValue {
 const CartGPContext = createContext<CartGPContextValue | undefined>(undefined);
 const STORAGE_KEY = 'maylary_panier_achat_gp';
 
+/**
+ * Une ligne de panier utilisable.
+ *
+ * Le prix doit être un nombre : la grille dégressive calcule dessus, et un
+ * prix absent ferait afficher « NaN FCFA » au client, ce qui est pire qu'une
+ * ligne manquante. `paliers` est ramené à un tableau quand il n'en est pas un,
+ * plutôt que de faire tomber la ligne entière pour un champ accessoire.
+ */
+const estLigneValide = (e: unknown): e is CartItemGP => {
+  if (typeof e !== 'object' || e === null) return false;
+  const l = e as CartItemGP;
+  if (typeof l.produit_id !== 'string') return false;
+  if (!Number.isFinite(l.quantite) || !Number.isFinite(l.prix_unitaire_fcfa)) return false;
+  if (l.paliers !== undefined && !Array.isArray(l.paliers)) l.paliers = [];
+  return true;
+};
+
 export function CartGPProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItemGP[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as CartItemGP[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [items, setItems] = useState<CartItemGP[]>(() =>
+    lireListeStockee(STORAGE_KEY, estLigneValide),
+  );
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    ecrireListeStockee(STORAGE_KEY, items);
   }, [items]);
 
   const addItem = (item: Omit<CartItemGP, 'quantite'>, quantite = 1) => {

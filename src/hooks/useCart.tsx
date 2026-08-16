@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { lireListeStockee, ecrireListeStockee } from '@/lib/stockage-local';
 
 export interface CartItem {
   produit_id: string;
@@ -24,18 +25,26 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | undefined>(undefined);
 const STORAGE_KEY = 'maylary_panier_devis';
 
+/**
+ * Une ligne de panier utilisable.
+ *
+ * Le minimum sans lequel l'affichage et les totaux lèveraient : un identifiant
+ * et une quantité qui est un nombre. Le reste se rattrape à l'écran ; ces
+ * deux-là, non.
+ */
+const estLigneValide = (e: unknown): e is CartItem =>
+  typeof e === 'object' &&
+  e !== null &&
+  typeof (e as CartItem).produit_id === 'string' &&
+  Number.isFinite((e as CartItem).quantite);
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as CartItem[]) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [items, setItems] = useState<CartItem[]>(() =>
+    lireListeStockee(STORAGE_KEY, estLigneValide),
+  );
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    ecrireListeStockee(STORAGE_KEY, items);
   }, [items]);
 
   const addItem = (item: Omit<CartItem, 'quantite'>, quantite = 1) => {

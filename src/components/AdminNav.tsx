@@ -25,6 +25,7 @@ const LINKS = [
   { to: '/admin/comptabilite', label: 'Comptabilité' },
   { to: '/admin/equipe', label: 'Équipe' },
   { to: '/admin/parametres', label: 'Paramètres' },
+  { to: '/admin/journal-erreurs', label: 'Écrans cassés' },
 ];
 
 export default function AdminNav() {
