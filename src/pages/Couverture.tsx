@@ -104,7 +104,7 @@ export default function Couverture() {
   return (
     <div className="min-h-screen bg-background">
       {/* ---------- Bandeau flottant ---------- */}
-      <header className="absolute inset-x-0 top-0 z-20">
+      <header className="absolute inset-x-0 top-0 z-20 pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4 sm:px-6">
           <Link to="/" aria-label="MayLary Group, accueil">
             <LogoMaylary className="font-display text-white" tailleTexte="text-lg" />
@@ -167,7 +167,12 @@ export default function Couverture() {
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-foreground/40" />
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent" />
 
-        <div className="relative mx-auto w-full max-w-screen-xl px-4 py-24 sm:px-6">
+        {/* Le bandeau flotte AU-DESSUS de cette ouverture : son dégagement de
+            6 rem lui suffisait tant qu'il mesurait sa seule hauteur. Sous une
+            encoche il gagne la hauteur de la barre système, et le logo venait
+            se poser sur la ligne « Aérien · Express ». Le dégagement suit
+            désormais l'encoche. */}
+        <div className="relative mx-auto w-full max-w-screen-xl px-4 py-24 pt-[calc(6rem+env(safe-area-inset-top))] sm:px-6">
           {/* `rideau` plutôt que `data-revele` : ce bloc est déjà à l'écran
               quand la page arrive. La révélation au défilement ne se
               déclencherait donc sur rien de visible — il faut une entrée au

@@ -194,7 +194,7 @@ export default function AdminDashboard() {
       {/* Le bandeau porte l'identité du métier : un port, des grues, des
           conteneurs. Une administration de transitaire n'a pas de raison de
           ressembler à un tableur. */}
-      <header className="relative overflow-hidden border-b bg-foreground">
+      <header className="relative overflow-hidden border-b bg-foreground pt-[env(safe-area-inset-top)]">
         <ScenePortAbidjan className="absolute inset-0 h-full w-full opacity-30" />
         <div className="relative mx-auto max-w-screen-xl px-4 py-4 sm:px-6">
           <div className="space-y-3 [&_a]:text-background/70 [&_a:hover]:text-background">

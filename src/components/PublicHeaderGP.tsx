@@ -35,7 +35,7 @@ export default function PublicHeaderGP() {
   };
 
   return (
-    <header className="sticky top-0 z-10 bg-foreground text-background">
+    <header className="sticky top-0 z-10 bg-foreground pt-[env(safe-area-inset-top)] text-background">
       {/* La bascule vers une seule ligne — logo, recherche, navigation — attend
           `xl` et non `sm`. Dès 640 px les libellés apparaissent en toutes
           lettres ; les tenir sur une ligne avec la barre de recherche faisait

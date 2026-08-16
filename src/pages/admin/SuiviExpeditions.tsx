@@ -203,7 +203,7 @@ export default function SuiviExpeditions() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+      <header className="border-b bg-card pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex max-w-screen-xl flex-col gap-3 px-4 py-4 sm:px-6">
           <AdminNav />
           <div className="flex flex-wrap items-center justify-between gap-3">

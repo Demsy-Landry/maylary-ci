@@ -144,7 +144,7 @@ export default function Fournisseurs() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-card">
+      <header className="border-b bg-card pt-[env(safe-area-inset-top)]">
         <div className="mx-auto max-w-screen-xl px-4 py-4 sm:px-6">
           <div className="space-y-2">
             <AdminNav />
