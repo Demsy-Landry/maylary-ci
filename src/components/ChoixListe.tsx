@@ -69,7 +69,11 @@ export default function ChoixListe({
   const boite = useRef<HTMLDivElement>(null);
 
   const choisie = options.find((o) => o.valeur === valeur) ?? null;
-  const horsListe = valeur !== '' && !choisie;
+  /* Tant que la liste n'est pas arrivée, on ne peut RIEN dire de la valeur.
+   * Sans ce garde-fou, l'écran affichait « valeur hors liste » sous un régime
+   * 4000 parfaitement valide, le temps que le référentiel se charge — et
+   * accusait la saisie du fondateur d'une faute qu'elle n'avait pas. */
+  const horsListe = options.length > 0 && valeur !== '' && !choisie;
 
   // Un clic ailleurs referme. Sans cela, la liste reste ouverte par-dessus le
   // champ suivant et on croit avoir cliqué à côté.
