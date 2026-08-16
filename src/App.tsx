@@ -42,6 +42,7 @@ const AdminEquipeGestion = lazy(() => import('@/pages/admin/EquipeGestion'));
 const AdminExportGestion = lazy(() => import('@/pages/admin/ExportGestion'));
 const AdminImportGestion = lazy(() => import('@/pages/admin/ImportGestion'));
 const AdminJournalErreurs = lazy(() => import('@/pages/admin/JournalErreurs'));
+const AdminSuiviExpeditions = lazy(() => import('@/pages/admin/SuiviExpeditions'));
 const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
 const AdminParametres = lazy(() => import('@/pages/admin/AdminParametres'));
 const AdminSourcingGestion = lazy(() => import('@/pages/admin/SourcingGestion'));
@@ -70,6 +71,7 @@ const MesCommandesGP = lazy(() => import('@/pages/MesCommandesGP'));
 const MesDemandesExport = lazy(() => import('@/pages/MesDemandesExport'));
 const MesDemandesImport = lazy(() => import('@/pages/MesDemandesImport'));
 const MesDevis = lazy(() => import('@/pages/MesDevis'));
+const MesExpeditions = lazy(() => import('@/pages/MesExpeditions'));
 const MonCompte = lazy(() => import('@/pages/MonCompte'));
 const MotDePasseOublie = lazy(() => import('@/pages/MotDePasseOublie'));
 const NouvelleDemandeExport = lazy(() => import('@/pages/NouvelleDemandeExport'));
@@ -307,6 +309,15 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/parametres">
                       <AdminParametres />
+                    </AdminRoute>
+                  }
+                />
+                <Route path="/mes-expeditions" element={<MesExpeditions />} />
+                <Route
+                  path="/admin/suivi"
+                  element={
+                    <AdminRoute ecran="/admin/suivi">
+                      <AdminSuiviExpeditions />
                     </AdminRoute>
                   }
                 />

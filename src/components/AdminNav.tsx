@@ -8,6 +8,7 @@ import BoutonRetour from '@/components/BoutonRetour';
 const LINKS = [
   { to: '/admin', label: 'Tableau de bord' },
   { to: '/admin/dossiers', label: 'Dossiers' },
+  { to: '/admin/suivi', label: 'Suivi des expéditions' },
   { to: '/admin/produits', label: 'Articles' },
   { to: '/admin/declarant', label: 'Le Déclarant' },
   { to: '/admin/import', label: "Demandes d'import" },

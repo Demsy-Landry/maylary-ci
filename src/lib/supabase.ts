@@ -811,6 +811,91 @@ export const CLASSIFICATIONS_HS_TABLE = 'app_e08c374bc4_classifications_hs';
  */
 export const JOURNAL_ERREURS_TABLE = 'app_e08c374bc4_journal_erreurs';
 
+/* ---------------------------------------------------------------------------
+   Le suivi d'expédition.
+
+   Une expédition est une chose en soi, et non un champ de plus sur la commande :
+   une demande d'import voyage en plusieurs segments — enlèvement chez le
+   fournisseur, traversée, transit local — chacun avec son transporteur et son
+   numéro. On la rattache à ce qui l'a fait naître.
+--------------------------------------------------------------------------- */
+export const EXPEDITIONS_TABLE = 'app_e08c374bc4_expeditions';
+export const EXPEDITION_EVENEMENTS_TABLE = 'app_e08c374bc4_expedition_evenements';
+
+export type StatutExpedition =
+  | 'a_expedier' | 'en_transit' | 'arrive_ci' | 'dedouanement'
+  | 'en_livraison' | 'livree' | 'incident' | 'annulee';
+
+/** L'ordre est celui du voyage : il sert aussi à dessiner la progression. */
+export const ETAPES_EXPEDITION: { code: StatutExpedition; libelle: string }[] = [
+  { code: 'a_expedier', libelle: 'À expédier' },
+  { code: 'en_transit', libelle: 'En transit' },
+  { code: 'arrive_ci', libelle: 'Arrivé en Côte d’Ivoire' },
+  { code: 'dedouanement', libelle: 'Dédouanement' },
+  { code: 'en_livraison', libelle: 'En livraison' },
+  { code: 'livree', libelle: 'Livrée' },
+];
+
+export const STATUT_EXPEDITION_LABELS: Record<StatutExpedition, string> = {
+  a_expedier: 'À expédier',
+  en_transit: 'En transit',
+  arrive_ci: 'Arrivé en Côte d’Ivoire',
+  dedouanement: 'Dédouanement',
+  en_livraison: 'En livraison',
+  livree: 'Livrée',
+  incident: 'Incident',
+  annulee: 'Annulée',
+};
+
+export type ModeExpedition = 'maritime' | 'aerien' | 'routier' | 'express';
+
+export const MODE_EXPEDITION_LABELS: Record<ModeExpedition, string> = {
+  maritime: 'Maritime',
+  aerien: 'Aérien',
+  routier: 'Routier',
+  express: 'Express',
+};
+
+export interface Expedition {
+  id: string;
+  numero: string;
+  user_id: string | null;
+  origine_type: 'commande_gp' | 'demande_import' | 'demande_export' | 'dossier' | 'libre';
+  origine_id: string | null;
+  designation: string | null;
+  mode: ModeExpedition;
+  transporteur: string | null;
+  /** Code du transporteur chez l'agrégateur. Le libellé change, le code non. */
+  transporteur_code: string | null;
+  numero_suivi: string | null;
+  statut: StatutExpedition;
+  eta: string | null;
+  suivi_automatique: boolean;
+  /** Quand on a DEMANDÉ au transporteur. */
+  derniere_releve: string | null;
+  /**
+   * Quand le transporteur a RÉPONDU. Distinct de `derniere_releve` à dessein :
+   * les confondre ferait passer un transporteur muet depuis trois jours pour un
+   * suivi à jour.
+   */
+  derniere_reponse_le: string | null;
+  releve_erreur: string | null;
+  cree_le: string;
+  maj_le: string;
+}
+
+export interface EvenementExpedition {
+  id: string;
+  expedition_id: string;
+  /** Qui parle. Le client doit pouvoir distinguer les deux d'un coup d'œil. */
+  source: 'transporteur' | 'maylary';
+  libelle: string;
+  lieu: string | null;
+  survenu_le: string;
+  enregistre_le: string;
+  auteur_id: string | null;
+}
+
 export interface ErreurJournalisee {
   id: string;
   code: string;
@@ -1205,6 +1290,7 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin/sourcing': ['proprietaire', 'operations'],
   '/admin/vendeurs': ['proprietaire', 'operations'],
   '/admin/dossiers': ['proprietaire', 'operations'],
+  '/admin/suivi': ['proprietaire', 'operations'],
   '/admin/produits': ['proprietaire', 'catalogue'],
   // Le Déclarant est un produit vendu : ses tarifs regardent le propriétaire.
   '/admin/declarant': ['proprietaire'],
