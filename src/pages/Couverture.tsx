@@ -8,6 +8,8 @@ import {
   CATEGORIES_GP_TABLE,
   type CategorieGP,
 } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { useFondDeBarre } from '@/hooks/useFondDeBarre';
 import { LogoMaylary } from '@/components/MarqueMaylary';
 import SiteFooter from '@/components/SiteFooter';
 import { Button } from '@/components/ui/button';
@@ -62,6 +64,12 @@ interface Vitrine {
 const fcfa = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
 
 export default function Couverture() {
+  /* L'ouverture est une photographie sombre : la bande système doit l'être
+     aussi, sans quoi l'écran commence par un bandeau crème au-dessus de
+     l'image. Même valeur que `bg-foreground`, qui habille la section. */
+  useFondDeBarre('oklch(0.19 0.02 250)');
+
+  const { user, isAdmin } = useAuth();
   const [produits, setProduits] = useState<Vitrine[] | null>(null);
   const [categories, setCategories] = useState<CategorieGP[]>([]);
   const [recherche, setRecherche] = useState('');
@@ -114,9 +122,22 @@ export default function Couverture() {
             >
               Nos services
             </Link>
-            <Button asChild size="sm" variant="secondary">
-              <Link to="/boutique/compte">Se connecter</Link>
-            </Button>
+            {/* La couverture est la seule page qui affichait « Se connecter »
+                sans jamais regarder si quelqu'un l'était. Un client déjà
+                connecté y lisait donc qu'il ne l'était pas, cliquait, et
+                retombait sur l'écran de connexion — de quoi douter d'avoir
+                jamais eu un compte. */}
+            {user ? (
+              <Button asChild size="sm" variant="secondary">
+                <Link to={isAdmin ? '/admin' : '/mon-compte'}>
+                  {isAdmin ? 'Administration' : 'Mon compte'}
+                </Link>
+              </Button>
+            ) : (
+              <Button asChild size="sm" variant="secondary">
+                <Link to="/boutique/compte">Se connecter</Link>
+              </Button>
+            )}
           </div>
         </div>
       </header>
