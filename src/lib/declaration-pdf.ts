@@ -1,31 +1,43 @@
 import { jsPDF } from 'jspdf';
-import { ORANGE, ENCRE, GRIS, GRIS_CLAIR, dessinerLogo } from '@/lib/facture-pdf';
+import { ENCRE, GRIS, GRIS_CLAIR, chiffre } from '@/lib/facture-pdf';
+import type { Liquidation } from '@/lib/supabase';
 import {
   GROUPES_DECLARATION,
-  CASES_ARTICLE,
+  taxesOrdonnees,
   type ValeursDeclaration,
-  type ArticleDeclaration,
-} from '@/lib/declaration-sydam';
+  type LigneDeclaration,
+} from '@/lib/declaration';
 
 /**
- * Le brouillon de déclaration, en PDF.
+ * Le document de déclaration — un seul, pour un seul écran.
  *
- * Il reprend la grammaire visuelle d'une déclaration en détail : cases
- * encadrées, numéro en petit dans le coin, valeur en dessous. Ce n'est pas de
- * l'esthétique — c'est ce qui permet de ressaisir dans SYDAM World en suivant
- * les numéros, sans relire les libellés.
+ * Il remplace les deux documents d'avant : le « brouillon » qui portait les
+ * cases sans les chiffres, et la « simulation » qui portait les chiffres sans
+ * les numéros. Un déclarant n'a pas besoin de deux papiers dont chacun dit la
+ * moitié de la vérité.
  *
- * CE QU'IL NE REPREND PAS, DÉLIBÉRÉMENT
+ * LES TROIS RÈGLES DE LISIBILITÉ DU FONDATEUR, APPLIQUÉES À LA LETTRE
+ *   * tous les chiffres en GRAS ;
+ *   * chaque case dans un CADRE, jamais de texte flottant ;
+ *   * le TOTAL À PAYER est la valeur la plus visible du document.
  *
- * Ni les armoiries de la République, ni le timbre de la Direction Générale des
- * Douanes, ni la mise en page exacte du formulaire officiel. Un document émis
- * par une société privée sous ces marques se ferait prendre pour un acte
- * officiel, quelle que soit la mention qu'on y ajoute. L'émetteur affiché est
- * MayLary Group, et le bandeau « brouillon » barre le haut de chaque page.
+ * SUR L'EN-TÊTE
  *
- * Format portrait : contrairement au bulletin de liquidation, qui aligne huit
- * taxes sur une ligne, la déclaration se lit case par case. Le portrait est ce
- * qui s'imprime et se classe le plus simplement au dossier.
+ * J'avais d'abord écarté toute mention de la République et de la Direction
+ * Générale des Douanes : un document privé sous ces marques se fait prendre
+ * pour un acte officiel. Le fondateur, transitaire de métier, les demande et a
+ * lui-même posé les garde-fous — sous-titre générique, aucune mention du
+ * système officiel dans le titre, mention légale en pied de CHAQUE page. Sa
+ * décision est appliquée telle quelle.
+ *
+ * Ce que le document ne porte pas et ne portera pas : ni armoiries, ni timbre,
+ * ni numéro de déclaration officiel. Le texte situe le cadre réglementaire ; il
+ * n'imite aucun sceau.
+ *
+ * LA PAGINATION
+ *
+ * Chaque bloc mesure sa hauteur avant d'être dessiné et saute à la page
+ * suivante s'il n'entre pas : jamais de ligne coupée en deux.
  */
 
 const MARGE = 12;
@@ -33,7 +45,29 @@ const LARGEUR = 210;
 const HAUTEUR = 297;
 const UTILE = LARGEUR - 2 * MARGE;
 
-/** Une case encadrée : numéro en haut à gauche, libellé, puis la valeur. */
+/**
+ * Le séparateur de milliers de la facture, pas celui du navigateur.
+ *
+ * `toLocaleString('fr-FR')` sépare avec une espace fine insécable (U+202F) que
+ * l'encodage WinAnsi des polices PDF standard ne connaît pas : elle s'imprime
+ * en « / ». Le document affichait donc « 106/400/000 » là où le douanier
+ * attend un montant. `chiffre()` sépare avec une espace ASCII.
+ */
+const montant = chiffre;
+
+/**
+ * Un taux du moteur de liquidation, en pourcentage lisible.
+ *
+ * Attention au piège : `taux_dd` ne porte pas la même unité selon d'où il
+ * vient. La liquidation le renvoie en FRACTION (0,20), la classification
+ * assistée le stocke en POURCENTAGE (20). Ici on est toujours du côté de la
+ * liquidation. Sans cette conversion, le document affichait « Taux DD 0.2 % »
+ * juste au-dessus d'une case 47 qui annonçait « DD … 20 % » sur la même ligne.
+ */
+const pourcent = (fraction: number) =>
+  `${(fraction * 100).toFixed(2).replace(/\.00$/, '').replace('.', ',')} %`;
+
+/** Une case encadrée : numéro et intitulé en petit, valeur en GRAS dessous. */
 function dessinerCase(
   doc: jsPDF,
   x: number,
@@ -41,245 +75,327 @@ function dessinerCase(
   largeur: number,
   hauteur: number,
   numero: string,
-  libelle: string,
+  intitule: string,
   valeur: string,
 ) {
-  doc.setDrawColor(190, 185, 180);
-  doc.setLineWidth(0.2);
+  doc.setDrawColor(120, 113, 108);
+  doc.setLineWidth(0.25);
   doc.rect(x, y, largeur, hauteur);
 
-  doc.setFillColor(...GRIS_CLAIR);
-  doc.rect(x, y, 6.5, 4.2, 'F');
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(5.6);
-  doc.setTextColor(...ORANGE);
-  doc.text(numero, x + 3.25, y + 3, { align: 'center' });
+  let decalage = 1.5;
+  if (numero && numero !== '—') {
+    doc.setFillColor(...GRIS_CLAIR);
+    doc.rect(x, y, 6.5, 4.2, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(5.6);
+    doc.setTextColor(...ENCRE);
+    doc.text(numero, x + 3.25, y + 3, { align: 'center' });
+    decalage = 7.5;
+  }
 
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(5.6);
-  doc.setTextColor(...GRIS);
-  doc.text(doc.splitTextToSize(libelle, largeur - 8)[0] ?? '', x + 7.5, y + 3);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.6);
-  doc.setTextColor(...ENCRE);
-  const lignes = doc.splitTextToSize(valeur || '—', largeur - 3) as string[];
-  const max = Math.max(1, Math.floor((hauteur - 5.5) / 3.2));
-  lignes.slice(0, max).forEach((l, i) => doc.text(l, x + 1.5, y + 7.6 + i * 3.2));
-}
-
-function enTete(doc: jsPDF, page: number) {
-  dessinerLogo(doc, MARGE, 10, 11);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.setTextColor(...ENCRE);
-  doc.text('MayLary Group', MARGE + 14, 15.5);
-
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.4);
-  doc.setTextColor(...GRIS);
-  doc.text('TRANSIT · IMPORT · EXPORT — Abidjan, Côte d’Ivoire', MARGE + 14, 19);
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(...ENCRE);
-  doc.text('DÉCLARATION EN DÉTAIL', LARGEUR - MARGE, 15.5, { align: 'right' });
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(6.4);
-  doc.setTextColor(...GRIS);
-  doc.text('Modèle SYDAM World — préparation', LARGEUR - MARGE, 19, { align: 'right' });
-  doc.text(`Page ${page}`, LARGEUR - MARGE, 22, { align: 'right' });
-
-  // Le bandeau qui empêche la confusion avec un acte officiel. Il barre le
-  // haut de CHAQUE page : une page détachée du reste doit le porter aussi.
-  doc.setFillColor(255, 244, 224);
-  doc.rect(MARGE, 24.5, UTILE, 6, 'F');
-  doc.setDrawColor(...ORANGE);
-  doc.setLineWidth(0.3);
-  doc.line(MARGE, 24.5, MARGE, 30.5);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(6.6);
-  doc.setTextColor(...ENCRE);
-  doc.text(
-    'BROUILLON — ne vaut pas dépôt. Le dépôt se fait dans SYDAM World sous la signature d’un commissionnaire en douane agréé.',
-    MARGE + 2,
-    28.4,
-  );
-
-  return 34;
-}
-
-function piedDePage(doc: jsPDF) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(5.8);
   doc.setTextColor(...GRIS);
+  doc.text(doc.splitTextToSize(intitule, largeur - decalage - 1)[0] ?? '', x + decalage, y + 3);
+
+  // Toutes les valeurs en gras : exigence explicite du fondateur, et c'est ce
+  // qui rend le document lisible d'un coup d'œil sur un bureau encombré.
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.2);
+  doc.setTextColor(...ENCRE);
+  const lignes = doc.splitTextToSize(valeur || '—', largeur - 3) as string[];
+  const max = Math.max(1, Math.floor((hauteur - 5) / 3.4));
+  lignes.slice(0, max).forEach((l, i) => doc.text(l, x + 1.5, y + 7.6 + i * 3.4));
+}
+
+function enTete(doc: jsPDF, page: number, reference: string) {
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(...ENCRE);
+  doc.text("RÉPUBLIQUE DE CÔTE D'IVOIRE", LARGEUR / 2, 13, { align: 'center' });
+  doc.setFontSize(9.5);
+  doc.text('DIRECTION GÉNÉRALE DES DOUANES', LARGEUR / 2, 18, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...GRIS);
+  doc.text('Document de simulation de calcul douanier', LARGEUR / 2, 23.5, { align: 'center' });
+
+  doc.setDrawColor(...ENCRE);
+  doc.setLineWidth(0.5);
+  doc.line(MARGE, 26, LARGEUR - MARGE, 26);
+
+  doc.setFontSize(6.5);
+  doc.setTextColor(...GRIS);
+  doc.text(`Réf. ${reference || '—'}`, MARGE, 30);
+  doc.text(`Page ${page}`, LARGEUR - MARGE, 30, { align: 'right' });
+
+  return 33.5;
+}
+
+function piedDePage(doc: jsPDF) {
+  doc.setDrawColor(...GRIS);
+  doc.setLineWidth(0.2);
+  doc.line(MARGE, HAUTEUR - 14, LARGEUR - MARGE, HAUTEUR - 14);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.6);
+  doc.setTextColor(...ENCRE);
   doc.text(
-    `Préparé le ${new Date().toLocaleDateString('fr-FR')} avec Le Déclarant — MayLary Group. Document de travail interne.`,
-    MARGE,
-    HAUTEUR - 8,
+    "Document d'aide au calcul — La déclaration officielle doit être saisie dans le système douanier officiel (SYDAM).",
+    LARGEUR / 2,
+    HAUTEUR - 10,
+    { align: 'center' },
+  );
+  doc.setFontSize(6);
+  doc.setTextColor(...GRIS);
+  doc.text(
+    `Établi par MayLary Group le ${new Date().toLocaleDateString('fr-FR')}`,
+    LARGEUR / 2,
+    HAUTEUR - 6.5,
+    { align: 'center' },
   );
 }
 
-/**
- * Le libellé d'une valeur codée.
- *
- * Depuis que les cases se choisissent dans une liste, elles portent un CODE :
- * « 1 » pour le maritime, « CN » pour la Chine, « 4000 » pour la mise à la
- * consommation. Le déposant a besoin du code — c'est lui qu'il ressaisit dans
- * SYDAM — mais un document où on lit « Mode de transport : 1 » est illisible
- * pour le client à qui on le remet, et invérifiable par celui qui relit.
- *
- * On imprime donc les deux : « 1 — Transport maritime ». C'est exactement ce
- * que le fondateur demande quand il dit que le détail doit être sur le PDF.
- */
-export type Libelles = Record<string, string>;
+export interface DonneesDocument {
+  valeurs: ValeursDeclaration;
+  lignes: LigneDeclaration[];
+  liquidation: Liquidation;
+  /**
+   * référentiel → code → libellé : le document n'imprime jamais un code nu.
+   *
+   * Le niveau « référentiel » n'est pas décoratif. Les codes se répètent d'une
+   * liste à l'autre : le mode de transport 1 est le maritime, la nature de
+   * transaction 1 est l'achat ferme. Une table à plat les confondait, et le
+   * document imprimait « Nature de la transaction : 1 — Maritime ».
+   */
+  libelles: Record<string, Record<string, string>>;
+}
 
-export function telechargerDeclarationPdf(
-  valeurs: ValeursDeclaration,
-  articles: ArticleDeclaration[],
-  libelles: Libelles = {},
-) {
-  // La valeur telle qu'elle doit s'imprimer : code et libellé quand les deux
-  // existent, la valeur brute sinon.
-  const afficher = (cle: string, brut: string): string => {
-    const v = (brut ?? '').trim();
-    if (!v) return '';
-    const l = libelles[`${cle}:${v}`];
-    if (!l || l === v) return v;
-    // Un intervenant est déjà multiligne : y accoler son propre nom ferait
-    // doublon.
-    return v.includes('\n') ? v : `${v} — ${l}`;
-  };
+export function telechargerDeclarationPdf(d: DonneesDocument) {
+  const { valeurs, lignes, liquidation, libelles } = d;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  let y = enTete(doc, 1);
-  let page = 1;
 
-  const sautSiNecessaire = (hauteurVoulue: number) => {
-    if (y + hauteurVoulue <= HAUTEUR - 14) return;
+  let page = 1;
+  let y = enTete(doc, page, valeurs.reference ?? '');
+
+  const place = (hauteur: number) => {
+    if (y + hauteur <= HAUTEUR - 18) return;
     piedDePage(doc);
     doc.addPage();
     page += 1;
-    y = enTete(doc, page);
+    y = enTete(doc, page, valeurs.reference ?? '');
   };
 
-  for (const groupe of GROUPES_DECLARATION) {
-    sautSiNecessaire(18);
-
+  /**
+   * Un intitulé de section, qui emmène avec lui ce qu'il annonce.
+   *
+   * `suite` est la hauteur du premier bloc qui suit. Sans elle, l'intitulé
+   * tenait seul au bas d'une page et son tableau ouvrait la suivante : le
+   * document montrait « RÉCAPITULATIF DES DROITS ET TAXES » sur un tiers de
+   * page vide. Un titre orphelin n'annonce plus rien.
+   */
+  const titre = (texte: string, suite = 0) => {
+    place(10 + suite);
+    doc.setFillColor(...GRIS_CLAIR);
+    doc.rect(MARGE, y, UTILE, 5.5, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(...ENCRE);
-    doc.text(groupe.titre.toUpperCase(), MARGE, y);
-    doc.setDrawColor(...ORANGE);
-    doc.setLineWidth(0.4);
-    doc.line(MARGE, y + 1.2, MARGE + 22, y + 1.2);
-    y += 4;
+    doc.text(texte.toUpperCase(), MARGE + 2, y + 3.9);
+    y += 7.5;
+  };
 
-    // Deux colonnes, sauf pour les cases longues qui prennent toute la largeur.
-    let colonne = 0;
-    const largeurColonne = (UTILE - 3) / 2;
+  /** Une rangée de cases de largeurs égales. */
+  const rangee = (cases: [string, string, string][], hauteur = 12) => {
+    place(hauteur + 2);
+    const largeur = (UTILE - (cases.length - 1) * 2) / cases.length;
+    cases.forEach(([numero, intitule, valeur], i) => {
+      dessinerCase(doc, MARGE + i * (largeur + 2), y, largeur, hauteur, numero, intitule, valeur);
+    });
+    y += hauteur + 2;
+  };
+
+  /** Un code seul ne dit rien au client à qui on remet le document. */
+  const nomme = (source: string, v: string) => {
+    if (!v) return '';
+    const libelle = libelles[source]?.[v];
+    return libelle ? `${v} — ${libelle}` : v;
+  };
+
+  // ---------- Les blocs de saisie, case par case ----------
+  for (const groupe of GROUPES_DECLARATION) {
+    titre(groupe.titre, 17);
+
+    let tampon: [string, string, string][] = [];
+    const vider = (hauteur = 12) => {
+      if (tampon.length === 0) return;
+      rangee(tampon, hauteur);
+      tampon = [];
+    };
 
     for (const c of groupe.cases) {
-      const pleineLargeur = c.type === 'long';
-      const hauteur = pleineLargeur ? 14 : 11;
+      const brut = valeurs[c.cle] ?? '';
+      const affiche = c.liste && !c.liste.startsWith('intervenant:') ? nomme(c.liste, brut) : brut;
+      const large = c.type === 'long';
 
-      if (pleineLargeur && colonne === 1) {
-        y += 11 + 2;
-        colonne = 0;
-      }
-      sautSiNecessaire(hauteur + 2);
-
-      const x = pleineLargeur ? MARGE : MARGE + colonne * (largeurColonne + 3);
-      dessinerCase(
-        doc,
-        x,
-        y,
-        pleineLargeur ? UTILE : largeurColonne,
-        hauteur,
-        c.numero,
-        c.libelle,
-        afficher(c.cle, valeurs[c.cle] ?? ''),
-      );
-
-      if (pleineLargeur) {
-        y += hauteur + 2;
-        colonne = 0;
-      } else if (colonne === 0) {
-        colonne = 1;
+      if (large) {
+        vider();
+        rangee([[c.numero, c.libelle, affiche]], 15);
       } else {
-        y += hauteur + 2;
-        colonne = 0;
+        tampon.push([c.numero, c.libelle, c.icones ? nomme('modesTransport', brut) : affiche]);
+        if (tampon.length === 3) vider();
       }
     }
-    if (colonne === 1) y += 11 + 2;
-    y += 2;
+    vider();
+
+    // Les valeurs monétaires closent le bloc 2, comme à l'écran.
+    if (groupe.numero === 2) {
+      rangee([
+        ['22', 'Devise de la facture', nomme('monnaies', valeurs.devise ?? '')],
+        ['23', 'Taux de change', valeurs.taux_change ?? ''],
+        ['6', 'Total des colis', valeurs.total_colis ?? ''],
+      ]);
+      rangee([
+        ['35', 'Masse brute totale (kg)', valeurs.masse_brute ?? ''],
+        ['38', 'Masse nette totale (kg)', valeurs.masse_nette ?? ''],
+        ['5', 'Nombre d’articles', String(liquidation.lignes.length)],
+      ]);
+      rangee([
+        ['—', 'FOB total (XOF)', montant(liquidation.globaux.fob_total_fcfa)],
+        ['12', 'Fret total (XOF)', montant(liquidation.globaux.fret_total_fcfa)],
+        ['12', 'Assurance totale (XOF)', montant(liquidation.globaux.assurance_total_fcfa)],
+        ['46', 'VALEUR EN DOUANE — CAF (XOF)', montant(liquidation.globaux.caf_total_fcfa)],
+      ]);
+    }
   }
 
-  // ------- Le détail des articles -------
-  for (const [i, a] of articles.entries()) {
-    sautSiNecessaire(46);
+  // ---------- Les articles ----------
+  titre('Articles et positions tarifaires', 40);
+  for (const l of liquidation.lignes) {
+    const saisie = lignes.find((x) => x.numero === l.numero);
+    place(40);
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(...ENCRE);
-    doc.text(`ARTICLE ${a.numero || i + 1}`, MARGE, y);
-    doc.setDrawColor(...ORANGE);
-    doc.setLineWidth(0.4);
-    doc.line(MARGE, y + 1.2, MARGE + 18, y + 1.2);
-    y += 4;
+    doc.text(`ARTICLE ${l.numero ?? ''}`, MARGE, y + 3);
+    y += 5;
 
-    const designation = CASES_ARTICLE.find((c) => c.cle === 'designation');
-    if (designation) {
-      dessinerCase(doc, MARGE, y, UTILE, 14, designation.numero, designation.libelle, a.designation);
-      y += 16;
+    rangee([['31', 'Désignation des marchandises', l.designation ?? saisie?.designation ?? '']], 14);
+    rangee([
+      ['33', 'Code des marchandises', l.position ?? ''],
+      ['34', 'Pays d’origine', nomme('pays', saisie?.origine ?? '')],
+      ['36', 'Préférence', saisie?.preference ?? ''],
+    ]);
+    rangee([['—', 'Désignation tarifaire officielle', l.designation_tec ?? '—']], 13);
+    rangee([
+      ['—', 'Taux DD', l.verifie_en_base ? pourcent(l.taux_dd) : 'non confirmé'],
+      ['41', 'Unités supplémentaires', saisie ? `${saisie.quantite || '—'} ${saisie.unite}` : '—'],
+      ['35', 'Masse brute (kg)', String(l.poids_brut_kg ?? '')],
+      ['38', 'Masse nette (kg)', saisie?.poids_net || '—'],
+    ]);
+
+    // La traçabilité : ce qui a été proratisé sur CETTE ligne. Sans elle, le
+    // document ne se vérifie pas.
+    rangee([
+      ['42', 'FOB ligne (XOF)', montant(l.fob_fcfa)],
+      ['—', 'Fret proratisé (XOF)', montant(l.fret_fcfa)],
+      ['—', 'Assurance proratisée (XOF)', montant(l.assurance_fcfa)],
+      ['—', 'CAF ligne (XOF)', montant(l.caf_fcfa)],
+    ]);
+
+    // Les taxes de la ligne.
+    const hauteurTaxes = 5.5 + l.taxes.length * 4.6;
+    place(hauteurTaxes + 4);
+    doc.setDrawColor(120, 113, 108);
+    doc.setLineWidth(0.25);
+    doc.rect(MARGE, y, UTILE, hauteurTaxes);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(5.8);
+    doc.setTextColor(...GRIS);
+    doc.text('Case 47 — Calcul des impositions', MARGE + 1.5, y + 3.2);
+
+    let yt = y + 7.8;
+    for (const t of l.taxes) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.4);
+      doc.setTextColor(...ENCRE);
+      doc.text(t.code, MARGE + 2, yt);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.4);
+      doc.setTextColor(...GRIS);
+      doc.text(doc.splitTextToSize(t.libelle, 62)[0] ?? '', MARGE + 14, yt);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.2);
+      doc.setTextColor(...ENCRE);
+      doc.text(`base ${montant(t.base_fcfa)}`, MARGE + 82, yt);
+      if (t.taux > 0) {
+        doc.text(pourcent(t.taux), MARGE + 118, yt);
+      }
+      doc.text(montant(t.montant_fcfa), LARGEUR - MARGE - 2, yt, { align: 'right' });
+      yt += 4.6;
     }
-
-    const autres = CASES_ARTICLE.filter((c) => c.cle !== 'designation' && c.cle !== 'numero');
-    const largeurTiers = (UTILE - 6) / 3;
-    autres.forEach((c, j) => {
-      const col = j % 3;
-      if (col === 0 && j > 0) y += 13;
-      sautSiNecessaire(13);
-      dessinerCase(
-        doc,
-        MARGE + col * (largeurTiers + 3),
-        y,
-        largeurTiers,
-        11,
-        c.numero,
-        c.libelle,
-        afficher(c.cle, String(a[c.cle as keyof ArticleDeclaration] ?? '')),
-      );
-    });
-    y += 15;
+    y += hauteurTaxes + 4;
   }
 
-  // ------- Signature -------
-  sautSiNecessaire(30);
-  doc.setDrawColor(190, 185, 180);
-  doc.setLineWidth(0.2);
-  doc.rect(MARGE, y, UTILE, 24);
-  doc.setFillColor(...GRIS_CLAIR);
-  doc.rect(MARGE, y, 6.5, 4.2, 'F');
+  // ---------- Récapitulatif ----------
+  const taxes = taxesOrdonnees(liquidation.totaux_taxes);
+  const hauteurRecap = 6 + taxes.length * 5;
+  titre('Récapitulatif des droits et taxes', hauteurRecap + 4);
+  place(hauteurRecap + 4);
+  doc.setDrawColor(...ENCRE);
+  doc.setLineWidth(0.4);
+  doc.rect(MARGE, y, UTILE, hauteurRecap);
+  let yr = y + 6;
+  for (const [code, m] of taxes) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.4);
+    doc.setTextColor(...ENCRE);
+    doc.text(code, MARGE + 3, yr);
+    if (code === 'TS') {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.4);
+      doc.setTextColor(...GRIS);
+      doc.text('par déclaration', MARGE + 16, yr);
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.4);
+    doc.setTextColor(...ENCRE);
+    doc.text(`${montant(m)} XOF`, LARGEUR - MARGE - 3, yr, { align: 'right' });
+    yr += 5;
+  }
+  y += hauteurRecap + 4;
+
+  // ---------- Le total, valeur la plus visible ----------
+  place(22);
+  doc.setDrawColor(...ENCRE);
+  doc.setLineWidth(1.1);
+  doc.setFillColor(255, 244, 224);
+  doc.rect(MARGE, y, UTILE, 18, 'FD');
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(5.6);
-  doc.setTextColor(...ORANGE);
-  doc.text('54', MARGE + 3.25, y + 3, { align: 'center' });
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(5.6);
-  doc.setTextColor(...GRIS);
-  doc.text(
-    'Lieu et date, signature et nom du déclarant / représentant',
-    MARGE + 7.5,
-    y + 3,
-  );
-  doc.setFontSize(6.4);
-  doc.text('Abidjan, le ..............................', MARGE + 3, y + 11);
-  doc.text('Nom et qualité : ....................................................', MARGE + 3, y + 16);
-  doc.text('Signature :', MARGE + 3, y + 21);
+  doc.setFontSize(9);
+  doc.setTextColor(...ENCRE);
+  doc.text('TOTAL À PAYER', MARGE + 4, y + 7.5);
+  doc.setFontSize(18);
+  doc.text(`${montant(liquidation.total_a_payer_fcfa)} XOF`, LARGEUR - MARGE - 4, y + 12.5, {
+    align: 'right',
+  });
+  y += 22;
+
+  // ---------- Signatures ----------
+  place(30);
+  const largeurSignature = (UTILE - 8) / 3;
+  ['Déclarant', 'Receveur des Douanes', 'Cachet du Bureau'].forEach((intitule, i) => {
+    const x = MARGE + i * (largeurSignature + 4);
+    doc.setDrawColor(120, 113, 108);
+    doc.setLineWidth(0.25);
+    doc.rect(x, y, largeurSignature, 26);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(...ENCRE);
+    doc.text(intitule, x + largeurSignature / 2, y + 4.5, { align: 'center' });
+  });
 
   piedDePage(doc);
-
-  const reference = valeurs.numero_reference?.trim() || 'brouillon';
-  doc.save(`declaration-${reference.replace(/[^\w-]/g, '-')}.pdf`);
+  doc.save(`declaration-${(valeurs.reference || 'simulation').replace(/[^\w-]/g, '-')}.pdf`);
 }
