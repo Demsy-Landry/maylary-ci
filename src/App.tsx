@@ -1,5 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/hooks/useAuth';
@@ -60,7 +60,6 @@ const DeclarantAbonnement = lazy(() => import('@/pages/DeclarantAbonnement'));
 const DeclarantAccueil = lazy(() => import('@/pages/DeclarantAccueil'));
 const DeclarantClassification = lazy(() => import('@/pages/DeclarantClassification'));
 const DeclarantDeclaration = lazy(() => import('@/pages/DeclarantDeclaration'));
-const DeclarantSimulateur = lazy(() => import('@/pages/DeclarantSimulateur'));
 const DeclarantHistorique = lazy(() => import('@/pages/DeclarantHistorique'));
 const DeclarantTableauDeBord = lazy(() => import('@/pages/DeclarantTableauDeBord'));
 const EspaceVendeur = lazy(() => import('@/pages/EspaceVendeur'));
@@ -134,7 +133,10 @@ function App() {
                 <Route path="/declarant/atelier" element={<Declarant />} />
                 <Route path="/declarant/classer" element={<DeclarantClassification />} />
                 <Route path="/declarant/declaration" element={<DeclarantDeclaration />} />
-                <Route path="/declarant/simulateur" element={<DeclarantSimulateur />} />
+                {/* Le simulateur et la déclaration ne font plus qu'un écran.
+                    L'ancienne adresse reste valide : un raccourci enregistré
+                    par le fondateur ne doit pas tomber sur une page vide. */}
+                <Route path="/declarant/simulateur" element={<Navigate to="/declarant/declaration" replace />} />
                 <Route path="/declarant/tableau-de-bord" element={<DeclarantTableauDeBord />} />
                 <Route path="/declarant/historique" element={<DeclarantHistorique />} />
                 <Route path="/declarant/abonnement" element={<DeclarantAbonnement />} />
