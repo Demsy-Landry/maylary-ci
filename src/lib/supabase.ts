@@ -803,6 +803,27 @@ export interface Liquidation {
 export const CLASSIFICATIONS_HS_TABLE = 'app_e08c374bc4_classifications_hs';
 
 /**
+ * Les erreurs d'écran, telles que le navigateur les a vues.
+ *
+ * Le dépôt est ouvert à tous, y compris aux visiteurs non connectés : une
+ * panne survenue avant la connexion est précisément celle qu'on a le plus
+ * besoin de voir. La lecture est réservée à l'administration.
+ */
+export const JOURNAL_ERREURS_TABLE = 'app_e08c374bc4_journal_erreurs';
+
+export interface ErreurJournalisee {
+  id: string;
+  code: string;
+  message: string;
+  pile: string | null;
+  composant: string | null;
+  chemin: string | null;
+  navigateur: string | null;
+  utilisateur_id: string | null;
+  cree_le: string;
+}
+
+/**
  * Visuels de marque, remplaçables sans redéploiement.
  *
  * Un visuel n'est servi que lorsqu'il est marqué actif — c'est-à-dire lorsque
@@ -1198,6 +1219,9 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin/comptabilite': ['proprietaire'],
   '/admin/equipe': ['proprietaire'],
   '/admin/parametres': ['proprietaire'],
+  /* Une pile d'appels décrit la structure interne de l'application : elle ne
+   * regarde que le propriétaire, comme les comptes. */
+  '/admin/journal-erreurs': ['proprietaire'],
 };
 
 export type StatutVendeur = 'en_attente' | 'valide' | 'suspendu' | 'refuse';

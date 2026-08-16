@@ -117,6 +117,52 @@ export const consentementMesure = (): boolean => lire(CLE_MESURE) === 'accepte';
 export const deciderMesure = (accepte: boolean): void =>
   ecrire(CLE_MESURE, accepte ? 'accepte' : 'refuse');
 
+/**
+ * Une liste relue depuis le stockage, dont on a VÉRIFIÉ la forme.
+ *
+ * CE QUI EST ARRIVÉ SANS ELLE
+ *
+ * Les deux paniers se relisaient ainsi :
+ *
+ *     const brut = localStorage.getItem(CLE);
+ *     return brut ? JSON.parse(brut) : [];
+ *
+ * Le `try` autour ne protège que de l'analyse. Or `JSON.parse` RÉUSSIT sur
+ * « null » et sur « {"a":1} » : il rend alors un non-tableau, que le panier
+ * range dans son état, et le premier `items.reduce(...)` lève. Comme les deux
+ * paniers enveloppent toute l'application, ce n'est pas la boutique qui tombe,
+ * c'est TOUT — sur chaque page, y compris celles qui n'ont pas de panier.
+ *
+ * Reproduit : un panier valant « null » ou un objet suffit à afficher l'écran
+ * « Cette page s'est arrêtée en chemin » partout. Le défaut ne vit que sur
+ * l'appareil du visiteur, donc il ne se voit sur aucun journal serveur — et il
+ * survit au rechargement, puisque la valeur fautive reste écrite.
+ *
+ * On vérifie donc chaque élément, et on jette ce qui ne tient pas plutôt que
+ * de tout perdre : un panier de trois articles dont un est corrompu doit
+ * rendre deux articles, pas un écran d'erreur.
+ */
+export function lireListeStockee<T>(cle: string, valide: (e: unknown) => e is T): T[] {
+  const brut = lire(cle);
+  if (!brut) return [];
+  try {
+    const analyse: unknown = JSON.parse(brut);
+    if (!Array.isArray(analyse)) return [];
+    return analyse.filter(valide);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Écrit une liste. L'échec est sans conséquence : le panier reste en mémoire
+ * pour la session en cours, il ne survivra simplement pas à la fermeture. Un
+ * stockage refusé — navigation privée, quota atteint — ne doit jamais faire
+ * tomber l'écran du client.
+ */
+export const ecrireListeStockee = (cle: string, valeur: unknown): void =>
+  ecrire(cle, JSON.stringify(valeur));
+
 /** Efface ce que l'application a déposé, hors session en cours. */
 export const effacerStockageNonEssentiel = (): void => {
   try {

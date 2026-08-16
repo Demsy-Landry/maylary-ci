@@ -49,9 +49,30 @@ export default class FrontiereErreur extends Component<Props, State> {
   }
 
   componentDidCatch(erreur: Error, infos: ErrorInfo) {
-    // Le seul canal disponible aujourd'hui. Le jour où une remontée d'erreurs
-    // est branchée, c'est ici qu'elle se pose — un seul endroit à changer.
     console.error('[MayLary] Erreur non rattrapée', this.state.code, erreur, infos.componentStack);
+
+    /* Le code affiché ne servait à rien : il n'existait que dans la console du
+     * visiteur. Un client au téléphone lisait « 5NIA-5J36 » et il n'y avait
+     * rien à en faire — une promesse faite à l'écran et non tenue.
+     *
+     * Le dépôt est chargé à la demande : le module de base de données n'est
+     * peut-être pas ce qui a tenu, et une erreur d'import ne doit pas
+     * remplacer l'écran de secours par une page blanche. Tout est enveloppé,
+     * y compris la promesse — l'écran de secours doit s'afficher même si
+     * l'enregistrement échoue. */
+    try {
+      void import('@/lib/journal-erreurs')
+        .then(({ deposerErreur }) =>
+          deposerErreur({
+            code: this.state.code,
+            erreur,
+            composant: infos.componentStack ?? null,
+          }),
+        )
+        .catch(() => {});
+    } catch {
+      /* Rien de plus à tenter : l'écran de secours, lui, s'affiche. */
+    }
   }
 
   render() {

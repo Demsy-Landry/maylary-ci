@@ -41,6 +41,7 @@ const AdminDossiersGestion = lazy(() => import('@/pages/admin/DossiersGestion'))
 const AdminEquipeGestion = lazy(() => import('@/pages/admin/EquipeGestion'));
 const AdminExportGestion = lazy(() => import('@/pages/admin/ExportGestion'));
 const AdminImportGestion = lazy(() => import('@/pages/admin/ImportGestion'));
+const AdminJournalErreurs = lazy(() => import('@/pages/admin/JournalErreurs'));
 const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
 const AdminParametres = lazy(() => import('@/pages/admin/AdminParametres'));
 const AdminSourcingGestion = lazy(() => import('@/pages/admin/SourcingGestion'));
@@ -306,6 +307,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/parametres">
                       <AdminParametres />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/journal-erreurs"
+                  element={
+                    <AdminRoute ecran="/admin/journal-erreurs">
+                      <AdminJournalErreurs />
                     </AdminRoute>
                   }
                 />
