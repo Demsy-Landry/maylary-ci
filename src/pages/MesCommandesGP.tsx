@@ -7,11 +7,13 @@ import {
   supabase,
   COMMANDES_GP_TABLE,
   LIGNES_COMMANDE_GP_TABLE,
+  COLONNES_COMMANDE_GP_CLIENT,
+  COLONNES_LIGNE_COMMANDE_GP_CLIENT,
   HISTORIQUE_COMMANDE_GP_TABLE,
   STATUT_COMMANDE_GP_LABELS,
   STATUT_COMMANDE_GP_MESSAGES,
   MODE_PAIEMENT_LABELS,
-  type CommandeGP,
+  type CommandeGPClient,
   type LigneCommandeGP,
   type HistoriqueStatutCommandeGP,
   type StatutCommandeGP,
@@ -49,7 +51,7 @@ const STATUT_BADGE_VARIANT: Record<StatutCommandeGP, 'default' | 'secondary' | '
   annulee: 'destructive',
 };
 
-interface CommandeAvecDetail extends CommandeGP {
+interface CommandeAvecDetail extends CommandeGPClient {
   lignes: LigneCommandeGP[];
   historique: HistoriqueStatutCommandeGP[];
 }
@@ -58,7 +60,7 @@ export default function MesCommandesGP() {
   const { user, loading: authLoading, profilEnCours, isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
 
-  const [commandes, setCommandes] = useState<CommandeGP[]>([]);
+  const [commandes, setCommandes] = useState<CommandeGPClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<CommandeAvecDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -68,10 +70,10 @@ export default function MesCommandesGP() {
     setLoading(true);
     const { data } = await supabase
       .from(COMMANDES_GP_TABLE)
-      .select('*')
+      .select(COLONNES_COMMANDE_GP_CLIENT)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-    setCommandes((data as CommandeGP[]) ?? []);
+    setCommandes((data as CommandeGPClient[]) ?? []);
     setLoading(false);
   };
 
@@ -80,10 +82,13 @@ export default function MesCommandesGP() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const openDetail = async (commande: CommandeGP) => {
+  const openDetail = async (commande: CommandeGPClient) => {
     setDetailLoading(true);
     const [lignesRes, historiqueRes] = await Promise.all([
-      supabase.from(LIGNES_COMMANDE_GP_TABLE).select('*').eq('commande_id', commande.id),
+      supabase
+        .from(LIGNES_COMMANDE_GP_TABLE)
+        .select(COLONNES_LIGNE_COMMANDE_GP_CLIENT)
+        .eq('commande_id', commande.id),
       supabase
         .from(HISTORIQUE_COMMANDE_GP_TABLE)
         .select('*')

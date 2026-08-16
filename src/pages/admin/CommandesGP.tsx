@@ -4,6 +4,7 @@ import {
   supabase,
   EDGE_FUNCTIONS_URL,
   COMMANDES_GP_TABLE,
+  COMMANDES_GP_COUT_VIEW,
   HISTORIQUE_COMMANDE_GP_TABLE,
   STATUT_COMMANDE_GP_LABELS,
   MODE_PAIEMENT_LABELS,
@@ -72,7 +73,7 @@ export default function AdminCommandesGP() {
   const loadCommandes = async () => {
     setLoading(true);
     const { data } = await supabase
-      .from(COMMANDES_GP_TABLE)
+      .from(COMMANDES_GP_COUT_VIEW)
       .select('*')
       .order('created_at', { ascending: false });
     setCommandes((data as CommandeGP[]) ?? []);

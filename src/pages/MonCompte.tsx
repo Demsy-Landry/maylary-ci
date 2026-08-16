@@ -9,6 +9,9 @@ import {
   PROFILES_TABLE,
   DEMANDES_IMPORT_TABLE,
   DEMANDES_EXPORT_TABLE,
+  COLONNES_DEMANDE_IMPORT_CLIENT,
+  COLONNES_DEMANDE_EXPORT_CLIENT,
+  COLONNES_COMMANDE_GP_CLIENT,
   DEMANDES_DEVIS_TABLE,
   COMMANDES_GP_TABLE,
   DOCUMENTS_IMPORT_TABLE,
@@ -21,17 +24,17 @@ import {
   TYPE_DOCUMENT_EXPORT_LABELS,
   FACTURES_TABLE,
   SOURCE_FACTURE_LABELS,
-  type DemandeImport,
-  type DemandeExport,
+  type DemandeImportClient,
+  type DemandeExportClient,
   type DemandeDevis,
-  type CommandeGP,
+  type CommandeGPClient,
   type DocumentImport,
   type DocumentExport,
   type Facture,
   IMPORT_DOCUMENTS_BUCKET,
   EXPORT_DOCUMENTS_BUCKET,
 } from '@/lib/supabase';
-import { GaleriePhotosPrivees, LienDocumentPrive } from '@/components/FichiersPrives';
+import { LienDocumentPrive } from '@/components/FichiersPrives';
 import MesDonneesPersonnelles from '@/components/MesDonneesPersonnelles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,12 +101,12 @@ export default function MonCompte() {
         await Promise.all([
           supabase
             .from(DEMANDES_IMPORT_TABLE)
-            .select('*')
+            .select(COLONNES_DEMANDE_IMPORT_CLIENT)
             .eq('user_id', user.id)
             .order('created_at', { ascending: false }),
           supabase
             .from(DEMANDES_EXPORT_TABLE)
-            .select('*')
+            .select(COLONNES_DEMANDE_EXPORT_CLIENT)
             .eq('user_id', user.id)
             .order('created_at', { ascending: false }),
           supabase
@@ -113,7 +116,7 @@ export default function MonCompte() {
             .order('created_at', { ascending: false }),
           supabase
             .from(COMMANDES_GP_TABLE)
-            .select('*')
+            .select(COLONNES_COMMANDE_GP_CLIENT)
             .eq('user_id', user.id)
             .order('created_at', { ascending: false }),
           supabase.from(DOCUMENTS_IMPORT_TABLE).select('*'),
@@ -127,10 +130,10 @@ export default function MonCompte() {
 
       setFactures((facturesRes.data as Facture[]) ?? []);
 
-      const imports = (importsRes.data as DemandeImport[]) ?? [];
-      const exportsList = (exportsRes.data as DemandeExport[]) ?? [];
+      const imports = (importsRes.data as DemandeImportClient[]) ?? [];
+      const exportsList = (exportsRes.data as DemandeExportClient[]) ?? [];
       const devis = (devisRes.data as DemandeDevis[]) ?? [];
-      const commandes = (commandesRes.data as CommandeGP[]) ?? [];
+      const commandes = (commandesRes.data as CommandeGPClient[]) ?? [];
 
       const lignesHistorique: HistoriqueLigne[] = [
         ...imports.map((d) => ({

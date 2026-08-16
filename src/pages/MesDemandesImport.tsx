@@ -8,12 +8,13 @@ import {
   supabase,
   EDGE_FUNCTIONS_URL,
   DEMANDES_IMPORT_TABLE,
+  COLONNES_DEMANDE_IMPORT_CLIENT,
   HISTORIQUE_IMPORT_TABLE,
   DOCUMENTS_IMPORT_TABLE,
   STATUT_IMPORT_LABELS,
   STATUT_IMPORT_MESSAGES,
   TYPE_DOCUMENT_LABELS,
-  type DemandeImport,
+  type DemandeImportClient,
   type HistoriqueStatutImport,
   type DocumentImport,
   type StatutImport,
@@ -53,16 +54,7 @@ const STATUT_BADGE_VARIANT: Record<StatutImport, 'default' | 'secondary' | 'outl
   annulee: 'destructive',
 };
 
-const LIGNES_DEVIS: { key: keyof DemandeImport; label: string }[] = [
-  { key: 'cout_marchandise_fcfa', label: 'Marchandise' },
-  { key: 'cout_fret_fcfa', label: 'Fret international' },
-  { key: 'assurance_fcfa', label: 'Assurance' },
-  { key: 'douane_estimee_fcfa', label: 'Douane' },
-  { key: 'transit_local_fcfa', label: 'Transit local' },
-  { key: 'livraison_fcfa', label: 'Livraison' },
-];
-
-interface DemandeAvecDetail extends DemandeImport {
+interface DemandeAvecDetail extends DemandeImportClient {
   historique: HistoriqueStatutImport[];
   documents: DocumentImport[];
 }
@@ -71,7 +63,7 @@ export default function MesDemandesImport() {
   const { user, loading: authLoading, profilEnCours, isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
 
-  const [demandes, setDemandes] = useState<DemandeImport[]>([]);
+  const [demandes, setDemandes] = useState<DemandeImportClient[]>([]);
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<DemandeAvecDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -82,10 +74,10 @@ export default function MesDemandesImport() {
     setLoading(true);
     const { data } = await supabase
       .from(DEMANDES_IMPORT_TABLE)
-      .select('*')
+      .select(COLONNES_DEMANDE_IMPORT_CLIENT)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-    setDemandes((data as DemandeImport[]) ?? []);
+    setDemandes((data as DemandeImportClient[]) ?? []);
     setLoading(false);
   };
 
@@ -94,7 +86,7 @@ export default function MesDemandesImport() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const openDetail = async (demande: DemandeImport) => {
+  const openDetail = async (demande: DemandeImportClient) => {
     setDetailLoading(true);
     const [historiqueRes, documentsRes] = await Promise.all([
       supabase
@@ -247,20 +239,30 @@ export default function MesDemandesImport() {
 
               {detail.montant_total_devis_fcfa ? (
                 <div>
-                  <p className="text-sm font-medium text-foreground">Détail du devis</p>
-                  <div className="mt-2 divide-y rounded-md border text-sm">
-                    {LIGNES_DEVIS.filter((l) => detail[l.key] != null).map((l) => (
-                      <div key={l.key} className="flex items-center justify-between p-2">
-                        <span className="text-muted-foreground">{l.label}</span>
-                        <span className="font-medium">
-                          {(detail[l.key] as number).toLocaleString('fr-FR')} FCFA
-                        </span>
-                      </div>
-                    ))}
+                  {/* UN PRIX FERME, PAS NOTRE COMPTABILITÉ.
+                      Le devis détaillait ligne à ligne marchandise, fret,
+                      assurance, douane, transit et livraison. Additionné, cela
+                      donnait notre coût de revient sur toute la chaîne — et par
+                      soustraction du total, notre marge. Un concurrent n'avait
+                      qu'à demander un devis pour connaître nos conditions
+                      d'achat.
+
+                      Le client s'engage sur un prix rendu chez lui, tout
+                      compris. C'est ce qu'il compare, et c'est ce qu'on
+                      affiche. Le détail reste à l'atelier de cotation. */}
+                  <p className="text-sm font-medium text-foreground">Votre devis</p>
+                  <div className="mt-2 rounded-lg border bg-muted/40 p-4">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                      Prix tout compris, rendu à votre adresse
+                    </p>
+                    <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-foreground">
+                      {detail.montant_total_devis_fcfa.toLocaleString('fr-FR')} FCFA
+                    </p>
+                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                      Marchandise, transport international, assurance, droits de douane, transit et
+                      livraison compris. Rien à ajouter à l’arrivée.
+                    </p>
                   </div>
-                  <p className="mt-2 text-right text-sm font-semibold text-foreground">
-                    Total : {detail.montant_total_devis_fcfa.toLocaleString('fr-FR')} FCFA
-                  </p>
                   {detail.commentaire_admin_devis && (
                     <p className="mt-2 rounded-md bg-muted p-2 text-xs text-foreground">
                       « {detail.commentaire_admin_devis} »

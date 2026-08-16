@@ -5,7 +5,7 @@ import {
   CANAUX_PAIEMENT_TABLE,
   PREUVES_PAIEMENT_BUCKET,
   type CanalPaiement,
-  type CommandeGP,
+  type CommandeGPClient,
 } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,8 @@ import { Loader2, CheckCircle2, Paperclip, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface DeclarerPaiementProps {
-  commande: CommandeGP;
+  /* Le type client : ce panneau ne voit jamais le coût fournisseur. */
+  commande: CommandeGPClient;
   userId: string;
   onDeclare: () => void;
 }
