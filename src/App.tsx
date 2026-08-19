@@ -52,6 +52,7 @@ const CatalogueCategorieGP = lazy(() => import('@/pages/CatalogueCategorieGP'));
 const CataloguePro = lazy(() => import('@/pages/CataloguePro'));
 const CatalogueSecteurPro = lazy(() => import('@/pages/CatalogueSecteurPro'));
 const CjDropshippingImport = lazy(() => import('@/pages/admin/CjDropshippingImport'));
+const AliExpressImport = lazy(() => import('@/pages/admin/AliExpressImport'));
 const CommandeGP = lazy(() => import('@/pages/CommandeGP'));
 const Comptabilite = lazy(() => import('@/pages/admin/Comptabilite'));
 const CompteGP = lazy(() => import('@/pages/CompteGP'));
@@ -190,6 +191,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/cj-dropshipping">
                       <CjDropshippingImport />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/aliexpress"
+                  element={
+                    <AdminRoute ecran="/admin/aliexpress">
+                      <AliExpressImport />
                     </AdminRoute>
                   }
                 />
