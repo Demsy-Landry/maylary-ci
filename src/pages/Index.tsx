@@ -15,15 +15,20 @@ import {
   Send,
 } from 'lucide-react';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
-import ScenePortAbidjan from '@/components/illustrations/ScenePortAbidjan';
 import EmplacementPublicitaire from '@/components/EmplacementPublicitaire';
 import BandeServices from '@/components/BandeServices';
+import ImageOuverture from '@/components/ImageOuverture';
 import SiteFooter from '@/components/SiteFooter';
 import { STORAGE_PUBLIC_URL, VISUELS_MARQUE_TABLE, supabase } from '@/lib/supabase';
 
 const STORAGE_BASE = `${STORAGE_PUBLIC_URL}/app_e08c374bc4_produit_photos/accueil`;
 
-const HERO_IMPORT_IMAGE = `${STORAGE_BASE}/hero-import-maritime.jpg`;
+/* Les deux ouvertures sont servies par le site et non par le stockage
+   distant : même origine, une connexion de moins, et elles arrivent avant le
+   reste. Ce sont les photographies du fondateur — le port de jour pour ce qui
+   entre, le port au couchant pour ce qui sort. Un visuel activé en base les
+   remplace toujours, sans redéploiement. */
+const HERO_IMPORT_IMAGE = '/visuels/port-import-abidjan.jpg';
 
 /**
  * Le bandeau d'accueil peut être remplacé depuis la base, sans redéploiement.
@@ -47,7 +52,7 @@ function useVisuelMarque(cle: string, defaut: string): string {
   }, [cle]);
   return url;
 }
-const HERO_EXPORT_IMAGE = `${STORAGE_BASE}/hero-export-aerien.jpg`;
+const HERO_EXPORT_IMAGE = '/visuels/port-export-abidjan.jpg';
 
 const MODES_TRANSPORT = [
   { key: 'aerien', label: 'Aérien', image: `${STORAGE_BASE}/mode-aerien.jpg`, icon: Plane },
@@ -162,19 +167,30 @@ export default function Index() {
           {/* L'illustration remplace la photographie de fond : dessinée pour
               cette page, elle garde sa gauche sombre pour le titre et reste
               nette à toute taille. Un visuel activé en base la remplace. */}
-          {heroAccueil ? (
+          {/* Servie depuis le site, l'ouverture passe par `ImageOuverture`, qui
+              propose le WebP et garde le JPEG en repli. Un visuel activé en
+              base peut venir d'ailleurs : il n'a pas forcément de jumeau WebP,
+              on le sert alors tel quel plutôt que de faire chercher au
+              navigateur un fichier qui n'existe pas. */}
+          {heroAccueil.startsWith('/') ? (
+            <ImageOuverture
+              src={heroAccueil}
+              alt=""
+              largeur={1168}
+              hauteur={784}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : (
             <img
               src={heroAccueil}
               alt=""
               className="absolute inset-0 h-full w-full object-cover"
             />
-          ) : (
-            <ScenePortAbidjan className="absolute inset-0 h-full w-full" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/75 to-foreground/25 sm:bg-gradient-to-r sm:from-foreground sm:via-foreground/85 sm:to-foreground/50" />
           <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/50 px-3 py-1 text-xs font-semibold text-accent backdrop-blur-sm">
                 <PackageSearch className="h-3.5 w-3.5" />
                 MayLary Group Import
               </span>
@@ -191,7 +207,7 @@ export default function Index() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   to="/import/nouvelle-demande"
-                  className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary-emphasis"
+                  className="inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-accent-emphasis hover:text-background"
                 >
                   Faire une demande d'import
                   <ArrowRight className="h-4 w-4" />
@@ -286,15 +302,17 @@ export default function Index() {
         </section>
 
         <section data-revele className="relative overflow-hidden border-y text-background">
-          <img
+          <ImageOuverture
             src={HERO_EXPORT_IMAGE}
             alt=""
+            largeur={1168}
+            hauteur={784}
             className="absolute inset-0 h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/50" />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/75 to-foreground/25 sm:bg-gradient-to-r sm:from-foreground sm:via-foreground/85 sm:to-foreground/50" />
           <div className="relative mx-auto max-w-screen-xl px-4 py-16 sm:px-6 sm:py-24">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary-foreground">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/50 px-3 py-1 text-xs font-semibold text-accent backdrop-blur-sm">
                 <Globe className="h-3.5 w-3.5" />
                 MayLary Group Export
               </span>
@@ -309,7 +327,7 @@ export default function Index() {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   to="/export/nouvelle-demande"
-                  className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-primary-emphasis"
+                  className="inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-lg transition-transform hover:-translate-y-0.5 hover:bg-accent-emphasis hover:text-background"
                 >
                   Faire une demande d'export
                   <ArrowRight className="h-4 w-4" />
