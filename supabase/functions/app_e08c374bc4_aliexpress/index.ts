@@ -76,16 +76,36 @@ interface Identifiants {
   jeton: string | null;
 }
 
-function lireIdentifiants(): Identifiants | { erreur: string } {
+/**
+ * Trois valeurs, et il faut les trois.
+ *
+ * La clé et le secret identifient l'application ; le JETON autorise les
+ * méthodes du programme dropshipping. Avec les deux premières seulement, la
+ * signature est valide et l'appel est refusé — l'erreur d'AliExpress parle
+ * alors de session, pas de signature, et on cherche des heures au mauvais
+ * endroit. On nomme donc ce qui manque, un par un, avant même d'appeler.
+ */
+function lireIdentifiants(): Identifiants | { erreur: string; manquants: string[] } {
   const cle = Deno.env.get('ALIEXPRESS_APP_KEY');
   const secret = Deno.env.get('ALIEXPRESS_APP_SECRET');
-  if (!cle || !secret) {
+  const jeton = Deno.env.get('ALIEXPRESS_ACCESS_TOKEN');
+
+  const manquants = [
+    !cle ? 'ALIEXPRESS_APP_KEY' : null,
+    !secret ? 'ALIEXPRESS_APP_SECRET' : null,
+    !jeton ? 'ALIEXPRESS_ACCESS_TOKEN' : null,
+  ].filter((v): v is string => v !== null);
+
+  if (manquants.length > 0) {
+    const jetonSeul = manquants.length === 1 && manquants[0] === 'ALIEXPRESS_ACCESS_TOKEN';
     return {
-      erreur:
-        'Identifiants AliExpress absents. Déposez ALIEXPRESS_APP_KEY et ALIEXPRESS_APP_SECRET dans Supabase → Edge Functions → Secrets. ALIEXPRESS_ACCESS_TOKEN est nécessaire en plus pour les méthodes du programme dropshipping.',
+      manquants,
+      erreur: jetonSeul
+        ? "Le jeton d'accès manque. La clé et le secret sont bien posés, mais ils identifient seulement l'application : les méthodes du programme dropshipping exigent en plus un ALIEXPRESS_ACCESS_TOKEN, obtenu par le parcours d'autorisation OAuth en échangeant un code contre un jeton. Sans lui, la signature passe et l'autorisation est refusée."
+        : `Secrets AliExpress absents : ${manquants.join(', ')}. À déposer dans Supabase → Edge Functions → Secrets.`,
     };
   }
-  return { cle, secret, jeton: Deno.env.get('ALIEXPRESS_ACCESS_TOKEN') ?? null };
+  return { cle: cle!, secret: secret!, jeton: jeton! };
 }
 
 async function appeler(
@@ -276,7 +296,9 @@ Deno.serve(async (req) => {
   }
 
   const id = lireIdentifiants();
-  if ('erreur' in id) return reponse({ erreur: id.erreur }, 400);
+  if ('erreur' in id) {
+    return reponse({ erreur: id.erreur, secrets_manquants: id.manquants }, 400);
+  }
 
   const corps = await req.json().catch(() => ({}));
   const action = String(corps.action ?? 'rechercher');

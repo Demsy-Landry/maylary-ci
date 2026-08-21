@@ -43,6 +43,7 @@ const AdminExportGestion = lazy(() => import('@/pages/admin/ExportGestion'));
 const AdminImportGestion = lazy(() => import('@/pages/admin/ImportGestion'));
 const AdminJournalErreurs = lazy(() => import('@/pages/admin/JournalErreurs'));
 const AdminFraisDestination = lazy(() => import('@/pages/admin/FraisDestination'));
+const AdminAliExpress = lazy(() => import('@/pages/admin/AliExpressImport'));
 const AdminSuiviExpeditions = lazy(() => import('@/pages/admin/SuiviExpeditions'));
 const AdminLogin = lazy(() => import('@/pages/admin/AdminLogin'));
 const AdminParametres = lazy(() => import('@/pages/admin/AdminParametres'));
@@ -319,6 +320,14 @@ function App() {
                   element={
                     <AdminRoute ecran="/admin/suivi">
                       <AdminSuiviExpeditions />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/aliexpress"
+                  element={
+                    <AdminRoute ecran="/admin/aliexpress">
+                      <AdminAliExpress />
                     </AdminRoute>
                   }
                 />
