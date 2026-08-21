@@ -1398,6 +1398,7 @@ export const ROLES_PAR_ECRAN: Record<string, RoleEquipe[]> = {
   '/admin/export': ['proprietaire', 'operations'],
   '/admin/devis': ['proprietaire', 'operations'],
   '/admin/cj-dropshipping': ['proprietaire', 'catalogue'],
+  '/admin/aliexpress': ['proprietaire', 'catalogue'],
   '/admin/fournisseurs': ['proprietaire', 'operations', 'catalogue'],
   '/admin/prospection': ['proprietaire', 'catalogue'],
   '/admin/qualite-fournisseurs': ['proprietaire', 'operations', 'catalogue'],
