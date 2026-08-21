@@ -91,6 +91,12 @@ export default function AliExpressImport() {
      sont nécessaires, et une recherche qui échoue ne dit pas laquelle manque. */
   const [diagnostic, setDiagnostic] = useState<Diagnostic | null>(null);
   const [testEnCours, setTestEnCours] = useState(false);
+  /* Le parcours d'autorisation se fait ICI, et pas au terminal : le code reçu
+     n'est valable que trente minutes, et le fondateur travaille au téléphone. */
+  const [adresseRetour, setAdresseRetour] = useState('https://maylary-ci.vercel.app/admin/aliexpress');
+  const [lienAutorisation, setLienAutorisation] = useState('');
+  const [code, setCode] = useState('');
+  const [echangeEnCours, setEchangeEnCours] = useState(false);
   const [destination, setDestination] = useState<'grand_public' | 'pro'>('grand_public');
 
   useEffect(() => {
@@ -181,6 +187,62 @@ export default function AliExpressImport() {
     }
   };
 
+  /* Le code d'autorisation revient dans l'adresse. On le ramasse au chargement
+     plutôt que de demander à quelqu'un de le recopier depuis la barre du
+     navigateur — c'est là que les erreurs de frappe se glissent. */
+  useEffect(() => {
+    const recu = new URLSearchParams(window.location.search).get('code');
+    if (recu) {
+      setCode(recu);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  const appelerAliExpress = async (corps: Record<string, unknown>) => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) throw new Error('Session expirée, reconnectez-vous.');
+    const res = await fetch(`${EDGE_FUNCTIONS_URL}/app_e08c374bc4_aliexpress`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(corps),
+    });
+    return { res, json: await res.json().catch(() => ({})) };
+  };
+
+  const construireLien = async () => {
+    try {
+      const { res, json } = await appelerAliExpress({
+        action: 'lien_autorisation',
+        redirect_uri: adresseRetour.trim(),
+      });
+      if (!res.ok) throw new Error(json.erreur ?? 'Lien impossible à construire.');
+      setLienAutorisation(json.url);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Échec.');
+    }
+  };
+
+  const echangerCode = async () => {
+    setEchangeEnCours(true);
+    try {
+      const { res, json } = await appelerAliExpress({ action: 'echanger_code', code: code.trim() });
+      if (!res.ok) throw new Error(json.erreur ?? 'Échange refusé.');
+      toast.success(
+        json.expire_dans_jours
+          ? `Compte autorisé. Le jeton vaut ${json.expire_dans_jours} jours et se renouvellera tout seul.`
+          : 'Compte autorisé.',
+      );
+      setCode('');
+      setLienAutorisation('');
+      await tester();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Échec.');
+    } finally {
+      setEchangeEnCours(false);
+    }
+  };
+
   const tester = async () => {
     setTestEnCours(true);
     setDiagnostic(null);
@@ -247,6 +309,76 @@ export default function AliExpressImport() {
                 Tester la connexion
               </Button>
             </div>
+
+            {/* LE PARCOURS D'AUTORISATION, EN DEUX GESTES.
+                Le code d'autorisation ne vit que trente minutes et ne sert
+                qu'une fois : le faire transiter par un terminal ou par une note
+                serait le perdre. Ici on ouvre le lien, on accepte, et le code
+                revient dans l'adresse — il est ramassé tout seul. */}
+            <details className="rounded-md border bg-muted/30 p-3">
+              <summary className="cursor-pointer text-sm font-medium text-foreground">
+                Autoriser le compte AliExpress
+              </summary>
+              <div className="mt-3 space-y-3">
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  À faire une seule fois. Le compte doit d’abord avoir rejoint le programme
+                  dropshipping d’AliExpress, sinon l’autorisation est accordée mais les méthodes
+                  restent refusées.
+                </p>
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="retour" className="text-xs">
+                    Adresse de retour — la même que celle déclarée sur votre application AliExpress
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    <Input
+                      id="retour"
+                      value={adresseRetour}
+                      onChange={(e) => setAdresseRetour(e.target.value)}
+                      className="min-w-0 flex-1 font-mono text-xs"
+                    />
+                    <Button type="button" size="sm" variant="outline" onClick={construireLien}>
+                      Construire le lien
+                    </Button>
+                  </div>
+                </div>
+
+                {lienAutorisation && (
+                  <a
+                    href={lienAutorisation}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-emphasis underline"
+                  >
+                    Ouvrir l’autorisation AliExpress
+                  </a>
+                )}
+
+                <div className="space-y-1.5">
+                  <Label htmlFor="code" className="text-xs">
+                    Code d’autorisation — valable trente minutes, une seule fois
+                  </Label>
+                  <div className="flex flex-wrap gap-2">
+                    <Input
+                      id="code"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      placeholder="collé automatiquement au retour"
+                      className="min-w-0 flex-1 font-mono text-xs"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={echangerCode}
+                      disabled={echangeEnCours || !code.trim()}
+                    >
+                      {echangeEnCours ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : null}
+                      Enregistrer
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </details>
 
             {diagnostic && (
               <div
