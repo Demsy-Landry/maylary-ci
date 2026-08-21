@@ -88,10 +88,10 @@ export default function CataloguePro() {
       {/* ---------- Ouverture ---------- */}
       <section className="relative flex min-h-[22rem] items-center overflow-hidden bg-foreground sm:min-h-[26rem]">
         <ImageOuverture
-          src="/visuels/sourcing-entrepot.jpg"
+          src="/visuels/bureau-espace-pro.jpg"
           alt=""
-          largeur={1168}
-          hauteur={784}
+          largeur={784}
+          hauteur={580}
           className="absolute inset-0 h-full w-full scale-105 object-cover object-[70%_center] opacity-70 motion-safe:animate-[respiration_28s_ease-in-out_infinite]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/40" />
@@ -99,12 +99,12 @@ export default function CataloguePro() {
 
         <div className="relative mx-auto w-full max-w-screen-xl px-4 py-14 sm:px-6 sm:py-16">
           <div className="rideau max-w-2xl">
-            <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-primary sm:text-xs">
+            <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-accent sm:text-xs">
               Espace Pro — Approvisionnement des entreprises
             </p>
             <h1 className="mt-4 font-display text-[2.1rem] font-extrabold leading-[1.02] tracking-tight text-white sm:text-5xl">
               Équipez votre entreprise
-              <span className="mt-1 block bg-gradient-to-r from-primary via-amber-300 to-primary bg-clip-text text-transparent">
+              <span className="mt-1 block bg-gradient-to-r from-accent via-amber-200 to-accent bg-clip-text text-transparent">
                 au prix rendu Abidjan.
               </span>
             </h1>
