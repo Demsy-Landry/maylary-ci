@@ -24,9 +24,7 @@ export default function PublicHeaderPro() {
           se rétrécit maintenant, la barre passe à la ligne si nécessaire. */}
       <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:gap-3 sm:px-6">
         <Link to="/" className="flex min-w-0 shrink items-center gap-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <MarqueMaylary className="h-5 w-5" />
-          </div>
+          <MarqueMaylary className="h-9 w-9" />
           <span className="truncate text-lg font-semibold tracking-tight">MayLary Group</span>
           <span className="hidden rounded-full bg-background/10 px-2 py-0.5 text-xs font-medium sm:inline">
             Espace Pro

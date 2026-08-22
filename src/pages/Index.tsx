@@ -23,11 +23,12 @@ import { STORAGE_PUBLIC_URL, VISUELS_MARQUE_TABLE, supabase } from '@/lib/supaba
 
 const STORAGE_BASE = `${STORAGE_PUBLIC_URL}/app_e08c374bc4_produit_photos/accueil`;
 
-/* Servies par le site plutôt que par le stockage distant : même origine, une
-   connexion de moins à ouvrir, et elles arrivent avant le reste. Le port de
-   jour pour ce qui entre, le port au couchant pour ce qui sort. Un visuel
-   activé en base les remplace toujours, sans redéploiement. */
-const HERO_IMPORT_IMAGE = '/visuels/port-import-abidjan.jpg';
+/* Les deux ouvertures de l'accueil restent celles d'origine. Les photographies
+   de port fournies par le fondateur sont allées aux pages de demande d'import
+   et d'export, qui n'avaient aucune image — remplacer ici ce qui existait
+   déjà aurait été déshabiller un écran pour en habiller un autre.
+   Un visuel activé en base les remplace toujours, sans redéploiement. */
+const HERO_IMPORT_IMAGE = `${STORAGE_BASE}/hero-import-maritime.jpg`;
 
 /**
  * Le bandeau d'accueil peut être remplacé depuis la base, sans redéploiement.
@@ -51,7 +52,7 @@ function useVisuelMarque(cle: string, defaut: string): string {
   }, [cle]);
   return url;
 }
-const HERO_EXPORT_IMAGE = '/visuels/port-export-abidjan.jpg';
+const HERO_EXPORT_IMAGE = `${STORAGE_BASE}/hero-export-aerien.jpg`;
 
 const MODES_TRANSPORT = [
   { key: 'aerien', label: 'Aérien', image: `${STORAGE_BASE}/mode-aerien.jpg`, icon: Plane },

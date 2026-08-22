@@ -88,7 +88,7 @@ export default function CataloguePro() {
       {/* ---------- Ouverture ---------- */}
       <section className="relative flex min-h-[22rem] items-center overflow-hidden bg-foreground sm:min-h-[26rem]">
         <ImageOuverture
-          src="/visuels/bureau-espace-pro.jpg"
+          src="/visuels/sourcing-entrepot.jpg"
           alt=""
           largeur={784}
           hauteur={580}

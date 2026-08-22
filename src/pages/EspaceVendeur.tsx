@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
+import ImageOuverture from '@/components/ImageOuverture';
 import { useAuth } from '@/hooks/useAuth';
 import {
   supabase,
@@ -291,6 +292,25 @@ export default function EspaceVendeur() {
     return (
       <div className="min-h-screen bg-background">
         <PublicHeaderGP />
+        {/* C'est ici qu'arrive un vendeur qui ne nous connaît pas encore : la
+            seule page de la marketplace qui ait quelque chose à vendre plutôt
+            qu'à afficher. Le bureau donnant sur le port dit le sérieux de la
+            maison mieux qu'un pictogramme seul. */}
+        <section className="relative flex h-36 items-end overflow-hidden bg-foreground sm:h-44">
+          <ImageOuverture
+            src="/visuels/bureau-espace-pro.jpg"
+            alt=""
+            largeur={1168}
+            hauteur={784}
+            className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/20" />
+          <div className="relative mx-auto w-full max-w-screen-md px-4 pb-4 sm:px-6">
+            <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-primary">
+              MayLary Group — Espace vendeur
+            </p>
+          </div>
+        </section>
         <main className="entree-page mx-auto max-w-screen-md px-4 py-16 text-center sm:px-6">
           <Store className="mx-auto h-10 w-10 text-primary" />
           <h1 className="mt-4 text-2xl font-bold text-foreground">Vendez sur MayLary Group</h1>
