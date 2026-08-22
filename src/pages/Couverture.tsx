@@ -178,12 +178,12 @@ export default function Couverture() {
               déclencherait donc sur rien de visible — il faut une entrée au
               montage, échelonnée dans l'ordre de lecture. */}
           <div className="rideau max-w-2xl">
-            <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-accent sm:text-xs">
+            <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-primary sm:text-xs">
               Aérien · Express · Groupage — Abidjan
             </p>
             <h1 className="mt-5 font-display text-[2.6rem] font-extrabold leading-[0.98] tracking-tight text-white sm:text-7xl">
               Le monde produit.
-              <span className="mt-1 block bg-gradient-to-r from-accent via-amber-200 to-accent bg-clip-text text-transparent">
+              <span className="mt-1 block bg-gradient-to-r from-primary via-amber-300 to-primary bg-clip-text text-transparent">
                 Nous vous l’apportons.
               </span>
             </h1>
@@ -216,15 +216,15 @@ export default function Couverture() {
 
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-white/75">
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-accent" />
+                <ShieldCheck className="h-4 w-4 text-primary" />
                 Payé, protégé
               </span>
               <span className="flex items-center gap-1.5">
-                <Truck className="h-4 w-4 text-accent" />
+                <Truck className="h-4 w-4 text-primary" />
                 Livraison dans tout le pays
               </span>
               <span className="flex items-center gap-1.5">
-                <Users className="h-4 w-4 text-accent" />
+                <Users className="h-4 w-4 text-primary" />
                 Achat groupé à prix de gros
               </span>
             </div>
@@ -460,7 +460,7 @@ export default function Couverture() {
                 />
               </div>
               <div className="p-4">
-                <p className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-accent">
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                   Étape {e.etape}
                 </p>
                 <h3 className="mt-1.5 font-display text-base font-bold text-foreground">{e.titre}</h3>
@@ -475,7 +475,7 @@ export default function Couverture() {
       <section className="mx-auto max-w-screen-xl px-4 py-16 sm:px-6">
         <div className="grid items-center gap-10 lg:grid-cols-2">
           <div data-revele>
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Vous vendez déjà quelque chose ?
             </p>
             <h2 className="trait-anime mt-3 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">

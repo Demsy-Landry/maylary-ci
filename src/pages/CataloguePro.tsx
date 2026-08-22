@@ -99,12 +99,12 @@ export default function CataloguePro() {
 
         <div className="relative mx-auto w-full max-w-screen-xl px-4 py-14 sm:px-6 sm:py-16">
           <div className="rideau max-w-2xl">
-            <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-accent sm:text-xs">
+            <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-primary sm:text-xs">
               Espace Pro — Approvisionnement des entreprises
             </p>
             <h1 className="mt-4 font-display text-[2.1rem] font-extrabold leading-[1.02] tracking-tight text-white sm:text-5xl">
               Équipez votre entreprise
-              <span className="mt-1 block bg-gradient-to-r from-accent via-amber-200 to-accent bg-clip-text text-transparent">
+              <span className="mt-1 block bg-gradient-to-r from-primary via-amber-300 to-primary bg-clip-text text-transparent">
                 au prix rendu Abidjan.
               </span>
             </h1>

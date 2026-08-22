@@ -176,13 +176,13 @@ export default function SourcingGP() {
             deux cents pixels de décalage, visibles à l'œil nu. */}
         <div className="relative mx-auto w-full max-w-screen-lg px-4 py-16 sm:px-6 sm:py-20">
           <div className="rideau max-w-xl">
-            <p className="flex items-center gap-2 font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-accent sm:text-xs">
+            <p className="flex items-center gap-2 font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-primary sm:text-xs">
               <Sparkles className="h-4 w-4" />
               Sourcing sur demande
             </p>
             <h1 className="mt-4 font-display text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-5xl">
               Vous ne trouvez pas votre article&nbsp;?
-              <span className="mt-1 block bg-gradient-to-r from-accent via-amber-200 to-accent bg-clip-text text-transparent">
+              <span className="mt-1 block bg-gradient-to-r from-primary via-amber-300 to-primary bg-clip-text text-transparent">
                 Nous allons le chercher.
               </span>
             </h1>

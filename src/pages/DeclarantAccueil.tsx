@@ -132,13 +132,13 @@ export default function DeclarantAccueil() {
 
         <div className="relative mx-auto w-full max-w-screen-xl px-4 py-14 sm:px-6 sm:py-20">
           <div className="rideau max-w-2xl">
-            <p className="flex items-center gap-2 font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-accent sm:text-xs">
+            <p className="flex items-center gap-2 font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-primary sm:text-xs">
               <ShieldCheck className="h-4 w-4" />
               Le Déclarant — Tarif et liquidation douanière
             </p>
             <h1 className="mt-4 font-display text-[2.2rem] font-extrabold leading-[1.02] tracking-tight text-white sm:text-6xl">
               Combien la douane
-              <span className="mt-1 block bg-gradient-to-r from-accent via-amber-200 to-accent bg-clip-text text-transparent">
+              <span className="mt-1 block bg-gradient-to-r from-primary via-amber-300 to-primary bg-clip-text text-transparent">
                 va vous coûter, exactement.
               </span>
             </h1>
