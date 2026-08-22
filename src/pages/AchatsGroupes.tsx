@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
+import ImageOuverture from '@/components/ImageOuverture';
 import SiteFooter from '@/components/SiteFooter';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import { useAuth } from '@/hooks/useAuth';
@@ -123,6 +124,23 @@ export default function AchatsGroupes() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
+      {/* L'entrepôt dit le service mieux qu'un titre : l'achat groupé, c'est
+          du volume mis en commun. */}
+      <section className="relative flex h-36 items-end overflow-hidden bg-foreground sm:h-44">
+        <ImageOuverture
+          src="/visuels/sourcing-entrepot.jpg"
+          alt=""
+          largeur={1168}
+          hauteur={784}
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/20" />
+        <div className="relative mx-auto w-full max-w-screen-xl px-4 pb-4 sm:px-6">
+          <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-primary">
+            Acheter à plusieurs, au prix du gros
+          </p>
+        </div>
+      </section>
 
       <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <h1 className="font-display text-2xl font-extrabold text-foreground">Achats groupés</h1>
