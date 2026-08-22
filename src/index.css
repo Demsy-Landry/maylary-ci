@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/baloo-2";
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
@@ -7,103 +7,75 @@
 :root {
   --radius: 0.5rem;
 
-  /* LA PLANCHE DE MARQUE FAIT LOI
-     Quatre couleurs relevées sur la planche du fondateur, converties en oklch
-     pour que les dégradés et les états de survol restent perceptuellement
-     réguliers — une teinte éclaircie en RVB vire, la même en oklch ne vire pas.
-
-       #0F172A  marine   dominante, la masse du logo et le mot « MayLary »
-       #F59E0B  or       accent, le mot « Group »
-       #F7F5F0  crème    le fond de la planche
-       #2B2B2B  encre    le texte courant
-
-     CE QUI CHANGE PAR RAPPORT À AVANT
-     L'or était la couleur des boutons et le bleu un simple accent. La planche
-     inverse la hiérarchie : le marine porte, l'or ponctue. C'est ce qui donne
-     le registre « maison de transit » plutôt que « boutique en ligne », et
-     c'est cohérent avec les photographies de port et de bureau. */
-
-  --background: oklch(0.970 0.007 88.6);
-  --foreground: oklch(0.289 0 89.9);
+  /* Style "grosse boutique en ligne" — fond blanc, encre bleu-nuit quasi noir */
+  /* Ivoire tiède plutôt que blanc pur : un fond à 100 % de luminosité
+     renvoie tout l'éclairage de l'écran dans l'œil et fatigue en lecture
+     prolongée. Les cartes, elles, restent blanches et se détachent. */
+  --background: oklch(0.977 0.008 78);
+  --foreground: oklch(0.19 0.02 250);
 
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.289 0 89.9);
+  --card-foreground: oklch(0.19 0.02 250);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.289 0 89.9);
+  --popover-foreground: oklch(0.19 0.02 250);
 
-  /* Primaire : le marine de la planche. Il porte les boutons et les titres. */
-  --primary: oklch(0.208 0.040 265.8);
-  --primary-foreground: oklch(0.970 0.007 88.6);
-  /* Le marine est déjà sombre : sur fond clair il sert tel quel au petit texte,
-     à peine éclairci pour ne pas écraser un libellé de deux mots. */
-  --primary-emphasis: oklch(0.300 0.055 265.8);
+  /* Primaire : orange CTA */
+  --primary: oklch(0.78 0.16 75);
+  --primary-foreground: oklch(0.2 0.02 60);
+  /* Variante "texte" du primaire, plus foncée, utilisée pour les libellés/liens
+     colorés sur fond clair (le ton bouton est trop clair pour du petit texte). */
+  --primary-emphasis: oklch(0.52 0.17 50);
 
-  --secondary: oklch(0.955 0.004 265.8);
-  --secondary-foreground: oklch(0.289 0 89.9);
+  /* Secondaire : gris très clair, pour les surfaces neutres */
+  --secondary: oklch(0.96 0.003 250);
+  --secondary-foreground: oklch(0.25 0.01 250);
 
-  --muted: oklch(0.945 0.004 265.8);
-  --muted-foreground: oklch(0.480 0.012 265.8);
+  --muted: oklch(0.95 0.003 250);
+  --muted-foreground: oklch(0.48 0.01 250);
 
-  /* Accent : l'or de la planche. Il ponctue, il ne porte pas.
-     Son texte est le marine et non le blanc : de l'or à 0,77 de luminosité
-     sous du blanc ne passe aucun seuil de lisibilité. */
-  --accent: oklch(0.769 0.165 70.1);
-  --accent-foreground: oklch(0.208 0.040 265.8);
-  /* Version assombrie de l'or, pour un lien ou un chiffre sur fond clair. */
-  --accent-emphasis: oklch(0.560 0.130 60);
+  /* Accent : bleu-sarcelle (liens secondaires, Espace Pro) */
+  --accent: oklch(0.5 0.09 220);
+  --accent-foreground: oklch(1 0 0);
 
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.970 0.007 88.6);
+  --destructive-foreground: oklch(0.99 0.01 75);
 
-  --border: oklch(0.885 0.005 265.8);
-  --input: oklch(0.885 0.005 265.8);
-  --ring: oklch(0.208 0.040 265.8 / 0.45);
+  --border: oklch(0.87 0.004 250);
+  --input: oklch(0.87 0.004 250);
+  --ring: oklch(0.78 0.16 75 / 0.5);
 
-  /* SUISSE INTL EST SOUS LICENCE COMMERCIALE
-     La planche demande Suisse Intl Light et Bold. C'est une police de Swiss
-     Typefaces, payante, qu'on ne peut ni embarquer ni servir sans l'avoir
-     achetée. Inter est la néo-grotesque libre qui s'en approche le plus :
-     mêmes proportions fermées, même g à une boucle, même neutralité suisse.
-     Le jour où la licence est acquise, il suffit de la poser en tête de pile —
-     rien d'autre ne bouge. */
-  --font-display: "Suisse Intl", "Inter Variable", Inter, system-ui, sans-serif;
-  --font-sans: "Suisse Intl", "Inter Variable", Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Baloo 2 Variable", ui-rounded, "Nunito Sans", system-ui, sans-serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 .dark {
-  /* Le sombre part du marine de la planche plutôt que d'un brun : c'est la même
-     couleur que les boutons du mode clair, poussée jusqu'au fond de page. La
-     maison reste reconnaissable dans les deux modes. */
-  --background: oklch(0.185 0.030 265.8);
-  --foreground: oklch(0.955 0.005 88.6);
+  --background: oklch(0.2 0.035 40);
+  --foreground: oklch(0.96 0.02 75);
 
-  --card: oklch(0.235 0.033 265.8);
-  --card-foreground: oklch(0.955 0.005 88.6);
-  --popover: oklch(0.235 0.033 265.8);
-  --popover-foreground: oklch(0.955 0.005 88.6);
+  --card: oklch(0.25 0.04 40);
+  --card-foreground: oklch(0.96 0.02 75);
+  --popover: oklch(0.25 0.04 40);
+  --popover-foreground: oklch(0.96 0.02 75);
 
-  /* Sur fond marine, un bouton marine ne se verrait pas : c'est l'or qui prend
-     la main. L'inversion est voulue, et elle vaut pour tout le mode sombre. */
-  --primary: oklch(0.769 0.165 70.1);
-  --primary-foreground: oklch(0.185 0.030 265.8);
-  --primary-emphasis: oklch(0.840 0.140 75);
+  --primary: oklch(0.72 0.16 75);
+  --primary-foreground: oklch(0.2 0.02 60);
+  --primary-emphasis: oklch(0.82 0.13 75);
 
-  --secondary: oklch(0.290 0.030 265.8);
-  --secondary-foreground: oklch(0.955 0.005 88.6);
+  --secondary: oklch(0.3 0.02 250);
+  --secondary-foreground: oklch(0.96 0.02 75);
 
-  --muted: oklch(0.290 0.030 265.8);
-  --muted-foreground: oklch(0.720 0.015 265.8);
+  --muted: oklch(0.3 0.02 250);
+  --muted-foreground: oklch(0.72 0.01 250);
 
-  --accent: oklch(0.769 0.165 70.1);
-  --accent-foreground: oklch(0.185 0.030 265.8);
-  --accent-emphasis: oklch(0.840 0.140 75);
+  --accent: oklch(0.6 0.09 220);
+  --accent-foreground: oklch(0.98 0.01 75);
 
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.98 0.01 75);
 
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.769 0.165 70.1 / 0.5);
+  --ring: oklch(0.68 0.18 45 / 0.5);
 }
 
 @theme inline {
@@ -122,7 +94,6 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --color-accent-emphasis: var(--accent-emphasis);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
