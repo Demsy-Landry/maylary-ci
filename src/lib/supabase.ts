@@ -980,8 +980,63 @@ export interface Expedition {
    */
   derniere_reponse_le: string | null;
   releve_erreur: string | null;
+
+  /* ---- L'ouverture chez le transporteur -------------------------------- */
+
+  /** Le shipping mark peint sur les cartons. Immuable une fois posé. */
+  marque_expedition: string | null;
+  /**
+   * L'état de la RÉSERVATION, distinct du statut du voyage : une expédition
+   * peut être « à expédier » depuis trois jours parce que la réservation a
+   * échoué, et le statut de voyage seul ne le disait pas.
+   */
+  reservation_statut: 'non_ouverte' | 'a_ouvrir' | 'ouverte' | 'echec';
+  /** Numéro de connaissement chez un consolidateur, d'envoi chez DHL. */
+  reservation_reference: string | null;
+  reservation_le: string | null;
+  reservation_erreur: string | null;
+  /**
+   * Qui RÉSERVE. Distinct de `transporteur_code`, qui désigne qui ACHEMINE aux
+   * yeux de l'agrégateur de suivi : le consolidateur et la compagnie qui porte
+   * la marchandise ne sont pas le même acteur.
+   */
+  connecteur: 'cj' | 'dhl' | 'consolidateur' | null;
+  etiquette_chemin: string | null;
+  nombre_colis: number | null;
+  poids_brut_kg: number | null;
+  volume_m3: number | null;
+
   cree_le: string;
   maj_le: string;
+}
+
+export const CONSOLIDATEURS_TABLE = 'app_e08c374bc4_consolidateurs';
+
+/**
+ * Un point de consolidation : une adresse d'entrepôt et un code client.
+ *
+ * Rien de plus, et c'est suffisant — c'est exactement ce qu'il faut
+ * communiquer au fournisseur chinois pour que la marchandise arrive au bon
+ * endroit et se rattache à la bonne expédition.
+ */
+export interface Consolidateur {
+  id: string;
+  code: string;
+  nom: string;
+  ville: string | null;
+  pays: string;
+  /** Recopiée telle quelle par le fournisseur : c'est lui qui la lit. */
+  adresse_entrepot: string | null;
+  /** Le code que le consolidateur nous a attribué. Il préfixe chaque marque. */
+  code_client: string | null;
+  contact_nom: string | null;
+  contact_telephone: string | null;
+  contact_email: string | null;
+  delai_min_jours: number | null;
+  delai_max_jours: number | null;
+  note: string | null;
+  actif: boolean;
+  cree_le: string;
 }
 
 export interface EvenementExpedition {
