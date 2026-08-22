@@ -153,7 +153,7 @@ export default function Couverture() {
             arrive avant tout le reste. C'est le premier écran d'un groupe —
             il n'a pas le droit d'être lent. */}
         <ImageOuverture
-          src="/visuels/bureau-vue-port.jpg"
+          src="/visuels/fret-aerien-abidjan.jpg"
           alt=""
           largeur={784}
           hauteur={1168}

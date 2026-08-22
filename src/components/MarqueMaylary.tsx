@@ -1,58 +1,52 @@
 /**
  * La marque MayLary Group.
  *
- * Le fondateur voulait « une femme et une fille dans l'univers de la
- * logistique ». Le dessin porte donc deux silhouettes — une adulte, une
- * enfant — devant une pile de caisses, et la plus petite tient la main de la
- * plus grande.
+ * LE DESSIN EST CELUI DU FONDATEUR
  *
- * Deux contraintes ont dicté la forme. D'abord la taille : la marque vit à
- * 32 px dans un en-tête, où un visage ou un pli de vêtement devient une tache.
- * Tout est donc ramené à des formes pleines, sans trait fin, lisibles en
- * silhouette. Ensuite le sens : deux figures de tailles différentes se lisent
- * d'emblée comme une transmission — ce qu'une entreprise familiale ivoirienne
- * a de plus juste à raconter, et ce qu'un empilement de cartons ne dit pas.
+ * Il y avait ici un SVG que j'avais dessiné faute de mieux : deux silhouettes
+ * devant des caisses, ramenées à des formes pleines pour rester lisibles à
+ * 32 px. C'était un provisoire, et il est remplacé par le logo réel.
  *
- * Le dessin est en SVG plutôt qu'en image : il reste net sur un écran à haute
- * densité, pèse deux kilo-octets, hérite de la couleur du texte parent, et ne
- * demande aucune requête réseau.
+ * Le logo montre une pile de conteneurs qui compose un M, et dans son creux
+ * une femme et une fillette qui se tiennent la main, en pagne à motifs. Autour,
+ * un réseau de lignes et de points d'or — les liaisons d'un transitaire. Le
+ * dessin dit donc les deux choses à la fois, le métier et la transmission, là
+ * où mon provisoire les juxtaposait.
+ *
+ * POURQUOI LA MARQUE PORTE SON PROPRE FOND BLANC
+ *
+ * Le logo est bleu nuit et or. Sur un en-tête clair il passe, sur un fond
+ * sombre le bleu disparaît — et l'application se regarde dans les deux thèmes.
+ * La marque embarque donc sa tuile blanche : elle ne dépend plus de ce sur quoi
+ * on la pose, y compris une photographie d'ouverture.
+ *
+ * C'est aussi pour ça que le fichier n'est pas détouré. Un PNG transparent
+ * obligerait chaque écran à lui fournir un fond clair, et il suffirait d'un
+ * oubli pour que la marque s'efface.
+ *
+ * DEUX FORMATS, UN SEUL TÉLÉCHARGEMENT
+ *
+ * `<picture>` sert le WebP — 47 Ko contre 300 pour le PNG — et garde le PNG en
+ * repli. Un navigateur qui connaît le WebP ne télécharge jamais le second.
  */
 
-export function MarqueMaylary({ className = 'h-5 w-5' }: { className?: string }) {
+export function MarqueMaylary({ className = 'h-9 w-9' }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 48 48"
-      role="img"
-      aria-label="MayLary Group"
-      className={className}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <span
+      className={`inline-flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-white ring-1 ring-black/5 ${className}`}
     >
-      {/* Les caisses, en retrait : elles situent le métier sans voler la
-          lecture aux deux figures. */}
-      <g opacity="0.42" fill="currentColor">
-        <rect x="3" y="26" width="11" height="9" rx="1.4" />
-        <rect x="34" y="26" width="11" height="9" rx="1.4" />
-        <rect x="34" y="15" width="11" height="9" rx="1.4" />
-      </g>
-
-      {/* La ligne de sol : elle pose les silhouettes au lieu de les laisser
-          flotter, et sert de socle visuel au petit format. */}
-      <rect x="2" y="37" width="44" height="3" rx="1.5" fill="currentColor" />
-
-      {/* La femme. */}
-      <g fill="currentColor">
-        <circle cx="20" cy="10.5" r="4.6" />
-        <path d="M20 16.4c-4.5 0-7.4 2.9-7.9 7.3l-.9 8.1a1.9 1.9 0 0 0 1.9 2.1h2.2l.5 2.6h8.4l.5-2.6h2.2a1.9 1.9 0 0 0 1.9-2.1l-.9-8.1c-.5-4.4-3.4-7.3-7.9-7.3z" />
-      </g>
-
-      {/* La fille, plus petite, et la main tenue entre les deux. */}
-      <g fill="currentColor">
-        <circle cx="33" cy="19.5" r="3.4" />
-        <path d="M33 24c-3.2 0-5.2 2-5.6 5.1l-.6 4.5a1.6 1.6 0 0 0 1.6 1.8h1.5l.4 2.2h5.4l.4-2.2h1.5a1.6 1.6 0 0 0 1.6-1.8l-.6-4.5c-.4-3.1-2.4-5.1-5.6-5.1z" />
-      </g>
-      <rect x="25.4" y="26.2" width="4.6" height="2.6" rx="1.3" fill="currentColor" />
-    </svg>
+      <picture>
+        <source srcSet="/logo-maylary.webp" type="image/webp" />
+        <img
+          src="/logo-maylary.png"
+          alt="MayLary Group"
+          width={512}
+          height={512}
+          decoding="async"
+          className="h-full w-full object-contain"
+        />
+      </picture>
+    </span>
   );
 }
 
@@ -65,7 +59,7 @@ export function MarqueMaylary({ className = 'h-5 w-5' }: { className?: string })
  */
 export function LogoMaylary({
   className = '',
-  tailleMarque = 'h-5 w-5',
+  tailleMarque = 'h-9 w-9',
   tailleTexte = 'text-lg',
 }: {
   className?: string;
@@ -74,9 +68,7 @@ export function LogoMaylary({
 }) {
   return (
     <span className={`flex items-center gap-2 ${className}`}>
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-        <MarqueMaylary className={tailleMarque} />
-      </span>
+      <MarqueMaylary className={tailleMarque} />
       <span className={`${tailleTexte} font-semibold tracking-tight`}>
         MayLary<span className="font-normal opacity-80"> Group</span>
       </span>

@@ -50,9 +50,7 @@ export default function SiteFooter() {
         <div className="cascade grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                <MarqueMaylary className="h-4 w-4" />
-              </div>
+              <MarqueMaylary className="h-8 w-8" />
               <span className="text-base font-semibold tracking-tight">MayLary Group</span>
             </div>
             <p className="mt-3 max-w-xs text-sm text-background/70">

@@ -34,11 +34,21 @@ interface Props {
 }
 
 export default function ImageOuverture({ src, alt, largeur, hauteur, className }: Props) {
-  const webp = src.replace(/\.jpe?g$/i, '.webp');
+  /**
+   * Le WebP n'est proposé que pour les images du site.
+   *
+   * Le repli de `<picture>` ne joue qu'au moment de CHOISIR la source : une
+   * fois le WebP retenu, s'il répond 404, le navigateur affiche une image
+   * cassée — il ne redescend pas sur le `<img>`. Or les visuels servis depuis
+   * le stockage distant n'ont pas de jumeau WebP. Leur en proposer un
+   * casserait l'ouverture au lieu de l'alléger.
+   */
+  const local = src.startsWith('/');
+  const webp = local ? src.replace(/\.jpe?g$/i, '.webp') : null;
 
   return (
     <picture>
-      <source srcSet={webp} type="image/webp" />
+      {webp && <source srcSet={webp} type="image/webp" />}
       <img
         src={src}
         alt={alt}

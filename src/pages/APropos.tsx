@@ -2,6 +2,7 @@ import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
 import { Link } from 'react-router-dom';
 import { MarqueMaylary } from '@/components/MarqueMaylary';
+import ImageOuverture from '@/components/ImageOuverture';
 import { Button } from '@/components/ui/button';
 import {
   Ship,
@@ -84,11 +85,29 @@ export default function APropos() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
+      {/* Le bureau à la baie vitrée, au crépuscule, le port derrière. Cette
+          page-ci n'a pas de formulaire à protéger : l'ouverture peut donc
+          respirer plus qu'ailleurs. Et c'est la seule page où une photographie
+          de nos murs dit quelque chose de vrai — les autres parlent d'un
+          service, celle-ci parle de la maison. */}
+      <section className="relative flex h-48 items-end overflow-hidden bg-foreground sm:h-64">
+        <ImageOuverture
+          src="/visuels/bureau-vue-port.jpg"
+          alt=""
+          largeur={1168}
+          hauteur={784}
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-75"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/20" />
+        <div className="relative mx-auto w-full max-w-screen-lg px-4 pb-5 sm:px-6">
+          <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-primary">
+            Dems'Inc — Abidjan, Côte d'Ivoire
+          </p>
+        </div>
+      </section>
       <main className="entree-page mx-auto max-w-screen-lg px-4 py-12 sm:px-6">
         <div className="flex items-start gap-4">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <MarqueMaylary className="h-8 w-8" />
-          </span>
+          <MarqueMaylary className="h-14 w-14 rounded-xl" />
           <div className="min-w-0">
             <h1 className="font-display text-3xl font-extrabold text-foreground">
               MayLary Group
