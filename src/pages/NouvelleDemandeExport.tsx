@@ -2,6 +2,7 @@ import { useMemo, useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
+import ImageOuverture from '@/components/ImageOuverture';
 import { useAuth } from '@/hooks/useAuth';
 import {
   supabase,
@@ -209,6 +210,24 @@ export default function NouvelleDemandeExport() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />
+      {/* Une bande d'ouverture, pas un grand format : cette page est un
+          formulaire, la photographie situe le service sans repousser le premier
+          champ sous la ligne de flottaison. */}
+      <section className="relative flex h-36 items-end overflow-hidden bg-foreground sm:h-44">
+        <ImageOuverture
+          src="/visuels/port-export-abidjan.jpg"
+          alt=""
+          largeur={1168}
+          hauteur={784}
+          className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/20" />
+        <div className="relative mx-auto w-full max-w-screen-md px-4 pb-4 sm:px-6">
+          <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-primary">
+            MayLary Group Export — Abidjan
+          </p>
+        </div>
+      </section>
       <main className="entree-page mx-auto max-w-screen-md px-4 py-8 sm:px-6">
         <h1 className="font-display text-2xl font-bold text-foreground">Faire une demande d'export</h1>
         <p className="mt-1 text-sm text-muted-foreground">
