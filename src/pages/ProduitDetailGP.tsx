@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
+import FretApresVerification from '@/components/FretApresVerification';
 import AvisProduit from '@/components/AvisProduit';
 import {
   supabase,
@@ -133,7 +134,7 @@ export default function ProduitDetailGP() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
-      <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-[1600px] px-4 py-8 sm:px-6">
         <Link
           to="/boutique"
           className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
@@ -169,26 +170,26 @@ export default function ProduitDetailGP() {
                     onError={() =>
                       setBrokenPhotos((prev) => new Set(prev).add(produit.photos[activePhoto]))
                     }
-                    className="h-80 w-full rounded-lg border object-cover"
+                    className="aspect-square w-full rounded-lg border bg-white object-contain p-3"
                   />
                   {produit.photos.length > 1 && (
-                    <div className="mt-2 flex gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       {produit.photos.map((url, idx) => (
                         <button
                           key={url}
                           onClick={() => setActivePhoto(idx)}
-                          className={`h-14 w-14 shrink-0 overflow-hidden rounded-md border ${
-                            idx === activePhoto ? 'border-primary' : ''
+                          className={`h-14 w-14 shrink-0 overflow-hidden rounded-md border bg-white ${
+                            idx === activePhoto ? 'border-primary ring-1 ring-primary' : ''
                           }`}
                         >
-                          <img src={url} alt="" className="h-full w-full object-cover" />
+                          <img src={url} alt="" className="h-full w-full object-contain p-1" />
                         </button>
                       ))}
                     </div>
                   )}
                 </>
               ) : (
-                <div className="flex h-80 w-full items-center justify-center rounded-lg border bg-muted">
+                <div className="flex aspect-square w-full items-center justify-center rounded-lg border bg-muted">
                   <ImageOff className="h-8 w-8 text-muted-foreground" />
                 </div>
               )}
@@ -237,6 +238,10 @@ export default function ProduitDetailGP() {
                   {produit.description}
                 </p>
               )}
+
+              {/* Même règle qu'ailleurs : on ne montre pas un chiffre qu'on ne
+                  peut pas tenir. Le fret de groupage se dit, il ne s'estime pas. */}
+              {produit.mode_acheminement === 'groupage' && <FretApresVerification />}
 
               {/* La fiche technique relevée chez le fournisseur. Elle est
                   courte et factuelle — matière, emballage, poids — donc elle

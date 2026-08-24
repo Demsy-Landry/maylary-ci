@@ -97,7 +97,7 @@ export default function CataloguePro() {
         <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/40" />
         <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-background to-transparent" />
 
-        <div className="relative mx-auto w-full max-w-screen-xl px-4 py-14 sm:px-6 sm:py-16">
+        <div className="relative mx-auto w-full max-w-[1600px] px-4 py-14 sm:px-6 sm:py-16">
           <div className="rideau max-w-2xl">
             <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-primary sm:text-xs">
               Espace Pro — Approvisionnement des entreprises
@@ -151,7 +151,7 @@ export default function CataloguePro() {
         </div>
       </section>
 
-      <main className="entree-page mx-auto max-w-screen-xl px-4 py-12 sm:px-6">
+      <main className="entree-page mx-auto max-w-[1600px] px-4 py-12 sm:px-6">
         {/* ---------- Les engagements ---------- */}
         <section data-revele>
           <h2 className="trait-anime font-display text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -221,7 +221,7 @@ export default function CataloguePro() {
                       {visuels.length > 0 ? (
                         <CarrouselSecteur photos={visuels} alt={s.nom} />
                       ) : photo ? (
-                        <img src={photo} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
+                        <img src={photo} alt="" loading="lazy" decoding="async" className="h-full w-full bg-white object-contain p-2" />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center bg-primary/10">
                           <SectorIllustration sector={guessSector(s.nom)} className="h-16 w-16" />

@@ -135,14 +135,14 @@ export default function AchatsGroupes() {
           className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/20" />
-        <div className="relative mx-auto w-full max-w-screen-xl px-4 pb-4 sm:px-6">
+        <div className="relative mx-auto w-full max-w-[1600px] px-4 pb-4 sm:px-6">
           <p className="font-display text-[0.7rem] font-semibold uppercase tracking-[0.28em] text-primary">
             Acheter à plusieurs, au prix du gros
           </p>
         </div>
       </section>
 
-      <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-[1600px] px-4 py-8 sm:px-6">
         <h1 className="font-display text-2xl font-extrabold text-foreground">Achats groupés</h1>
         <p className="mt-2 max-w-prose text-sm text-muted-foreground">
           Importer coûte cher à l’unité à cause de ce qui ne dépend pas de la quantité : assurance,

@@ -674,6 +674,8 @@ select {
 @media (hover: hover) {
   .groupe-zoom:hover .cadre-zoom img,
   .cadre-zoom:hover img {
-    transform: scale(1.07);
+    /* 4 % et pas 7 : au-delà, l'agrandissement mange la marge blanche d'une
+       photo de produit et se met à couper l'objet lui-même. */
+    transform: scale(1.04);
   }
 }
