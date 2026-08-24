@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
 import type { Facture, LigneFacture } from '@/lib/supabase';
+import { LOGO_MAYLARY_JPEG } from '@/lib/logo-document';
 
 /**
  * Couleurs de marque, alignées sur les variables CSS du site. Exportées : le
@@ -84,16 +85,27 @@ export const chiffre = (v: number) =>
     .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const jour = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
 
-/** Marque MayLary Group dessinée en vectoriel : carré orange + pyramide de colis. */
+/**
+ * La marque de la maison, en haut de chaque document.
+ *
+ * Il y avait ici un carré orange surmonté de trois colis blancs, dessiné en
+ * vectoriel faute d'avoir le vrai logo. C'était un provisoire, et il est
+ * remplacé par le logo réel — la pile de conteneurs qui compose un M, avec la
+ * femme et la fillette dans son creux.
+ *
+ * L'image est encastrée dans le code plutôt que chargée par son adresse : un
+ * PDF se fabrique dans le navigateur du client, parfois hors ligne, et
+ * s'envoie ensuite par courriel. Un document qui irait chercher son logo sur
+ * le réseau s'imprimerait sans marque chez qui le rouvre six mois plus tard.
+ *
+ * Le cadre blanc arrondi qui l'entoure n'est pas décoratif : le dessin est
+ * bleu nuit, et une facture s'imprime parfois sur un fond teinté ou se lit
+ * dans une visionneuse en thème sombre.
+ */
 export function dessinerLogo(doc: jsPDF, x: number, y: number, taille: number) {
-  doc.setFillColor(...ORANGE);
-  doc.roundedRect(x, y, taille, taille, taille * 0.22, taille * 0.22, 'F');
-
-  const colis = taille * 0.32;
   doc.setFillColor(255, 255, 255);
-  doc.roundedRect(x + taille * 0.34, y + taille * 0.16, colis, colis, 0.6, 0.6, 'F');
-  doc.roundedRect(x + taille * 0.13, y + taille * 0.52, colis, colis, 0.6, 0.6, 'F');
-  doc.roundedRect(x + taille * 0.55, y + taille * 0.52, colis, colis, 0.6, 0.6, 'F');
+  doc.roundedRect(x, y, taille, taille, taille * 0.16, taille * 0.16, 'F');
+  doc.addImage(LOGO_MAYLARY_JPEG, 'JPEG', x, y, taille, taille);
 }
 
 /** Papier à en-tête : identité de l'émetteur, répété en haut de chaque page. */
