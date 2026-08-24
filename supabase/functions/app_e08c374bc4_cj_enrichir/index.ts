@@ -5,8 +5,21 @@
  *
  * L'import ne gardait que le nom, le prix et LA PREMIÈRE image. Or la même
  * réponse contient jusqu'à douze photos, une vidéo, le poids net et emballé, le
- * volume, la matière, le type d'emballage, la description et la position
- * tarifaire déclarée à l'export. Tout cela était reçu puis jeté.
+ * volume, la matière, le type d'emballage et la description. Tout cela était
+ * reçu puis jeté.
+ *
+ * CE QU'ON NE REPREND PAS : LA POSITION TARIFAIRE
+ *
+ * CJ rend aussi le code SH sous lequel la marchandise sort de Chine. Je l'avais
+ * gardé, en me disant qu'une hypothèse valait mieux qu'une page blanche. Le
+ * fondateur a tranché autrement, et il a raison : ce code est saisi par un
+ * fournisseur chinois, pour SON export, sous SA réglementation. Il n'engage
+ * rien envers la douane ivoirienne.
+ *
+ * Posé à côté du moteur de liquidation, il ne serait pas resté une suggestion :
+ * il aurait fini recopié. Une position fausse, c'est un taux de droit faux et
+ * la signature d'un commissionnaire engagée sur une erreur. Mieux vaut une case
+ * vide, qui oblige à classer.
  *
  * Relevé avant : 58 articles pro, 58 avec exactement une photo, 2 avec un
  * poids, 0 avec une description.
@@ -182,7 +195,6 @@ Deno.serve(async (req) => {
         enrichi_le: new Date().toISOString(),
         matiere: premier(data.materialNameEn),
         emballage: premier(data.packingNameEn),
-        code_sh_fournisseur: data.entryCode ? String(data.entryCode) : null,
         video_url: data.productVideo ? String(data.productVideo) : null,
         description_fournisseur: data.description ? String(data.description).slice(0, 8000) : null,
       };
