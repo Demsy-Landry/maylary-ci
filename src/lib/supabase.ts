@@ -442,6 +442,9 @@ export interface Produit {
   matiere?: string | null;
   emballage?: string | null;
   poids_produit_g?: number | null;
+  /** Poids et encombrement unitaires, tels que la vue publique les expose. */
+  poids_unitaire_g?: number | null;
+  volume_unitaire_cm3?: number | null;
   prix_unitaire_fcfa: number;
   photos: string[];
   categorie: string | null;
