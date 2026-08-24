@@ -25,4 +25,4 @@ Disallow: /mot-de-passe-oublie
 Disallow: /declarant/tableau-de-bord
 Disallow: /declarant/historique
 
-Sitemap: https://maylary-ci.vercel.app/sitemap.xml
+Sitemap: https://maylarygroup.ci/sitemap.xml

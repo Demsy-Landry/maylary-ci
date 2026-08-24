@@ -31,12 +31,12 @@ const SUJETS: Record<string, (ref: string) => string> = {
 };
 
 const LIENS: Record<string, string> = {
-  devis: 'https://maylary-ci.vercel.app/admin/devis',
-  commande: 'https://maylary-ci.vercel.app/admin/commandes',
-  import: 'https://maylary-ci.vercel.app/admin/import',
-  import_valide: 'https://maylary-ci.vercel.app/admin/import',
-  export: 'https://maylary-ci.vercel.app/admin/export',
-  export_valide: 'https://maylary-ci.vercel.app/admin/export',
+  devis: 'https://maylarygroup.ci/admin/devis',
+  commande: 'https://maylarygroup.ci/admin/commandes',
+  import: 'https://maylarygroup.ci/admin/import',
+  import_valide: 'https://maylarygroup.ci/admin/import',
+  export: 'https://maylarygroup.ci/admin/export',
+  export_valide: 'https://maylarygroup.ci/admin/export',
 };
 
 const MESSAGES: Record<string, string> = {

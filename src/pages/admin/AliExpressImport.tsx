@@ -93,7 +93,7 @@ export default function AliExpressImport() {
   const [testEnCours, setTestEnCours] = useState(false);
   /* Le parcours d'autorisation se fait ICI, et pas au terminal : le code reçu
      n'est valable que trente minutes, et le fondateur travaille au téléphone. */
-  const [adresseRetour, setAdresseRetour] = useState('https://maylary-ci.vercel.app/admin/aliexpress');
+  const [adresseRetour, setAdresseRetour] = useState('https://maylarygroup.ci/admin/aliexpress');
   const [lienAutorisation, setLienAutorisation] = useState('');
   const [code, setCode] = useState('');
   const [echangeEnCours, setEchangeEnCours] = useState(false);

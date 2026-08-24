@@ -346,7 +346,7 @@ et brancher la comptabilisation SYSCOHADA à l’état payé. »]
 
 ## 9. Notes d’environnement
 
-- **Prod / preview :** Vercel (maylary-ci.vercel.app)
+- **Prod :** Vercel, domaine maylarygroup.ci (l’adresse maylary-ci.vercel.app reste servie et redirige)
 - **Backend :** Supabase (Postgres + Edge Functions)
 - **Paiement cible :** Wave (prioritaire) + virement bancaire SGCI en fallback
 - **Comptabilité :** SYSCOHADA, partie double, équilibre imposé par la base
