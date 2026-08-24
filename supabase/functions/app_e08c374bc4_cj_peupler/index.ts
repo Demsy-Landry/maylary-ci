@@ -1,3 +1,16 @@
+/* ⚠️  CE FICHIER EST EN RETARD SUR LA FONCTION DÉPLOYÉE.
+ *
+ * La version en production est la v3 : deux actions (`chercher` / `importer`),
+ * et le service des DEUX vitrines — Espace Pro par secteur, boutique par
+ * catégorie. Ce fichier-ci est resté à la v1, qui importait sur un simple
+ * mot-clé.
+ *
+ * La divergence vient d'un déploiement fait depuis un contenu en ligne plutôt
+ * que depuis le dépôt. C'est exactement le piège qu'il ne faut pas laisser
+ * s'installer, et il est signalé ici plutôt que tu : la fonction déployée fait
+ * foi jusqu'à resynchronisation.
+ */
+
 /**
  * Peupler un rayon de l'Espace Pro depuis CJ, fiche complète du premier coup.
  *
