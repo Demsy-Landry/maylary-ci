@@ -1,34 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  La carte du site, limitée aux pages publiques.
-
-  Les écrans personnels et d'administration en sont exclus : les référencer
-  reviendrait à publier la liste des portes de la maison. Les fiches produit
-  ne sont pas listées non plus — elles changent trop souvent pour un fichier
-  écrit à la main, et les pages de rayon y mènent.
-
-  L'adresse est celle du déploiement actuel. Le jour où maylary.ci est
-  branché, ce fichier et robots.txt changent ensemble.
+  Fichier ENGENDRÉ par scripts/generer-sitemap.mjs à chaque construction.
+  Ne pas le modifier à la main : la prochaine construction écraserait la retouche.
 -->
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <url>
     <loc>https://maylarygroup.ci/</loc>
-    <changefreq>weekly</changefreq>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/services</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://maylarygroup.ci/import</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>https://maylarygroup.ci/export</loc>
-    <changefreq>monthly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
@@ -39,52 +23,62 @@
   <url>
     <loc>https://maylarygroup.ci/catalogue</loc>
     <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://maylarygroup.ci/import</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://maylarygroup.ci/export</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/declarant</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/declarant/atelier</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/declarant/abonnement</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/poids-taxable</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/boutique/sourcing</loc>
-    <changefreq>monthly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/boutique/achats-groupes</loc>
-    <changefreq>weekly</changefreq>
+    <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/vendre</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/a-propos</loc>
-    <changefreq>yearly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/conditions-generales</loc>
     <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
+    <priority>0.3</priority>
   </url>
   <url>
     <loc>https://maylarygroup.ci/mentions-legales</loc>
