@@ -54,23 +54,49 @@ Deno.serve(async (req: Request) => {
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) return jsonResponse({ error: 'Authentification requise.' }, 401);
 
-    const supabaseAsCaller = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const {
-      data: { user },
-      error: userError,
-    } = await supabaseAsCaller.auth.getUser();
-    if (userError || !user) return jsonResponse({ error: 'Session invalide, reconnectez-vous.' }, 401);
-
     const supabaseService = createClient(supabaseUrl, serviceRoleKey);
-    const { data: profile } = await supabaseService
-      .from('app_e08c374bc4_profiles')
-      .select('type_compte')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    if (profile?.type_compte !== 'admin') {
-      return jsonResponse({ error: 'Accès réservé aux administrateurs.' }, 403);
+
+    /**
+     * DEUX FAÇONS D'ÊTRE AUTORISÉ, ET UNE SEULE PORTE
+     *
+     * Le cas courant : un administrateur connecté depuis l'écran d'import.
+     * Sa session est vérifiée, puis son profil.
+     *
+     * Le second : un appel déclenché depuis le serveur lui-même — une tâche
+     * planifiée, ou une relance faite par `pg_net` depuis la base. Il n'y a
+     * alors AUCUNE session d'utilisateur à présenter, et c'est normal : la
+     * retarification n'appartient à personne en particulier.
+     *
+     * La clé de service fait donc foi dans ce cas. Elle ne quitte jamais le
+     * serveur — elle n'est ni dans le navigateur, ni dans le dépôt — si bien
+     * que la présenter revient déjà à être le serveur. Refuser cet appel
+     * n'aurait rien protégé : il aurait fallu créer une seconde fonction qui
+     * dupliquerait tout le calcul de la grille de gros, et c'est exactement le
+     * genre de doublon qui finit par diverger sur les PRIX.
+     */
+    const jetonPresente = authHeader.replace(/^Bearer\s+/i, '').trim();
+    const estAppelServeur = jetonPresente === serviceRoleKey;
+
+    if (!estAppelServeur) {
+      const supabaseAsCaller = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const {
+        data: { user },
+        error: userError,
+      } = await supabaseAsCaller.auth.getUser();
+      if (userError || !user) {
+        return jsonResponse({ error: 'Session invalide, reconnectez-vous.' }, 401);
+      }
+
+      const { data: profile } = await supabaseService
+        .from('app_e08c374bc4_profiles')
+        .select('type_compte')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (profile?.type_compte !== 'admin') {
+        return jsonResponse({ error: 'Accès réservé aux administrateurs.' }, 403);
+      }
     }
 
     let body: RetariferBody;
