@@ -12,92 +12,92 @@
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://maylary-ci.vercel.app/</loc>
+    <loc>https://maylarygroup.ci/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/services</loc>
+    <loc>https://maylarygroup.ci/services</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/import</loc>
+    <loc>https://maylarygroup.ci/import</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/export</loc>
+    <loc>https://maylarygroup.ci/export</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/boutique</loc>
+    <loc>https://maylarygroup.ci/boutique</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/catalogue</loc>
+    <loc>https://maylarygroup.ci/catalogue</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/declarant</loc>
+    <loc>https://maylarygroup.ci/declarant</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/declarant/atelier</loc>
+    <loc>https://maylarygroup.ci/declarant/atelier</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/declarant/abonnement</loc>
+    <loc>https://maylarygroup.ci/declarant/abonnement</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/poids-taxable</loc>
+    <loc>https://maylarygroup.ci/poids-taxable</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/boutique/sourcing</loc>
+    <loc>https://maylarygroup.ci/boutique/sourcing</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/boutique/achats-groupes</loc>
+    <loc>https://maylarygroup.ci/boutique/achats-groupes</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/vendre</loc>
+    <loc>https://maylarygroup.ci/vendre</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/a-propos</loc>
+    <loc>https://maylarygroup.ci/a-propos</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/conditions-generales</loc>
+    <loc>https://maylarygroup.ci/conditions-generales</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/mentions-legales</loc>
+    <loc>https://maylarygroup.ci/mentions-legales</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/confidentialite</loc>
+    <loc>https://maylarygroup.ci/confidentialite</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://maylary-ci.vercel.app/cookies</loc>
+    <loc>https://maylarygroup.ci/cookies</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
