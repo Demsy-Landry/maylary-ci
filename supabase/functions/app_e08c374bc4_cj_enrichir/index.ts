@@ -198,16 +198,49 @@ Deno.serve(async (req) => {
         video_url: data.productVideo ? String(data.productVideo) : null,
         description_fournisseur: data.description ? String(data.description).slice(0, 8000) : null,
       };
+      // L'unité de vente telle que le fournisseur la déclare : elle vaut mieux
+      // que celle qu'on devinerait depuis le nom de l'article.
+      const unite = premier(data.productUnit);
+      if (unite) maj.unite_vente = unite;
       // On n'écrase une photo existante que si CJ rend mieux.
       if (images.length > 0) maj.photos = images;
       if (poids) maj.poids_unitaire_g = poids;
       if (volumeMm3) maj.volume_unitaire_cm3 = volumeMm3 / 1000;
 
-      await fetch(`${URL_SB}/rest/v1/app_e08c374bc4_produits?id=eq.${p.id}`, {
+      // On VÉRIFIE l'écriture avant de la déclarer faite.
+      //
+      // Cette ligne était un `await fetch(...)` dont personne ne lisait le
+      // résultat, suivi d'un `ok: true` inconditionnel. La fonction annonçait
+      // donc des succès qu'elle n'avait jamais constatés : quarante-six
+      // articles sont restés sans photos pendant des jours pendant qu'elle
+      // rapportait « 6 photos, ok ». Un rapport qui ne peut pas dire non ne
+      // sert à rien — il coûte même, puisqu'il fait chercher ailleurs.
+      const rMaj = await fetch(`${URL_SB}/rest/v1/app_e08c374bc4_produits?id=eq.${p.id}`, {
         method: 'PATCH',
-        headers: enTetesSb,
+        headers: { ...enTetesSb, Prefer: 'return=representation' },
         body: JSON.stringify(maj),
       });
+
+      if (!rMaj.ok) {
+        const detail = (await rMaj.text().catch(() => '')).slice(0, 160);
+        rapport.push({
+          nom: p.nom, photos: 0, poids_g: null, ok: false,
+          motif: `écriture refusée (${rMaj.status}) ${detail}`,
+        });
+        continue;
+      }
+
+      // Un PATCH qui ne renvoie aucune ligne a visé dans le vide : la clause
+      // n'a filtré personne, ou la politique de sécurité a masqué la ligne.
+      // Statut 200 et zéro ligne, c'est un échec silencieux, pas un succès.
+      const lignes = (await rMaj.json().catch(() => [])) as unknown[];
+      if (!Array.isArray(lignes) || lignes.length === 0) {
+        rapport.push({
+          nom: p.nom, photos: 0, poids_g: null, ok: false,
+          motif: 'écriture sans effet : aucune ligne touchée',
+        });
+        continue;
+      }
 
       rapport.push({ nom: p.nom, photos: images.length, poids_g: poids, ok: true });
     } catch (e) {
@@ -218,5 +251,6 @@ Deno.serve(async (req) => {
     await pause(1600);
   }
 
-  return json({ termine: false, traites: rapport.length, rapport });
+  const echecs = rapport.filter((x) => !x.ok).length;
+  return json({ termine: false, traites: rapport.length, reussis: rapport.length - echecs, echecs, rapport });
 });
