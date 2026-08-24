@@ -7,6 +7,7 @@ import { Minus, Plus, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import GarantiePayeProtege from '@/components/GarantiePayeProtege';
 import FileGroupage from '@/components/FileGroupage';
+import FretApresVerification from '@/components/FretApresVerification';
 
 export default function PanierAchat() {
   const { items, itemsExpress, itemsGroupage, updateQuantite, removeItem, totalFcfa } =
@@ -106,6 +107,7 @@ export default function PanierAchat() {
               {itemsGroupage.length > 0 && (
                 <div className="space-y-3 pt-2">
                   <FileGroupage nombreArticles={itemsGroupage.length} />
+                  <FretApresVerification compact />
                   {itemsGroupage.map(carteArticle)}
                 </div>
               )}
@@ -128,13 +130,15 @@ export default function PanierAchat() {
                       Hors livraison. Votre commande part en{' '}
                       <strong>deux envois</strong> : les articles en expédition rapide
                       d’abord, ceux en groupage au départ du prochain conteneur. Le
-                      transport est coté à l’étape suivante.
+                      transport rapide est coté à l’étape suivante ; celui du groupage
+                      vous est communiqué après vérification du volume.
                     </>
                   ) : itemsGroupage.length > 0 ? (
                     <>
                       Hors livraison. Votre commande part au{' '}
-                      <strong>prochain départ de groupage</strong>. Le transport est coté à
-                      l’étape suivante, au tarif du conteneur partagé.
+                      <strong>prochain départ de groupage</strong>. Le transport n’est pas
+                      encore chiffré : il vous sera communiqué après vérification du volume,
+                      et <strong>aucun paiement ne part avant</strong>.
                     </>
                   ) : (
                     <>

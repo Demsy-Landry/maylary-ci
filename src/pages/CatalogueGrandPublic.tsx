@@ -117,7 +117,7 @@ export default function CatalogueGrandPublic() {
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />
-      <main className="entree-page mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
+      <main className="entree-page mx-auto max-w-[1600px] px-4 py-8 sm:px-6">
         <div className="mb-6">
           <h1 className="trait-anime text-2xl font-bold text-foreground">Boutique MayLary Group</h1>
           <p className="mt-1 text-sm text-muted-foreground">
