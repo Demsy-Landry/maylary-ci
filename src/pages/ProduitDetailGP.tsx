@@ -3,6 +3,9 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
 import FretApresVerification from '@/components/FretApresVerification';
+import FicheTechnique from '@/components/FicheTechnique';
+import VideoProduit from '@/components/VideoProduit';
+import ArticlesSimilaires from '@/components/ArticlesSimilaires';
 import AvisProduit from '@/components/AvisProduit';
 import {
   supabase,
@@ -155,6 +158,7 @@ export default function ProduitDetailGP() {
         ) : !produit ? (
           <p className="text-sm text-muted-foreground">Produit introuvable.</p>
         ) : (
+          <>
           <div className="cascade grid gap-8 sm:grid-cols-2">
             {/* `min-w-0` sur les deux colonnes : un élément de grille a
                 `min-width: auto`, donc la colonne se dimensionne sur le mot le
@@ -227,12 +231,6 @@ export default function ProduitDetailGP() {
                 </p>
               )}
 
-              {produit.delai_livraison_estime && (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Délai de livraison estimé : {produit.delai_livraison_estime}
-                </p>
-              )}
-
               {produit.description && (
                 <p className="mt-4 whitespace-pre-line break-words text-sm text-foreground">
                   {produit.description}
@@ -280,22 +278,25 @@ export default function ProduitDetailGP() {
                 </dl>
               )}
 
-              {/* Le texte du fournisseur, en anglais tant que personne ne l'a
-                  réécrit. Il est présenté comme tel : le donner pour une
-                  description maison serait mentir sur son origine. */}
-              {produit.description_fournisseur && (
-                <details className="mt-4 rounded-md border bg-card p-3">
-                  <summary className="cursor-pointer text-sm font-medium text-foreground">
-                    Détail technique du fabricant
-                  </summary>
-                  <p className="mt-2 whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">
-                    {produit.description_fournisseur}
-                  </p>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Texte fourni par le fabricant, non traduit.
-                  </p>
-                </details>
-              )}
+              {/* Les caractéristiques chiffrées — poids, encombrement, commande
+                  minimum, acheminement, provenance. Elles n'étaient que sur la
+                  fiche Pro, alors qu'un particulier en a autant besoin : il veut
+                  savoir ce qu'il reçoit, quand, et combien ça pèse.
+
+                  Ce bloc reprend le délai de livraison, qui s'affichait avant en
+                  ligne isolée au-dessus. Le laisser aux deux endroits aurait
+                  donné deux fois la même information à deux endroits différents. */}
+              <VideoProduit url={produit.video_url} affiche={produit.photos?.[0]} />
+
+              <FicheTechnique
+                poids_unitaire_g={produit.poids_unitaire_g}
+                volume_unitaire_cm3={produit.volume_unitaire_cm3}
+                unite_vente={produit.unite_vente}
+                quantite_minimum={produit.quantite_minimum}
+                mode_acheminement={produit.mode_acheminement}
+                delai_livraison_estime={produit.delai_livraison_estime}
+                origine={produit.origine}
+              />
 
               {produit.quantite_minimum > 1 && (
                 <p className="mt-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-foreground">
@@ -348,6 +349,17 @@ export default function ProduitDetailGP() {
               <AvisProduit produitId={produit.id} />
             </div>
           </div>
+
+          {/* Hors de la grille à deux colonnes, donc sur toute la largeur :
+              c'est le bas de page, l'endroit où le visiteur qui n'a pas été
+              convaincu cherche autre chose plutôt que de fermer l'onglet. */}
+          <ArticlesSimilaires
+            produitId={produit.id}
+            espace="grand_public"
+            categorieGpId={produit.categorie_gp_id}
+            prixReference={produit.prix_unitaire_fcfa}
+          />
+          </>
         )}
       </main>
       <SiteFooter />
