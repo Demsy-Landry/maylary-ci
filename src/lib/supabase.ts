@@ -442,6 +442,9 @@ export interface Produit {
   matiere?: string | null;
   emballage?: string | null;
   poids_produit_g?: number | null;
+  /** Vidéo du produit, quand le fournisseur en fournit une. Chargée uniquement
+   *  si le visiteur la lance : sur un forfait mobile, ce sont ses données. */
+  video_url?: string | null;
   /** Poids et encombrement unitaires, tels que la vue publique les expose. */
   poids_unitaire_g?: number | null;
   volume_unitaire_cm3?: number | null;

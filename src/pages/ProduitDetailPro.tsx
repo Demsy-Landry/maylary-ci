@@ -4,6 +4,8 @@ import PublicHeaderPro from '@/components/PublicHeaderPro';
 import SiteFooter from '@/components/SiteFooter';
 import FretApresVerification from '@/components/FretApresVerification';
 import FicheTechnique from '@/components/FicheTechnique';
+import VideoProduit from '@/components/VideoProduit';
+import ArticlesSimilaires from '@/components/ArticlesSimilaires';
 import {
   supabase,
   ENSEIGNES_TABLE,
@@ -160,6 +162,7 @@ export default function ProduitDetailPro() {
         ) : !produit ? (
           <p className="text-sm text-muted-foreground">Produit introuvable.</p>
         ) : (
+          <>
           <div className="cascade grid gap-8 sm:grid-cols-2">
             {/* `min-w-0` sur les deux colonnes : un élément de grille a
                 `min-width: auto`, donc la colonne se dimensionne sur le mot le
@@ -283,17 +286,13 @@ export default function ProduitDetailPro() {
                 </p>
               )}
 
-              {produit.delai_livraison_estime && (
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Délai de livraison estimé : {produit.delai_livraison_estime}
-                </p>
-              )}
-
               {produit.description && (
                 <p className="mt-4 whitespace-pre-line break-words text-sm text-foreground">
                   {produit.description}
                 </p>
               )}
+
+              <VideoProduit url={produit.video_url} affiche={produit.photos?.[0]} />
 
               {/* Un acheteur en gros ne décide pas sur un prix : il calcule sa
                   place en rayon, son transport local et sa marge au détail.
@@ -341,6 +340,18 @@ export default function ProduitDetailPro() {
               <AvisProduit produitId={produit.id} />
             </div>
           </div>
+
+          {/* Côté Espace Pro, le voisinage se lit à l'enseigne : c'est elle qui
+              porte le secteur d'activité. Deux articles de la même enseigne
+              s'adressent au même métier, ce qui est le rapprochement utile
+              pour un acheteur professionnel. */}
+          <ArticlesSimilaires
+            produitId={produit.id}
+            espace="pro"
+            enseigneId={produit.enseigne_id}
+            prixReference={produit.prix_unitaire_fcfa}
+          />
+          </>
         )}
       </main>
       <SiteFooter />
