@@ -14,6 +14,7 @@ import {
 } from '@/lib/supabase';
 import { calculerCoutImport } from '@/lib/cout-import';
 import AdminNav from '@/components/AdminNav';
+import RetarifierCatalogue from '@/components/admin/RetarifierCatalogue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -215,6 +216,13 @@ export default function CjDropshippingImport() {
 
       <main className="mx-auto max-w-screen-xl px-4 py-8 sm:px-6">
         <ParametresMarge parametres={parametres} incoterms={incoterms} onSaved={loadParametres} />
+
+        {/* La tarification vient JUSTE APRÈS les réglages de marge, et avant
+            l'import : c'est l'ordre dans lequel on travaille. On règle sa
+            marge, on tarife ce qui attend, puis on va chercher du nouveau.
+            Placée en bas de page, personne ne l'aurait trouvée — c'est
+            exactement ce qui s'est produit tant qu'aucun écran ne l'appelait. */}
+        <RetarifierCatalogue />
 
         {/* La destination se choisit une fois pour toute une session d'import :
             on range rarement un article en boutique et le suivant en gros. */}
