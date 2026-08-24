@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import PublicHeaderPro from '@/components/PublicHeaderPro';
 import SiteFooter from '@/components/SiteFooter';
+import FicheTechnique from '@/components/FicheTechnique';
 import {
   supabase,
   ENSEIGNES_TABLE,
@@ -292,6 +293,19 @@ export default function ProduitDetailPro() {
                   {produit.description}
                 </p>
               )}
+
+              {/* Un acheteur en gros ne décide pas sur un prix : il calcule sa
+                  place en rayon, son transport local et sa marge au détail.
+                  Sans poids ni encombrement, il ne peut rien calculer. */}
+              <FicheTechnique
+                poids_unitaire_g={produit.poids_unitaire_g}
+                volume_unitaire_cm3={produit.volume_unitaire_cm3}
+                unite_vente={produit.unite_vente}
+                quantite_minimum={produit.quantite_minimum}
+                mode_acheminement={produit.mode_acheminement}
+                delai_livraison_estime={produit.delai_livraison_estime}
+                origine={produit.origine}
+              />
 
               <div className="mt-6 flex items-center gap-3">
                 <div className="flex items-center rounded-md border">
