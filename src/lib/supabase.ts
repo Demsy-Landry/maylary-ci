@@ -1,3 +1,4 @@
+import type { ModeAcheminement } from '@/lib/marge-chaine';
 import { createClient } from '@supabase/supabase-js';
 
 // Coordonnées du projet Supabase de MayLary Group.
@@ -465,6 +466,16 @@ export interface Produit {
   origine: OrigineProduit;
   created_at: string;
   updated_at: string;
+  /**
+   * Par où l'article arrive, et donc quand le client l'a.
+   *
+   * `cj_ddp` part tout de suite en porte-à-porte droits acquittés.
+   * `groupage` attend le départ d'une campagne, contre un fret divisé par
+   * trente. Ce n'est pas une information de coût — elle ne dit rien de ce que
+   * la marchandise nous revient — mais une information de service, et le
+   * client doit l'avoir avant de choisir.
+   */
+  mode_acheminement?: ModeAcheminement;
 }
 
 /** Vue admin complète du produit, incluant le prix d'achat privé — jamais utilisée côté public. */

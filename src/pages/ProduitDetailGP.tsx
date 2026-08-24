@@ -118,6 +118,7 @@ export default function ProduitDetailGP() {
         photo: produit.photos?.[0] ?? null,
         quantite_minimum: produit.quantite_minimum ?? 1,
         paliers,
+        mode_acheminement: produit.mode_acheminement,
       },
       quantite,
     );

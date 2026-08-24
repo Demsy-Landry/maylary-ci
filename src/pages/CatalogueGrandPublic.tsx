@@ -320,6 +320,7 @@ export function ProductCardGP({ produit }: { produit: Produit }) {
         photo: produit.photos?.[0] ?? null,
         quantite_minimum: quantite,
         paliers: produit.paliers ?? [],
+        mode_acheminement: produit.mode_acheminement,
       },
       quantite,
     );
