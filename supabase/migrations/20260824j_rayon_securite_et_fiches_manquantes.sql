@@ -1,0 +1,39 @@
+-- Le rayon Sécurité était vide, et neuf articles rallumés n'avaient pas de fiche
+--
+-- CE QUE CJ N'A PAS, ET CE QU'IL A
+--
+-- Recherche « helmet » : vingt-neuf résultats, pas un seul casque de chantier.
+-- CJ vend au grand public, pas à l'industrie — c'est établi depuis six
+-- recherches. Mais il vend des CASQUES MOTO, et à Abidjan c'est un marché de
+-- sécurité au moins aussi réel que le casque de chantier.
+--
+-- Recherche « padlock » : de la serrurerie sérieuse au milieu des bijoux
+-- fantaisie en forme de cadenas — cadenas à empreinte pour entrepôt, cadenas à
+-- alarme 110 dB, grilles de sécurité pliantes.
+--
+-- Douze articles retenus sur cinquante-neuf regardés, en deux registres qui se
+-- tiennent : ce qui protège la tête, ce qui protège le local.
+--
+-- LE TRI RESTE HUMAIN
+--
+-- `cj_peupler` sépare exprès `chercher` de `importer` : la recherche rend les
+-- candidats, l'import n'accepte que des identifiants explicitement choisis.
+-- Aucune machine ne décide seule de ce qui entre au catalogue — la leçon des
+-- quatre articles absurdes importés par mot-clé au début.
+--
+-- LES NEUF FICHES MANQUANTES
+--
+-- Le redevis CJ de la veille a rallumé neuf articles éteints à tort. Ils sont
+-- revenus tels qu'ils étaient tombés : nom anglais, aucune description. Le
+-- compte l'a montré — 140 en ligne, 131 décrits. Huit ont reçu leur fiche.
+--
+-- Le neuvième est le sachet à bulles d'expédition : vingt-quatre francs
+-- d'achat, une photo, aucun palier coté. Il est ressorti par automatisme, pas
+-- par mérite. Importer un consommable d'emballage de Chine pour le vendre cinq
+-- cents francs n'est pas une offre, c'est du remplissage — il est éteint sous
+-- ce motif plutôt que déguisé en article.
+
+-- Contenu appliqué directement : douze imports via `cj_peupler` action
+-- `importer` sur le secteur Sécurité, puis nommage, description, tarification
+-- au coefficient de marge et mise en ligne. Neuf fiches écrites. Un article
+-- éteint. Ce fichier tient lieu de trace ; les données vivent en base.
