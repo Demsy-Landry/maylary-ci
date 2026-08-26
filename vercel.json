@@ -8,7 +8,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://oubowmftzxpruckjzwuq.supabase.co https://mgx-backend-cdn.metadl.com https://cf.cjdropshipping.com https://oss-cf.cjdropshipping.com https://cbu01.alicdn.com; font-src 'self' data:; connect-src 'self' https://oubowmftzxpruckjzwuq.supabase.co wss://oubowmftzxpruckjzwuq.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://oubowmftzxpruckjzwuq.supabase.co https://mgx-backend-cdn.metadl.com https://*.cjdropshipping.com https://cbu01.alicdn.com; font-src 'self' data:; connect-src 'self' https://oubowmftzxpruckjzwuq.supabase.co wss://oubowmftzxpruckjzwuq.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
         },
         {
           "key": "Strict-Transport-Security",

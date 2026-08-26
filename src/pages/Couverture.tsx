@@ -130,6 +130,15 @@ export default function Couverture() {
   const [produits, setProduits] = useState<Vitrine[] | null>(null);
   const [categories, setCategories] = useState<CategorieGP[]>([]);
   const [recherche, setRecherche] = useState('');
+  /* LES IMAGES QUI NE RÉPONDENT PAS.
+     La vitrine n'avait aucun repli : une photo qui échoue laissait un cadre
+     vide, et le fondateur a vu des articles sans image. Une image distante
+     échoue pour des raisons qu'on ne maîtrise pas — le fournisseur retire un
+     fichier, la liaison coupe au mauvais moment. Ce qu'on maîtrise, c'est ce
+     qu'on montre à la place : jamais un trou. */
+  const [imagesCassees, setImagesCassees] = useState<Set<string>>(new Set());
+  const marquerCassee = (url: string) =>
+    setImagesCassees((s) => (s.has(url) ? s : new Set(s).add(url)));
 
   useEffect(() => {
     // Deux lectures légères et une seule fois. La vitrine n'a pas besoin de
@@ -362,13 +371,20 @@ export default function Couverture() {
                       téléphone, où la vignette est deux fois plus petite,
                       cela donnait des images qui ne ressemblaient à rien. */}
                   <div className="cadre-zoom aspect-square bg-white p-3">
-                    <img
-                      src={p.photos![0]}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="h-full w-full object-contain"
-                    />
+                    {imagesCassees.has(p.photos![0]) ? (
+                      <div className="flex h-full w-full items-center justify-center rounded bg-muted">
+                        <PackageSearch className="h-7 w-7 text-muted-foreground" aria-hidden="true" />
+                      </div>
+                    ) : (
+                      <img
+                        src={p.photos![0]}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        onError={() => marquerCassee(p.photos![0])}
+                        className="h-full w-full object-contain"
+                      />
+                    )}
                   </div>
                   <div className="relative z-[2] border-t bg-card px-3 py-2.5">
                     <p className="line-clamp-2 text-xs leading-snug text-muted-foreground sm:text-sm">
@@ -427,12 +443,13 @@ export default function Couverture() {
                   className="cadre-zoom group block overflow-hidden rounded-lg bg-card shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md"
                 >
                   <div className="aspect-square bg-muted">
-                    {c.image_url ? (
+                    {c.image_url && !imagesCassees.has(c.image_url) ? (
                       <img
                         src={c.image_url}
                         alt=""
                         loading="lazy"
                         decoding="async"
+                        onError={() => marquerCassee(c.image_url!)}
                         className="h-full w-full object-cover"
                       />
                     ) : (
