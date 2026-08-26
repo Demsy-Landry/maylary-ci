@@ -32,6 +32,47 @@ interface Annonce {
   origine: 'interne' | 'externe';
 }
 
+/**
+ * Ce que le serveur renvoie n'est pas forcément ce qu'on attend.
+ *
+ * CE QUI EST ARRIVÉ, ET QUI SE SERAIT VU UN JOUR DE FORTE AFFLUENCE
+ *
+ * La ligne d'avant écrivait `(data as Annonce | null) ?? null`. Ce `as` est
+ * une promesse faite au compilateur, pas une vérification : à l'exécution,
+ * personne ne regarde ce qui arrive vraiment. Et `?? null` ne rattrape que
+ * `null` ou `undefined` — un tableau vide, un objet incomplet, une réponse
+ * tronquée passent tous.
+ *
+ * La ligne suivante faisait alors `annonce.lien.startsWith('/')` sur un
+ * `lien` inexistant, et TOUTE LA PAGE tombait. Mesuré : la page « Nos
+ * services » ne s'affichait plus du tout, remplacée par le filet de sécurité.
+ *
+ * Ce n'est pas un cas d'école. Une réponse incomplète arrive précisément
+ * quand le réseau souffre — c'est-à-dire les jours de forte affluence, ceux
+ * où l'on peut le moins se permettre de perdre une page.
+ *
+ * LA RÈGLE
+ *
+ * Un encart publicitaire est un ornement. S'il ne peut pas s'afficher, il
+ * disparaît en silence ; il n'emporte jamais la page qui l'accueille. On
+ * vérifie donc ce qu'on a reçu avant de s'en servir, et au moindre doute on
+ * ne montre rien.
+ */
+function annonceUtilisable(data: unknown): Annonce | null {
+  // La fonction serveur peut rendre l'objet seul ou dans un tableau.
+  const brut = Array.isArray(data) ? data[0] : data;
+  if (!brut || typeof brut !== 'object') return null;
+
+  const a = brut as Partial<Annonce>;
+  // Le lien et le titre sont les deux seuls champs dont l'affichage dépend
+  // vraiment : sans eux, il n'y a rien à montrer ni où aller.
+  if (typeof a.lien !== 'string' || a.lien.length === 0) return null;
+  if (typeof a.titre !== 'string' || a.titre.length === 0) return null;
+  if (typeof a.id !== 'string') return null;
+
+  return a as Annonce;
+}
+
 export default function EmplacementPublicitaire({
   code,
   className = '',
@@ -46,7 +87,7 @@ export default function EmplacementPublicitaire({
   useEffect(() => {
     supabase
       .rpc('app_e08c374bc4_annonce_pour', { p_emplacement: code })
-      .then(({ data }) => setAnnonce((data as Annonce | null) ?? null));
+      .then(({ data }) => setAnnonce(annonceUtilisable(data)));
   }, [code]);
 
   useEffect(() => {
