@@ -300,8 +300,8 @@ export default function EspaceVendeur() {
           <ImageOuverture
             src="/visuels/bureau-espace-pro.jpg"
             alt=""
-            largeur={1168}
-            hauteur={784}
+            largeur={784}
+            hauteur={580}
             className="absolute inset-0 h-full w-full object-cover object-center opacity-70"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/20" />

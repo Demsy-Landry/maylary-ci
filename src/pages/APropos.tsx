@@ -94,8 +94,8 @@ export default function APropos() {
         <ImageOuverture
           src="/visuels/bureau-vue-port.jpg"
           alt=""
-          largeur={1168}
-          hauteur={784}
+          largeur={784}
+          hauteur={1168}
           className="absolute inset-0 h-full w-full object-cover object-center opacity-75"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/70 to-foreground/20" />
