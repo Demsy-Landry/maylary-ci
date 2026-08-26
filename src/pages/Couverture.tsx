@@ -16,7 +16,6 @@ import SystemeIntelligent from '@/components/SystemeIntelligent';
 import ImageOuverture from '@/components/ImageOuverture';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import SectorIllustration, { guessSector } from '@/components/illustrations/SectorIllustration';
 import {
   ArrowRight,
   ShieldCheck,
@@ -376,10 +375,22 @@ export default function Couverture() {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <SectorIllustration
-                        sector={guessSector(c.nom)}
-                        className="h-full w-full p-2"
-                      />
+                      /* PAS DE PICTOGRAMME DE REPLI.
+                         Le repli précédent devinait un « secteur » à partir du
+                         nom du rayon, et se trompait : le même dessin de sac
+                         est apparu sur Montres, Sacs, Bébé et Maison — quatre
+                         rayons, une seule image. Un visiteur y lit une
+                         boutique bâclée, et il a raison.
+
+                         Une initiale sur un aplat de marque ne prétend rien.
+                         Elle dit « ce rayon n'a pas encore de photo », ce qui
+                         est vrai, au lieu d'annoncer des sacs à main sous
+                         l'étiquette Montres. */
+                      <div className="flex h-full w-full items-center justify-center bg-primary/10">
+                        <span className="font-display text-3xl font-bold text-primary/70">
+                          {c.nom.charAt(0)}
+                        </span>
+                      </div>
                     )}
                   </div>
                   <p className="border-t bg-card px-2 py-2.5 text-center text-xs font-medium leading-tight text-foreground group-hover:text-primary sm:text-sm">
