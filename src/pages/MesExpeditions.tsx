@@ -39,6 +39,9 @@ export default function MesExpeditions() {
       .from(EXPEDITIONS_TABLE)
       .select('*')
       .order('maj_le', { ascending: false })
+      // Un client fidèle finit par accumuler des centaines d'expéditions.
+      // Il regarde les récentes ; les anciennes sont dans son historique.
+      .limit(100)
       .then(({ data }) => setExpeditions((data as Expedition[]) ?? []));
   }, [user]);
 
