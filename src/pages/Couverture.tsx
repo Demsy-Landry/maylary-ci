@@ -61,6 +61,61 @@ interface Vitrine {
   nom: string;
   prix_unitaire_fcfa: number;
   photos: string[] | null;
+  categorie_gp_id: string | null;
+  marchands_vendeurs: number | null;
+}
+
+/**
+ * Choisir ce qu'on met en devanture.
+ *
+ * POURQUOI PAS « LES PLUS RÉCENTS »
+ *
+ * La vitrine prenait les douze derniers articles créés. Le résultat dépendait
+ * donc de ce qu'on avait importé la veille : après une soirée passée à garnir
+ * la quincaillerie, la page d'accueil est devenue un magasin d'outillage. Le
+ * fondateur l'a vu tout de suite — « il n'y a que des articles de mécanique ».
+ *
+ * Une devanture ne dit pas ce qui vient d'arriver. Elle dit ce que la maison
+ * vend, et elle doit le dire en douze images.
+ *
+ * DEUX RÈGLES, DANS CET ORDRE
+ *
+ * D'abord la VARIÉTÉ : on tourne entre les rayons, un article chacun, puis on
+ * recommence. Aucun rayon ne peut occuper la vitrine à lui seul, même s'il
+ * contient la moitié du catalogue.
+ *
+ * Ensuite la QUALITÉ : dans chaque rayon, on prend d'abord l'article que le
+ * plus de marchands revendent. C'est le seul signal de validation dont on
+ * dispose, et il vaut mieux que l'ancienneté — un oxymètre revendu par trois
+ * cent trente-trois boutiques a fait ses preuves, un article importé hier n'a
+ * rien prouvé du tout.
+ */
+function vitrineVariee(tous: Vitrine[], combien: number): Vitrine[] {
+  const parRayon = new Map<string, Vitrine[]>();
+  for (const p of tous) {
+    const cle = p.categorie_gp_id ?? 'sans-rayon';
+    const liste = parRayon.get(cle) ?? [];
+    liste.push(p);
+    parRayon.set(cle, liste);
+  }
+  // Le mieux validé en tête de chaque rayon.
+  for (const liste of parRayon.values()) {
+    liste.sort((a, b) => (b.marchands_vendeurs ?? 0) - (a.marchands_vendeurs ?? 0));
+  }
+
+  const files = [...parRayon.values()];
+  const choisis: Vitrine[] = [];
+  let rang = 0;
+  // Un tour de table : un article par rayon, puis on recommence. On s'arrête
+  // quand la vitrine est pleine ou qu'il n'y a plus rien à prendre.
+  while (choisis.length < combien && files.some((f) => f.length > rang)) {
+    for (const f of files) {
+      if (choisis.length >= combien) break;
+      if (f.length > rang) choisis.push(f[rang]);
+    }
+    rang++;
+  }
+  return choisis;
 }
 
 const fcfa = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
@@ -82,20 +137,26 @@ export default function Couverture() {
     void Promise.all([
       supabase
         .from(PRODUITS_PUBLIC_VIEW)
-        .select('id, nom, prix_unitaire_fcfa, photos')
+        .select('id, nom, prix_unitaire_fcfa, photos, categorie_gp_id, marchands_vendeurs')
+        .eq('espace', 'grand_public')
         .not('photos', 'is', null)
-        .order('created_at', { ascending: false })
-        // Douze et non huit : une grille de tuiles se juge pleine. Huit
-        // laissaient une dernière rangée à moitié vide sur grand écran, et
-        // une vitrine à trous se lit comme un stock qui s'épuise.
-        .limit(12),
+        // On ramène large pour pouvoir CHOISIR : la variété se construit ici,
+        // pas dans la requête. Quatre-vingts lignes de quatre colonnes légères
+        // coûtent moins qu'une image, et permettent de couvrir tous les rayons.
+        .order('marchands_vendeurs', { ascending: false, nullsFirst: false })
+        .limit(80),
       supabase
         .from(CATEGORIES_GP_TABLE)
         .select('id, nom, image_url, ordre_affichage, actif, created_at, updated_at')
         .eq('actif', true)
         .order('ordre_affichage'),
     ]).then(([p, c]) => {
-      setProduits(((p.data as Vitrine[]) ?? []).filter((x) => x.photos?.length));
+      // Douze : une grille de tuiles se juge pleine. Huit laissaient une
+      // dernière rangée à moitié vide sur grand écran, et une vitrine à trous
+      // se lit comme un stock qui s'épuise.
+      setProduits(
+        vitrineVariee(((p.data as Vitrine[]) ?? []).filter((x) => x.photos?.length), 12),
+      );
       setCategories((c.data as CategorieGP[]) ?? []);
     });
   }, []);
