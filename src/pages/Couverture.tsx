@@ -14,6 +14,7 @@ import { LogoMaylary } from '@/components/MarqueMaylary';
 import SiteFooter from '@/components/SiteFooter';
 import SystemeIntelligent from '@/components/SystemeIntelligent';
 import ImageOuverture from '@/components/ImageOuverture';
+import MenuServices from '@/components/MenuServices';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -182,12 +183,34 @@ export default function Couverture() {
       <header className="absolute inset-x-0 top-0 z-20 pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex max-w-screen-xl items-center justify-between px-4 py-4 sm:px-6">
           <Link to="/" aria-label="MayLary Group, accueil">
-            <LogoMaylary className="font-display text-white" tailleTexte="text-lg" />
+            {/* `whitespace-nowrap` : le bandeau a gagné le bouton « Services »,
+                et sur un téléphone de 390 px le nom de la marque se coupait
+                entre « MayLary » et « Group ». Un nom qui passe à la ligne se
+                lit comme deux mots. */}
+            <LogoMaylary
+              className="whitespace-nowrap font-display text-white"
+              tailleMarque="h-8 w-8 sm:h-9 sm:w-9"
+              tailleTexte="text-base sm:text-lg"
+            />
           </Link>
           <div className="flex items-center gap-1 sm:gap-2">
+            {/* HUIT MÉTIERS, DEUX PORTES : LE COMPTE N'Y ÉTAIT PAS.
+                Cet en-tête menait à la boutique et à la page de présentation
+                des services — rien d'autre. Importer, Exporter, l'Espace Pro,
+                le Sourcing, les Achats groupés, Vendre, Le Déclarant : sept
+                métiers n'avaient AUCUN accès depuis la page d'accueil, la
+                seule que voit un visiteur qui arrive par le nom de domaine.
+
+                Le panneau latéral existait déjà et sert toutes les autres
+                pages. Il manquait ici, précisément là où il manquait le plus.
+
+                La page de présentation reste accessible : le panneau ouvre les
+                métiers un par un, « Nos services » les raconte ensemble. Les
+                deux ne font pas le même travail. */}
+            <MenuServices surFondSombre />
             <Link
               to="/boutique"
-              className="rounded-md px-3 py-2 text-sm font-medium text-white/85 transition hover:text-white"
+              className="hidden rounded-md px-3 py-2 text-sm font-medium text-white/85 transition hover:text-white sm:block"
             >
               Boutique
             </Link>
@@ -232,7 +255,13 @@ export default function Couverture() {
           bouton « Chercher » peut tomber hors de vue. Avec `svh` elle tient
           toujours, au prix d'un léger vide quand les barres se replient — un
           vide que la photographie remplit, puisqu'elle déborde déjà. */}
-      <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-foreground sm:min-h-[86vh]">
+      {/* SUR ORDINATEUR AUSSI, ET C'ÉTAIT LE DÉFAUT.
+          `sm:min-h-[86vh]` ramenait l'ouverture à 86 % de l'écran dès qu'on
+          quittait le téléphone : sur un moniteur de 1080 px, cent cinquante
+          pixels de section suivante montraient déjà le bas, et la
+          photographie s'arrêtait avant le bord. Le premier écran d'un groupe
+          se tient sur un écran entier, quel que soit l'écran. */}
+      <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-foreground">
         {/* L'image d'ouverture est servie par le site, pas par le stockage
             distant : même origine, une connexion de moins à ouvrir, et elle
             arrive avant tout le reste. C'est le premier écran d'un groupe —
@@ -240,16 +269,30 @@ export default function Couverture() {
         <ImageOuverture
           src="/visuels/fret-aerien-abidjan.jpg"
           alt=""
-          largeur={784}
-          hauteur={1168}
-          className="absolute inset-0 h-full w-full scale-105 object-cover object-[60%_center] motion-safe:animate-[respiration_24s_ease-in-out_infinite]"
+          largeur={1168}
+          hauteur={784}
+          className="absolute inset-0 h-full w-full scale-105 object-cover object-[60%_center] sm:object-[center_58%] motion-safe:animate-[respiration_24s_ease-in-out_infinite]"
         />
         {/* Deux voiles superposés plutôt qu'un seul aplat : le premier assure
             la lisibilité du texte à gauche, le second rattache le bas de
             l'image au fond de la page. La photographie reste visible — c'est
             elle qui dit le métier. */}
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/95 via-foreground/75 to-foreground/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-foreground/40" />
+        {/* LES VOILES SE RESSERRENT QUAND L'ÉCRAN S'ÉLARGIT.
+            Ils étaient réglés pour un téléphone, où le texte occupe toute la
+            largeur : il faut assombrir partout pour qu'il reste lisible. Sur
+            un moniteur, ce même réglage laissait la photographie à 75 % de
+            voile en son milieu et à 60 % en haut — l'avion, les conteneurs,
+            le chariot élévateur disparaissaient sous le gris, et il ne
+            restait qu'une bande claire au centre. D'où l'impression, juste,
+            d'une image « centrée » qui n'occupe pas l'écran.
+            Elle l'occupait ; on ne la voyait plus.
+
+            À partir de `sm`, le voile horizontal s'éteint dès 45 % — juste
+            après la colonne de texte — et le voile vertical s'allège. Le
+            contraste du titre est conservé là où il y a du titre, et la
+            photographie reprend les deux tiers droits de l'écran. */}
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/95 via-foreground/75 to-foreground/20 sm:via-foreground/70 sm:via-45% sm:to-foreground/5" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-transparent to-foreground/40 sm:from-foreground/45 sm:to-foreground/20" />
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent" />
 
         {/* Le bandeau flotte AU-DESSUS de cette ouverture : son dégagement de

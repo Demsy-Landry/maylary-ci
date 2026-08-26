@@ -58,7 +58,19 @@ const SERVICES: { to: string; titre: string; sous: string; icone: LucideIcon }[]
  * titre sous l'encoche, `pb-[env(safe-area-inset-bottom)]` garde la dernière
  * entrée au-dessus de la barre de geste — sinon elle est là, mais intouchable.
  */
-export default function MenuServices() {
+interface Props {
+  /**
+   * Habillage du bouton d'ouverture.
+   *
+   * La page de couverture pose son en-tête PAR-DESSUS la photographie : le gris
+   * du bouton fantôme y était illisible, et un menu qu'on ne voit pas n'existe
+   * pas. `sombre` bascule le texte en blanc et le survol en voile clair — la
+   * même règle que les autres liens de ce bandeau.
+   */
+  surFondSombre?: boolean;
+}
+
+export default function MenuServices({ surFondSombre = false }: Props) {
   const [ouvert, setOuvert] = useState(false);
   const fermeture = useRef<HTMLButtonElement>(null);
 
@@ -93,6 +105,11 @@ export default function MenuServices() {
         aria-expanded={ouvert}
         aria-haspopup="dialog"
         onClick={() => setOuvert(true)}
+        className={
+          surFondSombre
+            ? 'text-white/85 hover:bg-white/10 hover:text-white focus-visible:ring-white/40'
+            : undefined
+        }
       >
         <LayoutGrid className="mr-1.5 h-4 w-4" />
         Services

@@ -90,8 +90,8 @@ export default function CataloguePro() {
         <ImageOuverture
           src="/visuels/sourcing-entrepot.jpg"
           alt=""
-          largeur={784}
-          hauteur={580}
+          largeur={1168}
+          hauteur={784}
           className="absolute inset-0 h-full w-full scale-105 object-cover object-[70%_center] opacity-70 motion-safe:animate-[respiration_28s_ease-in-out_infinite]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground via-foreground/85 to-foreground/40" />
