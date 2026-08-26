@@ -16,6 +16,7 @@ import SystemeIntelligent from '@/components/SystemeIntelligent';
 import ImageOuverture from '@/components/ImageOuverture';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import SectorIllustration, { guessSector } from '@/components/illustrations/SectorIllustration';
 import {
   ArrowRight,
   ShieldCheck,
@@ -85,7 +86,10 @@ export default function Couverture() {
         .select('id, nom, prix_unitaire_fcfa, photos')
         .not('photos', 'is', null)
         .order('created_at', { ascending: false })
-        .limit(8),
+        // Douze et non huit : une grille de tuiles se juge pleine. Huit
+        // laissaient une dernière rangée à moitié vide sur grand écran, et
+        // une vitrine à trous se lit comme un stock qui s'épuise.
+        .limit(12),
       supabase
         .from(CATEGORIES_GP_TABLE)
         .select('id, nom, image_url, ordre_affichage, actif, created_at, updated_at')
@@ -275,12 +279,22 @@ export default function Couverture() {
           </p>
         ) : (
           <>
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {/* TUILE À BANDEAU-LÉGENDE, à la manière des vitrines de marque.
+                L'image occupe toute la tuile et le texte se tient dans une
+                bande sous elle, séparée par un trait. C'est ce qui donne à une
+                grille son allure de rayon : ce sont les PHOTOS qui s'alignent,
+                pas des cartes bordées de gris.
+
+                La bordure du haut disparaît donc, et l'ombre porte le relief.
+                Une carte cernée d'un trait à chaque tuile fabrique un
+                quadrillage — l'œil compte les cases au lieu de regarder les
+                objets. */}
+            <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
               {produits.map((p) => (
                 <Link
                   key={p.id}
                   to={`/boutique/produit/${p.id}`}
-                  className="groupe-zoom carte-reactive reflet block overflow-hidden rounded-lg border bg-card hover:border-primary/40"
+                  className="groupe-zoom carte-reactive reflet block overflow-hidden rounded-lg bg-card shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md"
                 >
                   {/* `object-contain`, et non `object-cover` : un article se
                       montre en entier. Recadrer au carré coupait les pieds
@@ -296,9 +310,11 @@ export default function Couverture() {
                       className="h-full w-full object-contain"
                     />
                   </div>
-                  <div className="relative z-[2] p-3">
-                    <p className="line-clamp-2 text-sm leading-snug text-foreground">{p.nom}</p>
-                    <p className="mt-1.5 font-display font-bold tabular-nums text-foreground">
+                  <div className="relative z-[2] border-t bg-card px-3 py-2.5">
+                    <p className="line-clamp-2 text-xs leading-snug text-muted-foreground sm:text-sm">
+                      {p.nom}
+                    </p>
+                    <p className="mt-1 font-display text-sm font-bold tabular-nums text-foreground sm:text-base">
                       {fcfa(p.prix_unitaire_fcfa)}
                     </p>
                   </div>
@@ -329,17 +345,49 @@ export default function Couverture() {
           </>
         )}
 
+        {/* LES RAYONS EN TUILES, ET NON PLUS EN PASTILLES.
+            Une rangée de pastilles grises se lit comme des filtres : on la
+            survole sans la voir. Une tuile avec l'image du rayon se regarde,
+            et donne envie d'entrer — c'est la différence entre une liste de
+            mots et une devanture.
+
+            Le rayon qui n'a pas encore de photographie ne laisse pas un trou :
+            son illustration sectorielle prend la place, dessinée aux couleurs
+            de la maison. */}
         {categories.length > 0 && (
-          <div className="mt-10 flex flex-wrap gap-2">
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                to={`/boutique/categorie/${c.id}`}
-                className="rounded-full border px-4 py-2 text-sm font-medium text-foreground transition hover:border-primary hover:bg-primary/5"
-              >
-                {c.nom}
-              </Link>
-            ))}
+          <div className="mt-12">
+            <h3 className="font-display text-lg font-semibold text-foreground">
+              Parcourir par rayon
+            </h3>
+            <div className="cascade mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-6">
+              {categories.map((c) => (
+                <Link
+                  key={c.id}
+                  to={`/boutique/categorie/${c.id}`}
+                  className="cadre-zoom group block overflow-hidden rounded-lg bg-card shadow-sm ring-1 ring-black/5 transition-shadow hover:shadow-md"
+                >
+                  <div className="aspect-square bg-muted">
+                    {c.image_url ? (
+                      <img
+                        src={c.image_url}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <SectorIllustration
+                        sector={guessSector(c.nom)}
+                        className="h-full w-full p-2"
+                      />
+                    )}
+                  </div>
+                  <p className="border-t bg-card px-2 py-2.5 text-center text-xs font-medium leading-tight text-foreground group-hover:text-primary sm:text-sm">
+                    {c.nom}
+                  </p>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </section>
