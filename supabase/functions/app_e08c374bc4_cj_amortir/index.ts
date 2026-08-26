@@ -42,6 +42,35 @@
  * quantité minimum, le fret unitaire qui en découle, et l'état de l'article.
  */
 
+/*
+ * TROIS ÉTATS DE `fret_source`, ET NON PLUS DEUX
+ *
+ * `forfait` voulait dire « jamais demandé ». Mais l'article partait quand même
+ * en groupage, comme si CJ avait refusé : une absence de question traitée comme
+ * une réponse négative. Sur 73 articles en groupage, 36 pesaient MOINS DE DEUX
+ * KILOS — on ne les avait pas mis en groupage, on avait omis de demander.
+ *
+ *   `forfait`    jamais demandé, à redemander.
+ *   `cj_reel`    CJ a coté — porte-à-porte, avec la quantité minimum qui rend
+ *                le fret tenable.
+ *   `cj_refuse`  CJ interrogé à chaque palier, et n'a rien coté. SEUL cas où le
+ *                groupage s'impose, comme le veut le fondateur.
+ *
+ * UN ÉCHEC RÉSEAU N'EST PAS UN REFUS
+ *
+ * Le devis se demande sur une VARIANTE, pas sur un produit. Première version :
+ * la recherche de variante rendait `null` sur n'importe quel incident — cadence
+ * dépassée comprise — et l'appelant inscrivait `cj_refuse`. Neuf articles
+ * légers ont ainsi été déclarés hors de portée de CJ sans qu'on le lui ait
+ * demandé. Vérifié à la main sur l'un d'eux : le cadenas de 155 g a bel et bien
+ * une variante, et CJ répond « Success ».
+ *
+ * D'où une seconde tentative espacée, et surtout : quand elle échoue aussi, on
+ * ne conclut plus au refus. L'article retourne en `forfait`, c'est-à-dire « à
+ * redemander ». Mieux vaut un article en attente qu'un article mal classé — le
+ * premier se rattrape au passage suivant, le second est perdu.
+ */
+
 import { amortirLeFret } from '../_partage/amortir-le-fret.ts';
 
 const CJ = 'https://developers.cjdropshipping.com/api2.0/v1';
@@ -67,6 +96,29 @@ async function jetonCj(): Promise<string | null> {
   const l = await r.json().catch(() => []);
   const t = l?.[0];
   return t?.access_token && new Date(t.expire_le) > new Date() ? t.access_token : null;
+}
+
+/**
+ * L'identifiant de variante, avec une seconde tentative.
+ *
+ * `null` ne veut PAS dire « pas de variante » : il veut dire « pas obtenue ».
+ * L'appelant doit traiter ce cas comme une attente, jamais comme un refus.
+ */
+async function variantePour(pid: string, token: string): Promise<string | null> {
+  for (let essai = 0; essai < 2; essai++) {
+    if (essai > 0) await pause(3000);
+    try {
+      const u = new URL(`${CJ}/product/query`);
+      u.searchParams.set('pid', pid);
+      const r = await fetch(u, { headers: { 'CJ-Access-Token': token } });
+      const d = await r.json().catch(() => null);
+      if (!d?.result) continue;   // cadence dépassée, ou fiche momentanément illisible
+      const v = (d?.data?.variants as Record<string, unknown>[] | undefined)?.[0];
+      const vid = v?.vid ?? v?.variantSku ?? null;
+      if (vid) return String(vid);
+    } catch { /* on retente */ }
+  }
+  return null;
 }
 
 /** Le devis CJ pour un envoi de `quantite` pièces, en dollars, ou null. */
