@@ -66,7 +66,9 @@ export default function SuiviExpeditions() {
     const { data } = await supabase
       .from(EXPEDITIONS_TABLE)
       .select('*')
-      .order('maj_le', { ascending: false });
+      .order('maj_le', { ascending: false })
+      // Le suivi porte sur ce qui bouge, pas sur l'archive complète.
+      .limit(200);
     const liste = (data as Expedition[]) ?? [];
     setExpeditions(liste);
 

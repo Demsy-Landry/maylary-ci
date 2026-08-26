@@ -62,7 +62,10 @@ export default function AchatsGroupes() {
         .from(ACHATS_GROUPES_PUBLICS_VIEW)
         .select('*')
         .order('statut', { ascending: true })
-        .order('cloture_prevue_le', { ascending: true }),
+        .order('cloture_prevue_le', { ascending: true })
+        // Page publique : sans plafond, une campagne populaire ferait
+        // télécharger toute la table à chaque visiteur.
+        .limit(120),
       user
         ? supabase.from(PARTICIPATIONS_ACHAT_GROUPE_TABLE).select('*')
         : Promise.resolve({ data: [] as ParticipationAchatGroupe[] }),

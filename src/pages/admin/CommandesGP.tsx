@@ -75,7 +75,11 @@ export default function AdminCommandesGP() {
     const { data } = await supabase
       .from(COMMANDES_GP_COUT_VIEW)
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      // Les deux cents dernières. Au-delà, l'écran devient illisible bien
+      // avant que la base ne peine — et personne ne fait défiler dix mille
+      // lignes pour retrouver une commande : on la cherche.
+      .limit(200);
     setCommandes((data as CommandeGP[]) ?? []);
     setLoading(false);
   };
