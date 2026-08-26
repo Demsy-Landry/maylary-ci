@@ -34,8 +34,9 @@
 
 const CJ_BASE = 'https://developers.cjdropshipping.com/api2.0/v1';
 
+// Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
+// connaît l'origine de la demande. Ce qui reste ici est écrasé en sortie.
 const enTetes = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type',
   'Content-Type': 'application/json; charset=utf-8',
 };
@@ -70,6 +71,7 @@ function motsUtiles(texte: string): string[] {
  * de ce qu'on cherche dans un catalogue de biens de consommation. Ils ne
  * remplacent pas un traducteur : ils garantissent un plancher.
  */
+import { servirAvecCors } from '../_partage/cors.ts';
 const LEXIQUE: Record<string, string> = {
   trottinette: 'scooter', velo: 'bicycle', voiture: 'car', moto: 'motorcycle',
   electrique: 'electric', solaire: 'solar', sans: '', batterie: 'battery',
@@ -187,7 +189,7 @@ async function jetonCJ(url: string, cle: string): Promise<string | null> {
   return jeton;
 }
 
-Deno.serve(async (requete) => {
+servirAvecCors(async (requete) => {
   if (requete.method === 'OPTIONS') return new Response('ok', { headers: enTetes });
 
   const url = Deno.env.get('SUPABASE_URL')!;

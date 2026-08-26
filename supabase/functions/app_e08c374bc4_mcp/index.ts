@@ -1,3 +1,4 @@
+import { servirAvecCors } from '../_partage/cors.ts';
 // Serveur MCP — les mains de l'agent MayLary Group.
 //
 // L'agent vit chez Anthropic. Il n'a aucun accès à la base : il ne connaît que
@@ -31,8 +32,9 @@
 // MCP_TOKEN, et donné à l'agent au moment de le connecter. Ce jeton vaut accès
 // à l'exploitation de la maison : il se traite comme un mot de passe.
 
+// Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
+// connaît l'origine de la demande. Ce qui reste ici est écrasé en sortie.
 const enTetes = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type, mcp-session-id, mcp-protocol-version',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
   'Content-Type': 'application/json; charset=utf-8',
@@ -407,7 +409,7 @@ async function executer(nom: string, args: Record<string, unknown>): Promise<Sor
   }
 }
 
-Deno.serve(async (requete) => {
+servirAvecCors(async (requete) => {
   if (requete.method === 'OPTIONS') return new Response('ok', { headers: enTetes });
 
   const attendu = (Deno.env.get('MCP_TOKEN') ?? '').trim();

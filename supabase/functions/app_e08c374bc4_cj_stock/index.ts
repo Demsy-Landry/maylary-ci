@@ -21,9 +21,11 @@ import {
   obtenirStockVariante,
   pause,
 } from '../_partage/cj-api.ts';
+import { servirAvecCors } from '../_partage/cors.ts';
 
+// Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
+// connaît l'origine de la demande. Ce qui reste ici est écrasé en sortie.
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
 };
 
@@ -43,7 +45,7 @@ interface CorpsRequete {
   lignes?: { produit_id: string; quantite: number }[];
 }
 
-Deno.serve(async (req: Request) => {
+servirAvecCors(async (req: Request) => {
   const requestId = crypto.randomUUID();
 
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: corsHeaders });

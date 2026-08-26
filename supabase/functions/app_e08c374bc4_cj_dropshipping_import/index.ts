@@ -7,12 +7,14 @@ import {
   type FretReel,
 } from '../_partage/cj-api.ts';
 import { calculerCout, quantiteMinimumPour } from '../_partage/cout-import.ts';
+import { servirAvecCors } from '../_partage/cors.ts';
 
 /** Enseigne maison sous laquelle paraissent les imports Maylary en espace pro. */
 const ENSEIGNE_MAYLARY = 'Maylary Import';
 
+// Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
+// connaît l'origine de la demande. Ce qui reste ici est écrasé en sortie.
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
 };
 
@@ -43,7 +45,7 @@ interface ImportBody {
   quantite_minimum?: number;
 }
 
-Deno.serve(async (req: Request) => {
+servirAvecCors(async (req: Request) => {
   const requestId = crypto.randomUUID();
 
   if (req.method === 'OPTIONS') {

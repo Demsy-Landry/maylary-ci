@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { servirAvecCors } from '../_partage/cors.ts';
 
 /**
  * Connecteur AliExpress — recherche, fiche article, et surtout MODE D'EXPÉDITION.
@@ -36,8 +37,9 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
  * par AliExpress le dira explicitement.
  */
 
+// Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
+// connaît l'origine de la demande. Ce qui reste ici est écrasé en sortie.
 const enTetesCors = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
 };
 
@@ -271,7 +273,7 @@ function cartographier(brut: unknown): ArticleAliExpress | null {
   };
 }
 
-Deno.serve(async (req) => {
+servirAvecCors(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: enTetesCors });
 
   /* Même garde que les autres fonctions d'administration : seul un

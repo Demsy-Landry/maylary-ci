@@ -23,9 +23,11 @@
  * fonction ne fait que le va-et-vient réseau : elle ne décide rien.
  */
 import { getCjAccessToken, pause } from '../_partage/cj-api.ts';
+import { servirAvecCors } from '../_partage/cors.ts';
 
+// Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
+// connaît l'origine de la demande. Ce qui reste ici est écrasé en sortie.
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
 };
 
@@ -52,7 +54,7 @@ async function sql(chemin: string, options: RequestInit = {}) {
   });
 }
 
-Deno.serve(async (req) => {
+servirAvecCors(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   // Seul un administrateur déclenche un parcours du catalogue : c'est long, ça
