@@ -33,9 +33,11 @@
  * Elle n'apparaît nulle part ailleurs. Sans clé, la fonction le DIT au lieu de
  * faire semblant de fonctionner.
  */
+import { servirAvecCors } from '../_partage/cors.ts';
 
+// Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
+// connaît l'origine de la demande. Ce qui reste ici est écrasé en sortie.
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
 };
 
@@ -167,7 +169,7 @@ interface Expedition {
   statut: string;
 }
 
-Deno.serve(async (req) => {
+servirAvecCors(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   /* Deux appelants légitimes : un administrateur qui relance à la main depuis

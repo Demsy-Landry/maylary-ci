@@ -46,9 +46,11 @@
  */
 
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { servirAvecCors } from '../_partage/cors.ts';
 
+// Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
+// connaît l'origine de la demande. Ce qui reste ici est écrasé en sortie.
 const enTetes = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': '*',
 };
 
@@ -181,7 +183,7 @@ function instructionFournisseur(c: Consolidateur, marque: string, colis: number)
 
 /* ------------------------------------------------------------------------ */
 
-Deno.serve(async (req) => {
+servirAvecCors(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: enTetes });
 
   /* Même garde que les autres fonctions d'administration. */

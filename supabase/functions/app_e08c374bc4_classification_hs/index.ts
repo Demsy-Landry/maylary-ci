@@ -1,5 +1,6 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { servirAvecCors } from '../_partage/cors.ts';
 
 /*
  * Classification tarifaire assistée.
@@ -22,8 +23,9 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
  * il est remonté, parce que sans lui un refus ne dit rien.
  */
 
+// Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
+// connaît l'origine de la demande. Ce qui reste ici est écrasé en sortie.
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
@@ -173,7 +175,7 @@ async function interrogerGoogle(modele: string, description: string): Promise<Re
   return { ok: false, refus: dernier };
 }
 
-Deno.serve(async (req: Request) => {
+servirAvecCors(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
 
   try {
