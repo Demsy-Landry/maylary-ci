@@ -147,7 +147,19 @@ export default function Couverture() {
       {/* ---------- Ouverture ----------
           Une seule image chargée en priorité sur toute la page. Le reste vient
           après, et seulement quand il approche de l'écran. */}
-      <section className="relative flex min-h-[34rem] items-center overflow-hidden bg-foreground sm:min-h-[86vh]">
+      {/* PLEINE HAUTEUR D'ÉCRAN, ET `svh` PLUTÔT QUE `vh`.
+          L'ouverture s'arrêtait à 34 rem : sur un téléphone de 844 px elle en
+          occupait 661, et laissait une bande claire sous la photographie avant
+          la section suivante. Le premier écran d'un groupe ne se termine pas
+          sur un blanc.
+
+          `svh` — la « petite » hauteur d'écran, barres du navigateur DÉPLOYÉES.
+          Avec `vh`, la bannière est dimensionnée sur l'écran barres repliées :
+          au chargement, quand elles sont visibles, le bas est coupé et le
+          bouton « Chercher » peut tomber hors de vue. Avec `svh` elle tient
+          toujours, au prix d'un léger vide quand les barres se replient — un
+          vide que la photographie remplit, puisqu'elle déborde déjà. */}
+      <section className="relative flex min-h-[100svh] items-center overflow-hidden bg-foreground sm:min-h-[86vh]">
         {/* L'image d'ouverture est servie par le site, pas par le stockage
             distant : même origine, une connexion de moins à ouvrir, et elle
             arrive avant tout le reste. C'est le premier écran d'un groupe —

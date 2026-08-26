@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,103 +12,159 @@ import {
   Users,
   ShieldCheck,
   LayoutGrid,
+  X,
   type LucideIcon,
 } from 'lucide-react';
 
-const SERVICES: { to: string; titre: string; icone: LucideIcon }[] = [
-  { to: '/import/nouvelle-demande', titre: 'Importer', icone: PackageSearch },
-  { to: '/export/nouvelle-demande', titre: 'Exporter', icone: Ship },
-  { to: '/boutique', titre: 'Boutique', icone: ShoppingBag },
-  { to: '/catalogue', titre: 'Espace Pro', icone: Building2 },
-  { to: '/boutique/sourcing', titre: 'Sourcing sur demande', icone: Search },
-  { to: '/boutique/achats-groupes', titre: 'Achats groupés', icone: Users },
-  { to: '/vendre', titre: 'Vendre sur MayLary Group', icone: Store },
-  { to: '/declarant', titre: 'Le Déclarant — douane', icone: ShieldCheck },
+const SERVICES: { to: string; titre: string; sous: string; icone: LucideIcon }[] = [
+  { to: '/import/nouvelle-demande', titre: 'Importer', sous: 'Faire venir une marchandise', icone: PackageSearch },
+  { to: '/export/nouvelle-demande', titre: 'Exporter', sous: 'Expédier depuis la Côte d’Ivoire', icone: Ship },
+  { to: '/boutique', titre: 'Boutique', sous: 'Acheter au détail', icone: ShoppingBag },
+  { to: '/catalogue', titre: 'Espace Pro', sous: 'Acheter en gros', icone: Building2 },
+  { to: '/boutique/sourcing', titre: 'Sourcing sur demande', sous: 'Nous cherchons pour vous', icone: Search },
+  { to: '/boutique/achats-groupes', titre: 'Achats groupés', sous: 'À plusieurs, au prix de gros', icone: Users },
+  { to: '/vendre', titre: 'Vendre sur MayLary Group', sous: 'Ouvrir votre boutique', icone: Store },
+  { to: '/declarant', titre: 'Le Déclarant', sous: 'Calcul et déclaration en douane', icone: ShieldCheck },
 ];
 
 /**
  * Accès à tous les métiers depuis n'importe quelle page.
  *
- * L'en-tête ne pouvait pas les porter tous : sur un téléphone il n'en affichait
- * que deux, et les quatre autres n'étaient joignables que par la page d'accueil.
- * Un visiteur arrivé sur une fiche produit n'avait aucun chemin vers l'export ou
- * le sourcing.
+ * POURQUOI UN PANNEAU LATÉRAL, ET NON PLUS UNE LISTE DÉROULANTE
  *
- * Un panneau plutôt qu'une rangée de boutons, parce que six libellés ne tiennent
- * pas sur 393 px sans repousser le reste de l'en-tête hors de l'écran.
+ * La liste pendait sous le bouton, dans le flux de la page. Elle héritait donc
+ * de tous les défauts d'un menu ancré : largeur bornée par l'écran, hauteur
+ * bornée par ce qui restait dessous, et une bataille permanente avec la barre
+ * du navigateur mobile qui se replie au défilement.
+ *
+ * Un panneau latéral ne dépend de rien de tout cela. Il occupe sa propre
+ * couche, toute la hauteur, et se ferme d'un geste. C'est aussi la forme que
+ * tout le monde connaît : sur un téléphone, un menu qui vient du côté se lit
+ * sans qu'on ait à l'apprendre.
+ *
+ * Le gain n'est pas que de place. Chaque entrée peut enfin porter une ligne
+ * d'explication — « Sourcing sur demande » ne dit rien à qui ne connaît pas le
+ * mot, « Nous cherchons pour vous » le dit.
+ *
+ * TROIS CHOSES QU'UN PANNEAU DOIT FAIRE, ET QU'ON OUBLIE SOUVENT
+ *
+ * Se fermer de trois façons — le voile, la croix, la touche Échap. Un panneau
+ * qui ne se ferme que par un bouton précis passe pour bloqué.
+ *
+ * Bloquer le défilement de la page dessous. Sans cela, le doigt qui veut faire
+ * défiler le menu fait défiler la page derrière, et le panneau paraît cassé.
+ *
+ * Rendre la barre système au système. `pt-[env(safe-area-inset-top)]` garde le
+ * titre sous l'encoche, `pb-[env(safe-area-inset-bottom)]` garde la dernière
+ * entrée au-dessus de la barre de geste — sinon elle est là, mais intouchable.
  */
 export default function MenuServices() {
   const [ouvert, setOuvert] = useState(false);
-  const conteneur = useRef<HTMLDivElement>(null);
+  const fermeture = useRef<HTMLButtonElement>(null);
 
-  // Un panneau qui ne se referme qu'en recliquant le bouton passe pour bloqué.
-  // On ferme donc au clic extérieur et à la touche Échap, comme partout ailleurs.
   useEffect(() => {
     if (!ouvert) return;
-    const auClic = (e: MouseEvent) => {
-      if (!conteneur.current?.contains(e.target as Node)) setOuvert(false);
-    };
+
     const auClavier = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOuvert(false);
     };
-    document.addEventListener('mousedown', auClic);
     document.addEventListener('keydown', auClavier);
+
+    // La page ne doit pas glisser derrière le panneau. On restitue la valeur
+    // d'origine plutôt que de forcer `auto` : une autre couche a pu la poser.
+    const avant = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // Le focus part sur la croix : au clavier comme au lecteur d'écran, on
+    // entre dans le panneau au lieu de rester sur le bouton qui l'a ouvert.
+    fermeture.current?.focus();
+
     return () => {
-      document.removeEventListener('mousedown', auClic);
       document.removeEventListener('keydown', auClavier);
+      document.body.style.overflow = avant;
     };
   }, [ouvert]);
 
   return (
-    <div className="relative" ref={conteneur}>
+    <>
       <Button
         variant="ghost"
         size="sm"
         aria-expanded={ouvert}
-        aria-haspopup="menu"
-        onClick={() => setOuvert((o) => !o)}
+        aria-haspopup="dialog"
+        onClick={() => setOuvert(true)}
       >
         <LayoutGrid className="mr-1.5 h-4 w-4" />
         Services
       </Button>
 
-      {/* ANCRÉ AU BOUTON, ET NON À L'ÉCRAN.
-          La version précédente posait le panneau en `fixed` avec un `top`
-          mesuré UNE SEULE FOIS à l'ouverture. Dès qu'on défilait, il restait
-          planté à sa coordonnée d'écran pendant que la page glissait dessous —
-          et sur iPhone, où la barre du navigateur se replie en cours de
-          défilement, il remontait carrément par-dessus l'en-tête, ses deux
-          premières entrées coupées hors de l'écran.
+      {/* PORTÉ SUR LE CORPS DU DOCUMENT, ET C'EST INDISPENSABLE.
+          Le panneau est en `fixed`, donc censé se caler sur l'écran. Mais il
+          vit dans l'en-tête, lui-même dans un conteneur `.animate-page` qui
+          porte une transform d'animation — et une transform, même identité,
+          fait de l'élément le repère de tous les `fixed` qu'il contient.
+          Mesuré : le panneau faisait 2 768 px de haut, la hauteur de la PAGE,
+          au lieu des 844 px de l'écran.
 
-          `absolute left-0 top-full` le raccroche au bouton : il descend avec
-          lui, quel que soit le défilement, sans une ligne de calcul. Aligné à
-          GAUCHE parce que le bouton est à gauche de la barre — un panneau
-          aligné à droite partirait hors de l'écran vers la gauche, ce qui
-          était le motif de la mesure d'origine.
+          Le sortir par un portail le raccroche à l'écran une fois pour toutes,
+          et l'immunise contre la prochaine animation qu'on posera au-dessus. */}
+      {ouvert && createPortal(
+        <>
+          {/* Le voile assombrit la page et reçoit le clic de fermeture. Il est
+              `aria-hidden` : ce n'est pas un bouton, c'est une surface. La
+              croix et la touche Échap portent la fermeture accessible. */}
+          <div
+            aria-hidden="true"
+            onClick={() => setOuvert(false)}
+            className="fixed inset-0 z-40 bg-foreground/60 motion-safe:animate-[voile_180ms_ease-out]"
+          />
 
-          La largeur ne dépasse jamais l'écran, marges comprises. */}
-      {ouvert && (
-        <div
-          role="menu"
-          className="absolute left-0 top-full z-30 mt-1 w-[min(15rem,calc(100vw-1.5rem))] overflow-hidden rounded-md border bg-card py-1 text-foreground shadow-lg"
-        >
-          {SERVICES.map((s) => {
-            const Icone = s.icone;
-            return (
-              <Link
-                key={s.to}
-                to={s.to}
-                role="menuitem"
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Nos services"
+            className="fixed inset-y-0 left-0 z-50 flex w-[min(20rem,86vw)] flex-col border-r bg-card shadow-2xl motion-safe:animate-[tiroir_220ms_cubic-bezier(0.22,1,0.36,1)]"
+          >
+            <div className="flex items-center justify-between border-b px-4 pb-3 pt-[calc(0.875rem+env(safe-area-inset-top))]">
+              <p className="font-display text-base font-semibold text-foreground">Nos services</p>
+              <button
+                ref={fermeture}
+                type="button"
                 onClick={() => setOuvert(false)}
-                className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-muted"
+                aria-label="Fermer le menu"
+                className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
-                <Icone className="h-4 w-4 shrink-0 text-primary" />
-                {s.titre}
-              </Link>
-            );
-          })}
-        </div>
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* `overflow-y-auto` sur la liste seule : le titre reste en place
+                pendant qu'on parcourt les entrées. */}
+            <nav className="flex-1 overflow-y-auto py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+              {SERVICES.map((s) => {
+                const Icone = s.icone;
+                return (
+                  <Link
+                    key={s.to}
+                    to={s.to}
+                    onClick={() => setOuvert(false)}
+                    className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-muted"
+                  >
+                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+                      <Icone className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-foreground">{s.titre}</span>
+                      <span className="block text-xs text-muted-foreground">{s.sous}</span>
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </>,
+        document.body,
       )}
-    </div>
+    </>
   );
 }

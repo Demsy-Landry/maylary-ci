@@ -280,6 +280,22 @@
   to   { transform: translateX(100%); }
 }
 
+/* Le panneau latéral des services : il ENTRE par le côté d'où il vient.
+   Apparaître sur place laisserait croire à un écran qui s'est substitué au
+   précédent ; glisser depuis le bord dit qu'il était rangé là et qu'on peut
+   l'y renvoyer. La courbe décélère franchement en fin de course — le panneau
+   se pose au lieu de s'arrêter net. */
+@keyframes tiroir {
+  from { transform: translateX(-100%); }
+  to   { transform: none; }
+}
+
+/* Le voile monte en opacité seulement : il n'a pas à bouger, il assombrit. */
+@keyframes voile {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 .animate-apparition-bas {
   animation: apparition-bas 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
