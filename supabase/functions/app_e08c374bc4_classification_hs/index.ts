@@ -176,8 +176,6 @@ async function interrogerGoogle(modele: string, description: string): Promise<Re
 }
 
 servirAvecCors(async (req: Request) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
-
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
