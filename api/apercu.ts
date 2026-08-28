@@ -88,33 +88,67 @@ function resumer(texte: string, limite = 200): string {
  * Le délai est court et l'échec est silencieux : un aperçu générique vaut mieux
  * qu'un robot qui attend, abandonne, et n'affiche aucun aperçu du tout.
  */
-async function lire(requete: string): Promise<Record<string, unknown> | null> {
-  if (!URL_SB || !CLE_SB) return null;
+/**
+ * Pourquoi une lecture n'a rien rendu.
+ *
+ * Sans ce mot, un aperçu générique est indiscernable d'un aperçu juste : la
+ * page est valide dans les deux cas. Il ressort en en-tête `x-apercu`, ce qui
+ * permet de diagnostiquer depuis l'extérieur sans rien exposer — le mot ne dit
+ * ni adresse, ni clé, ni donnée.
+ */
+type Motif =
+  | 'fixe'
+  | 'produit'
+  | 'categorie'
+  | 'secteur'
+  | 'repli-sans-config'
+  | 'repli-introuvable'
+  | 'repli-http'
+  | 'repli-reseau'
+  | 'repli-inconnu';
+
+/** Ce qu'une lecture a rendu, et pourquoi si elle n'a rien rendu. */
+interface Lecture {
+  ligne: Record<string, unknown> | null;
+  motif: Motif;
+}
+
+async function lire(requete: string): Promise<Lecture> {
+  if (!URL_SB || !CLE_SB) return { ligne: null, motif: 'repli-sans-config' };
+
+  // Le délai est volontairement généreux : un démarrage à froid, une résolution
+  // DNS et une négociation TLS tiennent mal dans deux secondes, et un robot
+  // d'aperçu, lui, patiente plusieurs secondes avant d'abandonner.
+  const arret = new AbortController();
+  const minuterie = setTimeout(() => arret.abort(), 6000);
   try {
     const r = await fetch(`${URL_SB}/rest/v1/${requete}`, {
       headers: { apikey: CLE_SB, Authorization: `Bearer ${CLE_SB}` },
-      signal: AbortSignal.timeout(2500),
+      signal: arret.signal,
     });
-    if (!r.ok) return null;
+    if (!r.ok) return { ligne: null, motif: 'repli-http' };
     const lignes = await r.json();
-    return Array.isArray(lignes) ? (lignes[0] ?? null) : null;
+    const ligne = Array.isArray(lignes) ? (lignes[0] ?? null) : null;
+    return { ligne, motif: ligne ? 'produit' : 'repli-introuvable' };
   } catch {
-    return null;
+    return { ligne: null, motif: 'repli-reseau' };
+  } finally {
+    clearTimeout(minuterie);
   }
 }
 
-/** Ce que l'adresse demandée doit montrer en aperçu. */
-async function apercuPour(chemin: string): Promise<Apercu> {
+/** Ce que l'adresse demandée doit montrer en aperçu, et d'où cela vient. */
+async function apercuPour(chemin: string): Promise<{ apercu: Apercu; motif: Motif }> {
   const propre = normaliser(chemin);
 
   // 1. Une page fixe : la réponse est dans la table, sans aller en base.
   const fixe = metaDeLaPage(propre);
-  if (fixe) return fixe;
+  if (fixe) return { apercu: fixe, motif: 'fixe' };
 
   // 2. Une fiche produit.
   const produit = propre.match(/^\/(boutique|catalogue)\/produit\/([0-9a-f-]{36})$/i);
   if (produit) {
-    const p = await lire(
+    const { ligne: p, motif } = await lire(
       `${PRODUITS}?id=eq.${produit[2]}&select=nom,description,description_fournisseur,photos&limit=1`,
     );
     if (p?.nom) {
@@ -124,50 +158,53 @@ async function apercuPour(chemin: string): Promise<Apercu> {
         (typeof p.description_fournisseur === 'string' && p.description_fournisseur.trim()) ||
         `Disponible chez ${MARQUE}, livré en Côte d'Ivoire.`;
       return {
-        titre: String(p.nom),
-        description: resumer(texte),
-        image: photos[0] ?? null,
-        type: 'product',
+        apercu: {
+          titre: String(p.nom),
+          description: resumer(texte),
+          image: photos[0] ?? null,
+          type: 'product',
+        },
+        motif: 'produit',
       };
     }
     // Référence inconnue : on retombe sur le rayon dont elle relève, ce qui
     // reste vrai, plutôt que d'annoncer un article qui n'existe pas.
-    return PAGES[produit[1] === 'pro' ? '/catalogue' : `/${produit[1]}`] ?? PAGES['/'];
+    return { apercu: PAGES[`/${produit[1]}`] ?? PAGES['/'], motif };
   }
 
   // 3. Un rayon de la boutique.
   const categorie = propre.match(/^\/boutique\/categorie\/([0-9a-f-]{36})$/i);
   if (categorie) {
-    const c = await lire(`${CATEGORIES}?id=eq.${categorie[1]}&select=nom,description&limit=1`);
+    const { ligne: c, motif } = await lire(`${CATEGORIES}?id=eq.${categorie[1]}&select=nom,description&limit=1`);
     if (c?.nom) {
-      return {
+      return { motif: 'categorie', apercu: {
         titre: `${c.nom} — Boutique`,
         description:
           (typeof c.description === 'string' && c.description.trim()) ||
           `Le rayon ${c.nom} de la boutique ${MARQUE}, livré en Côte d'Ivoire.`,
-      };
+      } };
     }
-    return PAGES['/boutique'];
+    return { apercu: PAGES['/boutique'], motif };
   }
 
   // 4. Un secteur de l'espace professionnel.
   const secteur = propre.match(/^\/catalogue\/secteur\/([0-9a-f-]{36})$/i);
   if (secteur) {
-    const s = await lire(`${SECTEURS}?id=eq.${secteur[1]}&select=nom,description&limit=1`);
-    if (s?.nom) {
-      return {
-        titre: `${s.nom} — Achat en gros`,
+    const { ligne: sect, motif } = await lire(`${SECTEURS}?id=eq.${secteur[1]}&select=nom,description&limit=1`);
+    if (sect?.nom) {
+      return { motif: 'secteur', apercu: {
+        titre: `${sect.nom} — Achat en gros`,
         description:
-          (typeof s.description === 'string' && s.description.trim()) ||
-          `Le secteur ${s.nom} de l'espace professionnel ${MARQUE}.`,
-      };
+          (typeof sect.description === 'string' && sect.description.trim()) ||
+          `Le secteur ${sect.nom} de l'espace professionnel ${MARQUE}.`,
+      } };
     }
-    return PAGES['/catalogue'];
+    return { apercu: PAGES['/catalogue'], motif };
   }
 
   // 5. Adresse inconnue : la maison, jamais une erreur. Un robot d'aperçu qui
   //    reçoit un 404 n'affiche rien du tout, et le lien paraît cassé.
-  return PAGES['/'];
+  return { apercu: PAGES['/'], motif: 'fixe' };
 }
 
 function document(apercu: Apercu, adresse: string): string {
@@ -219,12 +256,14 @@ export default async function handler(requete: Request): Promise<Response> {
   const adresse = principal === '/' ? `${SITE}/` : SITE + principal;
 
   let apercu: Apercu;
+  let motif: Motif;
   try {
-    apercu = await apercuPour(propre);
+    ({ apercu, motif } = await apercuPour(propre));
   } catch {
     // Un aperçu ne doit jamais échouer : un robot sans réponse affiche un lien
     // nu, ce qui est pire que l'aperçu générique de la maison.
     apercu = PAGES['/'];
+    motif = 'repli-inconnu';
   }
 
   return new Response(document(apercu, adresse), {
@@ -235,6 +274,11 @@ export default async function handler(requete: Request): Promise<Response> {
       // suffisent à absorber une conversation active sans figer un prix ou un
       // titre corrigé entre-temps.
       'Cache-Control': 'public, max-age=600, s-maxage=600',
+      // D'où vient cet aperçu. Un aperçu générique est indiscernable d'un
+      // aperçu juste — la page est valide dans les deux cas — et sans ce mot,
+      // une lecture de catalogue qui échoue passe inaperçue. Il ne dit ni
+      // adresse, ni clé, ni donnée.
+      'x-apercu': motif,
     },
   });
 }
