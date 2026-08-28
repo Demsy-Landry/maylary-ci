@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 import {
   Sparkles,
   Loader2,
@@ -61,11 +62,7 @@ import {
  */
 
 export default function DeclarantClassification() {
-  useReferencement({
-    titre: "Classer une marchandise au Système Harmonisé",
-    description:
-      "Décrivez une marchandise et obtenez sa position tarifaire, le raisonnement des Règles Générales Interprétatives qui l'a tranchée, et la vérification du code dans le corpus TEC officiel.",
-  });
+  useReferencement(PAGES["/declarant/classer"]);
 
   const navigate = useNavigate();
   const [marchandise, setMarchandise] = useState('');

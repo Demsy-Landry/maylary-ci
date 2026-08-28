@@ -1,5 +1,17 @@
 {
   "rewrites": [
+    {
+      "//": "LES ROBOTS D'APERÇU, ET EUX SEULS. WhatsApp, Facebook et les autres n'exécutent pas le JavaScript : ils lisent le <head> du fichier brut et repartent. Comme le même index.html sert les 168 adresses du site, ils voyaient l'accueil quel que soit le lien partagé. api/apercu.ts leur fabrique la vraie page. Un visiteur humain ne remplit jamais cette condition : son chemin reste celui d'en dessous, inchangé. Googlebot en est volontairement absent — il exécute le JavaScript, lit donc déjà les bonnes balises, et lui servir autre chose qu'au visiteur serait du cloaking.",
+      "source": "/:chemin*",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*([Ww]hats[Aa]pp|facebookexternalhit|[Ff]acebot|[Tt]witterbot|[Ll]inked[Ii]n[Bb]ot|[Ss]lackbot|[Tt]elegram[Bb]ot|[Dd]iscordbot|[Pp]interest|[Ss]kype[Uu]ri[Pp]review|redditbot|vk[Ss]hare|[Vv]iber|[Ww]hatsApp).*"
+        }
+      ],
+      "destination": "/api/apercu?chemin=/:chemin*"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [

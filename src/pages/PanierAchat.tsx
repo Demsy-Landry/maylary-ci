@@ -9,14 +9,10 @@ import GarantiePayeProtege from '@/components/GarantiePayeProtege';
 import FileGroupage from '@/components/FileGroupage';
 import FretApresVerification from '@/components/FretApresVerification';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 export default function PanierAchat() {
-  useReferencement({
-    titre: "Votre panier",
-    description:
-      "Votre panier d'achat.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/boutique/panier"]);
 
   const { items, itemsExpress, itemsGroupage, updateQuantite, removeItem, totalFcfa } =
     useCartGP();

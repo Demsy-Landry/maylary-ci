@@ -29,6 +29,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Loader2, Eye, Ship, FileText, ExternalLink } from 'lucide-react';
 import BoutonFacture from '@/components/BoutonFacture';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 /** Statuts à partir desquels le dossier est engagé : la facture est émise. */
 const FACTURE_EXPORT_DISPONIBLE: StatutExport[] = [
@@ -59,12 +60,7 @@ interface DemandeAvecDetail extends DemandeExportClient {
 }
 
 export default function MesDemandesExport() {
-  useReferencement({
-    titre: "Vos demandes d'export",
-    description:
-      "Le suivi de vos dossiers d'export.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/export/mes-demandes"]);
 
   const { user, loading: authLoading, profilEnCours, isAdmin } = useAuth();
   const [searchParams] = useSearchParams();

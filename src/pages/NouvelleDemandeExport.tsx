@@ -28,6 +28,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, ImagePlus, X, Ship, Calculator, FileText, FilePlus2 } from 'lucide-react';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 type DocumentAJoindre = { file: File; type: TypeDocumentExport };
 
@@ -35,11 +36,7 @@ const selectClassName =
   'flex h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm';
 
 export default function NouvelleDemandeExport() {
-  useReferencement({
-    titre: "Exporter depuis la Côte d'Ivoire",
-    description:
-      "Collecte, formalités d'export, expédition et suivi jusqu'à votre acheteur. Vous décrivez la marchandise et la destination, nous vous remettons un devis détaillé.",
-  });
+  useReferencement(PAGES["/export"]);
 
   const { user } = useAuth();
   const navigate = useNavigate();

@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Loader2, Eye, ClipboardList } from 'lucide-react';
 import BoutonFacture from '@/components/BoutonFacture';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 const STATUT_BADGE_VARIANT: Record<StatutDevis, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   nouvelle: 'secondary',
@@ -36,12 +37,7 @@ interface DemandeAvecDetail extends DemandeDevis {
 }
 
 export default function MesDevis() {
-  useReferencement({
-    titre: "Vos devis",
-    description:
-      "Vos demandes de devis professionnelles.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/catalogue/mes-devis"]);
 
   const { user, loading: authLoading, profilEnCours, isAdmin } = useAuth();
   const [searchParams] = useSearchParams();

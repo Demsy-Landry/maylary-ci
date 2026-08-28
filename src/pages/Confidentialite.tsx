@@ -3,6 +3,7 @@ import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
 import { ShieldCheck, Lock, Clock, UserCheck, Server, AlertTriangle } from 'lucide-react';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 /** Date de la dernière révision de fond, affichée au lecteur. */
 const DERNIERE_MISE_A_JOUR = '4 août 2026';
@@ -19,11 +20,7 @@ const DERNIERE_MISE_A_JOUR = '4 août 2026';
  * protection des données à caractère personnel, autorité de contrôle ARTCI.
  */
 export default function Confidentialite() {
-  useReferencement({
-    titre: "Protection des données personnelles",
-    description:
-      "Quelles données nous conservons, pourquoi, combien de temps, et comment obtenir leur export ou leur suppression.",
-  });
+  useReferencement(PAGES["/confidentialite"]);
 
   return (
     <div className="min-h-screen bg-background">

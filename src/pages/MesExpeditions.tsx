@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PackageSearch } from 'lucide-react';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 /**
  * Où sont mes marchandises.
@@ -31,12 +32,7 @@ import { useReferencement } from '@/hooks/useReferencement';
  * information de sécurité : on ne l'expose pas derrière un simple numéro.
  */
 export default function MesExpeditions() {
-  useReferencement({
-    titre: "Vos expéditions",
-    description:
-      "Le suivi de vos expéditions.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/mes-expeditions"]);
 
   const { user, loading: authLoading } = useAuth();
   const [expeditions, setExpeditions] = useState<Expedition[] | null>(null);

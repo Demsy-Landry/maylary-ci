@@ -21,6 +21,7 @@ import ImageOuverture from '@/components/ImageOuverture';
 import SiteFooter from '@/components/SiteFooter';
 import { STORAGE_PUBLIC_URL, VISUELS_MARQUE_TABLE, supabase } from '@/lib/supabase';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 const STORAGE_BASE = `${STORAGE_PUBLIC_URL}/app_e08c374bc4_produit_photos/accueil`;
 
@@ -154,11 +155,7 @@ const ATOUTS_EXPORT = [
 ];
 
 export default function Index() {
-  useReferencement({
-    titre: "Nos services : transit, import, export et sourcing",
-    description:
-      "Huit métiers pour faire venir ou partir une marchandise : import clé en main, export, sourcing fournisseur, groupage, boutique en ligne, espace professionnel, achats groupés et outils douaniers.",
-  });
+  useReferencement(PAGES["/services"]);
 
   // La photographie d'origine reste le fond par défaut. L'illustration dessinée
   // ne sert que si la photo venait à manquer — elle évite une page nue, elle ne

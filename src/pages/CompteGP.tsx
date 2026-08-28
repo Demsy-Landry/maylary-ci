@@ -12,6 +12,7 @@ import { supabase, EDGE_FUNCTIONS_URL, PROFILES_TABLE } from '@/lib/supabase';
 import { messageDeConnexion } from '@/lib/erreurs-auth';
 import { verifierMotDePasse } from '@/lib/force-mot-de-passe';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 import {
   Loader2,
   Building2,
@@ -80,12 +81,7 @@ const AVANTAGES_ENTREPRISE = [
 ];
 
 export default function CompteGP() {
-  useReferencement({
-    titre: "Votre compte",
-    description:
-      "Votre compte boutique.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/boutique/compte"]);
 
   const navigate = useNavigate();
   const [parametres] = useSearchParams();

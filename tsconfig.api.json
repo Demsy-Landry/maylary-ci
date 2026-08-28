@@ -1,0 +1,36 @@
+{
+  /*
+   * Les fonctions serveur de `api/`.
+   *
+   * Elles ne sont pas dans `src/`, et n'étaient donc vérifiées par personne :
+   * `tsconfig.app.json` ne regarde que `src`. Une erreur de type dans une
+   * fonction serveur ne serait apparue qu'au déploiement, sur le site en
+   * production. Ce fichier la ramène dans `tsc -b`.
+   *
+   * Elles tournent sur le moteur « edge » de l'hébergeur : les types du
+   * navigateur (`fetch`, `Request`, `Response`, `URL`) s'appliquent, et `node`
+   * n'est là que pour `process.env`.
+   */
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.api.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "types": ["node"],
+    "skipLibCheck": true,
+
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noEmit": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["api", "src/lib/referencement-pages.ts"]
+}

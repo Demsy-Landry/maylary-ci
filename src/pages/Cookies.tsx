@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { INVENTAIRE_STOCKAGE } from '@/lib/stockage-local';
 import { Cookie, ShieldOff, HardDrive, Trash2, CheckCircle2 } from 'lucide-react';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 /**
  * La page « cookies » d'un site qui n'en pose aucun.
@@ -20,11 +21,7 @@ import { useReferencement } from '@/hooks/useReferencement';
  * par diverger, et celle qui diverge est celle qu'on montre au public.
  */
 export default function Cookies() {
-  useReferencement({
-    titre: "Cookies et stockage local",
-    description:
-      "Ce que ce site dépose sur votre appareil, à quoi cela sert, et comment l'effacer.",
-  });
+  useReferencement(PAGES["/cookies"]);
 
   return (
     <div className="min-h-screen bg-background">

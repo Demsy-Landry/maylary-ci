@@ -24,15 +24,12 @@ import { useCartGP } from '@/hooks/useCartGP';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 type FiltreOrigine = 'tous' | OrigineProduit;
 
 export default function CatalogueGrandPublic() {
-  useReferencement({
-    titre: "Boutique en ligne — livraison en Côte d'Ivoire",
-    description:
-      "Articles sélectionnés un par un et importés par MayLary Group : électronique, maison, beauté, mode. Prix affiché tout compris, transport coté sur votre panier réel.",
-  });
+  useReferencement(PAGES["/boutique"]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState<CategorieGP[]>([]);

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { ALIAS, normaliser } from '@/lib/referencement-pages';
 
 /**
  * Ce que chaque page dit d'elle-même aux moteurs de recherche.
@@ -29,12 +30,16 @@ import { useEffect } from 'react';
  * le rendu, sont donc bien celles qu'il lit — c'est le fonctionnement normal
  * d'un site en page unique, pas un contournement.
  *
- * ⚠️ EN REVANCHE, ET IL FAUT LE SAVOIR : les robots d'aperçu de WhatsApp,
- * Facebook et LinkedIn, eux, N'EXÉCUTENT PAS le JavaScript. Ils ne verront que
- * ce qui est écrit dans `index.html`. Les balises `og:` posées ici corrigent
- * donc Google, pas l'aperçu d'un lien collé dans une conversation. Rendre ces
- * aperçus justes demande d'écrire le `<head>` côté serveur — un autre chantier,
- * volontairement laissé de côté ici.
+ * LES ROBOTS D'APERÇU, EUX, NE PASSENT PAS PAR ICI
+ *
+ * WhatsApp, Facebook et LinkedIn n'exécutent pas le JavaScript : rien de ce que
+ * pose ce crochet ne les atteint. Ils sont servis par `api/apercu.ts`, une
+ * fonction serveur qui leur fabrique une page toute faite, et que `vercel.json`
+ * n'appelle que pour eux.
+ *
+ * Les deux chemins lisent la MÊME table, `src/lib/referencement-pages.ts` —
+ * sans quoi le titre d'une page finirait par différer entre Google et WhatsApp,
+ * et personne ne le remarquerait puisqu'on ne regarde jamais les deux ensemble.
  *
  * ────────────────────────────────────────────────────────────────────────────
  * CE QU'IL RESTITUE EN PARTANT
@@ -204,8 +209,15 @@ export function useReferencement(page: Referencement) {
     // `https://maylarygroup.ci/` et `https://maylarygroup.ci/boutique`. Une
     // canonique qui différerait de l'adresse listée, ne serait-ce que d'une
     // barre, désignerait une page que le sitemap ne mentionne pas.
-    const chemin = window.location.pathname.replace(/\/+$/, '');
-    const canonique = chemin ? SITE + chemin : `${SITE}/`;
+    //
+    // Et les adresses jumelles se rabattent sur leur adresse principale :
+    // `/import` et `/import/nouvelle-demande` affichent le même formulaire.
+    // Sans ce rabattement, chacune se déclarerait canonique et Google verrait
+    // deux pages au contenu identique — le doublon exact que cette balise
+    // existe pour éviter.
+    const chemin = normaliser(window.location.pathname);
+    const principal = ALIAS[chemin] ?? chemin;
+    const canonique = principal === '/' ? `${SITE}/` : SITE + principal;
     const titreComplet = titre.includes(MARQUE) ? titre : `${titre} — ${MARQUE}`;
     const illustration = image || IMAGE_PAR_DEFAUT;
 

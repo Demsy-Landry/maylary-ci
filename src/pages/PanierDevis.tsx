@@ -18,14 +18,10 @@ import { Minus, Plus, Trash2, ClipboardList, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 export default function PanierDevis() {
-  useReferencement({
-    titre: "Votre demande de devis",
-    description:
-      "Les articles retenus pour votre devis.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/catalogue/devis"]);
 
   const { items, updateQuantite, removeItem, totalFcfa, clearCart } = useCart();
   const { user } = useAuth();
