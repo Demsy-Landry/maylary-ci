@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { ChevronLeft } from 'lucide-react';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import OrigineProduitBadge from '@/components/OrigineProduitBadge';
+import { useReferencement } from '@/hooks/useReferencement';
 
 export default function CatalogueSecteurPro() {
   const { secteurId } = useParams<{ secteurId: string }>();
@@ -26,6 +27,29 @@ export default function CatalogueSecteurPro() {
   const [enseignes, setEnseignes] = useState<Enseigne[]>([]);
   const [produits, setProduits] = useState<Produit[]>([]);
   const [loading, setLoading] = useState(true);
+
+  /*
+   * Même raisonnement que sur la boutique, avec un public différent : ici on
+   * s'adresse à un acheteur professionnel, et le mot « gros » compte autant
+   * que le nom du secteur dans ce qu'il tape.
+   */
+  useReferencement(
+    secteur
+      ? {
+          titre: `${secteur.nom} — Achat en gros`,
+          description:
+            produits.length > 0
+              ? `${produits.length} référence${produits.length > 1 ? 's' : ''} du secteur ${secteur.nom}, en gros, avec prix dégressifs selon la quantité et devis sur demande.`
+              : `Le secteur ${secteur.nom} de l'espace professionnel MayLary Group.`,
+        }
+      : {
+          titre: loading ? 'Espace Pro' : 'Secteur introuvable',
+          description: loading
+            ? 'Chargement du secteur.'
+            : "Ce secteur n'existe pas ou n'est plus proposé.",
+          horsIndex: !loading,
+        },
+  );
 
   useEffect(() => {
     if (!secteurId) return;

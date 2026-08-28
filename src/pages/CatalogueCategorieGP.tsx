@@ -7,12 +7,39 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ProductCardGP } from '@/pages/CatalogueGrandPublic';
 import { ChevronLeft } from 'lucide-react';
 import SectorIllustration, { guessSector } from '@/components/illustrations/SectorIllustration';
+import { useReferencement } from '@/hooks/useReferencement';
 
 export default function CatalogueCategorieGP() {
   const { categorieId } = useParams<{ categorieId: string }>();
   const [categorie, setCategorie] = useState<CategorieGP | null>(null);
   const [produits, setProduits] = useState<Produit[]>([]);
   const [loading, setLoading] = useState(true);
+
+  /*
+   * Le titre vient du rayon lui-même : « Beauté & Soins », « Électronique ».
+   * Ce sont ces mots-là qu'on tape dans un moteur, pas le nom de la maison.
+   *
+   * Le nombre d'articles entre dans la description parce qu'il est vrai et
+   * qu'il se vérifie d'un coup d'œil sur la page. Un chiffre annoncé dans un
+   * résultat de recherche et démenti par la page fait repartir le visiteur.
+   */
+  useReferencement(
+    categorie
+      ? {
+          titre: `${categorie.nom} — Boutique`,
+          description:
+            produits.length > 0
+              ? `${produits.length} article${produits.length > 1 ? 's' : ''} du rayon ${categorie.nom}, importés et livrés par MayLary Group en Côte d'Ivoire.`
+              : `Le rayon ${categorie.nom} de la boutique MayLary Group.`,
+        }
+      : {
+          titre: loading ? 'Boutique' : 'Rayon introuvable',
+          description: loading
+            ? 'Chargement du rayon.'
+            : "Ce rayon n'existe pas ou n'est plus proposé.",
+          horsIndex: !loading,
+        },
+  );
 
   useEffect(() => {
     if (!categorieId) return;

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Plane, Zap, Ship, Truck, ArrowRight, Loader2, Info } from 'lucide-react';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /**
  * Le calculateur de poids taxable.
@@ -76,6 +77,12 @@ const nombre = (v: string) => {
 };
 
 export default function PoidsTaxable() {
+  useReferencement({
+    titre: "Poids taxable : calculer le poids volumétrique",
+    description:
+      "Un transporteur facture le plus fort du poids réel et du poids volumétrique. Calculez l'unité payante de votre colis en aérien, en maritime et en routier, et comprenez ce qui la commande.",
+  });
+
   const [mode, setMode] = useState<string>('aerien');
   const [poids, setPoids] = useState('');
   const [longueur, setLongueur] = useState('');

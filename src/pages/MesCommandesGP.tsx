@@ -32,6 +32,7 @@ import BoutonFacture from '@/components/BoutonFacture';
 import AvisCommande from '@/components/AvisCommande';
 import ConfirmerReception from '@/components/ConfirmerReception';
 import DeclarerPaiement from '@/components/DeclarerPaiement';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /** Statuts à partir desquels la facture définitive est émise (paiement acquis). */
 const FACTURE_DISPONIBLE: StatutCommandeGP[] = [
@@ -57,6 +58,13 @@ interface CommandeAvecDetail extends CommandeGPClient {
 }
 
 export default function MesCommandesGP() {
+  useReferencement({
+    titre: "Vos commandes",
+    description:
+      "Le suivi de vos commandes.",
+    horsIndex: true,
+  });
+
   const { user, loading: authLoading, profilEnCours, isAdmin } = useAuth();
   const [searchParams] = useSearchParams();
 

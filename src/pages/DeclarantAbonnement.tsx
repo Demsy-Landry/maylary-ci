@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Check, Gauge, Mail, ArrowRight, Sparkles } from 'lucide-react';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /**
  * Les formules du Déclarant.
@@ -46,6 +47,12 @@ const lienDemande = (f: FormuleIA) =>
   )}`;
 
 export default function DeclarantAbonnement() {
+  useReferencement({
+    titre: "Formules d'abonnement au Déclarant",
+    description:
+      "Les formules d'accès aux outils douaniers de MayLary Group et ce que chacune permet : nombre de classements, de liquidations et de questions à l'assistant.",
+  });
+
   const { user, loading: authLoading } = useAuth();
   const [formules, setFormules] = useState<FormuleIA[] | null>(null);
   const [tb, setTb] = useState<TableauDeBordDeclarant | null>(null);

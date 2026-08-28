@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
 import { ScrollText, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /**
  * Les conditions générales de vente.
@@ -57,6 +58,12 @@ function Article({
 }
 
 export default function ConditionsGenerales() {
+  useReferencement({
+    titre: "Conditions générales de vente et de service",
+    description:
+      "Commande, paiement, garantie « payé, protégé », délais, réclamations et rétractation : les règles qui encadrent nos prestations et nos ventes.",
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />

@@ -3,6 +3,7 @@ import SiteFooter from '@/components/SiteFooter';
 import { Link } from 'react-router-dom';
 import { INVENTAIRE_STOCKAGE } from '@/lib/stockage-local';
 import { Cookie, ShieldOff, HardDrive, Trash2, CheckCircle2 } from 'lucide-react';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /**
  * La page « cookies » d'un site qui n'en pose aucun.
@@ -19,6 +20,12 @@ import { Cookie, ShieldOff, HardDrive, Trash2, CheckCircle2 } from 'lucide-react
  * par diverger, et celle qui diverge est celle qu'on montre au public.
  */
 export default function Cookies() {
+  useReferencement({
+    titre: "Cookies et stockage local",
+    description:
+      "Ce que ce site dépose sur votre appareil, à quoi cela sert, et comment l'effacer.",
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderGP />

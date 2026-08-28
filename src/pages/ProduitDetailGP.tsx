@@ -27,6 +27,8 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { ChevronLeft, ImageOff, Heart, ShoppingCart, Minus, Plus } from 'lucide-react';
+import { useReferencement } from '@/hooks/useReferencement';
+import { referencementProduit } from '@/lib/referencement-produit';
 
 const STOCK_LABELS: Record<string, string> = {
   en_stock: 'En stock',
@@ -50,6 +52,28 @@ export default function ProduitDetailGP() {
   const paliers = (produitId && grilles[produitId]) || [];
   const [isFavori, setIsFavori] = useState(false);
   const [favoriBusy, setFavoriBusy] = useState(false);
+
+  /*
+   * Ce que cette page dit d'elle-même aux moteurs.
+   *
+   * Trois états, trois réponses différentes, et la troisième est celle qui
+   * compte : une référence retirée du catalogue garde son adresse, et son
+   * adresse reste dans le sitemap jusqu'à la construction suivante. Sans
+   * `horsIndex`, Google indexerait une page qui ne montre aucun produit — et
+   * une poignée de pages vides suffit à faire douter un moteur de la qualité
+   * de tout le site.
+   */
+  useReferencement(
+    produit
+      ? referencementProduit(produit, 'boutique')
+      : {
+          titre: loading ? 'Article' : 'Article introuvable',
+          description: loading
+            ? 'Chargement de la fiche article.'
+            : "Cette référence n'est plus proposée à la vente.",
+          horsIndex: !loading,
+        },
+  );
 
   useEffect(() => {
     if (!produitId) return;

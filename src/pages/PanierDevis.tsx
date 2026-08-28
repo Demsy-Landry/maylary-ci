@@ -17,8 +17,16 @@ import { Label } from '@/components/ui/label';
 import { Minus, Plus, Trash2, ClipboardList, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import { useReferencement } from '@/hooks/useReferencement';
 
 export default function PanierDevis() {
+  useReferencement({
+    titre: "Votre demande de devis",
+    description:
+      "Les articles retenus pour votre devis.",
+    horsIndex: true,
+  });
+
   const { items, updateQuantite, removeItem, totalFcfa, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();

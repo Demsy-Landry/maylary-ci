@@ -17,6 +17,7 @@ import ImageOuverture from '@/components/ImageOuverture';
 import MenuServices from '@/components/MenuServices';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useReferencement } from '@/hooks/useReferencement';
 import {
   ArrowRight,
   ShieldCheck,
@@ -122,6 +123,12 @@ function vitrineVariee(tous: Vitrine[], combien: number): Vitrine[] {
 const fcfa = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
 
 export default function Couverture() {
+  useReferencement({
+    titre: "MayLary Group — Transit, import et export en Côte d'Ivoire",
+    description:
+      "Importez et exportez vos marchandises depuis Abidjan : recherche de fournisseur, fret aérien et maritime, assurance facultés, dédouanement et livraison. Devis détaillé et suivi de dossier en ligne.",
+  });
+
   /* L'ouverture est une photographie sombre : la bande système doit l'être
      aussi, sans quoi l'écran commence par un bandeau crème au-dessus de
      l'image. Même valeur que `bg-foreground`, qui habille la section. */

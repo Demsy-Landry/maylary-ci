@@ -29,6 +29,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /**
  * L'historique du Déclarant.
@@ -59,6 +60,13 @@ const dateHeure = (s: string) =>
 type Vue = 'liquidations' | 'classifications';
 
 export default function DeclarantHistorique() {
+  useReferencement({
+    titre: "Historique des liquidations",
+    description:
+      "Vos liquidations enregistrées.",
+    horsIndex: true,
+  });
+
   const { user, loading: authLoading } = useAuth();
   const [vue, setVue] = useState<Vue>('liquidations');
   const [liquidations, setLiquidations] = useState<LiquidationEnregistree[] | null>(null);

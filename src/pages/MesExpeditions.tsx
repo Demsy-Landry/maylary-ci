@@ -13,6 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PackageSearch } from 'lucide-react';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /**
  * Où sont mes marchandises.
@@ -30,6 +31,13 @@ import { PackageSearch } from 'lucide-react';
  * information de sécurité : on ne l'expose pas derrière un simple numéro.
  */
 export default function MesExpeditions() {
+  useReferencement({
+    titre: "Vos expéditions",
+    description:
+      "Le suivi de vos expéditions.",
+    horsIndex: true,
+  });
+
   const { user, loading: authLoading } = useAuth();
   const [expeditions, setExpeditions] = useState<Expedition[] | null>(null);
 

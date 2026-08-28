@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import SectorIllustration, { SECTOR_PHOTOS, guessSector } from '@/components/illustrations/SectorIllustration';
 import CarrouselSecteur from '@/components/CarrouselSecteur';
+import { useReferencement } from '@/hooks/useReferencement';
 import {
   ArrowRight,
   FileText,
@@ -70,6 +71,12 @@ const ENGAGEMENTS = [
 ];
 
 export default function CataloguePro() {
+  useReferencement({
+    titre: "Espace Pro — achat en gros pour entreprises",
+    description:
+      "Catalogue professionnel par secteur d'activité, avec prix dégressifs selon la quantité et devis sur demande. Destiné aux entreprises, revendeurs et artisans.",
+  });
+
   const [secteurs, setSecteurs] = useState<Secteur[] | null>(null);
 
   useEffect(() => {
