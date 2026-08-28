@@ -55,6 +55,21 @@ const IMAGE_MAISON = `${SITE}/og-image.png`;
 const URL_SB = process.env.VITE_SUPABASE_URL ?? '';
 const CLE_SB = process.env.VITE_SUPABASE_ANON_KEY ?? '';
 
+/*
+ * ⚠️ N'ÉNUMÉRER QUE DES COLONNES QUI EXISTENT VRAIMENT DANS CES VUES.
+ *
+ * PostgREST refuse la requête ENTIÈRE — 400 — dès qu'une colonne demandée est
+ * inconnue. Elle ne rend pas la ligne amputée du champ manquant : elle ne rend
+ * rien. L'aperçu retombait alors sur le rayon, et rien à l'écran ne le disait,
+ * puisqu'une page de repli est une page valide.
+ *
+ * C'est ce qui est arrivé : j'avais recopié les noms depuis l'interface
+ * `Produit`, qui décrit la TABLE. La vue publique, elle, n'expose qu'une partie
+ * des colonnes — c'est même sa raison d'être. `description_fournisseur` n'y est
+ * pas, et `categories_gp` n'a pas de `description`.
+ *
+ * L'en-tête `x-apercu` existe pour que ce genre de faute se voie de l'extérieur.
+ */
 const PRODUITS = 'app_e08c374bc4_produits_public';
 const CATEGORIES = 'app_e08c374bc4_categories_gp';
 const SECTEURS = 'app_e08c374bc4_secteurs';
@@ -149,13 +164,12 @@ async function apercuPour(chemin: string): Promise<{ apercu: Apercu; motif: Moti
   const produit = propre.match(/^\/(boutique|catalogue)\/produit\/([0-9a-f-]{36})$/i);
   if (produit) {
     const { ligne: p, motif } = await lire(
-      `${PRODUITS}?id=eq.${produit[2]}&select=nom,description,description_fournisseur,photos&limit=1`,
+      `${PRODUITS}?id=eq.${produit[2]}&select=nom,description,photos&limit=1`,
     );
     if (p?.nom) {
       const photos = Array.isArray(p.photos) ? (p.photos as string[]) : [];
       const texte =
         (typeof p.description === 'string' && p.description.trim()) ||
-        (typeof p.description_fournisseur === 'string' && p.description_fournisseur.trim()) ||
         `Disponible chez ${MARQUE}, livré en Côte d'Ivoire.`;
       return {
         apercu: {
@@ -175,14 +189,16 @@ async function apercuPour(chemin: string): Promise<{ apercu: Apercu; motif: Moti
   // 3. Un rayon de la boutique.
   const categorie = propre.match(/^\/boutique\/categorie\/([0-9a-f-]{36})$/i);
   if (categorie) {
-    const { ligne: c, motif } = await lire(`${CATEGORIES}?id=eq.${categorie[1]}&select=nom,description&limit=1`);
+    const { ligne: c, motif } = await lire(`${CATEGORIES}?id=eq.${categorie[1]}&select=nom,image_url&limit=1`);
     if (c?.nom) {
-      return { motif: 'categorie', apercu: {
-        titre: `${c.nom} — Boutique`,
-        description:
-          (typeof c.description === 'string' && c.description.trim()) ||
-          `Le rayon ${c.nom} de la boutique ${MARQUE}, livré en Côte d'Ivoire.`,
-      } };
+      return {
+        motif: 'categorie',
+        apercu: {
+          titre: `${c.nom} — Boutique`,
+          description: `Le rayon ${c.nom} de la boutique ${MARQUE} : articles sélectionnés un par un, importés et livrés en Côte d'Ivoire.`,
+          image: typeof c.image_url === 'string' ? c.image_url : null,
+        },
+      };
     }
     return { apercu: PAGES['/boutique'], motif };
   }
@@ -190,14 +206,17 @@ async function apercuPour(chemin: string): Promise<{ apercu: Apercu; motif: Moti
   // 4. Un secteur de l'espace professionnel.
   const secteur = propre.match(/^\/catalogue\/secteur\/([0-9a-f-]{36})$/i);
   if (secteur) {
-    const { ligne: sect, motif } = await lire(`${SECTEURS}?id=eq.${secteur[1]}&select=nom,description&limit=1`);
+    const { ligne: sect, motif } = await lire(`${SECTEURS}?id=eq.${secteur[1]}&select=nom,photos&limit=1`);
     if (sect?.nom) {
-      return { motif: 'secteur', apercu: {
-        titre: `${sect.nom} — Achat en gros`,
-        description:
-          (typeof sect.description === 'string' && sect.description.trim()) ||
-          `Le secteur ${sect.nom} de l'espace professionnel ${MARQUE}.`,
-      } };
+      const vues = Array.isArray(sect.photos) ? (sect.photos as string[]) : [];
+      return {
+        motif: 'secteur',
+        apercu: {
+          titre: `${sect.nom} — Achat en gros`,
+          description: `Le secteur ${sect.nom} de l'espace professionnel ${MARQUE} : prix dégressifs selon la quantité et devis sur demande.`,
+          image: vues[0] ?? null,
+        },
+      };
     }
     return { apercu: PAGES['/catalogue'], motif };
   }
