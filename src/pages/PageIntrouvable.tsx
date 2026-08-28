@@ -9,8 +9,16 @@ import { Link } from 'react-router-dom';
 import { Compass, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import SiteFooter from '@/components/SiteFooter';
+import { useReferencement } from '@/hooks/useReferencement';
 
 export default function PageIntrouvable() {
+  useReferencement({
+    titre: "Page introuvable",
+    description:
+      "Cette adresse ne correspond à aucune page du site.",
+    horsIndex: true,
+  });
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <main className="entree-page flex flex-1 items-center justify-center px-4 py-20">

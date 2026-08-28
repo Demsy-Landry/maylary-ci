@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Search, CheckCircle2, XCircle, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { useReferencement } from '@/hooks/useReferencement';
 
 const BADGE_VARIANT: Record<StatutSourcing, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   nouvelle: 'secondary',
@@ -33,6 +34,12 @@ const BADGE_VARIANT: Record<StatutSourcing, 'default' | 'secondary' | 'outline' 
 };
 
 export default function SourcingGP() {
+  useReferencement({
+    titre: "Sourcing sur demande — nous cherchons le produit pour vous",
+    description:
+      "L'article n'est pas au catalogue ? Décrivez-le : nous interrogeons nos fournisseurs et revenons vers vous avec un prix rendu Abidjan, tout compris.",
+  });
+
   const { user, loading: authLoading, profilEnCours } = useAuth();
   const navigate = useNavigate();
 

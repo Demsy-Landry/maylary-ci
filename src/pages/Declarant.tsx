@@ -40,6 +40,7 @@ import {
   Archive,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useReferencement } from '@/hooks/useReferencement';
 import {
   telechargerBulletinPdf,
   referenceSimulation,
@@ -103,6 +104,12 @@ const ligneVide = (numero: string): LigneSaisie => ({
  * exactement le visiteur qu'on veut.
  */
 export default function Declarant() {
+  useReferencement({
+    titre: "Atelier de liquidation — droits et taxes d'une importation",
+    description:
+      "Saisissez vos lignes tarifaires, le fret et l'assurance : l'atelier calcule la liquidation poste par poste à partir du tarif officiel, et vous rend un bulletin imprimable.",
+  });
+
   const [onglet, setOnglet] = useState<'position' | 'classer' | 'liquidation'>('position');
 
   /* ---- Recherche de position ---- */

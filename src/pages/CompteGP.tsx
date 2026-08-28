@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { supabase, EDGE_FUNCTIONS_URL, PROFILES_TABLE } from '@/lib/supabase';
 import { messageDeConnexion } from '@/lib/erreurs-auth';
 import { verifierMotDePasse } from '@/lib/force-mot-de-passe';
+import { useReferencement } from '@/hooks/useReferencement';
 import {
   Loader2,
   Building2,
@@ -79,6 +80,13 @@ const AVANTAGES_ENTREPRISE = [
 ];
 
 export default function CompteGP() {
+  useReferencement({
+    titre: "Votre compte",
+    description:
+      "Votre compte boutique.",
+    horsIndex: true,
+  });
+
   const navigate = useNavigate();
   const [parametres] = useSearchParams();
   const retour = retourSur(parametres.get('retour'));

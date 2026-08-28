@@ -26,6 +26,7 @@ import {
   RadioGroupItem,
 } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
+import { useReferencement } from '@/hooks/useReferencement';
 import {
   Loader2,
   Landmark,
@@ -40,6 +41,13 @@ import {
 } from 'lucide-react';
 
 export default function CommandeGP() {
+  useReferencement({
+    titre: "Finaliser la commande",
+    description:
+      "Coordonnées de livraison et règlement.",
+    horsIndex: true,
+  });
+
   const { items, totalFcfa, clearCart } = useCartGP();
   /**
    * Remise de groupage : la part fixe de transport que les prix article

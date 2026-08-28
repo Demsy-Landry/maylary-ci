@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import PublicHeaderImport from '@/components/PublicHeaderImport';
 import SiteFooter from '@/components/SiteFooter';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /**
  * Mentions légales.
@@ -16,6 +17,12 @@ import SiteFooter from '@/components/SiteFooter';
  * fait, ce qu'il ne fait pas, et qui signe.
  */
 export default function MentionsLegales() {
+  useReferencement({
+    titre: "Mentions légales",
+    description:
+      "Éditeur du site, hébergement, propriété intellectuelle et coordonnées de MayLary Group, marque de Dems'Inc.",
+  });
+
   return (
     <div className="min-h-screen bg-background">
       <PublicHeaderImport />

@@ -44,6 +44,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, User, FileText, ExternalLink, History, ArrowRight, Inbox, Receipt, Download } from 'lucide-react';
+import { useReferencement } from '@/hooks/useReferencement';
 
 interface HistoriqueLigne {
   module: string;
@@ -63,6 +64,13 @@ interface DocumentLigne {
 }
 
 export default function MonCompte() {
+  useReferencement({
+    titre: "Votre compte",
+    description:
+      "Profil, documents et historique.",
+    horsIndex: true,
+  });
+
   const { user, profile, loading: authLoading, profilEnCours, isAdmin, refreshProfile } = useAuth();
 
   const [nomComplet, setNomComplet] = useState('');

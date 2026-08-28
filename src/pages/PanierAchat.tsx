@@ -8,8 +8,16 @@ import ImageWithFallback from '@/components/ImageWithFallback';
 import GarantiePayeProtege from '@/components/GarantiePayeProtege';
 import FileGroupage from '@/components/FileGroupage';
 import FretApresVerification from '@/components/FretApresVerification';
+import { useReferencement } from '@/hooks/useReferencement';
 
 export default function PanierAchat() {
+  useReferencement({
+    titre: "Votre panier",
+    description:
+      "Votre panier d'achat.",
+    horsIndex: true,
+  });
+
   const { items, itemsExpress, itemsGroupage, updateQuantite, removeItem, totalFcfa } =
     useCartGP();
   const navigate = useNavigate();

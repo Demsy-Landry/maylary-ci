@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase';
 import { verifierMotDePasse } from '@/lib/force-mot-de-passe';
 import { toast } from 'sonner';
 import { KeyRound, Loader2, MailCheck, ShieldCheck } from 'lucide-react';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /**
  * Le mot de passe oublié — et pourquoi cet écran fait DEUX choses.
@@ -40,6 +41,13 @@ import { KeyRound, Loader2, MailCheck, ShieldCheck } from 'lucide-react';
 type Moment = 'inconnu' | 'demander' | 'reprendre';
 
 export default function MotDePasseOublie() {
+  useReferencement({
+    titre: "Réinitialiser votre mot de passe",
+    description:
+      "Recevez un lien de réinitialisation.",
+    horsIndex: true,
+  });
+
   const navigate = useNavigate();
   const [moment, setMoment] = useState<Moment>('inconnu');
 

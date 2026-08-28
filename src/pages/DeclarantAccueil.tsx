@@ -6,6 +6,7 @@ import SiteFooter from '@/components/SiteFooter';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useReferencement } from '@/hooks/useReferencement';
 import {
   supabase,
   STORAGE_PUBLIC_URL,
@@ -102,6 +103,12 @@ const GARANTIES = [
 const fcfa = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
 
 export default function DeclarantAccueil() {
+  useReferencement({
+    titre: "Le Déclarant — position tarifaire et calcul des droits de douane",
+    description:
+      "Trouvez la position tarifaire d'une marchandise dans le Tarif Extérieur Commun UEMOA et calculez les droits et taxes exigibles. Un outil de préparation : la déclaration en détail reste signée par un commissionnaire agréé.",
+  });
+
   const [formules, setFormules] = useState<FormuleIA[] | null>(null);
 
   useEffect(() => {

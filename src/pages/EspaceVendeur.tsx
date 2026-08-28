@@ -36,6 +36,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Store, Plus, Trash2, Eye, EyeOff, Wallet, BadgeCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import GarantiePayeProtege from '@/components/GarantiePayeProtege';
+import { useReferencement } from '@/hooks/useReferencement';
 
 /** Même habillage que le champ texte : le projet n'embarque pas de select. */
 const selectClassName =
@@ -59,6 +60,12 @@ interface ArticleVendeur {
 }
 
 export default function EspaceVendeur() {
+  useReferencement({
+    titre: "Vendre sur MayLary Group",
+    description:
+      "Ouvrez votre enseigne sur l'espace professionnel et présentez vos produits aux acheteurs de la plateforme. Inscription, conditions et fonctionnement du reversement.",
+  });
+
   const { user, loading: authLoading, profilEnCours } = useAuth();
   const navigate = useNavigate();
 

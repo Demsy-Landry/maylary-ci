@@ -14,7 +14,20 @@
       name="description"
       content="MayLary Group accompagne entreprises et particuliers pour importer et exporter leurs marchandises depuis Abidjan : transit, dédouanement, fret aérien et maritime, assurance facultés."
     />
-    <link rel="canonical" href="https://maylarygroup.ci/" />
+    <!-- PAS de balise `canonical` ici, et c'est délibéré.
+         L'hébergeur renvoie ce même fichier pour les cent soixante-huit
+         adresses du site. Une canonique écrite en dur pointait donc l'accueil
+         depuis CHAQUE fiche produit et chaque rayon — c'est-à-dire qu'elle
+         demandait à Google de n'en indexer aucune. Nous soumettions un sitemap
+         de cent soixante-huit adresses et nous les désavouions une par une.
+         Sans balise, un moteur retient l'adresse qu'il a visitée : c'est
+         exactement ce qu'il faut. `useReferencement` pose ensuite la canonique
+         exacte de la page, une fois le rendu fait. -->
+
+    <!-- `og:url` reste, lui, à l'accueil : les robots d'aperçu de WhatsApp et
+         de Facebook n'exécutent pas le JavaScript et ne liront jamais autre
+         chose que ce fichier. Une adresse de marque vaut mieux qu'aucune. -->
+
 
     <!-- Icônes. Toutes tirées du logo de la maison : le dessin étant une
          illustration et non un tracé vectoriel, le favicon est un PNG plutôt
