@@ -20,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Clock, Loader2, PackageSearch, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 const fcfa = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
 
@@ -50,11 +51,7 @@ function delaiRestant(iso: string): string {
  * personne n'a rien payé.
  */
 export default function AchatsGroupes() {
-  useReferencement({
-    titre: "Achats groupés — le prix de gros à plusieurs",
-    description:
-      "Réunissez-vous sur une même référence pour atteindre la quantité qui déclenche le prix de gros. Chacun paie sa part et reçoit sa commande.",
-  });
+  useReferencement(PAGES["/boutique/achats-groupes"]);
 
   const { user } = useAuth();
   const [campagnes, setCampagnes] = useState<AchatGroupePublic[]>([]);

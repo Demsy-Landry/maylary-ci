@@ -29,6 +29,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Loader2, Eye, PackageSearch, FileText, ExternalLink } from 'lucide-react';
 import BoutonFacture from '@/components/BoutonFacture';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 /** Statuts à partir desquels le dossier est engagé : la facture est émise. */
 const FACTURE_IMPORT_DISPONIBLE: StatutImport[] = [
@@ -61,12 +62,7 @@ interface DemandeAvecDetail extends DemandeImportClient {
 }
 
 export default function MesDemandesImport() {
-  useReferencement({
-    titre: "Vos demandes d'import",
-    description:
-      "Le suivi de vos dossiers d'import.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/import/mes-demandes"]);
 
   const { user, loading: authLoading, profilEnCours, isAdmin } = useAuth();
   const [searchParams] = useSearchParams();

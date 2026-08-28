@@ -38,6 +38,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 import {
   FileText, Printer, Plus, Trash2, Split, Sparkles, Loader2, CheckCircle2,
   AlertTriangle, ChevronDown, Calculator, Lock, Coins, Wand2, Save,
@@ -76,11 +77,7 @@ const nombre = (v: string) => {
 const ICONES_MODE = { ship: Ship, plane: Plane, truck: Truck, train: TrainFront } as const;
 
 export default function DeclarantDeclaration() {
-  useReferencement({
-    titre: "Déclaration en douane — préparation et simulation",
-    description:
-      "Préparez votre déclaration au modèle SYDAM World : en-tête, valeurs globales, lignes tarifaires et récapitulatif de liquidation, à partir des référentiels officiels.",
-  });
+  useReferencement(PAGES["/declarant/declaration"]);
 
   const { user } = useAuth();
   const emplacement = useLocation();

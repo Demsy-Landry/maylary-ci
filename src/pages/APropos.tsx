@@ -5,6 +5,7 @@ import { MarqueMaylary } from '@/components/MarqueMaylary';
 import ImageOuverture from '@/components/ImageOuverture';
 import { Button } from '@/components/ui/button';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 import {
   Ship,
   PackageSearch,
@@ -83,11 +84,7 @@ const SERVICES = [
 ];
 
 export default function APropos() {
-  useReferencement({
-    titre: "À propos de MayLary Group",
-    description:
-      "Qui nous sommes, ce que nous prenons en charge dans une opération d'import ou d'export, et où s'arrête notre rôle. MayLary Group est une marque de Dems'Inc, à Abidjan.",
-  });
+  useReferencement(PAGES["/a-propos"]);
 
   return (
     <div className="min-h-screen bg-background">

@@ -27,6 +27,7 @@ import {
 } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 import {
   Loader2,
   Landmark,
@@ -41,12 +42,7 @@ import {
 } from 'lucide-react';
 
 export default function CommandeGP() {
-  useReferencement({
-    titre: "Finaliser la commande",
-    description:
-      "Coordonnées de livraison et règlement.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/boutique/commande"]);
 
   const { items, totalFcfa, clearCart } = useCartGP();
   /**

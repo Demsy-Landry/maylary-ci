@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 /**
  * L'historique du Déclarant.
@@ -60,12 +61,7 @@ const dateHeure = (s: string) =>
 type Vue = 'liquidations' | 'classifications';
 
 export default function DeclarantHistorique() {
-  useReferencement({
-    titre: "Historique des liquidations",
-    description:
-      "Vos liquidations enregistrées.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/declarant/historique"]);
 
   const { user, loading: authLoading } = useAuth();
   const [vue, setVue] = useState<Vue>('liquidations');

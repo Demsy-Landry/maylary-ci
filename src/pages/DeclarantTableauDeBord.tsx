@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 import {
   Gauge,
   Sparkles,
@@ -123,12 +124,7 @@ function Compteur({
 }
 
 export default function DeclarantTableauDeBord() {
-  useReferencement({
-    titre: "Tableau de bord du Déclarant",
-    description:
-      "Votre activité sur les outils douaniers.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/declarant/tableau-de-bord"]);
 
   const { user, loading: authLoading } = useAuth();
   const [tb, setTb] = useState<TableauDeBordDeclarant | null>(null);

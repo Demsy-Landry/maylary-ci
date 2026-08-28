@@ -45,6 +45,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, User, FileText, ExternalLink, History, ArrowRight, Inbox, Receipt, Download } from 'lucide-react';
 import { useReferencement } from '@/hooks/useReferencement';
+import { PAGES } from '@/lib/referencement-pages';
 
 interface HistoriqueLigne {
   module: string;
@@ -64,12 +65,7 @@ interface DocumentLigne {
 }
 
 export default function MonCompte() {
-  useReferencement({
-    titre: "Votre compte",
-    description:
-      "Profil, documents et historique.",
-    horsIndex: true,
-  });
+  useReferencement(PAGES["/mon-compte"]);
 
   const { user, profile, loading: authLoading, profilEnCours, isAdmin, refreshProfile } = useAuth();
 
