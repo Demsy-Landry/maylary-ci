@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/generer-sitemap.mjs && tsc -b && vite build",
+    "build": "node scripts/verifier-vercel-json.mjs && node scripts/generer-sitemap.mjs && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "sitemap": "node scripts/generer-sitemap.mjs"
