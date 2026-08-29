@@ -5,7 +5,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/hooks/useAuth';
 import { CartGPProvider } from '@/hooks/useCartGP';
 import { CartProvider } from '@/hooks/useCart';
-import { useCycleJourNuit } from '@/hooks/useCycleJourNuit';
+// Coupé avec l'appel plus bas — voir l'explication dans App().
+// import { useCycleJourNuit } from '@/hooks/useCycleJourNuit';
 import AdminRoute from '@/components/AdminRoute';
 import Index from '@/pages/Index';
 import Couverture from '@/pages/Couverture';
@@ -94,11 +95,33 @@ function App() {
   // Un seul observateur pour toute l'application, monté avec elle.
   useEffect(() => demarrerRevelation(), []);
 
-  // Le cycle du jour et de la nuit. Monté ici, et ici seulement : il écrit sur
-  // la racine du document, donc toute l'application en hérite — écrans publics,
-  // espace client et administration compris. Un second appel ailleurs ferait
-  // deux minuteries qui se contrediraient.
-  useCycleJourNuit();
+  // LE CYCLE DU JOUR ET DE LA NUIT EST COUPÉ. NE PAS LE RALLUMER EN L'ÉTAT.
+  //
+  // Il fonctionnait — les couleurs dérivaient bien avec l'heure — mais il
+  // rendait la page d'accueil illisible la nuit, et je ne l'avais pas vu parce
+  // que je n'ai jamais chargé l'application elle-même avant de déployer.
+  //
+  // LA CAUSE
+  //
+  // Les voiles posés sur les photographies sont construits sur `--foreground` :
+  //
+  //     bg-gradient-to-r from-foreground/95 via-foreground/75 to-foreground/20
+  //
+  // Le jour, `foreground` est le bleu-nuit : le voile est sombre et le texte
+  // blanc s'y détache. La nuit, le cycle inverse la palette, `foreground`
+  // devient crème — le voile s'éclaircit et le texte blanc disparaît dedans.
+  //
+  // Ce n'est pas un oubli isolé : QUARANTE-SIX endroits, dans quatorze
+  // fichiers, se servent de `foreground` comme d'une couleur sombre. Toute
+  // l'application est bâtie sur cette hypothèse, et l'inverser la casse.
+  //
+  // CE QU'IL FAUT POUR LE RALLUMER
+  //
+  // Un jeton dédié — un « voile » qui reste sombre dans les deux thèmes — et
+  // les quarante-six usages repris un par un, puis vérifiés à l'écran de jour
+  // ET de nuit. Tant que ce n'est pas fait, cette ligne reste commentée.
+  //
+  // useCycleJourNuit();
 
   return (
     <QueryClientProvider client={queryClient}>
