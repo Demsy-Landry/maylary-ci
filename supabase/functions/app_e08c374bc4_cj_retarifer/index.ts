@@ -201,8 +201,28 @@ servirAvecCors(async (req: Request) => {
         incoterm: repartition,
       });
 
-      // Sans aucun devis, on ne sait pas ce que coûte l'acheminement : le produit
-      // ne peut pas être publié avec un prix inventé.
+      // SANS DEVIS DE FRET, L'ARTICLE RELÈVE DU GROUPAGE — PAS DE L'EXTINCTION
+      //
+      // Cette branche éteignait l'article sans jamais écrire son prix. Le
+      // raisonnement d'origine — « on ne connaît pas l'acheminement, donc on ne
+      // peut pas publier un prix inventé » — était juste tant que le fret était
+      // INCLUS dans le prix. Il ne l'est plus : le transport est facturé à part,
+      // à marge nulle sur le porte-à-porte.
+      //
+      // Le prix de vente ne dépend donc plus du fret. C'est coût de revient
+      // × marge, et `calculerCout` le produit ici même — il était d'ailleurs
+      // déjà rapporté sous le nom `prix_indicatif_fcfa`, puis jeté. Ce n'est pas
+      // un prix inventé : c'est le prix normal de la marchandise.
+      //
+      // Ce qui reste inconnu, c'est le fret — et le groupage est fait pour ça :
+      // il n'affiche aucun prix de transport tant qu'il n'est pas vérifié, et
+      // aucun paiement ne part avant.
+      //
+      // Mesuré le 29 août : dix articles étaient restés à 0 F de prix de vente,
+      // donc invisibles en vitrine, alors qu'ils avaient un prix d'achat, des
+      // photos et une fiche complète. Un article sans prix n'est jamais montré —
+      // c'est la vue publique qui le refuse, et elle a raison. C'est le prix qui
+      // manquait, pas la règle.
       if (paliers.length === 0) {
         const coutForfait = calculerCout({
           prixAchatFcfa,
@@ -214,17 +234,24 @@ servirAvecCors(async (req: Request) => {
         resultats.push({
           id: produit.id,
           nom: produit.nom,
-          publiable: false,
-          motif: 'fret_non_cote',
-          prix_indicatif_fcfa: coutForfait.prix_unitaire_fcfa,
+          publiable: true,
+          motif: 'groupage_fret_a_verifier',
+          prix_unitaire_fcfa: coutForfait.prix_unitaire_fcfa,
         });
 
         if (!simulation) {
           await supabaseService
             .from('app_e08c374bc4_produits')
             .update({
-              actif: false,
-              indisponible_motif: 'fret_non_cote',
+              prix_achat_fcfa: prixAchatFcfa,
+              prix_unitaire_fcfa: coutForfait.prix_unitaire_fcfa,
+              cout_assurance_fcfa: coutForfait.cout_assurance_fcfa,
+              cout_fret_fcfa: 0,
+              mode_acheminement: 'groupage',
+              fret_source: 'forfait',
+              actif: true,
+              indisponible_motif: null,
+              retarife_le: new Date().toISOString(),
               paliers_calcules_le: new Date().toISOString(),
             })
             .eq('id', produit.id);

@@ -233,7 +233,7 @@ Deno.serve(async (req) => {
     rapport.push({
       nom: p.nom,
       ancien_motif: p.indisponible_motif,
-      decision: refuse ? 'éteint' : 'rallumé',
+      decision: refuse ? 'groupage' : 'rallumé',
       quantite_minimum: a.quantite,
       fret_unitaire_fcfa: a.fret_unitaire_fcfa,
       ratio: Number(a.ratio.toFixed(2)),
@@ -243,9 +243,27 @@ Deno.serve(async (req) => {
 
     if (simulation) continue;
 
+    // UN FRET INAMORTISSABLE N'EST PAS UN MOTIF D'EXTINCTION
+    //
+    // Cette branche éteignait l'article. C'était une faute de raisonnement :
+    // « le transporteur porte-à-porte revient trop cher » ne veut pas dire
+    // « cet article est invendable », cela veut dire « cet article ne passe pas
+    // par le porte-à-porte ». Or la règle de la maison est que tout ce que le
+    // transporteur ne prend pas relève du GROUPAGE.
+    //
+    // Le résultat de l'ancienne écriture, mesuré le 29 août : sept articles
+    // éteints alors qu'ils avaient un prix, des photos et une fiche complète.
+    // L'un d'eux valait 363 F à l'achat pour 7 574 F de fret express — en
+    // groupage, ce rapport n'a plus aucun sens, puisque le fret y est vérifié
+    // séparément et n'est pas affiché tant qu'il ne l'est pas.
+    //
+    // On bascule donc, exactement comme la branche « aucun palier coté »
+    // au-dessus : même forme d'écriture, même conséquence. Le fret express est
+    // remis à zéro pour qu'aucune vitrine n'affiche le prix d'un acheminement
+    // qui ne sera pas utilisé.
     const maj = refuse
-      ? { indisponible_motif: 'fret_non_amortissable', actif: false,
-          quantite_minimum: a.quantite, cout_fret_fcfa: a.fret_unitaire_fcfa }
+      ? { mode_acheminement: 'groupage', fret_source: 'forfait',
+          cout_fret_fcfa: 0, indisponible_motif: null, actif: true }
       : { indisponible_motif: null, actif: true,
           quantite_minimum: a.quantite, cout_fret_fcfa: a.fret_unitaire_fcfa,
           fret_source: 'cj_reel', mode_acheminement: 'cj_ddp', retarife_le: new Date().toISOString() };
