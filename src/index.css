@@ -78,6 +78,16 @@
   --ring: oklch(0.68 0.18 45 / 0.5);
 }
 
+/* Les photographies de produit sont éclairées pour le plein jour. Sur un fond
+   sombre, laissées à pleine intensité, elles deviennent des lampes : l'œil ne
+   voit plus qu'elles. Le voile est calculé par le cycle jour/nuit et posé sur
+   la racine ; tant qu'il n'est pas là, `none` s'applique et rien ne change.
+   Le logo et les pictogrammes s'en exemptent avec `.sans-voile-nuit`. */
+img:not(.sans-voile-nuit),
+video:not(.sans-voile-nuit) {
+  filter: var(--voile-nuit, none);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

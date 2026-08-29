@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/hooks/useAuth';
 import { CartGPProvider } from '@/hooks/useCartGP';
 import { CartProvider } from '@/hooks/useCart';
+import { useCycleJourNuit } from '@/hooks/useCycleJourNuit';
 import AdminRoute from '@/components/AdminRoute';
 import Index from '@/pages/Index';
 import Couverture from '@/pages/Couverture';
@@ -92,6 +93,12 @@ const queryClient = new QueryClient();
 function App() {
   // Un seul observateur pour toute l'application, monté avec elle.
   useEffect(() => demarrerRevelation(), []);
+
+  // Le cycle du jour et de la nuit. Monté ici, et ici seulement : il écrit sur
+  // la racine du document, donc toute l'application en hérite — écrans publics,
+  // espace client et administration compris. Un second appel ailleurs ferait
+  // deux minuteries qui se contrediraient.
+  useCycleJourNuit();
 
   return (
     <QueryClientProvider client={queryClient}>
