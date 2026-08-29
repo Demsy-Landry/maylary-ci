@@ -24,8 +24,23 @@ import { fileURLToPath } from 'node:url';
 import { statSync } from 'node:fs';
 
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
-const SOURCE = resolve(RACINE, 'docs/dossier-reference.html');
-const SORTIE = resolve(RACINE, 'docs/MayLaryGroup-Dossier-de-reference.pdf');
+
+/** Les documents fabriqués par ce script : source HTML → PDF livré. */
+const DOCUMENTS = {
+  dossier: ['docs/dossier-reference.html', 'docs/MayLaryGroup-Dossier-de-reference.pdf',
+    'MayLary Group — Dossier de référence'],
+  rapport: ['docs/rapport-construction.html', 'docs/MayLaryGroup-Rapport-de-construction.pdf',
+    'MayLary Group — Rapport de construction'],
+};
+
+const demande = process.argv[2] ?? 'dossier';
+if (!DOCUMENTS[demande]) {
+  console.error(`Document inconnu : « ${demande} ». Choix : ${Object.keys(DOCUMENTS).join(', ')}`);
+  process.exit(1);
+}
+const [cheminSource, cheminSortie, TITRE] = DOCUMENTS[demande];
+const SOURCE = resolve(RACINE, cheminSource);
+const SORTIE = resolve(RACINE, cheminSortie);
 
 const navigateur = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 const page = await navigateur.newPage();
@@ -47,7 +62,7 @@ await page.pdf({
   footerTemplate: `
     <div style="width:100%;font-family:Liberation Sans,Arial,sans-serif;font-size:7pt;
                 color:#8a939d;padding:0 16mm;display:flex;justify-content:space-between;">
-      <span>MayLary Group — Dossier de référence</span>
+      <span>${TITRE}</span>
       <span class="pageNumber"></span>
     </div>`,
   margin: { top: '17mm', right: '16mm', bottom: '14mm', left: '16mm' },

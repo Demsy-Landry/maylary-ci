@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>MayLary Group — Rapport de construction</title>
+<link rel="stylesheet" href="dossier.css">
+</head>
+<body>
+
+<!-- ============================== COUVERTURE ============================== -->
+<div class="couverture">
+  <div class="couverture-visuel"><img src="../public/visuels/sourcing-entrepot.jpg" alt=""></div>
+  <div class="contenu">
+    <div class="bandeau">MayLary Group &nbsp;·&nbsp; Dems'Inc &nbsp;·&nbsp; Abidjan</div>
+    <div style="height:26mm"></div>
+    <div class="filet"></div>
+    <h1>Rapport de<br><em>construction</em></h1>
+    <p class="chapeau">
+      D'où vient la plateforme, comment elle est bâtie, où elle en est
+      exactement, et ce qu'il reste à faire pour qu'elle commence à travailler.
+    </p>
+  </div>
+  <div class="pied">
+    <table>
+      <tr><td>Établi le</td><td>29 août 2026</td></tr>
+      <tr><td>Objet</td><td>Rendre compte du travail accompli et de ce qui reste</td></tr>
+      <tr><td>Période</td><td>19 juillet — 29 août 2026, soit six semaines</td></tr>
+      <tr><td>Diffusion</td><td>Interne. Les erreurs y sont racontées comme le reste.</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ============================== SOMMAIRE ============================== -->
+<div class="page">
+  <p class="num-chapitre">Sommaire</p>
+  <h2 class="chapitre">Ce que ce rapport répond</h2>
+  <p class="accroche">
+    Quatre questions, dans cet ordre. <strong>D'où ça vient</strong> — comment on
+    est passé d'une idée à cinquante mille lignes. <strong>Comment c'est
+    bâti</strong> — les trois étages et ce qui tient les règles.
+    <strong>Où on en est</strong> — mesuré, pas raconté. <strong>Ce qu'il
+    reste</strong> — la liste exacte, dans l'ordre où elle doit être traitée.
+  </p>
+
+  <div class="toc">
+    <div class="groupe">
+      <div class="groupe-titre">I · La construction</div>
+      <div class="ligne"><b>1</b><span>Avant le dépôt : les quatre premières semaines</span></div>
+      <div class="ligne"><b>2</b><span>Quatorze jours, cent vingt commits</span></div>
+      <div class="ligne"><b>3</b><span>Les sept chantiers</span></div>
+      <div class="ligne"><b>4</b><span>Les huit erreurs, et ce qu'elles ont changé</span></div>
+    </div>
+    <div class="groupe">
+      <div class="groupe-titre">II · La structure</div>
+      <div class="ligne"><b>5</b><span>L'architecture en trois étages</span></div>
+      <div class="ligne"><b>6</b><span>La base de données</span></div>
+      <div class="ligne"><b>7</b><span>L'application</span></div>
+      <div class="ligne"><b>8</b><span>Les fonctions serveur et les automatismes</span></div>
+      <div class="ligne"><b>9</b><span>La sécurité</span></div>
+    </div>
+    <div class="groupe">
+      <div class="groupe-titre">III · Où nous en sommes</div>
+      <div class="ligne"><b>10</b><span>L'inventaire mesuré</span></div>
+      <div class="ligne"><b>11</b><span>Ce qui marche, ce qui est vide, ce qui manque</span></div>
+    </div>
+    <div class="groupe">
+      <div class="groupe-titre">IV · Achever et démarrer</div>
+      <div class="ligne"><b>12</b><span>Les huit chantiers techniques restants</span></div>
+      <div class="ligne"><b>13</b><span>Ce qui ne dépend que du fondateur</span></div>
+      <div class="ligne"><b>14</b><span>L'ordre, et pourquoi il n'est pas négociable</span></div>
+      <div class="ligne"><b>15</b><span>À quoi ressemblera le premier jour</span></div>
+    </div>
+  </div>
+
+  <div class="encadre sombre" style="margin-top:6mm">
+    <div class="encadre-titre">Ce rapport ne raconte pas une réussite</div>
+    <p style="margin-bottom:0">
+      Il raconte un chantier, avec ce qui a été bâti et ce qui s'est cassé.
+      Le chapitre 4 est entièrement consacré aux erreurs — pas par scrupule, mais
+      parce que chacune a changé une règle de travail, et que ces règles valent
+      plus que le code qu'elles ont corrigé.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== SÉPARATEUR I ============================== -->
+<div class="separateur">
+  <div class="image"><img src="../public/visuels/port-import-abidjan.jpg" alt=""></div>
+  <div class="texte">
+    <div class="lettre">I</div>
+    <h2>La construction</h2>
+    <p>
+      Six semaines, dont quatorze jours tracés commit par commit. Ce qui a été
+      bâti, dans quel ordre, et pourquoi cet ordre-là.
+    </p>
+    <div class="sommaire-partie">
+      <div><b>1</b> &nbsp;&nbsp;&nbsp;&nbsp;Avant le dépôt : les quatre premières semaines</div>
+      <div><b>2</b> &nbsp;&nbsp;&nbsp;&nbsp;Quatorze jours, cent vingt commits</div>
+      <div><b>3</b> &nbsp;&nbsp;&nbsp;&nbsp;Les sept chantiers</div>
+      <div><b>4</b> &nbsp;&nbsp;&nbsp;&nbsp;Les huit erreurs, et ce qu'elles ont changé</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== CH. 1 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 1</p>
+  <h2 class="chapitre">Avant le dépôt : les quatre premières semaines</h2>
+  <p class="accroche">
+    Le dépôt de code ne commence que le 16 août. Ce qui précède existe, se
+    vérifie sur les dates de création des services, mais n'est pas tracé
+    ligne à ligne — et il faut le dire plutôt que de le reconstruire de mémoire.
+  </p>
+
+  <table class="t">
+    <tr><th class="c" style="width:26mm">Date</th><th>Ce qui est établi</th><th style="width:34mm">Comment on le sait</th></tr>
+    <tr><td class="c"><b>19 juillet 2026</b></td><td>Création de la base de données <b>MAYLARY</b>, région Europe de l'Ouest, PostgreSQL 17</td><td>Date de création du projet</td></tr>
+    <tr><td class="c"><b>24 juillet 2026</b></td><td>Création du projet d'hébergement du site</td><td>Date de création du projet</td></tr>
+    <tr><td class="c">fin juillet — mi-août</td><td>Première version de l'application : les huit métiers, les écrans, le premier moteur de calcul</td><td><span class="m conf">Non tracé</span> — pas de dépôt de code sur cette période</td></tr>
+    <tr><td class="c"><b>16 août 2026</b></td><td>Premier commit. À partir de là, chaque changement est daté, motivé et réversible</td><td>Historique du dépôt</td></tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">Ce que ce trou dans l'historique implique</div>
+    <p style="margin-bottom:0">
+      Les quatre premières semaines ont produit la structure de l'application —
+      les écrans, les tables, la logique métier de départ. Elles ne peuvent pas
+      être relues commit par commit. <strong>Tout ce qui est décrit dans la
+      partie II a donc été vérifié dans la base et dans le code aujourd'hui, pas
+      déduit d'un historique.</strong> C'est plus long, et c'est le seul moyen
+      d'être exact.
+    </p>
+  </div>
+
+  <h3>Ce qui a été mis en place à partir du 16 août</h3>
+  <p>
+    Le dépôt n'a pas seulement servi à garder le code. Il a introduit trois
+    habitudes qui n'existaient pas avant, et qui expliquent la vitesse des deux
+    semaines suivantes :
+  </p>
+  <ul>
+    <li><strong>Un message de commit qui explique le pourquoi</strong>, pas le quoi. Le diff dit ce qui a changé ; le message dit ce qu'on avait mal compris.</li>
+    <li><strong>Une branche de travail et une fusion dans la branche principale.</strong> Ce qui casse ne casse que la branche.</li>
+    <li><strong>Un retour arrière possible.</strong> Il a servi dès le 21 août, sur trois commits d'un écran ajouté sans avoir été demandé.</li>
+  </ul>
+</div>
+
+<!-- ============================== CH. 2 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 2</p>
+  <h2 class="chapitre">Quatorze jours, cent vingt commits</h2>
+  <p class="accroche">
+    Le rythme réel du chantier, jour par jour. Les creux ne sont pas des pauses :
+    ce sont les jours où le travail se faisait ailleurs — dans la base, ou en
+    attente d'une réponse du fondateur.
+  </p>
+
+  <table class="t">
+    <tr><th class="c" style="width:22mm">Jour</th><th class="n" style="width:22mm">Commits</th><th>Ce qui s'est joué</th></tr>
+    <tr><td class="c"><b>16 août</b></td><td class="n">13</td><td>Le coût de revient cesse d'être lisible par le client. Le devis d'import va jusqu'à la livraison. L'acconage cesse d'être un forfait</td></tr>
+    <tr><td class="c"><b>17 août</b></td><td class="n">6</td><td>Quatre-vingt-dix lignes de frais de compagnie et de terminal. Chaque fournisseur entre par la porte qui lui correspond</td></tr>
+    <tr><td class="c"><b>19 août</b></td><td class="n">2</td><td>Un écran de catalogue fournisseur, ajouté sans avoir été demandé</td></tr>
+    <tr><td class="c"><b>21 août</b></td><td class="n">10</td><td><b>Retour arrière sur cet écran</b>, puis réintroduction avec un test de raccordement. La planche de marque devient la peau de l'application</td></tr>
+    <tr><td class="c"><b>22 août</b></td><td class="n">8</td><td>Retour à l'apparence précédente. L'ouverture d'expédition, qui n'attend pas d'interface fournisseur</td></tr>
+    <tr><td class="c"><b>24 août</b></td><td class="n"><b>35</b></td><td>La plus grosse journée. Peuplement des deux vitrines, tarification automatique, séparation des deux acheminements, adresse publique et plan de site</td></tr>
+    <tr><td class="c"><b>26 août</b></td><td class="n"><b>28</b></td><td>Refonte de la vitrine, barre de qualité, tenue en charge, audit de sécurité, restriction des appels aux fonctions</td></tr>
+    <tr><td class="c"><b>27 août</b></td><td class="n">2</td><td>Fin de la restriction des appels</td></tr>
+    <tr><td class="c"><b>28 août</b></td><td class="n">10</td><td>Référencement : chaque page se présente sous son propre nom. Aperçus de partage sur les messageries</td></tr>
+    <tr><td class="c"><b>29 août</b></td><td class="n">6</td><td>Corpus juridique du Système Harmonisé. Dossier de référence</td></tr>
+  </table>
+
+  <div class="chiffres">
+    <div><div class="chiffre">120</div><div class="legende">commits</div></div>
+    <div><div class="chiffre">14</div><div class="legende">jours de travail</div></div>
+    <div><div class="chiffre">359</div><div class="legende">fichiers suivis</div></div>
+    <div><div class="chiffre">≈51 000</div><div class="legende">lignes de code</div></div>
+  </div>
+
+  <div class="encadre">
+    <div class="encadre-titre">Ce que la forme de cette courbe raconte</div>
+    <p style="margin-bottom:0">
+      Deux journées — le 24 et le 26 — portent <strong>la moitié des
+      commits</strong>. Ce ne sont pas des journées plus longues : ce sont les
+      deux jours où les décisions du fondateur étaient tombées et où plus rien
+      n'attendait. <em>Le rythme du chantier n'a jamais été limité par la vitesse
+      d'écriture. Il a été limité par les réponses.</em> C'est encore vrai
+      aujourd'hui, et c'est tout l'objet de la partie IV.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 3 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 3</p>
+  <h2 class="chapitre">Les sept chantiers</h2>
+  <p class="accroche">
+    Les cent vingt commits se rangent en sept chantiers. Chacun avait une
+    question de départ, et chacun a laissé une règle derrière lui.
+  </p>
+
+  <h3>1 — Le moteur de calcul <span class="petite">16-17 août</span></h3>
+  <p>
+    <strong>La question :</strong> un devis d'import s'arrêtait au Bon À Enlever,
+    donc avant la livraison. Et le client pouvait lire notre coût de revient.
+  </p>
+  <p>
+    <strong>Ce qui a été fait :</strong> le devis va désormais jusqu'à la porte
+    du client. L'acconage cesse d'être un forfait et devient un barème.
+    Quatre-vingt-dix lignes de frais de compagnie et de terminal sont chargées.
+    Le coût de revient disparaît de tout ce que voit un client.
+  </p>
+  <p class="petite"><b>La règle laissée :</b> le client ne voit jamais ce que la marchandise nous a coûté, à aucune étape.</p>
+
+  <h3>2 — Les connecteurs fournisseurs <span class="petite">17-21 août</span></h3>
+  <p>
+    <strong>La question :</strong> le catalogue ne pouvait venir que d'une seule
+    source, et le mode d'expédition n'était pas rapatrié — seulement le prix.
+  </p>
+  <p>
+    <strong>Ce qui a été fait :</strong> chaque fournisseur entre par la porte
+    qui lui correspond. Le connecteur rapporte le mode d'expédition en plus du
+    prix. Le jeton se renouvelle depuis un écran, sans intervention technique.
+  </p>
+  <p class="petite"><b>La règle laissée :</b> un connecteur sans identifiants ne plante pas — il répond « pas prêt » et dit ce qui manque.</p>
+
+  <h3>3 — L'apparence <span class="petite">21-22, 26 août</span></h3>
+  <p>
+    <strong>La question :</strong> la vitrine ne ressemblait pas à une maison de
+    commerce ivoirienne, et sept métiers sur huit n'avaient pas de porte
+    d'entrée sur l'accueil.
+  </p>
+  <p>
+    <strong>Ce qui a été fait :</strong> planche de marque appliquée, puis
+    <em>retour à l'apparence précédente</em> après essai. Vitrine en tuiles,
+    rayons en devanture, panneau latéral des services, bannière pleine hauteur.
+    Les huit métiers accessibles depuis l'accueil.
+  </p>
+  <p class="petite"><b>La règle laissée :</b> toujours régler pour l'ordinateur <em>et</em> pour le téléphone, jamais l'un après l'autre.</p>
+
+  <h3>4 — Le peuplement et la tarification <span class="petite">24, 26 août</span></h3>
+  <p>
+    <strong>La question :</strong> un catalogue vide, et des prix qu'il fallait
+    calculer un par un à la main.
+  </p>
+  <p>
+    <strong>Ce qui a été fait :</strong> les deux vitrines peuplées, article par
+    article, chacun examiné. Le lanceur de tarification, puis les trois moteurs
+    horaires qui cotent, tarifient et enrichissent sans qu'on les relance. La
+    séparation des deux acheminements — express et groupage — et la règle
+    d'amortissement du fret.
+  </p>
+  <p class="petite"><b>La règle laissée :</b> jamais un article ajouté « pour remplir ». Et jamais un article affiché sans prix.</p>
+
+  <h3>5 — La tenue en charge <span class="petite">26 août</span></h3>
+  <p>
+    <strong>La question :</strong> une lecture du catalogue prenait 117
+    millisecondes, parce que les droits de douane étaient évalués à chaque ligne.
+  </p>
+  <p>
+    <strong>Ce qui a été fait :</strong> droits évalués une seule fois, index
+    posés sur les jointures, listes plafonnées. <strong>117 ms → 13 ms.</strong>
+  </p>
+  <p class="petite"><b>La règle laissée :</b> mesurer avant, mesurer après. Un « c'est corrigé » sans chiffre ne vaut rien.</p>
+</div>
+
+<!-- ============================== CH. 3 suite ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 3 — suite</p>
+  <h2 class="chapitre">Les sept chantiers</h2>
+
+  <h3>6 — La sécurité <span class="petite">24, 26-27 août</span></h3>
+  <p>
+    <strong>La question :</strong> un audit demandé par le fondateur sur vingt
+    points. Dix-sept étaient tenus. Trois ne l'étaient pas — et la vérification
+    en a fait tomber un quatrième, plus grave.
+  </p>
+  <table class="t">
+    <tr><th style="width:56mm">Le défaut</th><th>Ce qui a été fait</th></tr>
+    <tr><td><b>Le dépôt des preuves de paiement n'avait aucun garde-fou</b> — six dépôts sur sept limitaient la taille et le type de fichier ; le septième, le plus exposé, acceptait n'importe quoi</td><td>Aligné sur les six autres : 10 Mo, images et PDF seulement</td></tr>
+    <tr><td><b>Trois failles connues dans les dépendances</b>, dont deux classées hautes</td><td>Corrigées par mise à jour. Zéro vulnérabilité restante</td></tr>
+    <tr><td><b>Une page entière tombait</b> pour un encart publicitaire absent</td><td>Réparée : un ornement ne fait plus tomber la page</td></tr>
+    <tr><td><b>Vingt-trois fonctions serveur répondaient à n'importe quel site</b></td><td>Une enveloppe posée autour de chacune, sans réécrire leur intérieur — vingt-trois occasions de casser évitées</td></tr>
+  </table>
+  <p class="petite"><b>La règle laissée :</b> la base fait respecter les règles, pas l'écran. Un écran se contourne.</p>
+
+  <h3>7 — La visibilité <span class="petite">24, 28 août</span></h3>
+  <p>
+    <strong>La question :</strong> le site était en ligne et invisible. Deux
+    causes distinctes, découvertes l'une après l'autre.
+  </p>
+  <ul>
+    <li><strong>Google n'indexait qu'une page sur cent soixante-huit.</strong> Le fichier de base portait, écrite en dur, une balise qui désignait l'accueil comme « la vraie version » de chaque page. Chaque fiche produit demandait donc à Google de ne pas la garder. Il obéissait.</li>
+    <li><strong>Un lien partagé sur une messagerie affichait toujours la même vignette.</strong> Les robots d'aperçu n'exécutent pas le code du navigateur : ils lisent le fichier brut, identique pour toutes les adresses. Aucune correction côté navigateur ne pouvait y changer quoi que ce soit — il a fallu que le serveur réponde autre chose, mais <em>seulement aux robots</em>.</li>
+  </ul>
+  <p class="petite"><b>La règle laissée :</b> vérifier en production, jamais en local. Les deux défauts étaient invisibles sur un poste de développement.</p>
+
+  <h3>Et le huitième, commencé aujourd'hui</h3>
+  <p>
+    <strong>Le socle juridique du classement.</strong> Les classements
+    tarifaires citaient des Règles Générales et des Notes de Chapitre qui
+    n'existaient nulle part dans la base : elles étaient récitées. Elles sont
+    maintenant chargées depuis la publication de l'UEMOA — <strong>12 alinéas de
+    Règles, 102 Notes légales</strong> — chacune avec l'adresse de sa source et
+    la date de son relevé, et chacune vérifiée contre le document d'origine.
+  </p>
+  <p class="petite"><b>La règle laissée :</b> un raisonnement qui ne se cite pas ne se défend pas.</p>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Ce que ces sept chantiers ont en commun</div>
+    <p style="margin-bottom:0">
+      Aucun n'est parti d'une envie d'ajouter une fonction. <strong>Tous sont
+      partis d'un défaut constaté</strong> — un devis incomplet, un catalogue
+      vide, une lecture lente, une porte ouverte, un site invisible, un
+      raisonnement invérifiable. C'est ce qui explique qu'une plateforme de
+      cinquante mille lignes n'ait presque aucune fonction inutilisée : chacune
+      répond à un problème qui s'était déjà manifesté.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 4 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 4</p>
+  <h2 class="chapitre">Les huit erreurs, et ce qu'elles ont changé</h2>
+  <p class="accroche">
+    Chacune a coûté du temps. Chacune a laissé une règle ou un garde-fou. Elles
+    sont ici parce qu'un rapport qui ne raconte que ce qui a marché n'apprend
+    rien à celui qui reprendra le dossier.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:44mm">L'erreur</th><th style="width:52mm">Ce qui s'est passé</th><th>Ce qu'elle a laissé</th></tr>
+    <tr>
+      <td><b>Un écran ajouté sans avoir été demandé</b><br><span class="petite">19 août</span></td>
+      <td>Un écran de catalogue fournisseur, construit de ma propre initiative. Trois commits, puis trois retours arrière</td>
+      <td>On ne construit pas ce qui n'a pas été demandé. L'écran est revenu deux jours plus tard — <em>demandé, et avec un test de raccordement</em></td>
+    </tr>
+    <tr>
+      <td><b>Le plafond de fret réglé à cinq fois le prix d'achat</b><br><span class="petite">26 août</span></td>
+      <td>Un décapsuleur acheté 500 F portait 2 765 F de transport. Trente-cinq articles sur soixante-quatre étaient dans ce cas</td>
+      <td>Ramené à 1,5. <strong>Un réglage ne se juge pas dans l'absolu, mais sur son effet mesuré sur le catalogue réel</strong></td>
+    </tr>
+    <tr>
+      <td><b>Le groupage traité comme une poubelle</b><br><span class="petite">24 août</span></td>
+      <td>Tout ce qui coûtait cher à transporter y était versé — y compris un cadenas de 155 grammes qu'aucun transporteur n'aurait refusé</td>
+      <td>Le groupage devient un <em>constat</em> — le transporteur a refusé de coter — et non un défaut où l'on range ce qui gêne</td>
+    </tr>
+    <tr>
+      <td><b>Une balise écrite en dur qui annulait tout le référencement</b><br><span class="petite">28 août</span></td>
+      <td>Chaque page demandait à Google de retenir l'accueil à sa place. Le plan de site était complet et à jour : ce n'était pas lui</td>
+      <td>Vérifier en production, sur une vraie page, avec les yeux du robot — pas en local</td>
+    </tr>
+    <tr>
+      <td><b>Un commentaire dans un fichier de configuration</b><br><span class="petite">28 août</span></td>
+      <td>Une clé <code>//</code> glissée pour y écrire une note. L'hébergeur valide ce fichier contre un schéma strict : déploiement refusé avant même de construire</td>
+      <td>Un contrôle automatique en tête de chaque construction, qui refuse toute clé inconnue. Il a été éprouvé sur la faute exacte</td>
+    </tr>
+    <tr>
+      <td><b>Des colonnes demandées à une vue qui ne les a pas</b><br><span class="petite">28 août</span></td>
+      <td>Les noms avaient été recopiés depuis la description de la <em>table</em>. La vue publique n'en expose qu'une partie — c'est sa raison d'être. Et la base refuse la requête <em>entière</em>, pas seulement le champ</td>
+      <td>Un avertissement écrit au-dessus des trois noms de vues, là où on le lira en écrivant la prochaine requête</td>
+    </tr>
+    <tr>
+      <td><b>Un moteur de groupage lancé sur un colis express</b><br><span class="petite">28 août</span></td>
+      <td>Cinq soutiens-gorge achetés 11 850 F, et un total partiel de <b>1 019 695 F</b>. Le calcul était juste ; la filière était fausse</td>
+      <td><strong>On ne mélange pas les filières.</strong> C'est devenu un chapitre entier du manuel d'exploitation</td>
+    </tr>
+    <tr>
+      <td><b>Un traitement annoncé comme fait alors qu'il simulait</b><br><span class="petite">26 août</span></td>
+      <td>Le moteur de tarification possède un mode qui calcule sans rien enregistrer. Il avait été lancé dedans, et le résultat annoncé comme écrit</td>
+      <td>Lire la réponse avant d'annoncer. Elle disait <code>simulation: true</code></td>
+    </tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le fil commun de ces huit erreurs</div>
+    <p style="margin-bottom:0">
+      Sept sur huit viennent de <strong>la même chose : avoir supposé au lieu
+      d'avoir vérifié.</strong> Supposé qu'un réglage était raisonnable, qu'une
+      vue exposait les mêmes colonnes qu'une table, qu'un traitement avait écrit,
+      qu'une page était indexée. Aucune n'est une faute de programmation ; toutes
+      sont des fautes de vérification. C'est pourquoi la règle qui revient le
+      plus souvent dans ce dossier est <em>« mesuré, pas supposé »</em>.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== SÉPARATEUR II ============================== -->
+<div class="separateur">
+  <div class="image"><img src="../public/visuels/bureau-espace-pro.jpg" alt=""></div>
+  <div class="texte">
+    <div class="lettre">II</div>
+    <h2>La structure</h2>
+    <p>
+      Comment la plateforme est bâtie : trois étages, ce que chacun fait, et où
+      sont écrites les règles qui ne doivent jamais être contournées.
+    </p>
+    <div class="sommaire-partie">
+      <div><b>5</b> &nbsp;&nbsp;&nbsp;&nbsp;L'architecture en trois étages</div>
+      <div><b>6</b> &nbsp;&nbsp;&nbsp;&nbsp;La base de données</div>
+      <div><b>7</b> &nbsp;&nbsp;&nbsp;&nbsp;L'application</div>
+      <div><b>8</b> &nbsp;&nbsp;&nbsp;&nbsp;Les fonctions serveur et les automatismes</div>
+      <div><b>9</b> &nbsp;&nbsp;&nbsp;&nbsp;La sécurité</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== CH. 5 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 5</p>
+  <h2 class="chapitre">L'architecture en trois étages</h2>
+  <p class="accroche">
+    Trois étages, et une règle qui les gouverne : <strong>plus une règle est
+    importante, plus elle est écrite bas.</strong> Ce qui compte vraiment est
+    dans la base, pas dans l'écran.
+  </p>
+
+  <div class="formule">   ┌──────────────────────────────────────────────────────┐
+   │  <b>ÉTAGE 3 — L'APPLICATION</b>                             │
+   │  Ce que voient le client et l'administrateur.        │
+   │  62 écrans, dont 24 d'administration.                │
+   │  Servie par l'hébergeur, exécutée dans le navigateur.│
+   └──────────────────────────────────────────────────────┘
+                            │
+   ┌──────────────────────────────────────────────────────┐
+   │  <b>ÉTAGE 2 — LES FONCTIONS SERVEUR</b>                     │
+   │  Ce qui doit tourner ailleurs que chez le client :   │
+   │  appels fournisseurs, cotation, facturation,         │
+   │  classification, courriels. 38 en production.        │
+   └──────────────────────────────────────────────────────┘
+                            │
+   ┌──────────────────────────────────────────────────────┐
+   │  <b>ÉTAGE 1 — LA BASE DE DONNÉES</b>                        │
+   │  Les données, ET les règles qui les protègent.       │
+   │  92 tables, 181 politiques d'accès, 149 contrôles.   │
+   │  <b>C'est ici que rien ne se contourne.</b>                 │
+   └──────────────────────────────────────────────────────┘</div>
+
+  <h3>Pourquoi les règles descendent</h3>
+  <p>
+    Un écran se contourne : il suffit d'appeler la base directement. Une
+    fonction serveur se contourne si quelqu'un a le jeton. <strong>Une contrainte
+    écrite dans la base ne se contourne pas</strong> — elle refuse l'écriture,
+    quel que soit le chemin emprunté.
+  </p>
+  <table class="t">
+    <tr><th style="width:56mm">La règle</th><th>Où elle est écrite, et pourquoi</th></tr>
+    <tr><td>Une écriture comptable doit être équilibrée</td><td><b>Dans la base.</b> Un déséquilibre est refusé à l'enregistrement, pas signalé après coup</td></tr>
+    <tr><td>Un reversement à un vendeur est bloqué tant que la réception n'est pas acquise</td><td><b>Dans la base.</b> C'est ce qui rend la garantie « payé, protégé » réelle et non déclarative</td></tr>
+    <tr><td>Une position tarifaire doit exister au corpus officiel</td><td><b>Dans la base</b>, par une clé étrangère. Un code inventé est structurellement impossible</td></tr>
+    <tr><td>Un article sans prix n'est jamais affiché</td><td><b>Dans la base</b>, par la vue publique. Même marqué « actif », il ne sort pas</td></tr>
+    <tr><td>Un client ne lit que ses propres données</td><td><b>Dans la base</b>, par 181 politiques d'accès sur 92 tables</td></tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">La conséquence pratique, pour qui reprendra le dossier</div>
+    <p style="margin-bottom:0">
+      <strong>Ne cherchez jamais une règle métier dans l'écran.</strong> Si vous
+      voulez savoir ce qui est vraiment imposé, lisez les contraintes et les
+      politiques de la base. L'écran ne fait qu'expliquer la règle à l'humain —
+      il ne la fait pas respecter.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 6 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 6</p>
+  <h2 class="chapitre">La base de données</h2>
+  <p class="accroche">
+    L'étage le plus important, et le plus dense. Tout ce qui suit a été compté en
+    base le 29 août 2026.
+  </p>
+
+  <div class="chiffres">
+    <div><div class="chiffre">92</div><div class="legende">tables</div></div>
+    <div><div class="chiffre">17</div><div class="legende">vues</div></div>
+    <div><div class="chiffre">181</div><div class="legende">politiques d'accès</div></div>
+    <div><div class="chiffre">105</div><div class="legende">migrations</div></div>
+  </div>
+
+  <h3>Ce qu'elle contient, par domaine</h3>
+  <table class="t">
+    <tr><th style="width:44mm">Domaine</th><th>Ce qu'on y trouve</th></tr>
+    <tr><td><b>Le catalogue</b></td><td>Produits, rayons, secteurs, paliers de prix, favoris, avis, images, enseignes</td></tr>
+    <tr><td><b>Le commerce</b></td><td>Commandes, lignes, historique des statuts, achats groupés, participations, vendeurs, reversements</td></tr>
+    <tr><td><b>Le transit</b></td><td>Demandes d'import et d'export, devis, dossiers, pièces, expéditions, événements de suivi, consolidateurs, intervenants</td></tr>
+    <tr><td><b>La douane</b></td><td>Tarif extérieur commun, régimes douaniers, régimes d'origine, taxes, liquidations, classifications, bureaux, marchandises réglementées, règles de procédure</td></tr>
+    <tr><td><b>Le droit</b></td><td><b>Nouveau :</b> Règles Générales Interprétatives, Notes de Section et de Chapitre, corpus des classements de référence</td></tr>
+    <tr><td><b>Les coûts</b></td><td>Frais de transit local, frais de destination, frais logistiques, barème de manutention, taux de fret, repères de marché, équivalences</td></tr>
+    <tr><td><b>La comptabilité</b></td><td>Comptes, journaux, écritures, lignes d'écriture, grand livre, balance, compte de résultat, factures, compteurs</td></tr>
+    <tr><td><b>Les réglages</b></td><td>Neuf tables de paramètres : tarif, import, facturation, garantie, marketplace, paiement, incoterm, classification</td></tr>
+    <tr><td><b>L'exploitation</b></td><td>Journal d'erreurs, demandes d'assistance, usage de l'intelligence artificielle, contrôle des images, caches</td></tr>
+  </table>
+
+  <h3>Ce qui la protège</h3>
+  <table class="t">
+    <tr><th>Mécanisme</th><th class="n" style="width:22mm">Nombre</th><th>Ce qu'il empêche</th></tr>
+    <tr><td>Tables avec sécurité au niveau ligne</td><td class="n"><b>92 / 92</b></td><td>Qu'un compte lise ce qui ne le regarde pas. <b>Couverture totale</b></td></tr>
+    <tr><td>Politiques d'accès</td><td class="n">181</td><td>Détaillent qui lit et qui écrit, table par table</td></tr>
+    <tr><td>Contraintes de vérification</td><td class="n">149</td><td>Qu'une valeur absurde entre : un statut inconnu, un montant négatif, un code mal formé</td></tr>
+    <tr><td>Clés étrangères</td><td class="n">61</td><td>Qu'une ligne pointe vers quelque chose qui n'existe pas</td></tr>
+    <tr><td>Déclencheurs</td><td class="n">25</td><td>Qu'une opération parte à moitié faite : équilibre comptable, horodatage, historique</td></tr>
+    <tr><td>Index</td><td class="n">209</td><td>Que les lectures ralentissent quand le volume monte</td></tr>
+    <tr><td>Fonctions internes</td><td class="n">83</td><td>Portent les calculs qui doivent rester identiques d'un appel à l'autre</td></tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Le chiffre qui compte le plus dans ce tableau</div>
+    <p style="margin-bottom:0">
+      <strong>92 tables sur 92 portent une sécurité au niveau de la ligne.</strong>
+      Pas 90, pas « les principales » : toutes. Une seule table oubliée suffit à
+      exposer des données clients — et c'est l'oubli le plus courant sur ce genre
+      de plateforme.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 7 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 7</p>
+  <h2 class="chapitre">L'application</h2>
+  <p class="accroche">
+    Ce que voient le client et l'administrateur. Bâtie pour être servie depuis un
+    seul fichier, et pour tenir aussi bien sur un téléphone que sur un
+    ordinateur.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:44mm">Partie</th><th class="n" style="width:22mm">Fichiers</th><th class="n" style="width:22mm">Lignes</th><th>Ce qu'elle contient</th></tr>
+    <tr><td><b>Les écrans</b></td><td class="n">62</td><td class="n">25 909</td><td>38 écrans publics et clients, 24 écrans d'administration</td></tr>
+    <tr><td><b>Les composants</b></td><td class="n">62</td><td class="n">7 308</td><td>Les briques réutilisées : cartes produit, tableaux, formulaires, illustrations</td></tr>
+    <tr><td><b>Les bibliothèques</b></td><td class="n">24</td><td class="n">6 735</td><td>Les calculs partagés : coût de revient, liquidation, référencement, factures</td></tr>
+    <tr><td><b>Les crochets</b></td><td class="n">8</td><td class="n">1 149</td><td>Panier, authentification, référencement — l'état partagé entre écrans</td></tr>
+    <tr><td><b>La fonction d'aperçu</b></td><td class="n">1</td><td class="n">303</td><td>Sert aux robots de partage la vraie page, sans toucher à l'application</td></tr>
+    <tr class="total"><td>Total application</td><td class="n">157</td><td class="n">41 404</td><td>—</td></tr>
+  </table>
+
+  <h3>Les vingt-quatre écrans d'administration</h3>
+  <p>
+    C'est la partie invisible du public et la plus utilisée au quotidien : tour
+    de contrôle du pipeline import et export, atelier de cotation, gestion des
+    commandes, catalogue et import fournisseur, comptabilité, facturation,
+    vendeurs, assistance client, paramètres, équipe, barèmes.
+  </p>
+
+  <div class="encadre">
+    <div class="encadre-titre">Un choix de construction qui a des conséquences</div>
+    <p style="margin-bottom:0">
+      L'application est <strong>une page unique</strong> : l'hébergeur renvoie le
+      même fichier pour toutes les adresses, et c'est le navigateur qui décide
+      quoi afficher. C'est rapide et simple — mais c'est exactement ce qui a
+      causé les deux défauts de visibilité du chapitre 4. <em>Les robots
+      n'exécutent pas le navigateur.</em> D'où la fonction d'aperçu, qui répond
+      autre chose aux robots et uniquement à eux.
+    </p>
+  </div>
+
+  <h3>Ce sur quoi elle repose</h3>
+  <table class="t">
+    <tr><th style="width:40mm">Brique</th><th>Rôle</th></tr>
+    <tr><td>React et TypeScript</td><td>La construction des écrans, avec un contrôle des types à la compilation</td></tr>
+    <tr><td>Vite</td><td>La fabrication du paquet servi au navigateur. Construction complète en moins de trois secondes</td></tr>
+    <tr><td>Tailwind</td><td>L'apparence, écrite au plus près de chaque élément</td></tr>
+    <tr><td>La bibliothèque cliente de la base</td><td>Le dialogue avec l'étage 1, en respectant les politiques d'accès du compte connecté</td></tr>
+  </table>
+</div>
+
+<!-- ============================== CH. 8 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 8</p>
+  <h2 class="chapitre">Les fonctions serveur et les automatismes</h2>
+  <p class="accroche">
+    Tout ce qui ne peut pas tourner dans le navigateur d'un client : parce que ça
+    manipule une clé, parce que ça appelle un fournisseur, ou parce que ça doit
+    tourner même quand personne n'est connecté.
+  </p>
+
+  <h3>Ce qui est déployé</h3>
+  <table class="t">
+    <tr><th>Catégorie</th><th class="n" style="width:24mm">Nombre</th><th>Exemples</th></tr>
+    <tr><td><b>En production</b></td><td class="n"><b>38</b></td><td>Cotation, tarification, enrichissement, commande fournisseur, facturation, classification, sourcing, aperçus, suivi, notifications</td></tr>
+    <tr><td>De diagnostic</td><td class="n">25</td><td>Écrites pour trouver un défaut précis, gardées après coup</td></tr>
+    <tr class="total"><td>Total déployé</td><td class="n">63</td><td>—</td></tr>
+  </table>
+  <div class="encadre">
+    <div class="encadre-titre">Une dette à solder, petite mais réelle</div>
+    <p style="margin-bottom:0">
+      <strong>Vingt-cinq fonctions de diagnostic</strong> traînent à côté des
+      trente-huit qui travaillent. Elles ne consomment rien tant qu'on ne les
+      appelle pas, mais elles encombrent la lecture et brouillent l'inventaire.
+      À retirer une fois la première vente passée — pas avant, car certaines
+      resserviront au premier incident réel.
+    </p>
+  </div>
+
+  <h3>Les trois moteurs qui tournent seuls</h3>
+  <table class="t">
+    <tr><th class="c" style="width:22mm">Heure</th><th style="width:44mm">Ce qu'il fait</th><th>Pourquoi à cette heure-là</th></tr>
+    <tr><td class="c"><b>:05 et :35</b></td><td>Demande au transporteur le prix de chaque nouvel article, et cherche la quantité minimum qui le rend acceptable</td><td rowspan="3">Le fournisseur n'accepte <b>qu'une requête par seconde</b>. Deux moteurs lancés ensemble échouent tous les deux. Les minutes sont décalées pour cette seule raison</td></tr>
+    <tr><td class="c"><b>:20</b></td><td>Calcule le prix de vente des articles qui viennent d'être cotés</td></tr>
+    <tr><td class="c"><b>:50</b></td><td>Complète les fiches : photos, poids, matière, emballage</td></tr>
+  </table>
+  <p class="petite">
+    Concrètement : un article importé à 14 h a son prix et ses photos avant 15 h,
+    sans que personne n'intervienne. C'est ce qui a permis de passer de 60 à 233
+    articles en quinze jours.
+  </p>
+
+  <h3>Comment elles s'authentifient, et pourquoi c'est important</h3>
+  <p>
+    Les trois moteurs sont appelés par la base elle-même, <strong>sans aucune
+    clé</strong>. C'est possible parce que l'enveloppe posée sur chaque fonction
+    distingue trois cas : pas d'origine du tout — c'est un appel de serveur à
+    serveur, il passe ; origine connue — elle est renvoyée telle quelle ; origine
+    inconnue — rien n'est autorisé.
+  </p>
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le cas qui ne doit jamais être cassé</div>
+    <p style="margin-bottom:0">
+      <strong>Le premier cas — pas d'origine — est vital.</strong> C'est par là
+      que passent les trois moteurs horaires. Le fermer arrêterait la cotation,
+      la tarification et l'enrichissement du catalogue, sans message d'erreur
+      visible : les articles cesseraient simplement d'apparaître.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 9 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 9</p>
+  <h2 class="chapitre">La sécurité</h2>
+  <p class="accroche">
+    Ce qui est en place, et ce qui reste ouvert. Un audit a eu lieu le 24 août
+    sur vingt points ; ce chapitre en donne l'état au 29.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:52mm">Point</th><th class="c" style="width:20mm">État</th><th>Détail</th></tr>
+    <tr><td>Sécurité au niveau de la ligne</td><td class="c"><b>En place</b></td><td>92 tables sur 92, 181 politiques</td></tr>
+    <tr><td>Dépôts de fichiers bornés</td><td class="c"><b>En place</b></td><td>10 Mo, images et PDF seulement, sur les sept dépôts</td></tr>
+    <tr><td>Dépendances sans faille connue</td><td class="c"><b>En place</b></td><td>Trois vulnérabilités corrigées le 24 août, zéro restante</td></tr>
+    <tr><td>Appels aux fonctions restreints</td><td class="c"><b>En place</b></td><td>Vingt-trois fonctions ne répondent plus à n'importe quel site</td></tr>
+    <tr><td>En-têtes de sécurité du site</td><td class="c"><b>En place</b></td><td>Politique de contenu, transport strict, anti-encadrement, référent</td></tr>
+    <tr><td>Secrets hors du dépôt</td><td class="c"><b>En place</b></td><td>Aucune clé dans le code ; tout est déposé dans les réglages du serveur</td></tr>
+    <tr><td>Politique de données personnelles publiée</td><td class="c"><b>En place</b></td><td>Avec la déclaration ARTCI annoncée</td></tr>
+    <tr><td><b>Déclaration ARTCI effective</b></td><td class="c"><b>Manquant</b></td><td>Obligation légale, déjà annoncée publiquement. Voir chapitre 13</td></tr>
+    <tr><td><b>Protection contre les mots de passe divulgués</b></td><td class="c"><b>Manquant</b></td><td>Réglage à activer côté service d'authentification</td></tr>
+    <tr><td>Politiques d'accès redondantes</td><td class="c">À nettoyer</td><td><b>9 combinaisons sur 6 tables</b> où deux politiques permissives se recouvrent. Sans danger, mais coûteux en lecture</td></tr>
+    <tr><td>Index jamais utilisés</td><td class="c">Normal</td><td><b>81</b> — attendu sur une base sans trafic. À réévaluer après trois mois d'activité réelle, pas avant</td></tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">Ce que l'audit du 24 août a appris, et qui vaut au-delà de la sécurité</div>
+    <p style="margin-bottom:0">
+      Dix-sept points sur vingt étaient déjà tenus. <strong>Le quatrième défaut —
+      le plus grave — n'était dans aucune des vingt questions.</strong> Il a été
+      trouvé en vérifiant les dix-sept autres. C'est l'argument le plus solide
+      pour vérifier ce dont on est sûr : la liste des choses à contrôler ne
+      contient jamais celle qui manque.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== SÉPARATEUR III ============================== -->
+<div class="separateur">
+  <div class="image"><img src="../public/visuels/sourcing-selection.jpg" alt=""></div>
+  <div class="texte">
+    <div class="lettre">III</div>
+    <h2>Où nous<br>en sommes</h2>
+    <p>
+      L'état exact au 29 août 2026, relevé en base et non raconté. Ce qui
+      fonctionne, ce qui est construit mais vide, et ce qui manque encore.
+    </p>
+    <div class="sommaire-partie">
+      <div><b>10</b> &nbsp;&nbsp;&nbsp;L'inventaire mesuré</div>
+      <div><b>11</b> &nbsp;&nbsp;&nbsp;Ce qui marche, ce qui est vide, ce qui manque</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== CH. 10 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 10</p>
+  <h2 class="chapitre">L'inventaire mesuré</h2>
+  <p class="accroche">
+    Tout ce tableau a été compté en base ou dans le dépôt le 29 août 2026.
+    Aucune ligne n'est estimée.
+  </p>
+
+  <h3>Ce qui a été construit</h3>
+  <table class="t">
+    <tr><th style="width:56mm">Élément</th><th class="n" style="width:26mm">Quantité</th><th>Remarque</th></tr>
+    <tr><td>Lignes de code</td><td class="n"><b>≈ 51 000</b></td><td>Application, fonctions serveur et bibliothèques partagées</td></tr>
+    <tr><td>Fichiers suivis</td><td class="n">359</td><td>—</td></tr>
+    <tr><td>Écrans</td><td class="n">62</td><td>Dont 24 d'administration</td></tr>
+    <tr><td>Migrations de base</td><td class="n">105</td><td>Chaque changement de structure est daté et rejouable</td></tr>
+    <tr><td>Tables et vues</td><td class="n">109</td><td>92 tables, 17 vues</td></tr>
+    <tr><td>Fonctions serveur en production</td><td class="n">38</td><td>Plus 25 de diagnostic</td></tr>
+    <tr><td>Automatismes horaires</td><td class="n">3</td><td>Cotation, tarification, enrichissement</td></tr>
+  </table>
+
+  <h3>Ce que la plateforme contient</h3>
+  <table class="t">
+    <tr><th style="width:56mm">Contenu</th><th class="n" style="width:26mm">Quantité</th><th>Remarque</th></tr>
+    <tr><td>Articles au catalogue</td><td class="n"><b>233</b></td><td>131 en boutique, 102 en Espace Pro. 203 actifs</td></tr>
+    <tr><td>Rayons et secteurs</td><td class="n">8 + 13</td><td>—</td></tr>
+    <tr><td>Positions du tarif extérieur commun</td><td class="n"><b>6 298</b></td><td>Avec taux et unité statistique</td></tr>
+    <tr><td>Notes légales de Section et de Chapitre</td><td class="n">102</td><td>Chargées le 29 août, chacune vérifiée à sa source</td></tr>
+    <tr><td>Alinéas des Règles Générales Interprétatives</td><td class="n">12</td><td>Confrontés à deux publications officielles</td></tr>
+    <tr><td>Familles de classement de référence</td><td class="n">18</td><td>43 articles classés sur 233</td></tr>
+    <tr><td>Régimes d'origine</td><td class="n">4</td><td>Droit commun, APE, ZLECAf, CEDEAO</td></tr>
+    <tr><td>Règles de procédure douanière</td><td class="n">15</td><td>Seuils, franchises, délais, sanctions</td></tr>
+    <tr><td>Postes de transit local</td><td class="n">21</td><td><b>11 confirmés</b> sur cotations et proformas réelles</td></tr>
+    <tr><td>Taux de fret et repères de marché</td><td class="n">3 + 17</td><td>Trois liaisons cotées, dix-sept repères indicatifs</td></tr>
+    <tr><td>Adresses au plan de site</td><td class="n">214</td><td>Engendrées depuis le catalogue</td></tr>
+  </table>
+
+  <h3>Ce que la plateforme a produit</h3>
+  <table class="t">
+    <tr><th style="width:56mm">Activité</th><th class="n" style="width:26mm">Quantité</th></tr>
+    <tr><td>Comptes créés</td><td class="n">3</td></tr>
+    <tr><td>Demandes de devis</td><td class="n">3</td></tr>
+    <tr><td>Demandes de sourcing</td><td class="n">2</td></tr>
+    <tr><td>Demandes d'import</td><td class="n">1</td></tr>
+    <tr><td>Dossiers ouverts</td><td class="n">1</td></tr>
+    <tr class="total"><td><b>Commandes payées</b></td><td class="n"><b>0</b></td></tr>
+    <tr class="total"><td><b>Écritures comptables</b></td><td class="n"><b>0</b></td></tr>
+    <tr class="total"><td><b>Factures émises</b></td><td class="n"><b>0</b></td></tr>
+    <tr class="total"><td><b>Vendeurs inscrits</b></td><td class="n"><b>0</b></td></tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Les deux tableaux à lire ensemble</div>
+    <p style="margin-bottom:0">
+      Cinquante mille lignes de code, cent neuf tables, six mille deux cent
+      quatre-vingt-dix-huit positions tarifaires — et
+      <strong>zéro commande payée</strong>. Ce n'est pas une contradiction :
+      c'est l'état normal d'un outil qui a été construit avant d'être ouvert. Mais
+      c'est la seule ligne qui compte pour la suite, et c'est elle qui décide de
+      tout l'ordre de la partie IV.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 11 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 11</p>
+  <h2 class="chapitre">Ce qui marche, ce qui est vide, ce qui manque</h2>
+
+  <h3>Ce qui fonctionne sur données réelles</h3>
+  <table class="t">
+    <tr><th style="width:52mm">Brique</th><th>Preuve</th></tr>
+    <tr><td>Le catalogue et sa tarification automatique</td><td>233 articles cotés et tarifés sans intervention, 203 actifs, tous avec un prix</td></tr>
+    <tr><td>Le calcul du coût de revient et du fret</td><td>Appliqué sur chaque article, avec la bascule express / groupage</td></tr>
+    <tr><td>La liquidation douanière</td><td>Vérifiée sur une déclaration réelle par un déclarant agréé</td></tr>
+    <tr><td>Le devis d'import</td><td>Onze postes confirmés sur cotations réelles ; refuse de totaliser s'il en manque</td></tr>
+    <tr><td>La facturation</td><td>Proforma et facture définitive, numérotation continue, PDF</td></tr>
+    <tr><td>La comptabilité</td><td>Partie double, équilibre imposé par la base</td></tr>
+    <tr><td>Le référencement</td><td>38 pages à titre et description distincts ; vérifié en production</td></tr>
+    <tr><td>Les aperçus de partage</td><td>Vérifié en production : un robot de messagerie reçoit le vrai article, un humain l'application</td></tr>
+    <tr><td>Le socle juridique du classement</td><td>102 textes, chacun retrouvé dans son document d'origine par contrôle machine</td></tr>
+  </table>
+
+  <h3>Ce qui est construit mais vide</h3>
+  <table class="t">
+    <tr><th style="width:52mm">Brique</th><th>Ce qui manque pour la remplir</th></tr>
+    <tr><td>La marketplace</td><td><b>Du démarchage.</b> Rien d'autre : le parcours vendeur est complet</td></tr>
+    <tr><td>Les achats groupés</td><td><b>Une campagne à ouvrir.</b> Le mécanisme fonctionne</td></tr>
+    <tr><td>La comptabilité</td><td><b>Une vente.</b> Les écritures se passeront toutes seules</td></tr>
+    <tr><td>Le carnet de commandes</td><td><b>Un moyen d'encaisser.</b> Voir chapitre 13</td></tr>
+    <tr><td>L'abonnement au Déclarant</td><td><b>Un prix.</b> L'outil est fini et sourcé</td></tr>
+  </table>
+
+  <h3>Ce qui manque vraiment</h3>
+  <table class="t">
+    <tr><th style="width:52mm">Manque</th><th>Conséquence</th></tr>
+    <tr><td>Un moyen d'encaissement professionnel</td><td>Deux étapes de chaque commande restent manuelles</td></tr>
+    <tr><td>La configuration d'envoi des courriels, arrêtée à mi-parcours</td><td>Un client qui oublie son mot de passe ne peut pas le récupérer</td></tr>
+    <tr><td>Les écrans de cotation conteneur</td><td>Le service le plus rentable se traite à la main</td></tr>
+    <tr><td>Dix postes de transit non confirmés</td><td>Le moteur refuse de totaliser certains devis</td></tr>
+    <tr><td>Des taux de fret réels</td><td>Trois liaisons seulement sont cotées</td></tr>
+    <tr><td>Le chapitre 42 du tarif et les compositions textiles</td><td>16 articles de maroquinerie sans taux, 25 vêtements non classables</td></tr>
+    <tr><td>La liste des positions exonérées par l'APE</td><td>Impossible de dire si une position bénéficie de l'exonération</td></tr>
+    <tr><td>Un déploiement qui aboutit</td><td>Quatre échecs de suite sur un compte d'hébergement gratuit</td></tr>
+  </table>
+</div>
+
+<!-- ============================== SÉPARATEUR IV ============================== -->
+<div class="separateur">
+  <div class="image"><img src="../public/visuels/port-export-abidjan.jpg" alt=""></div>
+  <div class="texte">
+    <div class="lettre">IV</div>
+    <h2>Achever<br>et démarrer</h2>
+    <p>
+      La liste exacte de ce qui reste, séparée en deux : ce qui se code, et ce
+      qui ne dépend que du fondateur. Puis l'ordre dans lequel tout cela doit
+      être traité, et pourquoi cet ordre n'est pas négociable.
+    </p>
+    <div class="sommaire-partie">
+      <div><b>12</b> &nbsp;&nbsp;&nbsp;Les huit chantiers techniques restants</div>
+      <div><b>13</b> &nbsp;&nbsp;&nbsp;Ce qui ne dépend que du fondateur</div>
+      <div><b>14</b> &nbsp;&nbsp;&nbsp;L'ordre, et pourquoi il n'est pas négociable</div>
+      <div><b>15</b> &nbsp;&nbsp;&nbsp;À quoi ressemblera le premier jour</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== CH. 12 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 12</p>
+  <h2 class="chapitre">Les huit chantiers techniques restants</h2>
+  <p class="accroche">
+    Ce qui se code, avec pour chacun ce qui le déclenche et ce qu'il rapporte.
+    Aucun n'est long ; six sur huit attendent une décision ou une clé, pas du
+    travail.
+  </p>
+
+  <table class="t">
+    <tr>
+      <th class="c" style="width:12mm">Ordre</th>
+      <th style="width:46mm">Le chantier</th>
+      <th style="width:38mm">Ce qui le débloque</th>
+      <th>Ce qu'il apporte</th>
+    </tr>
+    <tr>
+      <td class="c"><b>1</b></td>
+      <td><b>Faire aboutir le déploiement</b></td>
+      <td>Le passage du compte d'hébergement en formule professionnelle</td>
+      <td>Sans lui, aucune correction ne parvient plus en ligne. Quatre échecs de suite, sans journal, sur un compte gratuit</td>
+    </tr>
+    <tr>
+      <td class="c"><b>2</b></td>
+      <td><b>Brancher l'encaissement</b></td>
+      <td>Le RCCM et le numéro de contribuable, puis un agrégateur de paiement</td>
+      <td>Deux opérations de la chaîne cessent d'être manuelles. C'est la moitié du chemin vers l'objectif d'automatisme</td>
+    </tr>
+    <tr>
+      <td class="c"><b>3</b></td>
+      <td><b>Terminer l'envoi des courriels</b></td>
+      <td>Une configuration à finir — arrêtée à mi-parcours</td>
+      <td>La récupération de mot de passe, les notifications de commande, les devis envoyés</td>
+    </tr>
+    <tr>
+      <td class="c"><b>4</b></td>
+      <td><b>Brancher les écrans de cotation conteneur</b></td>
+      <td>Rien — le barème est chargé, les honoraires confirmés à 500 000 F</td>
+      <td><b>Le service le plus rentable de la maison</b> cesse de se traiter à la main. C'est le seul chantier de cette liste qui ne dépende que de temps de développement</td>
+    </tr>
+    <tr>
+      <td class="c"><b>5</b></td>
+      <td><b>Déposer la clé du suivi des colis</b></td>
+      <td>Un abonnement à un service d'agrégation de suivi</td>
+      <td>Le suivi cesse d'être saisi à la main. Tenable à dix commandes, pas à cent</td>
+    </tr>
+    <tr>
+      <td class="c"><b>6</b></td>
+      <td><b>Confirmer les dix postes de transit et charger les taux de fret</b></td>
+      <td>Vos chiffres — une photo d'un devis réel suffit</td>
+      <td>Le moteur totalise enfin un devis complet, et cote le fret au lieu de renvoyer vers la compagnie</td>
+    </tr>
+    <tr>
+      <td class="c"><b>7</b></td>
+      <td><b>Achever le classement du catalogue</b></td>
+      <td>Le chapitre 42 du tarif, absent du corpus, et la composition des textiles</td>
+      <td>190 articles sur 233 attendent. Un classement inventé vaut moins que pas de classement</td>
+    </tr>
+    <tr>
+      <td class="c"><b>8</b></td>
+      <td><b>Nettoyer</b></td>
+      <td>La première vente passée</td>
+      <td>Retirer les 25 fonctions de diagnostic, résorber les 9 politiques d'accès redondantes. À faire après, jamais avant</td>
+    </tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Ce que ce tableau dit du travail restant</div>
+    <p style="margin-bottom:0">
+      <strong>Un seul de ces huit chantiers demande vraiment du
+      développement</strong> — le quatrième, les écrans de cotation conteneur.
+      Les sept autres attendent une clé, une décision, un chiffre ou une
+      démarche. <em>La plateforme n'attend plus qu'on la construise. Elle attend
+      qu'on l'ouvre.</em>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 13 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 13</p>
+  <h2 class="chapitre">Ce qui ne dépend que du fondateur</h2>
+  <p class="accroche">
+    Aucune de ces lignes n'est un problème de logiciel. Ce sont des démarches et
+    des décisions, et elles conditionnent presque tout le chapitre précédent.
+  </p>
+
+  <h3>Les démarches</h3>
+  <table class="t">
+    <tr><th class="c" style="width:12mm">#</th><th style="width:48mm">La démarche</th><th>Ce qu'elle débloque</th></tr>
+    <tr><td class="c">1</td><td><b>Trancher la structure juridique</b><br><span class="petite">avec un juriste ivoirien : une entité ou deux</span></td><td>Tout le reste. Et vérifier au passage votre situation vis-à-vis de votre employeur</td></tr>
+    <tr><td class="c">2</td><td><b>Immatriculer</b><br><span class="petite">RCCM, contribuable, CNPS, ARTCI</span></td><td>La facturation légale, le compte bancaire professionnel, le client entreprise</td></tr>
+    <tr><td class="c">3</td><td><b>Ouvrir un moyen de paiement professionnel</b></td><td>Le chantier technique n° 2. Et traiter en même temps la question du séquestre avec un établissement agréé</td></tr>
+    <tr><td class="c">4</td><td><b>Passer l'hébergement en formule professionnelle</b></td><td>Le chantier technique n° 1 — le plus urgent, car il bloque tous les autres déploiements</td></tr>
+    <tr><td class="c">5</td><td><b>Formaliser la convention avec le commissionnaire agréé</b></td><td>Périmètre, rétrocession, responsabilités. Ses honoraires figurent déjà dans vos devis</td></tr>
+    <tr><td class="c">6</td><td><b>Souscrire la responsabilité civile professionnelle et engager un comptable</b></td><td>Vous manipulez la marchandise d'autrui, et vous tiendrez une comptabilité commerciale</td></tr>
+    <tr><td class="c">7</td><td><b>Demander la liste APE à la Direction générale des douanes</b></td><td>C'est gratuit. Cela vaut 3 380 387 F d'économie sur un seul dossier type</td></tr>
+  </table>
+
+  <h3>Les décisions</h3>
+  <table class="t">
+    <tr><th style="width:48mm">La décision</th><th>Pourquoi elle bloque</th></tr>
+    <tr><td><b>Le tarif du Déclarant</b></td><td>Un outil fini, sourcé, vérifié — et sans prix. Il ne rapporte rien tant que la ligne est vide</td></tr>
+    <tr><td><b>Le montant de l'acompte d'import</b></td><td>Votre principale protection de trésorerie. Il double le nombre de dossiers portables à réserve égale</td></tr>
+    <tr><td><b>La marge sur le fret conteneur</b></td><td>Sans elle, impossible de coter un conteneur — donc le chantier technique n° 4 n'a pas de valeur à produire</td></tr>
+    <tr><td><b>Combien de commerçants héberger, et sur quels critères</b></td><td>Chaque vendeur validé engage votre réputation sur des marchandises que vous ne contrôlez pas</td></tr>
+    <tr><td><b>Vos chiffres de dépenses déjà engagées</b></td><td>Le tableau du chapitre 32 du dossier de référence attend vos montants pour devenir le point de départ de votre comptabilité</td></tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le constat qu'il faut regarder en face</div>
+    <p style="margin-bottom:0">
+      <strong>Douze lignes sur cette page, et aucune ne demande d'écrire du
+      code.</strong> Le chantier n'est plus technique depuis plusieurs jours. Le
+      chapitre 2 le montrait déjà : les deux journées les plus productives du
+      projet sont celles où vos décisions étaient tombées. <em>C'est votre
+      agenda, et non la vitesse de développement, qui fixe désormais la date de
+      la première vente.</em>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 14 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 14</p>
+  <h2 class="chapitre">L'ordre, et pourquoi il n'est pas négociable</h2>
+  <p class="accroche">
+    Chaque étape ouvre la suivante. En prendre une avant son tour ne fait pas
+    gagner de temps : cela produit du travail qu'il faudra refaire.
+  </p>
+
+  <div class="formule">   <b>1. PASSER L'HÉBERGEMENT EN FORMULE PROFESSIONNELLE</b>
+      │  Sans lui, aucune correction n'arrive plus en ligne.
+      │  Quatre déploiements refusés de suite.
+      ▼
+   <b>2. TRANCHER LA STRUCTURE ET IMMATRICULER</b>
+      │  Sans RCCM : pas de compte professionnel,
+      │  donc pas de moyen de paiement, donc pas de vente.
+      ▼
+   <b>3. OUVRIR L'ENCAISSEMENT</b>
+      │  Deux opérations cessent d'être manuelles.
+      │  Le client entreprise devient possible.
+      ▼
+   <b>4. PASSER CINQ COMMANDES VOUS-MÊME</b>
+      │  Éprouver la chaîne entière avant qu'un client la découvre.
+      │  C'est là qu'on trouve ce qu'aucun test ne montre.
+      ▼
+   <b>5. LIVRER CINQ VRAIS CLIENTS DE VOTRE CARNET</b>
+      │  Les premiers dossiers publiés. La preuve qui vend les suivants.
+      ▼
+   <b>6. BRANCHER LA COTATION CONTENEUR</b>
+      │  Le service le plus rentable devient vendable.
+      ▼
+   <b>7. FIXER LE TARIF DU DÉCLARANT ET RECRUTER DES VENDEURS</b>
+         Les deux seules recettes qui n'immobilisent aucun franc.</div>
+
+  <h3>Ce que coûte chaque inversion d'ordre</h3>
+  <table class="t">
+    <tr><th style="width:52mm">Si l'on fait ça avant</th><th>Ce qui se passe</th></tr>
+    <tr><td>De la publicité avant cinq dossiers livrés</td><td>On achète du trafic vers une maison sans preuve. Le visiteur arrive, ne trouve aucun avis, et repart. <b>L'argent est perdu, pas différé</b></td></tr>
+    <tr><td>Du développement avant l'immatriculation</td><td>On améliore une plateforme déjà plus avancée que la structure qui la porte. <b>Zéro effet sur le revenu</b></td></tr>
+    <tr><td>Le recrutement de vendeurs avant l'encaissement</td><td>On promet d'encaisser pour eux avec un compte personnel. <b>On abîme la relation dès le premier reversement</b></td></tr>
+    <tr><td>Le nettoyage technique avant la première vente</td><td>On retire des fonctions de diagnostic dont on aura besoin au premier incident réel</td></tr>
+    <tr><td>Les premiers clients avant d'avoir testé soi-même</td><td>Le client découvre les défauts à votre place. <b>Un dossier raté se raconte plus vite que dix réussis</b></td></tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">La seule étape qui peut être menée en parallèle</div>
+    <p style="margin-bottom:0">
+      <strong>Les démarches administratives et la collecte de vos chiffres</strong>
+      — les dix postes de transit, les taux de fret, la liste APE. Elles
+      n'attendent rien et débloquent le moteur de cotation. Si vous devez
+      remplir un temps mort pendant que le RCCM se traite, c'est là qu'il faut le
+      mettre.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 15 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 15</p>
+  <h2 class="chapitre">À quoi ressemblera le premier jour</h2>
+  <p class="accroche">
+    Une fois les quatre premières étapes franchies, voici ce qui se passe quand
+    un client commande — et ce que vous, vous avez à faire. C'est le meilleur
+    résumé de ce que ces six semaines ont produit.
+  </p>
+
+  <div class="etapes">
+    <div class="etape"><div class="no">1</div><div class="txt">
+      <b>Un commerçant d'Adjamé cherche « droits de douane carrelage »</b>
+      Il tombe sur Le Déclarant. Il obtient une position tarifaire, un taux, et
+      la note de chapitre qui le fonde. Gratuitement. <em>Vous ne faites rien.</em>
+    </div></div>
+    <div class="etape"><div class="no">2</div><div class="txt">
+      <b>Il regarde la boutique et commande deux cartons</b>
+      Le prix était calculé depuis des heures, le fret aussi. Il paie par mobile
+      money marchand. <em>Vous ne faites rien.</em>
+    </div></div>
+    <div class="etape"><div class="no">3</div><div class="txt">
+      <b>Le paiement est confirmé automatiquement</b>
+      La commande passe en « paiement confirmé », l'écriture comptable se passe
+      seule, la facture est engendrée et numérotée. <em>Vous ne faites rien.</em>
+    </div></div>
+    <div class="etape"><div class="no">4</div><div class="txt">
+      <b>La commande part chez le fournisseur</b>
+      Automatique sur le canal express. Le numéro de suivi remonte tout seul, et
+      le client le voit dans son compte. <em>Vous ne faites rien.</em>
+    </div></div>
+    <div class="etape"><div class="no">5</div><div class="txt">
+      <b>Vous livrez</b>
+      C'est la première chose que vous faites de la journée. Le client confirme
+      la réception, la garantie se dénoue, la marge est acquise.
+    </div></div>
+    <div class="etape"><div class="no">6</div><div class="txt">
+      <b>Six semaines plus tard, il revient avec un conteneur</b>
+      Là, vous travaillez : vous contrôlez ses documents, vous cotez, vous
+      transmettez au commissionnaire agréé, vous suivez le dédouanement.
+      <strong>500 000 F d'honoraires</strong> — quatre-vingt-deux fois ce que
+      rapportaient ses deux cartons.
+    </div></div>
+  </div>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Ce que cette journée montre</div>
+    <p>
+      <strong>Sur les six étapes, vous n'intervenez que deux fois</strong> — pour
+      livrer, et pour traiter le dossier de transit. Les quatre autres tournent
+      seules. C'est très exactement ce que ces six semaines ont construit : une
+      maison où le travail répétitif est fait par la machine, et où l'humain est
+      gardé pour ce qui engage la responsabilité.
+    </p>
+    <p style="margin-bottom:0">
+      Et c'est aussi pourquoi la partie IV est courte. <em>Il ne reste presque
+      rien à construire. Il reste à ouvrir.</em>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CLÔTURE ============================== -->
+<div class="page">
+  <div style="height:40mm"></div>
+  <div class="filet-or"></div>
+  <p class="num-chapitre">Pour finir</p>
+  <h2 class="chapitre" style="border:none;padding-bottom:0">Ce que ce rapport<br>a mesuré, et ce qu'il n'a pas pu</h2>
+
+  <h4>Mesuré</h4>
+  <p>
+    L'historique du dépôt, commit par commit, du 16 au 29 août. Les dates de
+    création de la base et de l'hébergement. Le volume de code, fichier par
+    fichier. La structure de la base : tables, vues, politiques, contraintes,
+    clés, déclencheurs, index, fonctions. L'état du catalogue et du socle
+    réglementaire. Les échecs de déploiement et leur message exact. Tout cela a
+    été relevé le 29 août 2026, dans la base et dans le dépôt.
+  </p>
+
+  <h4>Non mesuré, et signalé comme tel</h4>
+  <p>
+    Les quatre premières semaines — du 19 juillet au 16 août — ne sont pas
+    tracées dans le dépôt. Ce qui y a été construit est décrit d'après l'état
+    actuel du code et de la base, pas d'après un historique. Les quatre-vingt-un
+    index jamais utilisés le sont sur une base sans trafic : ce n'est pas une
+    dette, c'est une absence de mesure.
+  </p>
+
+  <h4>Ce qu'il ne contient pas</h4>
+  <p>
+    Aucune projection, aucun montant estimé, aucune date promise. Les chiffres
+    d'affaires et les scénarios de revenu sont dans le dossier de référence, avec
+    leurs marqueurs de provenance. Ce rapport-ci décrit ce qui est, pas ce qui
+    pourrait être.
+  </p>
+
+  <div class="encadre" style="margin-top:8mm">
+    <div class="encadre-titre">À lire avec ce rapport</div>
+    <p style="margin-bottom:0">
+      <strong>Le Dossier de référence</strong> — manuel d'exploitation et plan
+      d'affaires, 72 pages. Il explique comment se servir de ce qui est décrit
+      ici, et ce que la maison doit gagner. Les deux documents sont datés du même
+      jour et se complètent : celui-ci raconte la construction, l'autre
+      l'exploitation.
+    </p>
+  </div>
+
+  <div style="margin-top:14mm;padding-top:5mm;border-top:2px solid var(--encre);font-family:'Liberation Sans',Arial,sans-serif;font-size:8.4pt;color:var(--gris)">
+    <b style="color:var(--encre)">MayLary Group — Dems'Inc, Abidjan.</b> Document interne.<br>
+    Rapport de construction établi le 29 août 2026.<br>
+    Plateforme en ligne : <b>maylarygroup.ci</b>
+  </div>
+</div>
+
+</body>
+</html>
