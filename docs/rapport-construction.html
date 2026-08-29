@@ -48,7 +48,7 @@
       <div class="ligne"><b>1</b><span>Avant le dépôt : les quatre premières semaines</span></div>
       <div class="ligne"><b>2</b><span>Quatorze jours, cent vingt commits</span></div>
       <div class="ligne"><b>3</b><span>Les sept chantiers</span></div>
-      <div class="ligne"><b>4</b><span>Les huit erreurs, et ce qu'elles ont changé</span></div>
+      <div class="ligne"><b>4</b><span>Les neuf erreurs, et ce qu'elles ont changé</span></div>
     </div>
     <div class="groupe">
       <div class="groupe-titre">II · La structure</div>
@@ -97,7 +97,7 @@
       <div><b>1</b> &nbsp;&nbsp;&nbsp;&nbsp;Avant le dépôt : les quatre premières semaines</div>
       <div><b>2</b> &nbsp;&nbsp;&nbsp;&nbsp;Quatorze jours, cent vingt commits</div>
       <div><b>3</b> &nbsp;&nbsp;&nbsp;&nbsp;Les sept chantiers</div>
-      <div><b>4</b> &nbsp;&nbsp;&nbsp;&nbsp;Les huit erreurs, et ce qu'elles ont changé</div>
+      <div><b>4</b> &nbsp;&nbsp;&nbsp;&nbsp;Les neuf erreurs, et ce qu'elles ont changé</div>
     </div>
   </div>
 </div>
@@ -321,7 +321,7 @@
 <!-- ============================== CH. 4 ============================== -->
 <div class="page">
   <p class="num-chapitre">Chapitre 4</p>
-  <h2 class="chapitre">Les huit erreurs, et ce qu'elles ont changé</h2>
+  <h2 class="chapitre">Les neuf erreurs, et ce qu'elles ont changé</h2>
   <p class="accroche">
     Chacune a coûté du temps. Chacune a laissé une règle ou un garde-fou. Elles
     sont ici parce qu'un rapport qui ne raconte que ce qui a marché n'apprend
@@ -370,17 +370,28 @@
       <td>Le moteur de tarification possède un mode qui calcule sans rien enregistrer. Il avait été lancé dedans, et le résultat annoncé comme écrit</td>
       <td>Lire la réponse avant d'annoncer. Elle disait <code>simulation: true</code></td>
     </tr>
+    <tr>
+      <td><b>Une pause constatée avec l'outil qui la fait cesser</b><br><span class="petite">29 août</span></td>
+      <td>Quatre déploiements refusés. J'ai interrogé la base : « actif ». J'en ai conclu que la cause était ailleurs, et j'ai désigné le plan d'hébergement. <strong>Mais mes propres requêtes venaient de réveiller la base.</strong> Le fondateur, lui, l'avait vue en pause sur son tableau de bord</td>
+      <td>Un état ne se mesure pas avec un outil qui le modifie. Quand une panne dépend d'une mise en veille, il faut regarder <em>avant</em> d'interroger — ou regarder ailleurs qu'avec l'outil qui réveille</td>
+    </tr>
   </table>
 
   <div class="encadre alerte">
-    <div class="encadre-titre">Le fil commun de ces huit erreurs</div>
+    <div class="encadre-titre">Le fil commun de ces neuf erreurs</div>
     <p style="margin-bottom:0">
-      Sept sur huit viennent de <strong>la même chose : avoir supposé au lieu
+      Huit sur neuf viennent de <strong>la même chose : avoir supposé au lieu
       d'avoir vérifié.</strong> Supposé qu'un réglage était raisonnable, qu'une
       vue exposait les mêmes colonnes qu'une table, qu'un traitement avait écrit,
       qu'une page était indexée. Aucune n'est une faute de programmation ; toutes
       sont des fautes de vérification. C'est pourquoi la règle qui revient le
       plus souvent dans ce dossier est <em>« mesuré, pas supposé »</em>.
+    </p>
+    <p style="margin-bottom:0">
+      Et la neuvième dit la limite de cette règle : <strong>on avait bien
+      mesuré, mais avec un instrument qui changeait ce qu'il mesurait.</strong>
+      Vérifier ne suffit pas — il faut aussi savoir ce que l'acte de vérifier
+      déplace.
     </p>
   </div>
 </div>
@@ -782,7 +793,7 @@
     <tr><td>Des taux de fret réels</td><td>Trois liaisons seulement sont cotées</td></tr>
     <tr><td>Le chapitre 42 du tarif et les compositions textiles</td><td>16 articles de maroquinerie sans taux, 25 vêtements non classables</td></tr>
     <tr><td>La liste des positions exonérées par l'APE</td><td>Impossible de dire si une position bénéficie de l'exonération</td></tr>
-    <tr><td>Un déploiement qui aboutit</td><td>Quatre échecs de suite sur un compte d'hébergement gratuit</td></tr>
+    <tr><td>Une base qui ne se met pas en pause</td><td>Quatre déploiements refusés de suite. La formule gratuite de la base la suspend après inactivité, et l'hébergeur ne peut plus construire</td></tr>
   </table>
 </div>
 
@@ -825,9 +836,9 @@
     </tr>
     <tr>
       <td class="c"><b>1</b></td>
-      <td><b>Faire aboutir le déploiement</b></td>
-      <td>Le passage du compte d'hébergement en formule professionnelle</td>
-      <td>Sans lui, aucune correction ne parvient plus en ligne. Quatre échecs de suite, sans journal, sur un compte gratuit</td>
+      <td><b>Empêcher la base de se mettre en pause</b></td>
+      <td>Le passage de la <b>base de données</b> en formule professionnelle</td>
+      <td>Une base suspendue fait échouer le déploiement en moins d'une seconde, sans aucun journal. C'est arrivé le 14 août, puis quatre fois le 29. Tant que la formule reste gratuite, cela se reproduira à chaque période d'inactivité</td>
     </tr>
     <tr>
       <td class="c"><b>2</b></td>
@@ -900,7 +911,7 @@
     <tr><td class="c">1</td><td><b>Trancher la structure juridique</b><br><span class="petite">avec un juriste ivoirien : une entité ou deux</span></td><td>Tout le reste. Et vérifier au passage votre situation vis-à-vis de votre employeur</td></tr>
     <tr><td class="c">2</td><td><b>Immatriculer</b><br><span class="petite">RCCM, contribuable, CNPS, ARTCI</span></td><td>La facturation légale, le compte bancaire professionnel, le client entreprise</td></tr>
     <tr><td class="c">3</td><td><b>Ouvrir un moyen de paiement professionnel</b></td><td>Le chantier technique n° 2. Et traiter en même temps la question du séquestre avec un établissement agréé</td></tr>
-    <tr><td class="c">4</td><td><b>Passer l'hébergement en formule professionnelle</b></td><td>Le chantier technique n° 1 — le plus urgent, car il bloque tous les autres déploiements</td></tr>
+    <tr><td class="c">4</td><td><b>Passer la base de données en formule professionnelle</b></td><td>Le chantier technique n° 1 — le plus urgent, car une base suspendue bloque tous les autres déploiements</td></tr>
     <tr><td class="c">5</td><td><b>Formaliser la convention avec le commissionnaire agréé</b></td><td>Périmètre, rétrocession, responsabilités. Ses honoraires figurent déjà dans vos devis</td></tr>
     <tr><td class="c">6</td><td><b>Souscrire la responsabilité civile professionnelle et engager un comptable</b></td><td>Vous manipulez la marchandise d'autrui, et vous tiendrez une comptabilité commerciale</td></tr>
     <tr><td class="c">7</td><td><b>Demander la liste APE à la Direction générale des douanes</b></td><td>C'est gratuit. Cela vaut 3 380 387 F d'économie sur un seul dossier type</td></tr>
