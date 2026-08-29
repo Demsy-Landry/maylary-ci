@@ -94,13 +94,21 @@ export default function FicheTechnique(p: Props) {
           souffle, et le décalage cesse au dixième élément. Elle respecte déjà
           `prefers-reduced-motion`. En réécrire une ici ferait diverger deux
           animations qui doivent se ressembler. */}
+      {/* QUI REND LA PLACE, DU LIBELLÉ OU DE LA VALEUR
+          La valeur portait `shrink-0` et le libellé `flex-1` : sur un
+          téléphone, « Groupage maritime — 35 à 45 jours » gardait toute sa
+          largeur et « Acheminement » débordait par-dessus. Les deux textes se
+          chevauchaient, illisibles.
+          C'est l'inverse qu'il faut : le libellé est court et connu, il ne
+          bouge pas ; la valeur est longue et variable, c'est elle qui prend la
+          place restante et passe à la ligne quand il n'y en a plus. */}
       <dl className="cascade divide-y">
         {lignes.map((l) => (
-          <div key={l.libelle} className="flex items-center gap-3 px-3 py-2.5">
-            <l.icone className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-            <dt className="min-w-0 flex-1 text-sm text-muted-foreground">{l.libelle}</dt>
+          <div key={l.libelle} className="flex items-start gap-3 px-3 py-2.5">
+            <l.icone className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <dt className="shrink-0 text-sm text-muted-foreground">{l.libelle}</dt>
             <dd
-              className={`shrink-0 text-sm font-medium ${
+              className={`min-w-0 flex-1 text-right text-sm font-medium ${
                 l.valeur ? 'text-foreground' : 'italic text-muted-foreground/70'
               }`}
             >
