@@ -1,0 +1,3039 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>MayLary Group — Dossier de référence</title>
+<style>
+  @page { size: A4; margin: 17mm 16mm 16mm 16mm; }
+
+  :root{
+    --encre:#101c2c;
+    --encre-clair:#2b3b4e;
+    --or:#b07d2b;
+    --or-pale:#f3e9d6;
+    --sable:#f7f4ee;
+    --gris:#5d6975;
+    --trait:#ddd6ca;
+    --vert-ok:#2f6b46;
+    --rouge:#9c3026;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{ margin:0; padding:0; }
+
+  body{
+    font-family:"Bitstream Charter","Liberation Serif",Georgia,serif;
+    font-size:10.2pt;
+    line-height:1.5;
+    color:var(--encre);
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,h4,.sans,table,.encadre-titre,.chiffre,.etiquette{
+    font-family:"Liberation Sans",Arial,Helvetica,sans-serif;
+  }
+
+  /* ---------- Structure de page ---------- */
+  .page{ page-break-after:always; }
+  .page:last-child{ page-break-after:auto; }
+  .eviter-coupure{ page-break-inside:avoid; }
+
+  /* ---------- Couverture ---------- */
+  .couverture{
+    position:relative;
+    height:263mm;
+    background:var(--encre);
+    color:#fff;
+    margin:-17mm -16mm 0 -16mm;
+    padding:24mm 20mm;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    page-break-after:always;
+  }
+  .couverture .bandeau{
+    font-size:8.2pt; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--or); font-family:"Liberation Sans",Arial,sans-serif;
+  }
+  .couverture h1{
+    font-family:"Bitstream Charter","Liberation Serif",Georgia,serif;
+    font-size:44pt; line-height:1.03; margin:0 0 8mm 0; font-weight:400;
+  }
+  .couverture h1 em{ font-style:italic; color:var(--or-pale); }
+  .couverture .chapeau{
+    font-size:12pt; line-height:1.55; color:#c8d2dd; max-width:120mm; margin:0;
+  }
+  .couverture .filet{ width:34mm; height:2px; background:var(--or); margin:0 0 7mm 0; }
+  .couverture-visuel{
+    position:absolute; left:0; right:0; bottom:0; height:88mm; overflow:hidden;
+  }
+  .couverture-visuel img{ width:100%; height:100%; object-fit:cover; opacity:.42; }
+  .couverture-visuel::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(to bottom, var(--encre) 0%, rgba(16,28,44,.35) 45%, rgba(16,28,44,.9) 100%);
+  }
+  .couverture .contenu{ position:relative; z-index:2; }
+  .couverture .pied{ position:relative; z-index:2; }
+  .couverture .pied table{ width:100%; border-collapse:collapse; font-size:9pt; }
+  .couverture .pied td{ padding:2.4mm 0; border-top:1px solid rgba(255,255,255,.18); color:#c8d2dd; vertical-align:top; }
+  .couverture .pied td:first-child{
+    width:32mm; color:var(--or); text-transform:uppercase; letter-spacing:.12em; font-size:7.6pt;
+    padding-top:3mm; font-family:"Liberation Sans",Arial,sans-serif;
+  }
+
+  /* ---------- Titres ---------- */
+  .num-chapitre{
+    font-family:"Liberation Sans",Arial,sans-serif;
+    font-size:8pt; letter-spacing:.22em; text-transform:uppercase; color:var(--or);
+    margin:0 0 1.5mm 0;
+  }
+  h2.chapitre{
+    font-family:"Bitstream Charter","Liberation Serif",Georgia,serif;
+    font-size:21pt; font-weight:400; line-height:1.15;
+    margin:0 0 3mm 0; padding:0 0 3mm 0; border-bottom:2px solid var(--encre);
+  }
+  .accroche{
+    font-size:10.6pt; color:var(--encre-clair); line-height:1.55;
+    margin:0 0 6mm 0; max-width:150mm;
+  }
+  h3{
+    font-size:11pt; margin:7mm 0 2.5mm 0; color:var(--encre);
+    letter-spacing:.005em;
+  }
+  h4{ font-size:9.4pt; margin:5mm 0 1.5mm 0; text-transform:uppercase; letter-spacing:.11em; color:var(--or); }
+
+  p{ margin:0 0 3mm 0; }
+  ul,ol{ margin:0 0 3mm 0; padding-left:5mm; }
+  li{ margin-bottom:1.4mm; }
+  strong{ font-weight:700; }
+
+  /* ---------- Tableaux ---------- */
+  table.t{
+    width:100%; border-collapse:collapse; font-size:8.8pt; margin:0 0 4mm 0;
+    page-break-inside:avoid;
+  }
+  table.t th{
+    text-align:left; font-size:7.4pt; text-transform:uppercase; letter-spacing:.1em;
+    color:#fff; background:var(--encre); padding:2.2mm 2.4mm; font-weight:700;
+  }
+  table.t td{
+    padding:2.1mm 2.4mm; border-bottom:1px solid var(--trait); vertical-align:top;
+  }
+  table.t tr:nth-child(even) td{ background:#faf8f4; }
+  table.t td.n{ text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+  table.t td.c{ text-align:center; }
+  table.t tr.total td{ background:var(--or-pale); font-weight:700; border-top:1.5px solid var(--or); }
+
+  /* ---------- Encadrés ---------- */
+  .encadre{
+    background:var(--sable); border-left:3px solid var(--or);
+    padding:3.5mm 4mm; margin:0 0 4mm 0; page-break-inside:avoid;
+  }
+  .encadre-titre{
+    font-size:7.6pt; text-transform:uppercase; letter-spacing:.13em;
+    color:var(--or); margin:0 0 1.8mm 0; font-weight:700;
+  }
+  .encadre p:last-child, .encadre ul:last-child{ margin-bottom:0; }
+  .encadre.alerte{ background:#fdf3f1; border-left-color:var(--rouge); }
+  .encadre.alerte .encadre-titre{ color:var(--rouge); }
+  .encadre.sombre{ background:var(--encre); border-left-color:var(--or); color:#e6ecf2; }
+  .encadre.sombre .encadre-titre{ color:var(--or); }
+  .encadre.sombre strong{ color:#fff; }
+
+  /* ---------- Marqueurs de provenance ---------- */
+  .m{
+    display:inline-block; font-family:"Liberation Sans",Arial,sans-serif;
+    font-size:6.6pt; letter-spacing:.09em; text-transform:uppercase; font-weight:700;
+    padding:.5mm 1.4mm; border-radius:1mm; vertical-align:.6mm; white-space:nowrap;
+  }
+  .m.mes{ background:#e4efe7; color:#2f6b46; }
+  .m.hyp{ background:#fdf0dc; color:#94651a; }
+  .m.dec{ background:#e9e6f2; color:#4b4080; }
+  .m.conf{ background:#f6e3e0; color:var(--rouge); }
+
+  /* ---------- Chiffres clés ---------- */
+  .chiffres{ display:flex; gap:3mm; margin:0 0 5mm 0; }
+  .chiffres > div{
+    flex:1; background:var(--sable); padding:3mm; border-top:2px solid var(--or); text-align:center;
+  }
+  .chiffres .chiffre{ font-size:17pt; font-weight:700; color:var(--encre); line-height:1.1; }
+  .chiffres .legende{ font-size:7.4pt; color:var(--gris); line-height:1.3; margin-top:1mm; }
+
+  /* ---------- Visuels ---------- */
+  figure{ margin:0 0 5mm 0; page-break-inside:avoid; }
+  figure img{ width:100%; height:auto; display:block; }
+  figure img.bandeau{ height:52mm; object-fit:cover; }
+  figcaption{
+    font-family:"Liberation Sans",Arial,sans-serif; font-size:7.4pt; color:var(--gris);
+    padding-top:1.5mm; border-top:1px solid var(--trait); margin-top:1.5mm;
+  }
+
+  /* ---------- Séparateur de partie ---------- */
+  .separateur{
+    height:263mm; margin:-17mm -16mm 0 -16mm; background:var(--encre); color:#fff;
+    padding:0; position:relative; page-break-after:always; overflow:hidden;
+  }
+  .separateur .image{ position:absolute; inset:0; }
+  .separateur .image img{ width:100%; height:100%; object-fit:cover; opacity:.3; }
+  .separateur .image::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(135deg, rgba(16,28,44,.96) 0%, rgba(16,28,44,.55) 100%);
+  }
+  .separateur .texte{ position:relative; z-index:2; padding:60mm 22mm 0 22mm; }
+  .separateur .lettre{
+    font-family:"Bitstream Charter","Liberation Serif",Georgia,serif;
+    font-size:90pt; line-height:.8; color:var(--or); opacity:.9; margin:0 0 6mm 0;
+  }
+  .separateur h2{
+    font-family:"Bitstream Charter","Liberation Serif",Georgia,serif;
+    font-size:30pt; font-weight:400; margin:0 0 6mm 0; line-height:1.1;
+  }
+  .separateur p{ font-size:11.5pt; color:#c8d2dd; max-width:125mm; line-height:1.6; }
+  .separateur .sommaire-partie{
+    margin-top:14mm; border-top:1px solid rgba(255,255,255,.2); padding-top:5mm;
+    font-family:"Liberation Sans",Arial,sans-serif; font-size:9pt; color:#aebccb;
+  }
+  .separateur .sommaire-partie div{ margin-bottom:2mm; }
+  .separateur .sommaire-partie b{ color:var(--or); font-weight:700; display:inline-block; width:18mm; }
+
+  /* ---------- Sommaire ---------- */
+  .toc{ column-count:2; column-gap:10mm; font-size:9pt; }
+  .toc .groupe{ break-inside:avoid; margin-bottom:5mm; }
+  .toc .groupe-titre{
+    font-family:"Liberation Sans",Arial,sans-serif; font-size:7.6pt; text-transform:uppercase;
+    letter-spacing:.13em; color:var(--or); border-bottom:1px solid var(--trait);
+    padding-bottom:1.5mm; margin-bottom:2mm; font-weight:700;
+  }
+  .toc .ligne{ display:flex; gap:2.5mm; margin-bottom:1.3mm; }
+  .toc .ligne b{ font-family:"Liberation Sans",Arial,sans-serif; color:var(--gris); font-weight:700; min-width:6mm; font-size:8.4pt; }
+
+  /* ---------- Divers ---------- */
+  .formule{
+    font-family:"DejaVu Sans Mono","Liberation Mono",monospace; font-size:8.4pt;
+    background:var(--encre); color:#e6ecf2; padding:3.5mm 4mm; margin:0 0 4mm 0;
+    line-height:1.65; white-space:pre; overflow-x:hidden; page-break-inside:avoid;
+  }
+  .formule b{ color:var(--or); font-weight:400; }
+  .deux-col{ display:flex; gap:6mm; }
+  .deux-col > *{ flex:1; }
+  .filet-or{ height:2px; background:var(--or); width:24mm; margin:0 0 3mm 0; }
+  .petite{ font-size:8.2pt; color:var(--gris); line-height:1.45; }
+  .etapes{ counter-reset:e; margin:0 0 4mm 0; }
+  .etapes .etape{ display:flex; gap:3mm; margin-bottom:2.5mm; page-break-inside:avoid; }
+  .etapes .etape .no{
+    flex:0 0 6mm; height:6mm; background:var(--encre); color:#fff; border-radius:50%;
+    font-family:"Liberation Sans",Arial,sans-serif; font-size:8pt; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .etapes .etape .txt{ flex:1; }
+  .etapes .etape .txt b{ display:block; margin-bottom:.6mm; }
+</style>
+</head>
+<body>
+
+<!-- ============================== COUVERTURE ============================== -->
+<div class="couverture">
+  <div class="couverture-visuel"><img src="../public/visuels/port-import-abidjan.jpg" alt=""></div>
+  <div class="contenu">
+    <div class="bandeau">MayLary Group &nbsp;·&nbsp; Dems'Inc &nbsp;·&nbsp; Abidjan</div>
+    <div style="height:26mm"></div>
+    <div class="filet"></div>
+    <h1>Dossier<br>de <em>référence</em></h1>
+    <p class="chapeau">
+      Le manuel d'exploitation de la plateforme et le plan d'affaires de la
+      maison, réunis en un seul document.
+    </p>
+  </div>
+  <div class="pied">
+    <table>
+      <tr><td>Établi le</td><td>29 août 2026 — remplace l'édition du 26 août</td></tr>
+      <tr><td>Objet</td><td>Formation des collaborateurs, pilotage de l'activité, feuille de route des dépenses</td></tr>
+      <tr><td>État</td><td>Plateforme en ligne sur maylarygroup.ci, avant la première vente</td></tr>
+      <tr><td>Diffusion</td><td>Interne. Rien n'y est dissimulé — y compris ce qui ne marche pas.</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ============================== SOMMAIRE ============================== -->
+<div class="page">
+  <p class="num-chapitre">Sommaire</p>
+  <h2 class="chapitre">Ce que contient ce dossier</h2>
+  <p class="accroche">
+    Deux parties. La première explique comment la plateforme travaille, ce
+    qu'elle fait seule et où elle s'arrête. La seconde dit comment la maison
+    gagne de l'argent, ce qu'elle a déjà dépensé, ce qu'elle doit dépenser, et
+    dans quel ordre.
+  </p>
+
+  <div class="toc">
+    <div class="groupe">
+      <div class="groupe-titre">A · Le manuel d'exploitation</div>
+      <div class="ligne"><b>1</b><span>Ce qu'est MayLary Group</span></div>
+      <div class="ligne"><b>2</b><span>La carte de l'automatisation</span></div>
+      <div class="ligne"><b>3</b><span>Les huit métiers</span></div>
+      <div class="ligne"><b>4</b><span>Le vocabulaire du métier</span></div>
+      <div class="ligne"><b>5</b><span>Comment un article arrive en boutique</span></div>
+      <div class="ligne"><b>6</b><span>Comment se calcule un prix</span></div>
+      <div class="ligne"><b>7</b><span>Les quatre filières d'acheminement</span></div>
+      <div class="ligne"><b>8</b><span>L'assurance, et quand elle ne s'applique pas</span></div>
+      <div class="ligne"><b>9</b><span>Le calcul des droits de douane</span></div>
+      <div class="ligne"><b>10</b><span>Le socle juridique du classement</span></div>
+      <div class="ligne"><b>11</b><span>Le parcours d'une commande</span></div>
+      <div class="ligne"><b>12</b><span>L'import sur mesure</span></div>
+      <div class="ligne"><b>13</b><span>L'export</span></div>
+      <div class="ligne"><b>14</b><span>Le Déclarant</span></div>
+      <div class="ligne"><b>15</b><span>Vendre sur MayLary Group</span></div>
+      <div class="ligne"><b>16</b><span>Sourcing et achats groupés</span></div>
+      <div class="ligne"><b>17</b><span>Les limites de l'automatisme</span></div>
+      <div class="ligne"><b>18</b><span>Les précautions</span></div>
+      <div class="ligne"><b>19</b><span>Les corrections : quand quelque chose casse</span></div>
+      <div class="ligne"><b>20</b><span>Les règles absolues</span></div>
+      <div class="ligne"><b>21</b><span>Ce que vous pouvez régler vous-même</span></div>
+    </div>
+
+    <div class="groupe">
+      <div class="groupe-titre">B · Le plan d'affaires</div>
+      <div class="ligne"><b>22</b><span>La vision, et ce que nous construisons</span></div>
+      <div class="ligne"><b>23</b><span>Comment lire les chiffres de ce plan</span></div>
+      <div class="ligne"><b>24</b><span>L'inventaire de ce qui est réalisé</span></div>
+      <div class="ligne"><b>25</b><span>Le métier et sa différence</span></div>
+      <div class="ligne"><b>26</b><span>Analyse du marché</span></div>
+      <div class="ligne"><b>27</b><span>À qui nous vendons</span></div>
+      <div class="ligne"><b>28</b><span>La structure juridique</span></div>
+      <div class="ligne"><b>29</b><span>Les sources de revenu</span></div>
+      <div class="ligne"><b>30</b><span>Ce que rapporte une opération</span></div>
+      <div class="ligne"><b>31</b><span>Les dépenses : engagées et à venir</span></div>
+      <div class="ligne"><b>32</b><span>Le point mort</span></div>
+      <div class="ligne"><b>33</b><span>Créer l'entreprise</span></div>
+      <div class="ligne"><b>34</b><span>Encaisser</span></div>
+      <div class="ligne"><b>35</b><span>La montée en charge</span></div>
+      <div class="ligne"><b>36</b><span>Le marketing</span></div>
+      <div class="ligne"><b>37</b><span>Financement et trésorerie</span></div>
+      <div class="ligne"><b>38</b><span>Les risques</span></div>
+      <div class="ligne"><b>39</b><span>Ce qui bloque aujourd'hui</span></div>
+      <div class="ligne"><b>40</b><span>Les décisions qui vous attendent</span></div>
+      <div class="ligne"><b>41</b><span>La feuille de route des 90 jours</span></div>
+    </div>
+  </div>
+
+  <div class="encadre sombre" style="margin-top:6mm">
+    <div class="encadre-titre">Trois marqueurs, dans tout le document</div>
+    <p style="margin-bottom:2mm">
+      <span class="m mes">Mesuré</span> &nbsp;Relevé dans la base de données ou dans un document réel
+      de la maison, le 29 août 2026. Ce chiffre est vrai aujourd'hui.
+    </p>
+    <p style="margin-bottom:2mm">
+      <span class="m hyp">Hypothèse</span> &nbsp;Une supposition de travail, appuyée sur rien
+      d'observé. Elle fait tourner le raisonnement ; corrigez-la.
+    </p>
+    <p style="margin-bottom:2mm">
+      <span class="m dec">À décider</span> &nbsp;Une valeur que personne n'a arrêtée. Tant qu'elle
+      est vide, la ligne correspondante ne peut pas exister.
+    </p>
+    <p style="margin-bottom:0">
+      <span class="m conf">À confirmer</span> &nbsp;Un montant réel que la maison connaît mais que
+      la base ne porte pas encore. Le fondateur seul peut le remplir.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== SÉPARATEUR A ============================== -->
+<div class="separateur">
+  <div class="image"><img src="../public/visuels/sourcing-entrepot.jpg" alt=""></div>
+  <div class="texte">
+    <div class="lettre">A</div>
+    <h2>Le manuel<br>d'exploitation</h2>
+    <p>
+      Ce que toute personne travaillant avec MayLary Group doit savoir : ce que
+      la plateforme fait toute seule, où elle s'arrête, ce qu'elle ne saura
+      jamais faire, et quoi faire quand elle se trompe.
+    </p>
+    <div class="sommaire-partie">
+      <div><b>1 – 4</b> Ce que nous sommes, ce qui tourne seul, les métiers, les mots</div>
+      <div><b>5 – 10</b> Les prix, le transport, l'assurance, la douane</div>
+      <div><b>11 – 16</b> Les services, un par un</div>
+      <div><b>17 – 19</b> Les limites, les précautions, les corrections</div>
+      <div><b>20 – 21</b> Les règles absolues et les réglages</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== CH. 1 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 1</p>
+  <h2 class="chapitre">Ce qu'est MayLary Group</h2>
+  <p class="accroche">
+    Ce n'est ni une vitrine, ni un blog, ni un catalogue en ligne. C'est une
+    <strong>entreprise numérique de logistique</strong> : elle exploite huit
+    services sur un seul moteur de calcul, elle exécute seule la plus grande
+    partie de son travail, et elle appelle un professionnel exactement là où une
+    signature engage une responsabilité.
+  </p>
+
+  <h3>La phrase à tenir</h3>
+  <p>
+    <strong>En Côte d'Ivoire, importer est un métier d'initié. MayLary en fait un
+    achat.</strong> Aujourd'hui, un Ivoirien qui veut faire venir une machine ou
+    un lot de marchandise doit connaître quelqu'un. Il négocie par messagerie, il
+    ne sait pas ce qu'il paie, il découvre les frais au port, et il n'a aucun
+    recours. Le commerce se fait à la confiance personnelle — et la confiance
+    personnelle ne s'étend pas.
+  </p>
+  <p>
+    Nous remplaçons cette chaîne d'initiés par un service : <strong>vous
+    choisissez, vous payez, le reste est fait.</strong> Pas « une plateforme qui
+    met en relation » — un opérateur qui répond de bout en bout.
+  </p>
+
+  <h3>La machine et l'homme</h3>
+  <p>
+    La plateforme cote le transport, calcule les prix, complète les fiches,
+    chiffre une liquidation douanière, émet une facture et tient une
+    comptabilité en partie double — sans que personne ne la relance. Trois
+    moteurs tournent toutes les heures.
+  </p>
+  <p>
+    Elle ne décide pas si un article est une contrefaçon. Elle ne confirme pas
+    un paiement. Elle ne signe pas une déclaration en douane. Ces trois-là
+    engagent la responsabilité de la maison, et resteront humains — ce n'est pas
+    une faiblesse, c'est <em>la barrière à l'entrée</em> qui empêche un pur
+    acteur numérique de nous copier.
+  </p>
+
+  <div class="chiffres">
+    <div><div class="chiffre">8</div><div class="legende">services sur un seul moteur</div></div>
+    <div><div class="chiffre">233</div><div class="legende">articles en catalogue <span class="m mes">Mesuré</span></div></div>
+    <div><div class="chiffre">6&nbsp;298</div><div class="legende">positions tarifaires chargées</div></div>
+    <div><div class="chiffre">0</div><div class="legende">vente à ce jour</div></div>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le chiffre le plus important de ce dossier</div>
+    <p>
+      <strong>MayLary Group n'a pas encore fait une seule vente complète.</strong>
+      Zéro commande payée, zéro écriture comptable, zéro vendeur inscrit
+      <span class="m mes">Mesuré</span>. Tout ce qui précède est de la
+      <em>capacité</em>, pas de l'<em>activité</em>. Un investisseur qui teste la
+      plateforme voit une belle mécanique vide. Une seule commande réellement
+      livrée, avec son écriture comptable et son avis client, change complètement
+      ce qu'il regarde.
+    </p>
+  </div>
+
+  <div class="encadre">
+    <div class="encadre-titre">Ce que nous sommes, et ce que nous ne sommes pas</div>
+    <p style="margin-bottom:0">
+      Nous sommes <strong>transitaire</strong>. Nous ne sommes pas
+      <strong>commissionnaire en douane agréé</strong>. La signature d'une
+      déclaration engage un agrément que nous n'avons pas : elle passe par un
+      commissionnaire partenaire, dont les honoraires figurent séparément au
+      devis. Ne laissez jamais entendre le contraire à un client — c'est une
+      question de droit, pas de modestie.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 2 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 2</p>
+  <h2 class="chapitre">La carte de l'automatisation</h2>
+  <p class="accroche">
+    Voici, opération par opération, ce qui se fait sans personne, ce qui se fait
+    avec une aide, et ce qui exige une décision humaine. C'est la carte à avoir
+    en tête avant tout le reste : elle dit où vous devez être présent.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:8mm">#</th><th>Opération</th><th style="width:26mm">Qui l'exécute</th><th style="width:52mm">Remarque</th></tr>
+    <tr><td colspan="4" style="background:var(--encre);color:#fff;font-size:7.4pt;letter-spacing:.12em;text-transform:uppercase;font-family:'Liberation Sans',Arial,sans-serif;padding:1.6mm 2.4mm"><b>Le catalogue</b></td></tr>
+    <tr><td>1</td><td>Choisir les mots-clés de recherche fournisseur</td><td><b>Humain</b></td><td>Un mot à la fois — le fournisseur ne comprend pas les phrases</td></tr>
+    <tr><td>2</td><td>Interroger le fournisseur</td><td>Automatique</td><td>Limite d'une requête par seconde</td></tr>
+    <tr><td>3</td><td>Examiner l'article : qualité, conformité, contrefaçon</td><td><b>Humain</b></td><td>Règle absolue. Jamais délégué</td></tr>
+    <tr><td>4</td><td>Importer la fiche, les photos, le poids, les dimensions</td><td>Automatique</td><td>—</td></tr>
+    <tr><td>5</td><td>Rédiger le nom et la description en français</td><td>Assisté</td><td>Relu et corrigé à la main</td></tr>
+    <tr><td>6</td><td>Coter le transport auprès du transporteur</td><td>Automatique</td><td>Toutes les 30 min, à :05 et :35</td></tr>
+    <tr><td>7</td><td>Chercher la quantité qui rend le fret acceptable</td><td>Automatique</td><td>Sinon bascule en groupage</td></tr>
+    <tr><td>8</td><td>Calculer le prix de vente</td><td>Automatique</td><td>À :20</td></tr>
+    <tr><td>9</td><td>Compléter la fiche : matière, emballage, photos</td><td>Automatique</td><td>À :50</td></tr>
+    <tr><td>10</td><td>Classer tarifairement la marchandise</td><td>Assisté</td><td>43 articles sur 233 <span class="m mes">Mesuré</span></td></tr>
+    <tr><td>11</td><td>Publier l'article en boutique</td><td>Automatique</td><td>Jamais avant que le prix existe</td></tr>
+
+    <tr><td colspan="4" style="background:var(--encre);color:#fff;font-size:7.4pt;letter-spacing:.12em;text-transform:uppercase;font-family:'Liberation Sans',Arial,sans-serif;padding:1.6mm 2.4mm"><b>La commande</b></td></tr>
+    <tr><td>12</td><td>Calculer le fret du panier</td><td>Automatique</td><td>—</td></tr>
+    <tr><td>13</td><td>Appliquer la grille de prix par quantité</td><td>Automatique</td><td>Paliers 1 · 5 · 20 · 50</td></tr>
+    <tr><td>14</td><td>Encaisser le paiement</td><td><b>Humain</b></td><td>Blocage n° 2 du chapitre 39</td></tr>
+    <tr><td>15</td><td>Vérifier que l'argent est bien arrivé</td><td><b>Humain</b></td><td>Idem</td></tr>
+    <tr><td>16</td><td>Commander chez le fournisseur</td><td>Automatique</td><td>Sur le canal express ; manuel ailleurs</td></tr>
+    <tr><td>17</td><td>Suivre l'acheminement</td><td><b>Humain</b></td><td>Automatique le jour où la clé de suivi est déposée</td></tr>
+    <tr><td>18</td><td>Livrer au client</td><td><b>Humain</b></td><td>Ne sera jamais automatique</td></tr>
+    <tr><td>19</td><td>Émettre la facture</td><td>Automatique</td><td>Numérotation continue, PDF</td></tr>
+    <tr><td>20</td><td>Passer l'écriture comptable</td><td>Automatique</td><td>Équilibre imposé par la base</td></tr>
+
+    <tr><td colspan="4" style="background:var(--encre);color:#fff;font-size:7.4pt;letter-spacing:.12em;text-transform:uppercase;font-family:'Liberation Sans',Arial,sans-serif;padding:1.6mm 2.4mm"><b>Le dossier de transit</b></td></tr>
+    <tr><td>21</td><td>Recevoir et enregistrer la demande</td><td>Automatique</td><td>—</td></tr>
+    <tr><td>22</td><td>Détecter une marchandise réglementée</td><td>Automatique</td><td>Pendant la saisie, avant l'engagement</td></tr>
+    <tr><td>23</td><td>Chiffrer fret, douane, transit local, assurance</td><td>Assisté</td><td>Refuse de totaliser si un poste manque</td></tr>
+    <tr><td>24</td><td>Émettre le devis poste par poste</td><td>Automatique</td><td>—</td></tr>
+    <tr><td>25</td><td>Ouvrir le dossier et son numéro</td><td>Automatique</td><td>—</td></tr>
+    <tr><td>26</td><td>Signer et déposer la déclaration en douane</td><td><b>Humain</b></td><td>Commissionnaire agréé. Jamais automatisable</td></tr>
+    <tr><td>27</td><td>Assurer le transit local jusqu'au client</td><td><b>Humain</b></td><td>—</td></tr>
+    <tr><td>28</td><td>Archiver le dossier et ses pièces</td><td>Automatique</td><td>Archive figée, jamais recalculée</td></tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Le compte exact, et le chemin vers 80 %</div>
+    <p>
+      Sur ces <strong>28 opérations</strong> : <strong>17 s'exécutent seules</strong>,
+      <strong>3 sont assistées</strong>, <strong>8 demandent une décision
+      humaine</strong>. Soit <strong>61 % d'automatisme complet</strong>, et 71 %
+      si l'on compte l'assistance <span class="m mes">Mesuré</span>.
+    </p>
+    <p style="margin-bottom:0">
+      Deux branchements manquent pour atteindre les 80 % visés :
+      <strong>l'encaissement</strong> (opérations 14 et 15) et <strong>le suivi
+      des colis</strong> (opération 17). Une fois ces deux-là posés, on passe à
+      <strong>23 opérations sur 28, soit 82 %</strong>. Ce ne sont pas des
+      développements : ce sont deux clés à obtenir. Elles figurent en tête du
+      chapitre 39.
+    </p>
+  </div>
+
+  <div class="encadre">
+    <div class="encadre-titre">Pourquoi les 8 restantes ne bougeront pas</div>
+    <p style="margin-bottom:0">
+      Examiner un article, confirmer un paiement, signer une déclaration, livrer
+      une marchandise. Ces gestes engagent la maison devant un client, une
+      banque, ou l'administration. Un automate qui se trompe sur une position
+      tarifaire ne paie pas l'amende — l'entreprise la paie. C'est pourquoi ils
+      restent tenus par des professionnels, et c'est ce qui fait qu'un
+      concurrent purement numérique ne peut pas prendre ce marché.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 3 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 3</p>
+  <h2 class="chapitre">Les huit métiers</h2>
+  <p class="accroche">
+    Huit portes, huit travaux différents. Savoir laquelle proposer à qui est la
+    première compétence commerciale de la maison.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:32mm">La porte</th><th>Ce que le client veut</th><th>Ce que nous faisons</th></tr>
+    <tr><td><b>Boutique</b></td><td>Acheter un article, à l'unité</td><td>On le vend depuis notre catalogue, on le fait venir, on le livre</td></tr>
+    <tr><td><b>Espace Pro</b></td><td>Acheter en gros pour son commerce</td><td>Même chose, avec une grille de prix qui baisse à la quantité</td></tr>
+    <tr><td><b>Importer</b></td><td>Faire venir <em>sa</em> marchandise, déjà trouvée</td><td>Transit, dédouanement, livraison — on ne vend rien, on achemine</td></tr>
+    <tr><td><b>Exporter</b></td><td>Envoyer une marchandise hors de Côte d'Ivoire</td><td>Collecte, formalités d'export, expédition</td></tr>
+    <tr><td><b>Sourcing</b></td><td>Un produit qu'il ne trouve pas</td><td>On cherche chez nos fournisseurs et on lui fait une offre chiffrée</td></tr>
+    <tr><td><b>Achats groupés</b></td><td>Le prix de gros sans en acheter mille</td><td>On réunit plusieurs acheteurs sur une même commande</td></tr>
+    <tr><td><b>Vendre</b></td><td>Écouler ses propres produits</td><td>Il ouvre sa boutique chez nous ; on encaisse et on livre</td></tr>
+    <tr><td><b>Le Déclarant</b></td><td>Savoir ce que la douane va lui prendre</td><td>Classement, liquidation, préparation de déclaration</td></tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">La question à poser au téléphone</div>
+    <p style="margin-bottom:0">
+      <strong>« Est-ce que vous avez déjà trouvé la marchandise ? »</strong>
+      Si oui, c'est <em>Importer</em>. Si non, c'est la <em>Boutique</em>,
+      l'<em>Espace Pro</em> ou le <em>Sourcing</em>. Cette seule question oriente
+      neuf appels sur dix.
+    </p>
+  </div>
+
+  <h3>Ce que chaque porte pèse aujourd'hui</h3>
+  <table class="t">
+    <tr><th>Porte</th><th class="c" style="width:26mm">Contenu en base</th><th>État commercial</th></tr>
+    <tr><td>Boutique grand public</td><td class="c"><b>131 articles</b></td><td>8 rayons. Prête</td></tr>
+    <tr><td>Espace Pro</td><td class="c"><b>102 articles</b></td><td>13 secteurs. Prête</td></tr>
+    <tr><td>Importer</td><td class="c">1 demande</td><td>Écrans prêts, 11 postes de transit confirmés</td></tr>
+    <tr><td>Exporter</td><td class="c">0 demande</td><td>Écrans prêts</td></tr>
+    <tr><td>Sourcing</td><td class="c">2 demandes</td><td>Prêt</td></tr>
+    <tr><td>Achats groupés</td><td class="c">0 campagne</td><td>Prêt, jamais ouvert</td></tr>
+    <tr><td>Vendre</td><td class="c"><b>0 vendeur</b></td><td>Prêt. Uniquement du démarchage à faire</td></tr>
+    <tr><td>Le Déclarant</td><td class="c">6 298 positions</td><td>Construit. <span class="m dec">Tarif à décider</span></td></tr>
+  </table>
+  <p class="petite">Relevé en base le 29 août 2026. <span class="m mes">Mesuré</span></p>
+</div>
+
+<!-- ============================== CH. 4 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 4</p>
+  <h2 class="chapitre">Le vocabulaire du métier</h2>
+  <p class="accroche">
+    Ces mots reviennent partout dans la plateforme et dans ce dossier. Sans eux,
+    rien de ce qui suit n'est lisible.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:34mm">Le mot</th><th>Ce qu'il veut dire</th></tr>
+    <tr><td><b>FOB</b></td><td>La valeur de la marchandise seule, départ usine, sans le transport.</td></tr>
+    <tr><td><b>CAF</b> (ou CIF)</td><td>Marchandise + transport + assurance. C'est la valeur sur laquelle la douane calcule.</td></tr>
+    <tr><td><b>Incoterm</b></td><td>Qui paie quoi entre le vendeur et l'acheteur. <b>EXW</b> : le client paie tout. <b>DDP</b> : le fournisseur paie tout, droits compris.</td></tr>
+    <tr><td><b>Fret</b></td><td>Le prix du transport.</td></tr>
+    <tr><td><b>FCL</b></td><td>Conteneur complet. Un client, un conteneur.</td></tr>
+    <tr><td><b>LCL</b> (groupage)</td><td>Plusieurs marchandises dans un même conteneur, chacun paie son volume.</td></tr>
+    <tr><td><b>Porte-à-porte</b></td><td>Le transporteur prend chez le fournisseur et livre chez le client, formalités comprises.</td></tr>
+    <tr><td><b>Liquidation</b></td><td>Le calcul officiel de tout ce que la douane réclame.</td></tr>
+    <tr><td><b>Position tarifaire</b> (code SH)</td><td>Le numéro qui classe une marchandise. Il détermine le taux de droit.</td></tr>
+    <tr><td><b>Poids taxable</b></td><td>Le plus grand des deux : le poids réel, ou le volume converti en poids. Un carton léger mais encombrant se paie au volume.</td></tr>
+    <tr><td><b>Unité payante (UP)</b></td><td>L'unité de facturation du groupage maritime : le plus grand entre la tonne et le mètre cube.</td></tr>
+    <tr><td><b>Palier</b></td><td>Un seuil de quantité à partir duquel le prix unitaire baisse.</td></tr>
+    <tr><td><b>Surestaries</b></td><td>Pénalité journalière quand un conteneur reste trop longtemps au port.</td></tr>
+    <tr><td><b>Magasinage</b></td><td>Le loyer de la marchandise qui dort sous douane. Il court, et il coûte cher.</td></tr>
+    <tr><td><b>Acconage</b></td><td>La manutention portuaire du conteneur. Poste lourd, propre au maritime conteneurisé.</td></tr>
+    <tr><td><b>Échange B/L</b></td><td>Remise du connaissement original contre le bon à délivrer. Concerne le conteneur complet, <b>pas</b> le groupage.</td></tr>
+    <tr><td><b>Débours</b></td><td>Des sommes avancées pour le compte du client et refacturées à l'identique. Ce n'est pas du chiffre d'affaires.</td></tr>
+    <tr><td><b>RFCV</b></td><td>Rapport final de classification et de valeur. Obligatoire au-delà d'un million de francs FOB.</td></tr>
+    <tr><td><b>FDI</b></td><td>Fiche de déclaration à l'importation. Sans elle, la déclaration ne part pas.</td></tr>
+    <tr><td><b>BSC</b></td><td>Bordereau de suivi des cargaisons. À prendre <b>avant</b> l'embarquement.</td></tr>
+  </table>
+</div>
+
+<!-- ============================== CH. 5 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 5</p>
+  <h2 class="chapitre">Comment un article arrive en boutique</h2>
+  <p class="accroche">
+    Un article ne s'ajoute pas à la main. Il traverse quatre étapes, et il reste
+    invisible tant qu'elles ne sont pas toutes franchies.
+  </p>
+
+  <div class="etapes">
+    <div class="etape"><div class="no">1</div><div class="txt">
+      <b>On le cherche chez le fournisseur</b>
+      Par mot-clé, un mot à la fois — jamais une phrase, le fournisseur ne
+      comprend pas les phrases. Chaque résultat indique combien de commerçants
+      le revendent déjà : c'est notre seul signal de qualité, le fournisseur ne
+      publiant ni note ni avis.
+    </div></div>
+    <div class="etape"><div class="no">2</div><div class="txt">
+      <b>On l'examine, un par un</b>
+      Poids cohérent ? Nom compréhensible ? Adapté au climat ? Pas une
+      contrefaçon ? Un article dont on ne sait pas ce qu'il est ne rentre pas.
+      <em>Cas réels écartés :</em> une barrière annoncée à 550 tonnes, des sacs
+      portant le nom d'une grande maison, une gigoteuse d'hiver, des crèmes
+      cosmétiques sans composition vérifiable.
+    </div></div>
+    <div class="etape"><div class="no">3</div><div class="txt">
+      <b>On l'importe et on le traduit</b>
+      La fiche arrive en anglais avec ses photos, son poids et ses dimensions. On
+      écrit un nom et une description en français, honnêtes : si c'est du
+      similicuir, on ne dit pas « cuir ».
+    </div></div>
+    <div class="etape"><div class="no">4</div><div class="txt">
+      <b>La machine finit le travail</b>
+      Le transporteur est interrogé, puis le prix de vente se calcule seul, puis
+      la fiche se complète. L'article apparaît en boutique à ce moment-là, pas
+      avant.
+    </div></div>
+  </div>
+
+  <div class="encadre">
+    <div class="encadre-titre">Pourquoi un article peut rester invisible</div>
+    <p style="margin-bottom:0">
+      Un article sans prix de vente n'est <strong>jamais</strong> montré, même si
+      quelqu'un le marque « actif ». C'est la boutique elle-même qui refuse. Si
+      un article ajouté n'apparaît pas, c'est presque toujours que le
+      transporteur n'a pas encore répondu : laissez passer une heure.
+      <span class="m mes">Mesuré</span> — 203 articles actifs sur 233, tous avec
+      un prix.
+    </p>
+  </div>
+
+  <figure>
+    <img class="bandeau" src="../public/visuels/sourcing-selection.jpg" alt="Sélection des articles">
+    <figcaption>
+      L'étape 2 est la seule que la machine ne fera jamais : décider si une
+      marchandise mérite d'entrer au catalogue.
+    </figcaption>
+  </figure>
+</div>
+
+<!-- ============================== CH. 6 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 6</p>
+  <h2 class="chapitre">Comment se calcule un prix</h2>
+  <p class="accroche">
+    C'est le cœur de la maison. Cinq opérations, dans cet ordre, sans exception.
+  </p>
+
+  <div class="formule">1. <b>Prix d'achat</b>    = prix fournisseur en dollars × taux de change
+2. <b>Valeur CAF</b>     = prix d'achat + part du transport à notre charge
+3. <b>Assurance</b>      = voir chapitre 8
+4. <b>Coût de revient</b> = prix d'achat + assurance   <b>← le transport est facturé à part</b>
+5. <b>Prix de vente</b>  = coût de revient × (1 + marge)
+                    puis relevé au prix plancher si besoin</div>
+
+  <h3>Les valeurs en vigueur</h3>
+  <table class="t">
+    <tr><th>Réglage</th><th class="n" style="width:24mm">Valeur</th><th>Ce que ça fait</th></tr>
+    <tr><td>Taux de change dollar</td><td class="n"><b>600 F / $</b></td><td>Convertit le prix du fournisseur</td></tr>
+    <tr><td>Marge sur la marchandise</td><td class="n"><b>40 %</b></td><td>Ce qu'on ajoute au coût de revient</td></tr>
+    <tr><td>Prix plancher</td><td class="n"><b>2 500 F</b></td><td>Aucun article n'est vendu en dessous</td></tr>
+    <tr><td>Marge sur le fret porte-à-porte</td><td class="n"><b>0 %</b></td><td>Refacturé au prix coûtant</td></tr>
+    <tr><td>Marge sur le groupage</td><td class="n"><b>30 %</b></td><td>Le groupage est notre métier : il porte une marge</td></tr>
+    <tr><td>Frais de service</td><td class="n"><b>2 000 F</b></td><td>Par commande</td></tr>
+    <tr><td>Plafond de fret</td><td class="n"><b>1,5 ×</b></td><td>Le transport ne dépasse pas 1,5 fois le prix d'achat</td></tr>
+    <tr><td>Paliers de gros</td><td class="n"><b>1 · 5 · 20 · 50</b></td><td>Seuils de quantité de l'Espace Pro</td></tr>
+    <tr><td>Quantité minimum par défaut</td><td class="n"><b>5</b></td><td>Appliquée quand le fret l'exige</td></tr>
+  </table>
+  <p class="petite">Relevé en base le 29 août 2026. <span class="m mes">Mesuré</span></p>
+
+  <div class="encadre">
+    <div class="encadre-titre">Un cas réel — la montre KT58</div>
+    <p style="margin-bottom:0">
+      Le fournisseur la vend <b>16,92 $</b>, soit <b>10 152 F</b> d'achat. Marge
+      de 40 % : <b>14 213 F</b> de prix de vente. Le transport est facturé à
+      part : <b>2 112 F</b>. Le client paie <b>16 325 F</b> livré, plus les frais
+      de service.
+    </p>
+  </div>
+
+  <h3>La grille de gros</h3>
+  <p>
+    Dans l'Espace Pro, le prix unitaire baisse par paliers. Ce n'est pas une
+    remise décidée à la main — <strong>c'est le transport qui se dilue</strong>.
+    Cinq montres dans un colis coûtent moins cher à faire venir que cinq colis
+    d'une montre.
+  </p>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Interdits sur les prix</div>
+    <ul style="margin-bottom:0">
+      <li><strong>Jamais</strong> changer un prix après que le client a payé.</li>
+      <li><strong>Jamais</strong> afficher un coût de revient à un client — ni prix d'achat, ni marge, nulle part, à aucun endroit de la chaîne.</li>
+      <li><strong>Jamais</strong> inventer un montant. Si on ne l'a pas, on écrit « à coter ».</li>
+      <li><strong>Jamais</strong> afficher le nom du fournisseur. Il reste en base.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============================== CH. 7 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 7</p>
+  <h2 class="chapitre">Les quatre filières d'acheminement</h2>
+  <p class="accroche">
+    <strong>C'est le chapitre le plus important du manuel.</strong> Quatre
+    filières, quatre méthodes de calcul distinctes. Les mélanger produit des
+    montants absurdes et des devis indéfendables — c'est déjà arrivé, et le cas
+    est rapporté en fin de chapitre.
+  </p>
+
+  <table class="t">
+    <tr>
+      <th style="width:30mm">Filière</th>
+      <th>Quand</th>
+      <th style="width:26mm">Dossier<br>d'importation</th>
+      <th style="width:24mm">Assurance</th>
+      <th style="width:30mm">Postes propres</th>
+    </tr>
+    <tr>
+      <td><b>1 · Express DDP</b><br><span class="petite">fournisseur</span></td>
+      <td>Le fournisseur cote le porte-à-porte et livre droits acquittés</td>
+      <td><b>Non</b></td>
+      <td><b>Non</b></td>
+      <td>Aucun. Tout est dans le prix du transporteur</td>
+    </tr>
+    <tr>
+      <td><b>2 · DHL Express</b></td>
+      <td>Envoi express classique, hors DDP</td>
+      <td>Simplifié ou normal selon la valeur</td>
+      <td>Selon le cas</td>
+      <td>Proforma de dédouanement émise <b>après</b> l'arrivée</td>
+    </tr>
+    <tr>
+      <td><b>3 · Groupage LCL</b><br><span class="petite">maritime</span></td>
+      <td>Volumineux, ou refusé par l'express, ou choix du client</td>
+      <td><b>Oui</b>, procédure normale</td>
+      <td><b>Obligatoire</b></td>
+      <td>Dégroupage, empotage. <b>Ni acconage ni échange B/L</b></td>
+    </tr>
+    <tr>
+      <td><b>4 · Conteneur FCL</b></td>
+      <td>Au-delà d'une quinzaine de mètres cubes</td>
+      <td><b>Oui</b>, procédure normale</td>
+      <td><b>Obligatoire</b></td>
+      <td>Acconage <b>250 774 F</b>, échange B/L <b>555 359 F</b></td>
+    </tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">La règle qui gouverne tout ce chapitre</div>
+    <p style="margin-bottom:0">
+      <strong>On ne mélange pas les filières.</strong> Les calculs de
+      l'importation — dossier, liquidation complète, assurance, transit local —
+      servent au <em>groupage</em>, au <em>sourcing</em> et aux colis que le
+      transporteur express refuse de prendre en DDP. Ils ne s'appliquent
+      <strong>pas</strong> à un colis livrable directement en DDP. Les y
+      appliquer, c'est de la surfacturation : ça gonfle les prix et ça ne
+      correspond à rien.
+    </p>
+  </div>
+
+  <h3>Filière 2 — ce qu'il faut savoir sur DHL Express</h3>
+  <p>
+    <strong>DHL Express ne pratique plus le DDP systématique depuis 2017.</strong>
+    Un envoi n'arrive pas droits acquittés : le transporteur émet une facture
+    proforma de dédouanement <em>après</em> l'arrivée du colis, que le client
+    règle avant livraison.
+  </p>
+  <table class="t">
+    <tr><th>Seuil ou délai</th><th class="n" style="width:26mm">Valeur</th><th>Conséquence</th></tr>
+    <tr><td>Déclaration simplifiée</td><td class="n"><b>&lt; 100 000 F</b></td><td>Exemption de droits et taxes. Un envoi maintenu sous ce seuil évite toute la chaîne d'évaluation</td></tr>
+    <tr><td>Soumission à évaluation</td><td class="n"><b>&gt; 1 000 000 F</b></td><td>RFCV exigé, délivré en 1 à 5 jours</td></tr>
+    <tr><td>Règlement de la proforma</td><td class="n"><b>5 jours</b></td><td>Passé ce délai, le magasinage court</td></tr>
+    <tr><td>Dédouanement et livraison</td><td class="n"><b>48 heures</b></td><td>Après règlement. Documents définitifs sous deux semaines</td></tr>
+  </table>
+  <p class="petite">
+    Source : affiche « Processus général de dédouanement des envois chez DHL
+    Express CI », relevée en agence. Chargée en base sous cinq règles de
+    procédure. <span class="m mes">Mesuré</span>
+  </p>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Ce qu'on ne dit jamais sur un envoi DHL Express</div>
+    <p style="margin-bottom:0">
+      <strong>« C'est tout compris. »</strong> C'est faux depuis 2017. Les droits
+      et taxes viennent en supplément, et le colis attend le règlement de la
+      proforma. Un client à qui on a promis un prix tout compris découvrira une
+      facture supplémentaire au moment où il ne peut plus reculer — c'est
+      exactement la pratique que nous combattons chez les autres.
+    </p>
+  </div>
+
+  <h3>La règle de bascule entre express et groupage</h3>
+  <p>
+    Le transport ne doit pas dépasser <strong>1,5 fois le prix d'achat</strong>.
+    Au-delà, la machine cherche d'abord une quantité minimum qui le fasse
+    redescendre. Si aucune quantité n'y arrive, l'article passe en groupage.
+  </p>
+
+  <div class="encadre">
+    <div class="encadre-titre">Pourquoi ce plafond existe</div>
+    <p style="margin-bottom:0">
+      Il était réglé à 5. Résultat mesuré le 26 août : <strong>un décapsuleur
+      acheté 500 F portait 2 765 F de transport</strong> — le client payait
+      3 265 F un décapsuleur. Trente-cinq articles sur soixante-quatre étaient
+      dans ce cas. Ramené à 1,5, le rapport moyen est tombé à 1,64 et trente
+      articles sont passés en groupage.
+    </p>
+  </div>
+
+  <h3>Ce que porte le catalogue aujourd'hui</h3>
+  <table class="t">
+    <tr><th>Filière</th><th class="n" style="width:24mm">Articles</th><th class="n" style="width:22mm">Actifs</th><th>Lecture</th></tr>
+    <tr><td>Groupage — importation requise</td><td class="n"><b>140</b></td><td class="n">117</td><td>Le fret n'est pas affiché tant qu'il n'est pas vérifié</td></tr>
+    <tr><td>Express DDP</td><td class="n"><b>81</b></td><td class="n">74</td><td>Fret connu d'avance, affiché</td></tr>
+    <tr><td>Express basculé en groupage</td><td class="n"><b>12</b></td><td class="n">12</td><td>Le transporteur a refusé de coter</td></tr>
+    <tr class="total"><td>Total</td><td class="n">233</td><td class="n">203</td><td>Tous ont un prix calculé</td></tr>
+  </table>
+  <p class="petite">Relevé en base le 29 août 2026. <span class="m mes">Mesuré</span></p>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le cas vécu — pourquoi cette règle est écrite en gras</div>
+    <p style="margin-bottom:0">
+      Le moteur de cotation du <em>groupage</em> a été lancé sur un article de
+      boutique en <em>express</em> : cinq soutiens-gorge achetés 11 850 F. Il a
+      rendu un total partiel de <strong>1 019 695 F</strong>. Le chiffre était
+      arithmétiquement juste et commercialement absurde : on avait appliqué à un
+      colis express toute la procédure d'un dossier d'importation maritime.
+      L'échange de connaissement, en particulier, avait été ajouté alors qu'il ne
+      concerne que le conteneur complet. <strong>Le défaut n'était pas dans le
+      calcul, il était dans le choix de la filière.</strong>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 8 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 8</p>
+  <h2 class="chapitre">L'assurance, et quand elle ne s'applique pas</h2>
+  <p class="accroche">
+    La loi ivoirienne impose que la marchandise importée soit assurée localement.
+    Le barème ci-dessous est celui de notre assureur, pas une estimation. Mais
+    l'assurance ne se colle pas à tout : l'ajouter là où elle n'a pas lieu
+    d'être, c'est de la surfacturation.
+  </p>
+
+  <div class="formule">Valeur assurée = (marchandise + fret) × 110 %
+Prime nette    = valeur assurée × 0,15 %
+<b>Total          = (prime nette + 2 500 F de frais de police) × 1,07</b>
+                                                    <b>↑ taxe sur les contrats</b></div>
+
+  <p>
+    Les 110 % sont la règle habituelle du transport maritime : on assure un peu
+    plus que la valeur, pour couvrir la perte de bénéfice. Les 2 500 F sont dus
+    une fois par expédition, pas par article — ils se diluent sur un lot.
+  </p>
+
+  <h3>Quand l'assurance s'applique</h3>
+  <p>
+    <strong>Uniquement quand le colis doit faire l'objet d'un dossier
+    d'importation et suivre la procédure de dédouanement normale.</strong>
+    C'est-à-dire : le groupage, le sourcing, et les colis que le transporteur
+    express ne prend pas en charge en DDP.
+  </p>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Quand elle ne s'applique pas — et pourquoi c'est une faute</div>
+    <p>
+      Un colis dont le fournisseur cote le fret et qui se livre directement en
+      <strong>DDP</strong> ne porte pas d'assurance. Le transporteur couvre déjà
+      la marchandise ; en souscrire une seconde revient à faire payer deux fois.
+    </p>
+    <p style="margin-bottom:0">
+      De même sous <strong>CIF</strong> ou <strong>CIP</strong> : le fournisseur
+      assure déjà. La machine le sait et met alors l'assurance à zéro. Si vous
+      voyez une ligne d'assurance sur un devis express DDP, c'est une erreur —
+      signalez-la.
+    </p>
+  </div>
+
+  <h3>Ce que la loi sanctionne</h3>
+  <table class="t">
+    <tr><th>Manquement</th><th class="n" style="width:34mm">Sanction</th><th>Référence</th></tr>
+    <tr><td>Défaut de certificat d'assurance</td><td class="n"><b>20 % de la valeur</b></td><td>Circulaire DGD n° 848 du 13 mai 1997</td></tr>
+    <tr><td>Sous-assurance (valeur assurée &lt; 95 % de la CAF)</td><td class="n">50 000 à 500 000 F</td><td>Idem</td></tr>
+  </table>
+  <div class="encadre">
+    <div class="encadre-titre">L'ordre de grandeur à retenir</div>
+    <p style="margin-bottom:0">
+      L'amende pour défaut d'assurance est <strong>la sanction la plus chère de
+      tout le dossier d'importation</strong>. Sur une marchandise à 10 millions,
+      elle coûte 2 millions — quand la prime elle-même se compte en dizaines de
+      milliers. Notre barème couvre 110 % du CAF, donc au-dessus du seuil de
+      95 % ; mais un client qui apporte sa propre police doit être vérifié sur ce
+      point.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 9 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 9</p>
+  <h2 class="chapitre">Le calcul des droits de douane</h2>
+  <p class="accroche">
+    C'est le moteur du Déclarant. Ces formules sont officielles : elles ne se
+    modifient pas, et personne ne doit y toucher.
+  </p>
+
+  <h4>Les taxes assises sur la valeur CAF</h4>
+  <div class="formule"><b>DD</b>   Droit de douane              = CAF × taux (0, 5, 10, 20 ou 35 %)
+<b>RST</b>  Redevance statistique        = CAF × 1 %
+<b>PCS</b>  Prélèvement communautaire    = CAF × 0,8 %
+<b>PUA</b>  Prélèvement Union africaine  = CAF × 0,2 %
+<b>PCC</b>  Prélèvement compensatoire    = CAF × 0,5 %</div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">La TVA — attention à son assiette</div>
+    <div class="formule" style="margin-bottom:2mm;background:#7a2018"><b>TVA = (CAF + DD + RST) × 18 %</b></div>
+    <p style="margin-bottom:0">
+      La TVA ne porte <strong>jamais</strong> sur PCS, PUA ni PCC. C'est l'erreur
+      la plus fréquente du métier, et elle gonfle la note. C'est précisément la
+      nuance qui fausse la plupart des calculs faits à la main.
+    </p>
+  </div>
+
+  <h4>Les montants dus par déclaration</h4>
+  <div class="formule"><b>RPI</b>  Redevance prestation info. = FOB × 0,75 %, minimum 100 000 F
+<b>TS</b>   Timbre / taxe spéciale     = 20 000 F forfaitaires</div>
+  <p>
+    Ces deux-là sont dus par déclaration, quelle que soit la taille du lot. Sur
+    une petite importation, la RPI à 100 000 F pèse énormément :
+    <strong>c'est un argument de vente pour le groupage</strong>, qui la répartit
+    sur plusieurs clients.
+  </p>
+
+  <div class="encadre">
+    <div class="encadre-titre">À l'export, c'est plus simple</div>
+    <p style="margin-bottom:0">Seul le timbre de <b>20 000 F</b> s'applique. Pas de RPI.</p>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Quand la position tarifaire n'est pas connue</div>
+    <p>
+      Le Tarif Extérieur Commun de l'UEMOA ne connaît que cinq taux : <b>0, 5,
+      10, 20 et 35 %</b>. Tant qu'on ne sait pas lequel s'applique, la plateforme
+      donne une <strong>fourchette</strong> — le calcul à 0 % et le calcul à
+      35 % — jamais un chiffre unique inventé.
+    </p>
+    <p style="margin-bottom:0">
+      <strong>Les codes du fournisseur étranger ne sont pas repris.</strong> Ils
+      sont saisis pour <em>son</em> export, sous <em>sa</em> réglementation. Une
+      position fausse, c'est un taux faux et une signature engagée sur une
+      erreur.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 10 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 10</p>
+  <h2 class="chapitre">Le socle juridique du classement</h2>
+  <p class="accroche">
+    Un classement tarifaire qui ne peut pas être justifié devant un contentieux
+    ne vaut rien. Depuis le 29 août, le texte de loi qui fonde chaque classement
+    est chargé en base, avec l'adresse de sa source et la date de son relevé.
+  </p>
+
+  <div class="chiffres">
+    <div><div class="chiffre">6&nbsp;298</div><div class="legende">positions tarifaires du TEC</div></div>
+    <div><div class="chiffre">12</div><div class="legende">alinéas des Règles Générales Interprétatives</div></div>
+    <div><div class="chiffre">93</div><div class="legende">Notes de Chapitre, du 1 au 97</div></div>
+    <div><div class="chiffre">9</div><div class="legende">Notes de Section</div></div>
+  </div>
+  <p class="petite">
+    Source unique : <strong>UEMOA</strong> — Tarif Extérieur Commun, Règlement
+    N°02/2022/CM/UEMOA. Le même organe que celui qui édicte notre tarif.
+    <span class="m mes">Mesuré</span>
+  </p>
+
+  <h3>Pourquoi ce socle change quelque chose</h3>
+  <p>
+    Avant, un classement s'appuyait sur des règles <em>récitées</em>. Aujourd'hui
+    elles sont <em>citables</em> : le Déclarant peut donner au client non
+    seulement le code et le taux, mais le texte de la note de chapitre qui le
+    fonde. Sur un marché où l'approximation est la norme, dire d'où vient le taux
+    est l'argument commercial.
+  </p>
+
+  <h3>Comment il a été vérifié</h3>
+  <table class="t">
+    <tr><th>Contrôle</th><th class="c" style="width:26mm">Résultat</th></tr>
+    <tr><td>Chaque texte stocké se retrouve dans la page ou le document d'origine</td><td class="c"><b>102 / 102</b></td></tr>
+    <tr><td>Les RGI confrontées à une seconde publication officielle</td><td class="c"><b>12 / 12</b></td></tr>
+    <tr><td>Codes de nos familles de classement présents au corpus TEC</td><td class="c"><b>18 / 18</b></td></tr>
+    <tr><td>Taux identiques au corpus, au chiffre près</td><td class="c"><b>18 / 18</b></td></tr>
+    <tr><td>Chapitres utilisés par nos classements dont la Note est chargée</td><td class="c"><b>10 / 10</b></td></tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">Un seul écart, et il est consigné</div>
+    <p style="margin-bottom:0">
+      La confrontation des Règles Générales à une seconde publication officielle
+      a révélé <strong>un mot de différence</strong>, sur la Règle 3 c) :
+      l'UEMOA écrit « Dans <em>le cas</em> où », l'autre publication « Dans
+      <em>les cas</em> où ». Aucun changement de sens. C'est la rédaction UEMOA
+      qui fait foi en Côte d'Ivoire, et l'écart est inscrit dans une colonne de
+      la table plutôt que passé sous silence.
+    </p>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Ce qui manque encore, et qui bloque des articles</div>
+    <ul style="margin-bottom:0">
+      <li><strong>Chapitre 42 (maroquinerie)</strong> — une seule position au corpus TEC sur une cinquantaine. <b>16 articles</b> sans taux applicable. Les Notes sont là, les taux non.</li>
+      <li><strong>Composition textile inconnue</strong> — le fournisseur annonce « Cloth » sans préciser la fibre. <b>25 vêtements</b> du chapitre 61 ne peuvent pas être classés.</li>
+      <li><strong>Montres connectées</strong> — 8 articles, arbitrage entre 8517.62 et 9102, les deux à 20 %. À trancher avec le commissionnaire agréé.</li>
+      <li><strong>Chaussures bébé</strong> — 3 articles, matières de la tige et de la semelle inconnues.</li>
+    </ul>
+  </div>
+  <p class="petite">
+    <strong>43 articles classés sur 233</strong> à ce jour. Les 190 autres
+    attendent, et c'est volontaire : un classement inventé vaut moins que pas de
+    classement. <span class="m mes">Mesuré</span>
+  </p>
+</div>
+
+<!-- ============================== CH. 11 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 11</p>
+  <h2 class="chapitre">Le parcours d'une commande</h2>
+  <p class="accroche">
+    Sept états. Le client voit exactement le même que vous, en clair, dans son
+    compte.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:44mm">État</th><th>Ce qui s'est passé</th><th style="width:26mm">Qui agit</th></tr>
+    <tr><td><b>En attente de paiement</b></td><td>La commande est passée, l'argent n'est pas arrivé</td><td>Le client</td></tr>
+    <tr><td><b>Paiement reçu — vérification</b></td><td>L'argent est annoncé, on contrôle</td><td>Nous</td></tr>
+    <tr><td><b>Paiement confirmé</b></td><td>Contrôle fait, on peut acheter</td><td>Nous</td></tr>
+    <tr><td><b>En préparation</b></td><td>Commandé chez le fournisseur</td><td>Le fournisseur</td></tr>
+    <tr><td><b>Expédiée</b></td><td>En route, un numéro de suivi existe</td><td>Le transporteur</td></tr>
+    <tr><td><b>Livrée</b></td><td>Le client a reçu et confirmé</td><td>Le client</td></tr>
+    <tr><td><b>Annulée</b></td><td>Arrêtée avant l'achat</td><td>—</td></tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">« Payé, protégé » — ce que ça veut dire vraiment</div>
+    <p style="margin-bottom:0">
+      L'argent du client est <strong>retenu en base</strong> jusqu'à ce qu'il
+      confirme la livraison. Ce n'est pas un slogan, c'est un mécanisme : le
+      reversement est bloqué par la base de données, pas par une consigne.
+      Dites-le aux clients hésitants — c'est notre meilleur argument face à
+      quelqu'un qui n'ose pas payer d'avance en ligne.
+    </p>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le trou dans ce parcours, aujourd'hui</div>
+    <p style="margin-bottom:0">
+      Les états 2 et 3 sont <strong>entièrement manuels</strong> : le client
+      annonce son paiement, quelqu'un va vérifier. Tant qu'aucun moyen
+      d'encaissement professionnel n'est branché, la chaîne s'arrête là à chaque
+      commande. C'est le blocage n° 2 du chapitre 39, et c'est aussi l'une des
+      deux opérations qui séparent la maison de son objectif de 80 %
+      d'automatisme.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 12 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 12</p>
+  <h2 class="chapitre">L'import sur mesure</h2>
+  <p class="accroche">
+    Le client a trouvé sa marchandise. Il veut qu'on la lui amène. C'est du
+    transit pur : nous ne vendons rien, nous acheminons et nous dédouanons.
+  </p>
+
+  <h3>Les dix étapes d'un dossier</h3>
+  <table class="t">
+    <tr><th style="width:44mm">Étape</th><th>Ce qui se passe</th><th style="width:38mm">Qui tient la main</th></tr>
+    <tr><td>Nouvelle</td><td>Le client dépose sa demande et ses documents</td><td>Le client</td></tr>
+    <tr><td>En cotation</td><td>On chiffre : fret, douane, transit local, assurance</td><td>Nous</td></tr>
+    <tr><td>Devis envoyé</td><td>Le client reçoit un prix ferme, poste par poste</td><td>Le client</td></tr>
+    <tr><td>Validée</td><td>Il a accepté et payé l'acompte</td><td>Le client</td></tr>
+    <tr><td>Achat effectué</td><td>Payé au fournisseur, marchandise réservée</td><td>Nous</td></tr>
+    <tr><td>Expédition internationale</td><td>En mer ou en l'air, suivi actif</td><td>Le transporteur</td></tr>
+    <tr><td>Arrivée en Côte d'Ivoire</td><td>Débarquée, manifeste déposé</td><td>La compagnie</td></tr>
+    <tr><td>Dédouanement</td><td>Déclaration, liquidation, paiement des droits</td><td><b>Le commissionnaire agréé</b></td></tr>
+    <tr><td>Transit local</td><td>Du port ou de l'aéroport jusqu'au client</td><td>Nous</td></tr>
+    <tr><td>Livrée</td><td>Marchandise remise, dossier archivé</td><td>—</td></tr>
+  </table>
+
+  <h3>Les onze postes de transit confirmés</h3>
+  <p>
+    Un devis honnête sépare ce qui nous revient de ce qui revient à d'autres.
+    C'est ce qui distingue un transitaire d'un intermédiaire opaque.
+  </p>
+  <table class="t">
+    <tr><th>Poste</th><th class="n" style="width:26mm">Montant</th><th style="width:30mm">Assiette</th><th>Source</th></tr>
+    <tr><td>Honoraires de transit — aérien</td><td class="n"><b>100 000 F</b></td><td>Par dossier</td><td>Cotations DEMCI et Menzies</td></tr>
+    <tr><td>Honoraires de transit — conteneur</td><td class="n"><b>500 000 F</b></td><td>Par conteneur</td><td>Proforma Mundra, 20 pieds</td></tr>
+    <tr><td>Passage en douane</td><td class="n"><b>150 000 F</b></td><td>Forfait</td><td>Trois cotations concordantes</td></tr>
+    <tr><td>Tirage de la déclaration</td><td class="n"><b>70 000 F</b></td><td>Forfait</td><td>Trois cotations — plafond retenu</td></tr>
+    <tr><td>FDI et RFCV</td><td class="n"><b>50 000 F</b></td><td>Forfait</td><td>Proforma Mundra</td></tr>
+    <tr><td>Retrait documentaire (aérien)</td><td class="n"><b>30 000 F</b></td><td>Forfait</td><td>Cotation Menzies</td></tr>
+    <tr><td>Taxe de déclaration SYDAM</td><td class="n"><b>23 350 F</b></td><td>Forfait</td><td>Proforma Mundra</td></tr>
+    <tr><td>Apurement D3</td><td class="n"><b>20 000 F</b></td><td>Forfait</td><td>Cotation DEMCI</td></tr>
+    <tr><td>Frais d'agio</td><td class="n"><b>10 000 F</b></td><td>Forfait</td><td>Cotation DEMCI</td></tr>
+    <tr><td>Échange du connaissement</td><td class="n"><b>555 359 F</b></td><td><b>Conteneur seul</b></td><td>Proforma Mundra</td></tr>
+    <tr><td>Acconage et manutention</td><td class="n"><b>250 774 F</b></td><td><b>Conteneur seul</b></td><td>Proforma Mundra</td></tr>
+  </table>
+  <p class="petite">
+    <span class="m mes">Mesuré</span> — Dix postes restent « à coter » : dossier,
+    BSC, dégroupage, empotage, magasinage, scanner, manutention aéroport,
+    transport local, débours, formalités export. Le moteur
+    <strong>refuse de totaliser un devis incomplet</strong> plutôt que d'estimer.
+  </p>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le fret : ne jamais dire « le fret coûte X »</div>
+    <p>
+      Le fret dépend de la marchandise, du poids, des mesures et du marché du
+      jour. C'est la compagnie qui le donne. Deux réponses possibles, et deux
+      seulement :
+    </p>
+    <p>
+      <strong>1. Un plafond existe pour cette liaison.</strong> Vous l'annoncez
+      avec la phrase exacte : <em>« Sous réserve de la confirmation par la
+      compagnie : elle peut diminuer ou être ce montant, mais jamais plus. »</em>
+      Ce plafond est un engagement de la maison.
+    </p>
+    <p style="margin-bottom:0">
+      <strong>2. Aucun plafond.</strong> Vous ne citez aucun chiffre de fret.
+      Vous donnez le reste du devis et annoncez sous quel délai la cotation
+      arrive.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 12 bis ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 12 — suite</p>
+  <h2 class="chapitre">Les papiers, avant l'argent</h2>
+  <p class="accroche">
+    Un dossier se perd sur une pièce manquante, pas sur un franc de trop.
+    Vérifiez toujours les documents avant de parler prix.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:34mm">Pièce</th><th style="width:52mm">Quand</th><th>Ce que l'oubli coûte</th></tr>
+    <tr><td><b>FDI</b><br><span class="petite">Fiche de déclaration à l'importation</span></td><td>Toujours, à l'import</td><td>Sans elle, la déclaration ne part pas du tout</td></tr>
+    <tr><td><b>RFCV</b><br><span class="petite">Rapport final de classification et de valeur</span></td><td>Dès 1 000 000 F de valeur FOB. En dessous : attestation de valeur</td><td>Cinq jours ouvrés de délai — à anticiper. Le RFCV porte la valeur et le code retenus : c'est lui, pas la facture, qui fixe l'assiette en cas de divergence</td></tr>
+    <tr><td><b>BSC</b><br><span class="petite">Bordereau de suivi des cargaisons</span></td><td><b>Avant</b> l'embarquement, en maritime</td><td>Pris après : pénalité. L'oubli le plus fréquent et le plus cher</td></tr>
+    <tr><td><b>Autorisation BURIDA</b></td><td>CD, DVD, cartes préchargées — tout support son et image</td><td>Sans vignette, la marchandise est réputée piratée et peut être saisie</td></tr>
+    <tr><td><b>Certificat d'origine</b></td><td>Avant le dédouanement</td><td>Sans lui, le régime préférentiel tombe : souvent la différence entre 0 % et 20 %</td></tr>
+  </table>
+
+  <h3>Les délais et franchises à connaître</h3>
+  <table class="t">
+    <tr><th>Règle</th><th class="n" style="width:26mm">Valeur</th><th>Nature</th></tr>
+    <tr><td>Franchise de magasinage au terminal</td><td class="n">10 jours</td><td>Usage relevé, à confirmer au terminal</td></tr>
+    <tr><td>Franchise de surestaries</td><td class="n">6 jours</td><td>Usage, négociable au volume</td></tr>
+    <tr><td>Délai de délivrance du RFCV</td><td class="n">5 jours ouvrés</td><td>Officiel — convention État / Webb Fontaine</td></tr>
+    <tr><td>Délai de contestation d'une valeur</td><td class="n">2 jours</td><td>Officiel. Un client prévenu tard a perdu son recours</td></tr>
+  </table>
+
+  <h3>Le poids qui compte</h3>
+  <p>
+    On ne facture pas le poids de la balance, mais le <strong>poids
+    taxable</strong> : le plus grand entre le poids réel et le volume converti.
+    En aérien, on divise le volume en centimètres cubes par 6 000. Un carton de
+    mousse d'un mètre cube pèse peut-être 20 kg, mais il se paie comme
+    <strong>167 kg</strong>.
+  </p>
+
+  <figure>
+    <img class="bandeau" src="../public/visuels/fret-aerien-abidjan.jpg" alt="Fret aérien">
+    <figcaption>
+      L'aérien et l'express sont la spécialité d'origine du fondateur —
+      responsable adjoint Aérien, Dégroupage et Express.
+    </figcaption>
+  </figure>
+</div>
+
+<!-- ============================== CH. 13 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 13</p>
+  <h2 class="chapitre">L'export</h2>
+  <p class="accroche">
+    Le trajet inverse. Moins de taxes, plus de papiers, et une limite claire à
+    connaître avant de répondre à un client.
+  </p>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Les filières que nous ne traitons pas</div>
+    <p>
+      <strong>Cacao, café, noix de cajou, coton, hévéa.</strong> Ces filières
+      supposent un agrément d'exportateur, des quotas et un contrôle qualité
+      propres à chacune. Ce sont des procédures lourdes et sensibles que la
+      maison ne traite pas.
+    </p>
+    <p style="margin-bottom:0">
+      Si un client vient pour cela : dites-le franchement, expliquez en deux
+      phrases ce que la filière exige, et orientez-le vers l'organisme
+      compétent. <strong>Ne montez pas de dossier, ne chiffrez pas, ne promettez
+      rien.</strong>
+    </p>
+  </div>
+
+  <div class="deux-col">
+    <div>
+      <h4>Ce que nous exportons</h4>
+      <ul>
+        <li>Effets personnels et déménagements</li>
+        <li>Échantillons commerciaux</li>
+        <li>Pièces détachées et équipements</li>
+        <li>Produits manufacturés hors filière réglementée</li>
+        <li>Colis express vers la diaspora</li>
+      </ul>
+    </div>
+    <div>
+      <h4>Les pièces à réunir</h4>
+      <ul>
+        <li>Facture commerciale</li>
+        <li>Liste de colisage</li>
+        <li>Certificat d'origine</li>
+        <li>Certificat phytosanitaire — obligatoire pour tout produit végétal</li>
+        <li>Déclaration d'exportation</li>
+        <li>Connaissement (B/L) ou lettre de transport aérien (LTA)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Les taxes à l'export</h3>
+  <div class="formule"><b>TS</b>  Timbre / taxe spéciale = 20 000 F par déclaration
+
+Et c'est tout. <b>Pas de RPI à l'export.</b></div>
+
+  <figure>
+    <img class="bandeau" src="../public/visuels/port-export-abidjan.jpg" alt="Port export">
+    <figcaption>
+      Le port d'Abidjan a traité 46,6 millions de tonnes en 2025, contre 40,1 en
+      2024 — soit une hausse de 16,1 %.
+    </figcaption>
+  </figure>
+</div>
+
+<!-- ============================== CH. 14 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 14</p>
+  <h2 class="chapitre">Le Déclarant</h2>
+  <p class="accroche">
+    Un service à part entière, et le seul de la maison qui se vend sans
+    marchandise. Il répond à la question que tout importateur se pose :
+    « ça va me coûter combien à la douane ? »
+  </p>
+
+  <table class="t">
+    <tr><th style="width:34mm">Outil</th><th>Ce qu'il fait</th><th style="width:44mm">Quand s'en servir</th></tr>
+    <tr><td><b>Trouver la position</b></td><td>Cherche dans les 6 298 positions du TEC et rend les codes candidats avec leur désignation officielle et leur taux</td><td>Vous savez ce que vous importez, mais pas sous quel code</td></tr>
+    <tr><td><b>Classer une marchandise</b></td><td>Remonte les Règles Générales Interprétatives — section, chapitre, position, sous-position — et vérifie le code dans le corpus officiel avant de le donner</td><td>La marchandise est ambiguë et le classement se discute</td></tr>
+    <tr><td><b>Calculer les droits</b></td><td>Liquide poste par poste, chaque taxe sur sa propre assiette. Le bulletin s'imprime</td><td>Il faut annoncer un chiffre, ou vérifier une facture</td></tr>
+    <tr><td><b>Préparer la déclaration</b></td><td>Saisie au modèle SYDAM World, avec mémorisation des intervenants d'un dossier à l'autre</td><td>Le dossier part au commissionnaire</td></tr>
+  </table>
+
+  <h3>Ce qui fait sa valeur</h3>
+  <ul>
+    <li><strong>Aucun taux inventé.</strong> Les taux viennent du corpus TEC chargé en base. Si un code n'y figure pas, l'outil le dit.</li>
+    <li><strong>Chaque taxe sur son assiette.</strong> La TVA porte sur CAF + DD + RST, jamais sur les prélèvements communautaires.</li>
+    <li><strong>Le texte de loi à l'appui.</strong> Depuis le 29 août, les Règles Générales et les Notes de Chapitre sont en base : le raisonnement se cite, il ne s'affirme plus.</li>
+    <li><strong>Une archive figée.</strong> Les liquidations restent avec le résultat tel qu'il a été calculé. Les taux changent ; l'archive non.</li>
+  </ul>
+
+  <div class="encadre">
+    <div class="encadre-titre">Le tarif n'est toujours pas fixé <span class="m dec">À décider</span></div>
+    <p>
+      Aucune formule d'abonnement n'est arrêtée. L'écran affiche « tarif à venir »
+      et propose au visiteur de le demander — plutôt qu'un prix inventé ou une
+      gratuité laissée croire.
+    </p>
+    <p style="margin-bottom:0">
+      C'est la <strong>seule source de revenu qui ne dépende ni d'une
+      marchandise, ni d'un transport, ni d'une avance de trésorerie</strong>.
+      Autrement dit : la seule qui rentre pendant qu'un conteneur navigue.
+      La recherche d'une position, la vérification d'un code et le calcul des
+      droits restent gratuits ; seul le classement raisonné est compté.
+    </p>
+  </div>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Une règle du fondateur, à respecter absolument</div>
+    <p style="margin-bottom:0">
+      <strong>Un seul modèle d'intelligence artificielle pour la
+      classification — jamais un vote entre deux.</strong> Et les crédits du
+      Déclarant servent à l'application et à ses clients : ils ne sont pas
+      consommés pour du travail de fond interne.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 15 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 15</p>
+  <h2 class="chapitre">Vendre sur MayLary Group</h2>
+  <p class="accroche">
+    Un commerçant d'Abidjan ouvre sa boutique chez nous. Nous encaissons, nous
+    livrons, nous prenons une commission. Lui n'a ni site, ni logistique, ni
+    système de paiement à monter.
+  </p>
+
+  <table class="t">
+    <tr><th>Point</th><th class="n" style="width:24mm">Valeur</th><th>Détail</th></tr>
+    <tr><td>Commission</td><td class="n"><b>10 %</b></td><td>Sur le montant de chaque ligne vendue</td></tr>
+    <tr><td>Commission minimum</td><td class="n"><b>0 F</b></td><td>Aucun plancher : une petite vente reste rentable pour lui</td></tr>
+    <tr><td>Délai de reversement</td><td class="n"><b>7 jours</b></td><td>Après confirmation de livraison par l'acheteur</td></tr>
+    <tr><td>Frais d'inscription</td><td class="n"><b>Aucun</b></td><td>Le vendeur ne paie que s'il vend</td></tr>
+  </table>
+
+  <div class="etapes">
+    <div class="etape"><div class="no">1</div><div class="txt"><b>Il demande à ouvrir sa boutique</b>Nom d'entreprise, ville, logo, ce qu'il vend.</div></div>
+    <div class="etape"><div class="no">2</div><div class="txt"><b>Nous validons son dossier</b>Tant que le statut n'est pas « validé », aucun de ses articles n'apparaît. C'est la barrière qui protège les acheteurs.</div></div>
+    <div class="etape"><div class="no">3</div><div class="txt"><b>Il dépose ses articles</b>Photos, description, prix, stock — dans son propre espace.</div></div>
+    <div class="etape"><div class="no">4</div><div class="txt"><b>Nous encaissons et livrons</b>L'acheteur paie MayLary Group, pas le vendeur. C'est ce qui rend la garantie « payé, protégé » possible.</div></div>
+    <div class="etape"><div class="no">5</div><div class="txt"><b>Nous reversons</b>Sept jours après la confirmation, commission déduite.</div></div>
+  </div>
+
+  <div class="encadre">
+    <div class="encadre-titre">L'argument à donner à un commerçant hésitant</div>
+    <p style="margin-bottom:0">
+      « Vous ne payez rien pour être là. Vous ne payez que si vous vendez. Et
+      vous ne courez pas après votre argent : c'est nous qui encaissons et qui
+      vous reversons. » Un commerçant de marché comprend immédiatement ce que ça
+      lui évite.
+    </p>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le risque juridique à traiter avant d'ouvrir cette porte</div>
+    <p style="margin-bottom:0">
+      Retenir l'argent d'un acheteur puis le reverser à un vendeur tiers,
+      c'est du <strong>séquestre</strong>, donc de l'intermédiation en paiement —
+      une activité réglementée par la BCEAO dans l'espace UEMOA. Avant d'inscrire
+      le premier vendeur, il faut savoir si un statut ou une convention est
+      nécessaire, et si le passage par un opérateur agréé avec compte de
+      cantonnement suffit. Voir le chapitre 38.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 16 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 16</p>
+  <h2 class="chapitre">Sourcing et achats groupés</h2>
+
+  <h3>Le sourcing sur demande</h3>
+  <p>
+    Le client décrit ce qu'il cherche et, s'il le peut, un prix cible. On
+    interroge nos fournisseurs et on revient avec des propositions chiffrées.
+    C'est le service qui transforme un « vous n'avez pas ça ? » en vente, au lieu
+    d'un client perdu.
+  </p>
+  <p>
+    <strong>Notez toujours le prix cible.</strong> Sans lui, on propose au
+    hasard ; avec lui, on sait tout de suite si l'affaire est possible.
+  </p>
+
+  <h3>Les achats groupés</h3>
+  <p>
+    Une campagne est ouverte sur un article : plusieurs acheteurs s'y joignent,
+    et quand le seuil est atteint, tout le monde obtient le prix de gros. Chaque
+    participation devient une commande normale.
+  </p>
+
+  <div class="encadre">
+    <div class="encadre-titre">Quand le proposer</div>
+    <p>
+      <strong>Systématiquement sur un article en groupage.</strong> Cinq
+      acheteurs qui partagent un colis paient chacun le cinquième du transport.
+      C'est le seul mécanisme qui rend un article volumineux vendable au détail.
+    </p>
+    <p style="margin-bottom:0">
+      Et en maritime, c'est ce qui permet d'atteindre le <strong>minimum de
+      facturation de deux à trois mètres cubes</strong> : trois clients réunis
+      paient leur volume réel au lieu du minimum chacun. Dites-le avant de coter,
+      pas après.
+    </p>
+  </div>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Ce que l'achat groupé apporte à la trésorerie</div>
+    <p style="margin-bottom:0">
+      Les acheteurs paient <strong>avant</strong> qu'on commande. C'est de
+      l'argent qui arrive en amont au lieu d'en aval — sur un article
+      volumineux, c'est le seul moyen de le vendre sans rien avancer. Voir le
+      chapitre 37.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 17 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 17</p>
+  <h2 class="chapitre">Les limites de l'automatisme</h2>
+  <p class="accroche">
+    Ce que la machine <strong>ne sait pas faire</strong>, et ce qu'elle ne saura
+    pas faire. Les connaître évite de lui reprocher un travail qu'on ne lui a
+    jamais confié — et évite surtout de lui faire confiance là où elle n'est pas
+    fiable.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:56mm">La limite</th><th>Ce qui se passe concrètement</th></tr>
+    <tr><td><b>Elle ne cote que ce que le transporteur accepte de coter</b></td><td>Un article trop volumineux se voit refuser une cotation. Il bascule seul en groupage, et son fret n'est plus affiché tant qu'il n'est pas vérifié</td></tr>
+    <tr><td><b>Elle ne classe pas tarifairement toute seule</b></td><td>43 articles sur 233 portent une position vérifiée. Les autres attendent une décision humaine, faute d'information sur la matière</td></tr>
+    <tr><td><b>Elle ne connaît pas la composition d'un textile</b></td><td>Le fournisseur annonce « Cloth ». Coton ou synthétique changent le classement et le taux. 25 vêtements sont bloqués là-dessus</td></tr>
+    <tr><td><b>Elle ne juge pas une contrefaçon ni une conformité</b></td><td>C'est l'œil humain de l'étape 2 du chapitre 5. Une gigoteuse d'hiver et des cosmétiques sans composition ont été écartés ainsi</td></tr>
+    <tr><td><b>Elle ne confirme pas un paiement</b></td><td>Et elle ne le fera pas depuis un agent : le jour où ce sera automatique, la confirmation viendra de la banque ou de l'opérateur, pas d'un modèle</td></tr>
+    <tr><td><b>Elle n'écrit pas au client sans supervision</b></td><td>Tant que la réputation se construit, un brouillon est produit, un humain l'envoie</td></tr>
+    <tr><td><b>Elle ne signe aucune déclaration</b></td><td>Une déclaration erronée est une faute de l'entreprise, pas du modèle. Cela restera humain, et c'est notre barrière à l'entrée</td></tr>
+    <tr><td><b>Elle ne suit pas le marché des changes</b></td><td>Le dollar est figé à 600 F. S'il monte, les prix affichés deviennent faux et la marge fond. À vérifier chaque mois</td></tr>
+    <tr><td><b>Elle refuse de coter un fret périmé</b></td><td>Tout taux porte une date de fin de validité. Passé cette date, le moteur ne chiffre plus et renvoie vers la compagnie</td></tr>
+    <tr><td><b>Elle refuse de totaliser un devis incomplet</b></td><td>Dix postes de transit restent « à coter ». Tant qu'ils manquent, aucun total n'est affiché — plutôt que d'estimer</td></tr>
+    <tr><td><b>Elle ne peut interroger le fournisseur qu'une fois par seconde</b></td><td>C'est la raison des heures décalées : :05, :20, :35, :50. Deux recherches lancées ensemble échouent toutes les deux</td></tr>
+    <tr><td><b>Elle ne mesure aucune audience</b></td><td>Aucune donnée de trafic. Impossible d'afficher « en vogue » honnêtement : la mise en avant reste manuelle ou fondée sur les demandes réelles</td></tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">La limite qui gouverne toutes les autres</div>
+    <p style="margin-bottom:0">
+      <strong>Si le chiffre n'existe pas en base, rien n'est affiché.</strong>
+      Pas d'estimation, pas de moyenne, pas de « à peu près ». Cette règle
+      explique la plupart des comportements que vous prendrez pour des pannes :
+      un article invisible, un devis sans total, un fret non affiché. Ce n'est
+      pas la plateforme qui est cassée — c'est elle qui refuse de mentir.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 18 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 18</p>
+  <h2 class="chapitre">Les précautions</h2>
+  <p class="accroche">
+    Les gestes qui font des dégâts. Chacun de ceux-ci a déjà été commis, ou a
+    failli l'être, pendant la construction de la plateforme.
+  </p>
+
+  <h3>Avant de toucher à un réglage</h3>
+  <table class="t">
+    <tr><th style="width:52mm">La précaution</th><th>Pourquoi</th></tr>
+    <tr><td><b>Ne jamais retarifer en masse sans mesurer avant et après</b></td><td>Changer la marge ou le plafond de fret déplace beaucoup de prix d'un coup. Comptez les articles concernés avant, vérifiez le rapport fret / achat après</td></tr>
+    <tr><td><b>Les prix déjà commandés ne bougent jamais</b></td><td>C'est une règle absolue, et elle est portée par la base. Une retarification ne touche que les articles non commandés</td></tr>
+    <tr><td><b>Vérifier si l'outil a réellement écrit</b></td><td>Le moteur de tarification possède un <em>mode simulation</em> qui calcule sans rien enregistrer. Un lancement a déjà été annoncé comme fait alors qu'il n'avait rien écrit. Lisez la réponse : elle dit <code>simulation: true</code></td></tr>
+  </table>
+
+  <h3>Avant de coter</h3>
+  <table class="t">
+    <tr><th style="width:52mm">La précaution</th><th>Pourquoi</th></tr>
+    <tr><td><b>Vérifier la filière avant la méthode de calcul</b></td><td>Chapitre 7. Un moteur de groupage lancé sur un colis express a déjà produit 1 019 695 F sur un lot de soutiens-gorge acheté 11 850 F</td></tr>
+    <tr><td><b>Ne jamais donner un chiffre de fret « à peu près » au téléphone</b></td><td>C'est celui-là que le client retiendra, et c'est sur celui-là qu'il vous jugera</td></tr>
+    <tr><td><b>Contrôler les documents avant de parler prix</b></td><td>FDI, RFCV, BSC, BURIDA, certificat d'origine. Un dossier se perd sur une pièce, pas sur un franc</td></tr>
+    <tr><td><b>Annoncer le minimum de facturation d'emblée</b></td><td>Le groupage maritime se facture sur deux à trois mètres cubes minimum. Dit après, c'est une mauvaise surprise ; dit avant, c'est l'argument qui vend l'achat groupé</td></tr>
+  </table>
+
+  <h3>Sur les secrets et les accès</h3>
+  <div class="encadre alerte">
+    <div class="encadre-titre">Règle absolue, sans exception</div>
+    <p>
+      <strong>Aucune clé, aucun mot de passe, aucun jeton ne passe par une
+      conversation, un message ou une capture d'écran.</strong> Ils se déposent
+      directement dans les réglages du serveur — Supabase, <em>Project
+      Settings</em>, <em>Edge Functions</em>, <em>Secrets</em> — et on dit
+      seulement « c'est déposé ».
+    </p>
+    <p style="margin-bottom:0">
+      Un jeton d'accès Supabase donne accès au compte entier. Il se traite comme
+      un mot de passe, et il se révoque d'un clic depuis la même page.
+    </p>
+  </div>
+
+  <h3>Sur le diagnostic</h3>
+  <div class="encadre">
+    <div class="encadre-titre">Ne pas conclure trop vite à la panne</div>
+    <p style="margin-bottom:0">
+      Un déploiement du site a déjà échoué <strong>sans aucun journal</strong>,
+      en une demi-seconde. On en avait déduit une limite de plan ou un problème
+      de facturation : <strong>c'était faux</strong>. Le projet de base de
+      données était simplement en pause après inactivité. Le même code, relancé
+      sans une ligne de changement, est passé. <em>Quand un déploiement échoue
+      sans journal, vérifiez d'abord l'état du projet de base de données.</em>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 19 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 19</p>
+  <h2 class="chapitre">Les corrections : quand quelque chose casse</h2>
+  <p class="accroche">
+    Le symptôme, la cause la plus probable, et le geste. À lire dans cet ordre,
+    de haut en bas : les premières lignes couvrent la quasi-totalité des cas.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:46mm">Le symptôme</th><th style="width:52mm">La cause la plus probable</th><th>Ce qu'on fait</th></tr>
+    <tr>
+      <td><b>Un article ajouté n'apparaît pas en boutique</b></td>
+      <td>Le transporteur n'a pas encore répondu, donc l'article n'a pas de prix</td>
+      <td>Laisser passer une heure. La boutique refuse d'elle-même d'afficher un article sans prix</td>
+    </tr>
+    <tr>
+      <td><b>Un article reste bloqué plus de deux heures</b></td>
+      <td>Le fournisseur a refusé de coter le transport — souvent parce que l'article est trop volumineux</td>
+      <td>Il bascule seul en groupage. Si rien ne bouge, signaler avec le nom exact de l'article</td>
+    </tr>
+    <tr>
+      <td><b>Un prix paraît aberrant</b></td>
+      <td>Le rapport fret / prix d'achat a dépassé le plafond, ou le taux de change a bougé</td>
+      <td>Vérifier le plafond de fret (1,5 ×) et le taux dollar dans Admin › Paramètres</td>
+    </tr>
+    <tr>
+      <td><b>Un devis d'import refuse d'afficher un total</b></td>
+      <td>Un poste de transit non confirmé manque au calcul</td>
+      <td>C'est volontaire. Confirmer le poste manquant, ou l'annoncer « à coter » au client</td>
+    </tr>
+    <tr>
+      <td><b>Le Déclarant répond « momentanément injoignable »</b></td>
+      <td>Le crédit du fournisseur d'intelligence artificielle est épuisé</td>
+      <td>Recharger le projet, ou déposer une nouvelle clé dans les secrets du serveur. La question n'est pas décomptée au client</td>
+    </tr>
+    <tr>
+      <td><b>Le déploiement du site échoue sans journal</b></td>
+      <td>Le projet de base de données est en pause après inactivité</td>
+      <td>Relancer le projet depuis son tableau de bord, puis redéployer. Le même code repassera</td>
+    </tr>
+    <tr>
+      <td><b>Le déploiement est refusé avant même de construire</b></td>
+      <td>Une clé inconnue dans le fichier de configuration de l'hébergeur — il valide contre un schéma strict et refuse tout ce qu'il ne connaît pas, y compris un commentaire</td>
+      <td>Un contrôle tourne désormais au début de chaque construction et attrape la faute en local. Lire son message</td>
+    </tr>
+    <tr>
+      <td><b>Un client dit ne pas pouvoir récupérer son mot de passe</b></td>
+      <td>La configuration d'envoi des courriels est arrêtée à mi-parcours</td>
+      <td>Blocage n° 3 du chapitre 39. Terminer la configuration du service d'envoi</td>
+    </tr>
+    <tr>
+      <td><b>Deux recherches fournisseur échouent en même temps</b></td>
+      <td>Limite d'une requête par seconde chez le fournisseur</td>
+      <td>Les relancer l'une après l'autre. C'est aussi pourquoi les moteurs tournent à des minutes décalées</td>
+    </tr>
+    <tr>
+      <td><b>Une fonction serveur ne peut pas être mise à jour</b></td>
+      <td>Le jeton d'accès n'est pas déposé dans l'environnement de travail</td>
+      <td>Le déposer sous le nom exact attendu, puis <strong>ouvrir une nouvelle session</strong> : une variable d'environnement n'est injectée qu'au démarrage</td>
+    </tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">La méthode, quand rien de tout cela ne s'applique</div>
+    <p style="margin-bottom:0">
+      <strong>Mesurer, corriger, remesurer.</strong> Aucun « c'est corrigé » sans
+      un chiffre avant et un chiffre après. Et dire ce qui n'a pas été vérifié :
+      une incertitude annoncée coûte toujours moins cher qu'une certitude
+      fausse.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 20 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 20</p>
+  <h2 class="chapitre">Les règles absolues</h2>
+  <p class="accroche">
+    Celles-ci ne se discutent pas. Elles protègent la maison, sa réputation, et
+    parfois sa responsabilité pénale.
+  </p>
+
+  <h4>Argent</h4>
+  <ul>
+    <li>Jamais changer un prix après paiement du client.</li>
+    <li>Jamais montrer un coût de revient, un prix d'achat ou une marge à un client — sur aucun écran, à aucune étape de la chaîne.</li>
+    <li>Jamais inventer un montant de taxe ou de fret. « À coter » est une réponse acceptable ; un chiffre faux ne l'est pas.</li>
+    <li>Le taux euro / franc CFA est fixe : <strong>655,957</strong>. C'est un ancrage légal, jamais un taux de marché, jamais une interrogation d'un service de change.</li>
+  </ul>
+
+  <h4>Douane</h4>
+  <ul>
+    <li>La TVA se calcule sur CAF + DD + RST. Jamais sur PCS, PUA ou PCC.</li>
+    <li>PCS 0,8 %, PUA 0,2 %. RPI = FOB × 0,75 %, plancher 100 000 F, par déclaration. TS = 20 000 F par déclaration. À l'export : TS seul, pas de RPI.</li>
+    <li>Les positions tarifaires du fournisseur étranger ne sont pas reprises.</li>
+    <li>Sans position tarifaire connue, on donne une fourchette, pas un chiffre.</li>
+    <li>Nous sommes transitaire, pas commissionnaire agréé.</li>
+    <li><strong>On ne touche pas aux formules de calcul.</strong> Elles sont vérifiées sur une déclaration réelle.</li>
+  </ul>
+
+  <h4>Filières</h4>
+  <ul>
+    <li><strong>On ne mélange pas les filières.</strong> Les calculs de l'importation servent au groupage, au sourcing et aux colis non éligibles au DDP. Pas aux autres.</li>
+    <li>L'assurance ne s'applique qu'aux colis qui font l'objet d'un dossier d'importation. L'ajouter ailleurs est de la surfacturation.</li>
+    <li>Le groupage ne doit jamais afficher un prix de fret non vérifié.</li>
+  </ul>
+
+  <h4>Catalogue</h4>
+  <ul>
+    <li>Aucun article ajouté « pour remplir ». Chacun est examiné.</li>
+    <li>Le nom du fournisseur ne s'affiche jamais au client. Il reste en base.</li>
+    <li>Pas de contrefaçon, jamais — même déguisée sous un nom inventé.</li>
+    <li>Pas de produit appliqué sur la peau dont la composition n'est pas vérifiable.</li>
+    <li>Une description ne promet que ce qui est vérifié. Du similicuir n'est pas du cuir.</li>
+  </ul>
+
+  <h4>Sécurité</h4>
+  <ul>
+    <li>Aucune clé, aucun mot de passe échangé par message. Ils se déposent directement dans les réglages du serveur.</li>
+    <li>Les données d'un client ne sortent jamais de la plateforme.</li>
+  </ul>
+
+  <h4>Conception</h4>
+  <ul>
+    <li><strong>La base fait respecter les règles, pas l'écran.</strong> Un écran se contourne. Ce qui compte est écrit en contrainte, en politique d'accès ou en déclencheur.</li>
+    <li>Toujours tenir compte de l'ordinateur <em>et</em> du téléphone quand on règle quelque chose.</li>
+    <li>Aucune valeur codée en dur qui empêcherait un second pays, une seconde devise, un second entrepôt.</li>
+  </ul>
+</div>
+
+<!-- ============================== CH. 21 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 21</p>
+  <h2 class="chapitre">Ce que vous pouvez régler vous-même</h2>
+  <p class="accroche">
+    Tout ce qui suit se modifie depuis l'administration, sans toucher au code.
+  </p>
+
+  <table class="t">
+    <tr><th>Ce que vous changez</th><th class="n" style="width:26mm">Aujourd'hui</th><th style="width:44mm">Où</th></tr>
+    <tr><td>Marge sur les articles</td><td class="n">40 %</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Taux de change dollar</td><td class="n">600 F</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Prix plancher</td><td class="n">2 500 F</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Plafond de fret</td><td class="n">1,5 ×</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Marge sur le groupage</td><td class="n">30 %</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Frais de service</td><td class="n">2 000 F</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Taux de prime d'assurance</td><td class="n">0,15 %</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Frais de police d'assurance</td><td class="n">2 500 F</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Taux de couverture</td><td class="n">110 %</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Quantité minimum par défaut</td><td class="n">5</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Paliers de gros</td><td class="n">1 · 5 · 20 · 50</td><td>Admin › Paramètres</td></tr>
+    <tr><td>Commission des vendeurs</td><td class="n">10 %</td><td>Admin › Vendeurs</td></tr>
+    <tr><td>Ajouter, corriger, éteindre un article</td><td class="n">—</td><td>Admin › Produits</td></tr>
+    <tr><td>Importer depuis le fournisseur</td><td class="n">—</td><td>Admin › Fournisseurs</td></tr>
+    <tr><td>Suivre et faire avancer les commandes</td><td class="n">—</td><td>Admin › Commandes</td></tr>
+    <tr><td>Coter un import ou un export</td><td class="n">—</td><td>Admin › Import · Export</td></tr>
+    <tr><td>Barèmes de frais portuaires</td><td class="n">—</td><td>Admin › Frais de destination</td></tr>
+    <tr><td>Ajouter un collaborateur</td><td class="n">—</td><td>Admin › Équipe</td></tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Deux réglages à manier avec précaution</div>
+    <p style="margin-bottom:0">
+      <strong>La marge et le plafond de fret ne changent pas les prix déjà
+      affichés</strong> — ils s'appliquent aux prochains calculs. Pour retarifer
+      l'existant, il faut le demander explicitement, et cela déplace beaucoup de
+      prix d'un coup. <strong>Les articles déjà commandés ne bougent
+      jamais.</strong>
+    </p>
+  </div>
+
+  <h3>Ce qui tourne tout seul, et à quelle heure</h3>
+  <table class="t">
+    <tr><th class="c" style="width:24mm">Heure</th><th>Ce qui se passe</th></tr>
+    <tr><td class="c"><b>:05 et :35</b></td><td>Demande au transporteur le prix de chaque nouvel article, et cherche la quantité minimum qui le rend acceptable</td></tr>
+    <tr><td class="c"><b>:20</b></td><td>Calcule le prix de vente des articles qui viennent d'être cotés</td></tr>
+    <tr><td class="c"><b>:50</b></td><td>Complète les fiches : photos, poids, matière, emballage</td></tr>
+  </table>
+  <p class="petite">
+    Trois tâches planifiées, actives, à heures décalées pour ne pas se gêner chez
+    le fournisseur. <span class="m mes">Mesuré</span> — Concrètement : un article
+    importé à 14 h a son prix et ses photos avant 15 h, sans que personne
+    n'intervienne.
+  </p>
+</div>
+
+<!-- ============================== SÉPARATEUR B ============================== -->
+<div class="separateur">
+  <div class="image"><img src="../public/visuels/bureau-vue-port.jpg" alt=""></div>
+  <div class="texte">
+    <div class="lettre">B</div>
+    <h2>Le plan<br>d'affaires</h2>
+    <p>
+      Ce que la maison veut devenir, ce qu'elle a déjà construit, ce qu'elle a
+      dépensé, ce qu'elle doit dépenser, ce qu'elle doit vendre pour tenir, et
+      dans quel ordre tout cela s'enchaîne.
+    </p>
+    <div class="sommaire-partie">
+      <div><b>22 – 24</b> La vision, la méthode, l'inventaire du réalisé</div>
+      <div><b>25 – 28</b> Le métier, le marché, les clients, la structure</div>
+      <div><b>29 – 32</b> Les revenus, les dépenses, le point mort</div>
+      <div><b>33 – 37</b> Créer, encaisser, monter en charge, financer</div>
+      <div><b>38 – 41</b> Les risques, les blocages, les décisions, les 90 jours</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== CH. 22 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 22</p>
+  <h2 class="chapitre">La vision, et ce que nous construisons</h2>
+
+  <h3>L'ambition, dite simplement</h3>
+  <p>
+    Faire de MayLary Group <strong>l'infrastructure du commerce importé en Côte
+    d'Ivoire</strong>, puis dans la sous-région — c'est-à-dire l'endroit par où
+    passe une importation quand on ne veut pas connaître quelqu'un pour la
+    réussir.
+  </p>
+  <p>
+    Ce n'est pas une ambition abstraite : le Tarif Extérieur Commun est le même
+    dans les huit pays de l'UEMOA, la monnaie est la même, le code des douanes
+    est le même. Un moteur tarifaire se porte d'un pays à l'autre bien plus
+    facilement qu'une opération logistique. <strong>L'expansion la moins chère du
+    monde est déjà dans la structure du produit.</strong>
+  </p>
+
+  <h3>Les trois actifs que personne d'autre ne réunit</h3>
+  <table class="t">
+    <tr><th style="width:44mm">L'actif</th><th>Pourquoi il est difficile à copier</th></tr>
+    <tr>
+      <td><b>Le fondateur est transitaire de métier</b></td>
+      <td>Il connaît le port, la douane, les barèmes, les délais réels, et les endroits où les autres ajoutent leur marge sans le dire. Un site de commerce en ligne ne peut pas apprendre ça ; un transitaire peut apprendre à faire un site</td>
+    </tr>
+    <tr>
+      <td><b>Le moteur tarifaire, avec son socle juridique</b></td>
+      <td>6 298 positions, les Règles Générales et 102 Notes légales, chacune avec sa source. Ce n'est pas un fichier acheté : c'est un corpus vérifié, et chaque question posée l'améliore</td>
+    </tr>
+    <tr>
+      <td><b>Une entreprise sans mur</b></td>
+      <td>Ni bureau, ni salarié, ni loyer. Un concurrent classique doit sortir plusieurs centaines de milliers de francs chaque mois avant de gagner un centime. Nous, non</td>
+    </tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">La direction, en une phrase</div>
+    <p style="margin-bottom:0">
+      <strong>La boutique n'est pas le métier — elle est la porte.</strong> Elle
+      amène les clients, elle construit la réputation, elle prouve que la maison
+      livre. Le transit fait le résultat. Un commerçant qui achète d'abord deux
+      cartons chez nous est celui qui nous confiera son conteneur six mois plus
+      tard.
+    </p>
+  </div>
+
+  <h3>Ce que nous ne serons pas</h3>
+  <ul>
+    <li><strong>Pas une place de marché passive.</strong> Un intermédiaire qui met en relation ne répond de rien. Nous répondons de bout en bout — c'est plus difficile, et c'est le seul positionnement défendable.</li>
+    <li><strong>Pas un vendeur de trafic.</strong> Pas de publicité avant d'avoir livré ses premiers clients : acheter du trafic vers une maison qui ne sait pas encore recevoir, c'est payer pour rien.</li>
+    <li><strong>Pas un opérateur qui promet ce qu'il ne tient pas.</strong> Un fret non vérifié n'est pas affiché ; un taux inconnu donne une fourchette. Cela coûte des ventes à court terme et construit tout le reste.</li>
+  </ul>
+</div>
+
+<!-- ============================== CH. 23 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 23</p>
+  <h2 class="chapitre">Comment lire les chiffres de ce plan</h2>
+  <p class="accroche">
+    C'est la partie la plus importante à comprendre avant de lire un seul
+    tableau. Sans elle, on confond ce qu'on sait avec ce qu'on espère.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:30mm">Marqueur</th><th>Ce qu'il veut dire</th></tr>
+    <tr><td><span class="m mes">Mesuré</span></td><td>Relevé dans la base de données ou dans un document réel de la maison, le 29 août 2026. Ce chiffre est vrai aujourd'hui.</td></tr>
+    <tr><td><span class="m hyp">Hypothèse</span></td><td>Une supposition de travail, appuyée sur rien d'observé. Elle sert à faire tourner le raisonnement, et vous devez la corriger avec ce que vous savez du terrain.</td></tr>
+    <tr><td><span class="m dec">À décider</span></td><td>Une valeur que personne n'a encore arrêtée. Tant qu'elle est vide, la ligne correspondante ne peut pas exister.</td></tr>
+    <tr><td><span class="m conf">À confirmer</span></td><td>Un montant réel que la maison connaît, mais qui n'est pas encore dans la base. Le fondateur seul peut le remplir. Ces lignes sont regroupées au chapitre 31.</td></tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Ce que ce plan ne fait pas, et pourquoi</div>
+    <p>
+      <strong>Il ne prédit pas le chiffre d'affaires.</strong> Aucune vente n'a
+      encore eu lieu. Bâtir des projections sur un historique inexistant serait
+      de la fiction présentée comme un résultat.
+    </p>
+    <p style="margin-bottom:0">
+      Ce plan décrit donc <strong>ce que rapporte chaque opération</strong> —
+      cela, c'est mesuré — puis <strong>ce qu'il faut de volume pour tenir</strong>.
+      Les volumes sont des hypothèses, et ils sont marqués comme telles. Un
+      tableau dont toutes les lignes seraient chiffrées serait plus flatteur et
+      moins vrai.
+    </p>
+  </div>
+
+  <div class="encadre">
+    <div class="encadre-titre">La même discipline que dans le produit</div>
+    <p style="margin-bottom:0">
+      Cette séparation entre le vérifié et le supposé n'est pas une posture de
+      rédaction : c'est exactement la règle qui gouverne la plateforme. Si une
+      position tarifaire n'est pas au corpus, l'application n'affiche rien — pas
+      même une estimation. Ce dossier applique à lui-même ce qu'il impose au
+      logiciel.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 24 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 24</p>
+  <h2 class="chapitre">L'inventaire de ce qui est réalisé</h2>
+  <p class="accroche">
+    L'état exact de la plateforme au 29 août 2026, relevé en base. La colonne qui
+    compte est la dernière.
+  </p>
+
+  <div class="chiffres">
+    <div><div class="chiffre">233</div><div class="legende">articles au catalogue</div></div>
+    <div><div class="chiffre">109</div><div class="legende">tables et vues en base</div></div>
+    <div><div class="chiffre">38</div><div class="legende">fonctions serveur en production</div></div>
+    <div><div class="chiffre">214</div><div class="legende">adresses au plan de site</div></div>
+  </div>
+
+  <h3>Construit et éprouvé sur données réelles</h3>
+  <table class="t">
+    <tr><th style="width:52mm">Brique</th><th>État</th></tr>
+    <tr><td>Boutique grand public</td><td>131 articles, 8 rayons, fret affiché séparément du prix</td></tr>
+    <tr><td>Espace Pro</td><td>102 articles, 13 secteurs, paliers de prix dégressifs</td></tr>
+    <tr><td>Import</td><td>Demande → cotation → devis → validation → suivi 10 étapes → documents</td></tr>
+    <tr><td>Export</td><td>Même circuit, 9 étapes, liquidation propre au régime export</td></tr>
+    <tr><td>Sourcing sur demande</td><td>Le client décrit, la maison cherche et chiffre</td></tr>
+    <tr><td>Moteur de coût de revient</td><td>FOB + fret réel + assurance au barème de l'assureur + douane</td></tr>
+    <tr><td>Le Déclarant</td><td>6 298 positions, 12 alinéas de RGI, 102 Notes légales sourcées</td></tr>
+    <tr><td>Facturation</td><td>Proforma et facture définitive, numérotation continue, PDF</td></tr>
+    <tr><td>Comptabilité</td><td>Partie double SYSCOHADA, équilibre <b>imposé par la base</b>, contrepassation obligatoire</td></tr>
+    <tr><td>Marketplace</td><td>Inscription vendeur, validation, commission, reversements bloqués jusqu'à réception</td></tr>
+    <tr><td>Achat groupé</td><td>Campagnes à seuil, conversion automatique en commandes</td></tr>
+    <tr><td>Socle réglementaire</td><td>4 régimes d'origine, 15 règles de procédure, 3 fiches de marchandises réglementées</td></tr>
+    <tr><td>Barème de transit</td><td>21 postes, <b>11 confirmés sur cotations réelles</b></td></tr>
+    <tr><td>Automatismes</td><td>3 moteurs horaires : cotation, tarification, enrichissement</td></tr>
+    <tr><td>Aperçus de partage</td><td>Titre et photo réels sur les messageries et réseaux sociaux</td></tr>
+    <tr><td>Référencement</td><td>38 pages à titre et description distincts, plan de site à 214 adresses</td></tr>
+  </table>
+
+  <h3>Construit, mais vide</h3>
+  <table class="t">
+    <tr><th style="width:52mm">Brique</th><th>Réalité mesurée</th></tr>
+    <tr><td>Commandes</td><td><b>0</b> — aucune commande passée à ce jour</td></tr>
+    <tr><td>Écritures comptables</td><td><b>0</b> — aucune vente à comptabiliser</td></tr>
+    <tr><td>Vendeurs marketplace</td><td><b>0</b> inscrit</td></tr>
+    <tr><td>Campagnes d'achat groupé</td><td><b>0</b> ouverte</td></tr>
+    <tr><td>Factures émises</td><td><b>0</b></td></tr>
+    <tr><td>Comptes clients</td><td><b>3</b></td></tr>
+    <tr><td>Classement tarifaire du catalogue</td><td><b>43</b> articles sur 233</td></tr>
+    <tr><td>Taux de fret chargés</td><td><b>3</b> liaisons, plus 17 repères de marché</td></tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Ce que cet inventaire dit vraiment</div>
+    <p style="margin-bottom:0">
+      La plateforme sait déjà faire plus de choses que l'entreprise n'en a jamais
+      vendu. <strong>Chaque brique nouvelle augmente l'écart entre ce qui est
+      possible et ce qui est prouvé.</strong> La première commande réellement
+      livrée, encaissée et comptabilisée apprendra davantage que la prochaine
+      fonctionnalité — et c'est le seul moyen d'être crédible devant un
+      partenaire, un financeur ou un vendeur qu'on veut recruter. « Nous savons
+      faire » ne vaut jamais « nous avons fait ».
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 25 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 25</p>
+  <h2 class="chapitre">Le métier et sa différence</h2>
+
+  <h3>Ce que nous faisons</h3>
+  <p>
+    Nous achetons à la source, nous groupons, nous dédouanons et nous livrons. Le
+    client ne voit qu'une chose : un prix, une date, et sa marchandise devant
+    lui.
+  </p>
+
+  <h3>La différence, et elle est réelle</h3>
+  <p>
+    À Abidjan, un commerçant qui veut importer traite avec trois personnes
+    différentes : celui qui trouve la marchandise, celui qui la transporte, celui
+    qui la dédouane. Chacun promet, aucun ne répond du tout.
+  </p>
+  <p>
+    Nous faisons les trois. Cela n'a rien de magique — c'est simplement que
+    <strong>le transit est notre métier d'origine, et que la vente vient s'y
+    greffer, plutôt que l'inverse.</strong> Une boutique en ligne qui découvre la
+    douane se casse les dents ; un transitaire qui ouvre une boutique connaît
+    déjà la partie difficile.
+  </p>
+
+  <h3>Trois choses que nos concurrents ne font pas</h3>
+  <table class="t">
+    <tr><th style="width:74mm">Notre pratique</th><th>Ce qui se fait ailleurs</th></tr>
+    <tr>
+      <td><b>Le fret non vérifié n'est pas affiché.</b> Si le transporteur n'a pas donné de prix, la fiche le dit et aucun paiement ne part</td>
+      <td>Un chiffre « à peu près », révisé à la hausse quand la marchandise est arrivée et que le client ne peut plus reculer</td>
+    </tr>
+    <tr>
+      <td><b>Aucun taux de douane inventé.</b> Sans position tarifaire, on donne une fourchette entre 0 % et 35 %</td>
+      <td>Le forfait « douane et transit ≈ 25 % », faux dans les deux sens, découvert au moment de payer</td>
+    </tr>
+    <tr>
+      <td><b>L'argent est retenu</b> jusqu'à ce que le client confirme avoir reçu</td>
+      <td>Paiement d'avance, sans recours</td>
+    </tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Pourquoi ces trois-là sont un actif, pas un handicap</div>
+    <p style="margin-bottom:0">
+      Elles coûtent des ventes à court terme : un client qui voit « fret à
+      confirmer » chez nous et « 15 000 F » chez le voisin part chez le voisin.
+      Mais il revient — parce que chez le voisin, la facture finale n'était pas
+      15 000 F. <strong>C'est un pari sur le deuxième achat</strong>, et sur le
+      bouche-à-oreille qui en découle. Sur un marché où tout le monde s'est déjà
+      fait avoir une fois, c'est le seul positionnement qui construit.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 26 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 26</p>
+  <h2 class="chapitre">Analyse du marché</h2>
+  <p class="accroche">
+    Les chiffres ci-dessous sont des relevés publics. Ils disent une chose : le
+    volume est là, il croît vite, et trois fenêtres réglementaires s'ouvrent en
+    même temps.
+  </p>
+
+  <h3>Le port d'Abidjan</h3>
+  <table class="t">
+    <tr><th>Indicateur</th><th class="n" style="width:26mm">2024</th><th class="n" style="width:26mm">2025</th><th class="n" style="width:22mm">Évolution</th></tr>
+    <tr><td>Tonnage total</td><td class="n">40,1 Mt</td><td class="n"><b>46,6 Mt</b></td><td class="n"><b>+16,1 %</b></td></tr>
+    <tr><td>Trafic national</td><td class="n">28,5 Mt</td><td class="n"><b>34,2 Mt</b></td><td class="n"><b>+19,8 %</b></td></tr>
+    <tr><td>Conteneurs</td><td class="n">—</td><td class="n"><b>1 697 131 EVP</b></td><td class="n">objectif 2 M en 2027</td></tr>
+  </table>
+
+  <h3>Trois fenêtres ouvertes en même temps</h3>
+  <table class="t">
+    <tr><th style="width:44mm">La fenêtre</th><th>Ce qu'elle change</th></tr>
+    <tr>
+      <td><b>APE Côte d'Ivoire – Union européenne</b><br><span class="petite">phase 4 en vigueur depuis le 1<sup>er</sup> janvier 2026</span></td>
+      <td>1 074 lignes tarifaires supplémentaires exonérées de droit de douane pour les produits originaires de l'Union. Démantèlement en cinq phases de 2019 à 2029</td>
+    </tr>
+    <tr>
+      <td><b>ZLECAf</b></td>
+      <td>La Tunisie délivre déjà des certificats d'origine nommément pour la Côte d'Ivoire. Le Maghreb devient une alternative à l'Asie : une semaine de mer contre quarante jours</td>
+    </tr>
+    <tr>
+      <td><b>La barrière à l'entrée du métier se durcit</b></td>
+      <td>La réforme au 1<sup>er</sup> janvier 2026 porte la caution du commissionnaire agréé à <b>50 millions</b> et le crédit d'enlèvement à <b>100 millions</b>. Un nouvel entrant doit immobiliser des dizaines de millions — <em>ce que l'adossement à un commissionnaire partenaire évite entièrement</em></td>
+    </tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">Ce que vaut une préférence d'origine, sur un seul dossier</div>
+    <p style="margin-bottom:0">
+      Sur une marchandise à 15 000 000 F FOB en groupage maritime depuis la
+      France, position à 20 % : la valeur en douane ressort à
+      <b>16 901 935 F</b>, le droit de douane à <b>3 380 387 F</b>, le total dû
+      au Trésor à <b>7 616 676 F</b>. Avec un certificat EUR.1 sur une ligne
+      couverte par la phase 4, <strong>le droit tombe à zéro</strong> : 3 380 387 F
+      économisés sur une seule expédition.
+      <br><em>La question commerciale n'est donc pas « combien facturons-nous »
+      mais « quelle fraction de ce gain restons-nous capables de capter ».</em>
+    </p>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Ce qui manque pour exploiter la première fenêtre</div>
+    <p style="margin-bottom:0">
+      La liste officielle des positions exonérées par phase de l'APE. La
+      plateforme sait qu'un régime APE existe, exige le certificat EUR.1 et
+      calcule l'écart de droit — mais <strong>elle ne peut pas dire si une
+      position donnée est dans la liste</strong>. Ce document se demande à la
+      Direction générale des douanes, bureau des régimes économiques. Il est
+      gratuit. C'est une démarche, pas un développement.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 27 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 27</p>
+  <h2 class="chapitre">À qui nous vendons</h2>
+  <p class="accroche">
+    Quatre clientèles, quatre besoins, quatre portes d'entrée. Elles ne se
+    travaillent pas de la même manière.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:34mm">Qui</th><th>Ce qu'il veut</th><th style="width:34mm">Par quelle porte</th><th>Ce qui le convainc</th></tr>
+    <tr><td><b>Le particulier d'Abidjan</b></td><td>Un article précis, à prix honnête, livré</td><td>Boutique</td><td>La garantie « payé, protégé » et un prix qui ne bouge pas</td></tr>
+    <tr><td><b>Le commerçant de marché</b></td><td>Du stock au prix de gros, sans aller en Chine</td><td>Espace Pro, achats groupés</td><td>La grille par quantité, et le fait qu'on dédouane</td></tr>
+    <tr><td><b>L'entreprise ivoirienne</b></td><td>Faire venir <em>sa</em> marchandise sans monter un service transit</td><td>Importer, conteneur, Le Déclarant</td><td>Un devis poste par poste, et savoir ce que la douane prendra</td></tr>
+    <tr><td><b>La diaspora</b></td><td>Envoyer ou recevoir vers la Côte d'Ivoire</td><td>Exporter, colis express</td><td>Un suivi visible et un correspondant qui répond à Abidjan</td></tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">La clientèle à travailler en premier <span class="m hyp">Hypothèse</span></div>
+    <p>
+      <strong>Le commerçant de marché.</strong> Il achète souvent, il achète en
+      quantité, et il parle à d'autres commerçants. Un particulier qui achète une
+      montre rapporte une fois ; un commerçant satisfait ramène son voisin
+      d'étal.
+    </p>
+    <p style="margin-bottom:0">
+      C'est aussi la clientèle pour qui notre différence compte le plus : il a
+      déjà perdu de l'argent sur un dédouanement mal chiffré, et il sait ce que
+      vaut un vrai prix annoncé d'avance.
+    </p>
+  </div>
+
+  <figure>
+    <img class="bandeau" src="../public/visuels/bureau-espace-pro.jpg" alt="Espace professionnel">
+    <figcaption>
+      L'Espace Pro compte 13 secteurs : quincaillerie et BTP, énergie solaire,
+      mobilier de bureau, hôtellerie et restauration, santé, sécurité,
+      informatique, agroalimentaire, automobile, décoration, emballage, hygiène,
+      cosmétique professionnelle.
+    </figcaption>
+  </figure>
+</div>
+
+<!-- ============================== CH. 28 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 28</p>
+  <h2 class="chapitre">La structure juridique</h2>
+  <p class="accroche">
+    C'est la décision qui commande toutes les autres : les moyens de paiement, la
+    facturation, le crédit, et la protection du patrimoine du fondateur.
+  </p>
+
+  <h3>La position réelle du fondateur</h3>
+  <p>
+    Demsy Landry est <strong>transitaire</strong>, responsable adjoint Aérien /
+    Dégroupage &amp; Express au sein d'une entreprise de transit à Abidjan.
+    <strong>Il n'est pas commissionnaire en douane agréé.</strong> Le montage
+    retenu : MayLary Group s'adosse à un commissionnaire agréé partenaire pour la
+    signature de la déclaration et l'acquittement des droits, et prend en charge
+    tout le reste de la chaîne.
+  </p>
+  <div class="encadre">
+    <div class="encadre-titre">La conséquence financière, et elle est majeure</div>
+    <p style="margin-bottom:0">
+      Devenir commissionnaire agréé suppose un capital entièrement libéré, une
+      caution et un crédit d'enlèvement bancaires — <b>50 millions</b> de caution
+      et <b>100 millions</b> de crédit d'enlèvement depuis la réforme du
+      1<sup>er</sup> janvier 2026. <strong>MayLary n'a besoin d'aucun des trois
+      pour démarrer, puisqu'elle s'adosse.</strong> L'agrément propre est un
+      objectif de long terme, financé par la croissance.
+    </p>
+  </div>
+
+  <h3>L'architecture recommandée : deux personnes morales</h3>
+  <div class="formule">        <b>MAYLARY GROUP</b>  (structure de tête)
+                 |
+    +------------+------------+
+    |                         |
+<b>Entité A — LE COMMERCE</b>    <b>Entité B — LA PRESTATION</b>
+Boutique, Espace Pro,       Transit, sourcing, cotation,
+marketplace, négoce         groupage, conseil, Le Déclarant
+pour compte propre.
+                            Ne possède pas la marchandise
+Qualité : commerçant.       des clients. S'adosse à un CAD
+Achète et revend en         aujourd'hui, candidate à son
+son nom.                    propre agrément demain.</div>
+
+  <h3>Trois raisons de séparer, même si la loi l'autorisait</h3>
+  <table class="t">
+    <tr><th style="width:34mm">La raison</th><th>Ce qu'elle évite</th></tr>
+    <tr>
+      <td><b>Le conflit d'intérêt</b></td>
+      <td>Quand MayLary vend une marchandise qu'elle possède, elle est vendeur. Quand elle traite le dossier d'un client, elle est mandataire. Mélangé dans une seule entité, le client ne sait plus si le prix de fret annoncé est celui d'un mandataire fidèle ou d'un fournisseur qui prend sa marge. <em>C'est le cœur de la promesse du projet — il ne faut pas l'abîmer</em></td>
+    </tr>
+    <tr>
+      <td><b>La responsabilité</b></td>
+      <td>Le commissionnaire en douane est solidairement responsable du paiement des droits. Cumuler cette responsabilité avec celle d'un commerçant sur ses propres stocks concentre deux risques lourds sur une seule structure</td>
+    </tr>
+    <tr>
+      <td><b>La comptabilité et la TVA</b></td>
+      <td>Ce ne sont pas les mêmes régimes. Chez le commerçant : TVA collectée sur la vente, marge taxable. Chez le prestataire de transit : TVA sur la prestation, et les <b>débours</b> — droits et taxes avancés pour le compte du client, refacturés à l'identique — ne sont pas du chiffre d'affaires. Les mélanger rend tout contrôle fiscal difficile et coûteux à défendre</td>
+    </tr>
+  </table>
+
+  <h3>La question de l'incompatibilité commerçant / transitaire</h3>
+  <p>
+    Le fondateur a soulevé ce point. Deux sources officielles ont été lues
+    directement sur le site de la Direction générale des douanes : les
+    <strong>douze conditions d'agrément</strong> du décret n° 90-663 du 22 août
+    1990, et le <strong>Code des douanes ivoirien, partie législative</strong>
+    (environ 533 000 caractères).
+  </p>
+  <ul>
+    <li>Aucune des douze conditions ne mentionne une incompatibilité avec la qualité de commerçant.</li>
+    <li>Dans le Code, les termes « transitaire », « commerçant » et « incompatib… » <strong>n'apparaissent pas une seule fois</strong>.</li>
+    <li>Ce que le Code dit, en revanche : le monopole porte sur <strong>un seul acte</strong> — signer la déclaration en détail pour le compte d'autrui. Tout le reste de ce que fait MayLary n'est pas réservé.</li>
+  </ul>
+  <div class="encadre alerte">
+    <div class="encadre-titre">Ce qui reste à vérifier, et où chercher</div>
+    <p style="margin-bottom:0">
+      Le Code renvoie explicitement les conditions d'agrément à
+      <strong>la réglementation communautaire UEMOA</strong>, qui n'a pas pu être
+      lue. S'il existe une incompatibilité, c'est là qu'elle se trouve, ou dans
+      le texte intégral du décret 90-663. <em>Aucune de ces questions ne bloque
+      le démarrage</em>, puisque MayLary ne demande pas l'agrément — elles
+      deviennent bloquantes le jour où le groupe demandera le sien, et c'est
+      justement pour ce jour-là qu'il faut avoir séparé les entités dès le
+      départ.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 29 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 29</p>
+  <h2 class="chapitre">Les sources de revenu</h2>
+  <p class="accroche">
+    Neuf sources, toutes construites. Elles ne sont pas au même stade de maturité
+    commerciale, et il faut le savoir avant de décider où mettre son énergie.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:52mm">Source</th><th class="n" style="width:28mm">Ce qu'on prend</th><th>État</th></tr>
+    <tr><td>Boutique — vente au détail</td><td class="n">40 %</td><td>Prête. 131 articles en ligne <span class="m mes">Mesuré</span></td></tr>
+    <tr><td>Espace Pro — vente en gros</td><td class="n">40 %</td><td>Prête. 102 articles, 13 secteurs <span class="m mes">Mesuré</span></td></tr>
+    <tr><td>Groupage colis</td><td class="n">30 %</td><td>Prêt. 152 articles en filière groupage</td></tr>
+    <tr><td>Honoraires de transit — aérien</td><td class="n">100 000 F</td><td>Confirmés sur cotations réelles</td></tr>
+    <tr><td>Honoraires de transit — conteneur</td><td class="n">500 000 F</td><td>Confirmés sur proforma réelle</td></tr>
+    <tr><td>Frais de service — par commande</td><td class="n">2 000 F</td><td>Prêts</td></tr>
+    <tr><td>Commission vendeurs</td><td class="n">10 %</td><td>Prête. <b>Zéro vendeur inscrit</b></td></tr>
+    <tr><td>Le Déclarant — abonnement</td><td class="n">—</td><td>Construit. <span class="m dec">Tarif à décider</span></td></tr>
+    <tr><td>Sourcing sur demande</td><td class="n">Marge sur l'offre</td><td>Prêt</td></tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">Le porte-à-porte ne rapporte rien, et c'est voulu</div>
+    <p style="margin-bottom:0">
+      Le transport porte-à-porte est refacturé <strong>au prix coûtant</strong>,
+      marge nulle <span class="m mes">Mesuré</span>. Ce n'est pas un oubli : c'est
+      ce qui rend nos prix comparables à ceux d'un site étranger, tout en livrant
+      à Abidjan. <em>La marge est prise sur la marchandise, pas sur le
+      transport.</em>
+    </p>
+  </div>
+
+  <h3>Trois sources dorment, et ce sont les meilleures</h3>
+  <table class="t">
+    <tr><th style="width:38mm">La source</th><th>Pourquoi elle mérite l'énergie</th></tr>
+    <tr>
+      <td><b>Le transit conteneur</b></td>
+      <td>La plus grosse des trois. Les honoraires sont confirmés à 500 000 F et les postes portuaires chiffrés. Ce qui manque : les écrans de cotation branchés sur le barème. Un dossier conteneur se traite aujourd'hui à la main</td>
+    </tr>
+    <tr>
+      <td><b>La commission vendeurs</b></td>
+      <td>Ne coûte rien à activer : ni stock, ni trésorerie, ni transport. Uniquement du démarchage. <strong>Le meilleur rapport effort / rendement de toute la liste</strong></td>
+    </tr>
+    <tr>
+      <td><b>Le Déclarant</b></td>
+      <td>Construit, sourcé, vérifié — et sans prix. La seule ligne qui ne dépend ni d'une marchandise ni d'un transport : <strong>la seule qui rentre pendant qu'un conteneur navigue</strong></td>
+    </tr>
+  </table>
+</div>
+
+<!-- ============================== CH. 30 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 30</p>
+  <h2 class="chapitre">Ce que rapporte une opération</h2>
+  <p class="accroche">
+    Le cœur du plan. Ces calculs sont exacts : ils sortent des formules
+    réellement appliquées, avec les réglages en vigueur au 29 août.
+  </p>
+
+  <div class="deux-col">
+    <div>
+      <h4>Une vente en boutique</h4>
+      <div class="formule">Prix d'achat     10 152 F
+  16,92 $ × 600 — montre KT58
+Prix de vente    14 213 F
+  × 1,40
+Frais de service  2 000 F
+                ─────────
+<b>Marge brute       6 061 F</b>
+                par vente</div>
+    </div>
+    <div>
+      <h4>Une vente d'un commerçant hébergé</h4>
+      <div class="formule">Commission    10 % du vendu
+Notre coût         0 F
+  ni achat, ni stock,
+  ni avance
+                ─────────
+Sur 100 000 F vendus :
+<b>10 000 F pour nous</b>,
+sans sortir un franc.</div>
+    </div>
+  </div>
+
+  <div class="deux-col">
+    <div>
+      <h4>Un dossier d'import aérien</h4>
+      <div class="formule">Honoraires     100 000 F
+Passage douane 150 000 F
+Tirage décl.    70 000 F
+FDI et RFCV     50 000 F
+Retrait doc.    30 000 F
+Taxe SYDAM      23 350 F
+Apurement D3    20 000 F
+Agio            10 000 F
+              ─────────
+<b>Total postes   453 350 F</b>
+dont <b>100 000 F</b> d'honoraires
+nets pour la maison</div>
+    </div>
+    <div>
+      <h4>Un dossier conteneur complet</h4>
+      <div class="formule">Honoraires     500 000 F
+Échange B/L    555 359 F
+Acconage       250 774 F
+Passage douane 150 000 F
+Tirage décl.    70 000 F
+FDI et RFCV     50 000 F
+Taxe SYDAM      23 350 F
+Apurement D3    20 000 F
+Agio            10 000 F
+              ─────────
+<b>Total postes 1 629 483 F</b>
+dont <b>500 000 F</b> d'honoraires
+nets pour la maison</div>
+    </div>
+  </div>
+  <p class="petite">
+    Les postes autres que les honoraires sont des débours ou des prestations de
+    tiers, refacturés. Seuls les honoraires constituent le revenu de la maison.
+    <span class="m mes">Mesuré</span> — barème relevé en base le 29 août 2026.
+  </p>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Ce que ces chiffres disent</div>
+    <p>
+      <strong>Un dossier conteneur vaut 82 ventes de montre.</strong> Un dossier
+      aérien en vaut 16. C'est l'information la plus importante de ce plan.
+    </p>
+    <p style="margin-bottom:0">
+      Un conteneur mobilise à peu près le même travail administratif qu'un colis,
+      pour une valeur de marchandise cinquante fois supérieure.
+      <strong>La boutique fait le volume et la notoriété ; le transit fait le
+      résultat.</strong>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 31 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 31</p>
+  <h2 class="chapitre">Les dépenses : engagées et à venir</h2>
+  <p class="accroche">
+    C'est la feuille de route financière. Elle sépare ce qui est déjà sorti de la
+    poche, ce qui doit sortir maintenant, ce qui sortira quand l'activité le
+    justifiera, et ce qui reste conditionnel.
+  </p>
+
+  <h3>1 — Ce qui a déjà été engagé</h3>
+  <table class="t">
+    <tr><th style="width:56mm">Poste</th><th class="n" style="width:30mm">Montant</th><th>Nature</th></tr>
+    <tr><td>Nom de domaine <b>maylarygroup.ci</b></td><td class="n"><span class="m conf">À confirmer</span></td><td>Annuel. Le seul poste réellement décaissé à ce jour</td></tr>
+    <tr><td>Crédits d'intelligence artificielle — Le Déclarant</td><td class="n"><span class="m conf">À confirmer</span></td><td>Rechargés après épuisement le 14 août</td></tr>
+    <tr><td>Hébergement du site</td><td class="n"><b>0 F</b></td><td>Formule gratuite jusqu'ici <span class="m mes">Mesuré</span></td></tr>
+    <tr><td>Base de données</td><td class="n"><b>0 F</b></td><td>Formule gratuite jusqu'ici <span class="m mes">Mesuré</span></td></tr>
+    <tr><td>Envoi des courriels</td><td class="n"><b>0 F</b></td><td>Formule gratuite, jusqu'à 300 par jour</td></tr>
+    <tr><td>Compte fournisseur</td><td class="n"><b>0 F</b></td><td>Gratuit</td></tr>
+    <tr><td>Développement de la plateforme</td><td class="n">non monétisé</td><td>109 tables, 38 fonctions serveur, 233 articles</td></tr>
+    <tr><td>Téléphone, connexion, déplacements</td><td class="n"><span class="m conf">À confirmer</span></td><td>Dépenses courantes déjà supportées par le fondateur</td></tr>
+  </table>
+  <div class="encadre alerte">
+    <div class="encadre-titre">Ce tableau attend vos chiffres</div>
+    <p style="margin-bottom:0">
+      Les lignes marquées <span class="m conf">À confirmer</span> sont des
+      montants que <strong>vous seul connaissez</strong> : je ne les invente pas.
+      Donnez-les-moi au fil de la plume, et ce tableau devient le point de départ
+      exact de votre comptabilité — les frais engagés avant l'immatriculation
+      peuvent être repris par la société une fois créée, à condition d'en avoir
+      gardé la trace et les justificatifs.
+    </p>
+  </div>
+
+  <h3>2 — À engager maintenant : la plateforme en version professionnelle</h3>
+  <p>
+    Décision prise : on garde l'hébergeur et la base de données actuels, et on
+    passe sur les formules payantes. Les tarifs ci-dessous sont les tarifs
+    publics constatés, convertis au taux de la plateforme (600 F / $).
+  </p>
+  <table class="t">
+    <tr><th style="width:40mm">Poste</th><th class="n" style="width:24mm">En dollars</th><th class="n" style="width:26mm">En francs</th><th>Ce qui est inclus</th></tr>
+    <tr>
+      <td><b>Hébergement du site</b><br><span class="petite">formule professionnelle</span></td>
+      <td class="n">20 $ / mois<br><span class="petite">par siège</span></td>
+      <td class="n"><b>12 000 F</b></td>
+      <td>1 To de bande passante, 10 millions de requêtes en périphérie, et 20 $ de crédit d'usage inclus. Au-delà : 0,15 $ le gigaoctet</td>
+    </tr>
+    <tr>
+      <td><b>Base de données</b><br><span class="petite">formule professionnelle</span></td>
+      <td class="n">25 $ / mois</td>
+      <td class="n"><b>15 000 F</b></td>
+      <td>10 $ de crédit de calcul, 100 Go de stockage, 2 millions d'appels de fonctions serveur, 50 000 utilisateurs actifs, sauvegardes</td>
+    </tr>
+    <tr class="total"><td>Total plateforme</td><td class="n">45 $ / mois</td><td class="n">27 000 F / mois</td><td>Soit <b>324 000 F par an</b></td></tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">Pourquoi passer en version payante avant de vendre</div>
+    <ul style="margin-bottom:0">
+      <li><strong>La formule gratuite met le projet en pause après inactivité.</strong> C'est déjà arrivé : le site n'a plus pu être déployé, sans aucun message d'erreur exploitable. Un client qui tombe sur un site en panne ne revient pas.</li>
+      <li><strong>Les sauvegardes.</strong> La formule gratuite n'en garantit pas. Une base qui porte la comptabilité et les dossiers clients ne peut pas rester sans filet.</li>
+      <li><strong>La formule gratuite ne tient pas une campagne publicitaire.</strong> Le jour où le trafic arrive, ce n'est pas le moment de découvrir la limite.</li>
+    </ul>
+  </div>
+
+  <h3>3 — À engager : l'existence légale</h3>
+  <table class="t">
+    <tr><th style="width:56mm">Poste</th><th class="n" style="width:30mm">Montant</th><th>Remarque</th></tr>
+    <tr><td>Immatriculation au guichet unique (CEPICI)</td><td class="n">42 000 F <span class="m conf">À confirmer</span></td><td>Relevé au tarif public 2026, capital ≤ 10 M. À vérifier au guichet</td></tr>
+    <tr><td>Registre du Commerce (RCCM)</td><td class="n">10 000 F <span class="m conf">À confirmer</span></td><td>Idem</td></tr>
+    <tr><td>Frais de notaire (statuts)</td><td class="n"><span class="m conf">À chiffrer</span></td><td>Dépend de la forme et du capital</td></tr>
+    <tr><td>Dépôt du capital social</td><td class="n"><span class="m dec">À décider</span></td><td>Sur compte bloqué jusqu'à l'immatriculation</td></tr>
+    <tr><td>Déclaration fiscale d'existence</td><td class="n"><span class="m conf">À confirmer</span></td><td>Numéro de compte contribuable</td></tr>
+    <tr><td>Déclaration CNPS</td><td class="n"><span class="m conf">À confirmer</span></td><td>Même sans salarié, le gérant relève d'un régime</td></tr>
+    <tr><td>Déclaration ARTCI — données personnelles</td><td class="n"><span class="m conf">À confirmer</span></td><td><b>Obligatoire</b>, et déjà annoncée dans la politique publiée</td></tr>
+    <tr><td>Ouverture du compte bancaire professionnel</td><td class="n"><span class="m conf">À confirmer</span></td><td>Porte d'entrée de tous les moyens de paiement</td></tr>
+  </table>
+  <p class="petite">
+    <strong>Aucun de ces montants n'est garanti par moi.</strong> Les tarifs et
+    délais changent ; ils se vérifient au guichet unique du CEPICI, qui
+    centralise l'ensemble des formalités. Notez-les et reportez-les ici.
+  </p>
+</div>
+
+<!-- ============================== CH. 31 suite ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 31 — suite</p>
+  <h2 class="chapitre">Les dépenses : la suite du calendrier</h2>
+
+  <h3>4 — À engager : l'exploitation courante</h3>
+  <table class="t">
+    <tr><th style="width:50mm">Poste</th><th class="n" style="width:32mm">Ordre de grandeur</th><th>Se déclenche quand</th></tr>
+    <tr><td>Expert-comptable</td><td class="n"><span class="m conf">À chiffrer</span></td><td><b>Dès l'immatriculation.</b> Pas un luxe : une obligation de fait dès qu'on tient une comptabilité commerciale. Le coût est modeste comparé à un redressement</td></tr>
+    <tr><td>Assurance responsabilité civile professionnelle</td><td class="n"><span class="m conf">À chiffrer</span></td><td><b>Avant le premier dossier.</b> Vous manipulez la marchandise d'autrui</td></tr>
+    <tr><td>Commission des moyens de paiement</td><td class="n">% par transaction <span class="m conf">À confirmer</span></td><td>Dès la première vente. Voir chapitre 34</td></tr>
+    <tr><td>Suivi des colis — service d'agrégation</td><td class="n">à l'usage</td><td>Au-delà d'une dizaine d'envois par mois. Tenable à dix commandes à la main, pas à cent</td></tr>
+    <tr><td>Crédits d'intelligence artificielle</td><td class="n">à l'usage</td><td>Proportionnel aux classements assistés demandés</td></tr>
+    <tr><td>Numéro WhatsApp Business</td><td class="n">gratuit à faible</td><td>Dès le premier client. Le canal de service n'existe pas encore</td></tr>
+    <tr><td>Téléphone et connexion</td><td class="n"><span class="m conf">À confirmer</span></td><td>Déjà supporté par le fondateur</td></tr>
+    <tr><td>Transport local, carburant</td><td class="n">variable</td><td>Par dossier, refacturable au client</td></tr>
+    <tr><td>Impôts et taxes</td><td class="n">selon régime</td><td>Dès l'immatriculation. À arbitrer avec le comptable</td></tr>
+  </table>
+
+  <h3>5 — Conditionnel, sur décision</h3>
+  <table class="t">
+    <tr><th style="width:50mm">Poste</th><th class="n" style="width:32mm">Montant</th><th>Condition</th></tr>
+    <tr><td>Publicité payante</td><td class="n"><span class="m dec">À décider</span></td><td><b>Pas avant le mois 3</b>, et pas avant cinq dossiers livrés. Voir chapitre 36</td></tr>
+    <tr><td>Deuxième source d'approvisionnement</td><td class="n"><span class="m dec">À décider</span></td><td>Un connecteur est écrit et inerte, en attente d'identifiants. Tout le catalogue tient aujourd'hui sur une seule source</td></tr>
+    <tr><td>Fonds de roulement marchandise</td><td class="n"><span class="m dec">À décider</span></td><td><strong>C'est le vrai coût du projet.</strong> Il fixe la taille des dossiers accessibles. Voir chapitre 37</td></tr>
+    <tr><td>Agrément de commissionnaire en douane</td><td class="n">150 M+ immobilisés</td><td>Objectif de long terme. Non nécessaire au démarrage</td></tr>
+  </table>
+
+  <h3>Récapitulatif — ce qu'il faut sortir, et quand</h3>
+  <table class="t">
+    <tr><th>Moment</th><th style="width:56mm">Ce qu'on paie</th><th class="n" style="width:32mm">Montant</th></tr>
+    <tr><td><b>Immédiatement</b></td><td>Plateforme en version professionnelle</td><td class="n"><b>27 000 F / mois</b></td></tr>
+    <tr><td><b>Avant d'encaisser</b></td><td>Formalités de création, notaire, capital</td><td class="n"><span class="m conf">À chiffrer au CEPICI</span></td></tr>
+    <tr><td><b>Dès l'immatriculation</b></td><td>Comptable, assurance RC professionnelle</td><td class="n"><span class="m conf">À chiffrer</span></td></tr>
+    <tr><td><b>Dès la première vente</b></td><td>Commissions de paiement</td><td class="n">% du encaissé</td></tr>
+    <tr><td><b>Au-delà de 10 envois / mois</b></td><td>Suivi des colis</td><td class="n">à l'usage</td></tr>
+    <tr><td><b>Mois 3 au plus tôt</b></td><td>Publicité</td><td class="n"><span class="m dec">À décider</span></td></tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Ce que ce chapitre démontre</div>
+    <p>
+      <strong>Le coût technologique est dérisoire : 27 000 F par mois pour toute
+      la plateforme.</strong> C'est moins qu'une journée de marge sur un seul
+      dossier d'import aérien.
+    </p>
+    <p style="margin-bottom:0">
+      Le vrai coût du projet n'est pas le logiciel. C'est
+      <strong>la structure juridique</strong> — sans laquelle rien ne s'encaisse
+      — et <strong>le fonds de roulement marchandise</strong>, qui décide de la
+      taille des clients que vous pouvez accepter. Tout le reste se paie au fur
+      et à mesure que l'activité le rend nécessaire : aucune de ces charges ne se
+      paie avant d'avoir servi.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 32 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 32</p>
+  <h2 class="chapitre">Le point mort</h2>
+  <p class="accroche">
+    Combien faut-il vendre pour couvrir les charges ? Avec une structure sans
+    mur, la réponse tient en une ligne.
+  </p>
+
+  <div class="formule">Point mort = charges fixes ÷ marge par opération
+
+Charges fixes après passage en version pro :  <b>27 000 F / mois</b>
+Marge d'une vente boutique :                   <b>6 061 F</b>
+Honoraires d'un dossier d'import aérien :    <b>100 000 F</b>
+                                            ─────────
+<b>UN SEUL DOSSIER D'IMPORT couvre près de quatre mois de charges.</b>
+<b>CINQ VENTES BOUTIQUE couvrent le mois.</b></div>
+
+  <div class="encadre">
+    <div class="encadre-titre">Le vrai point mort n'est pas comptable</div>
+    <p>
+      Avec 27 000 F de charges, la question « combien pour être rentable ? » n'a
+      pas grand sens : la maison est rentable dès la première vente.
+    </p>
+    <p style="margin-bottom:0">
+      <strong>La bonne question est : combien pour que ça vaille votre
+      temps ?</strong> C'est vous qui la fixez, pas la comptabilité.
+    </p>
+  </div>
+
+  <h3>Ce qu'il faut pour atteindre un objectif de revenu</h3>
+  <table class="t">
+    <tr><th>Objectif mensuel net</th><th class="n" style="width:32mm">Dossiers aériens</th><th class="n" style="width:32mm">Ou ventes boutique</th><th class="n" style="width:30mm">Ou conteneurs</th></tr>
+    <tr><td>250 000 F</td><td class="n">3</td><td class="n">46</td><td class="n">1</td></tr>
+    <tr><td>500 000 F</td><td class="n">6</td><td class="n">87</td><td class="n">1 à 2</td></tr>
+    <tr><td>1 000 000 F</td><td class="n">11</td><td class="n">170</td><td class="n">2 à 3</td></tr>
+    <tr><td>2 000 000 F</td><td class="n">21</td><td class="n">334</td><td class="n">4 à 5</td></tr>
+  </table>
+  <p class="petite">
+    Base : 100 000 F d'honoraires par dossier aérien, 500 000 F par conteneur,
+    6 061 F de marge par vente boutique, moins 27 000 F de charges mensuelles.
+    <span class="m mes">Mesuré</span> pour les valeurs unitaires,
+    <span class="m hyp">Hypothèse</span> pour le mélange.
+  </p>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Lisez la colonne de droite</div>
+    <p style="margin-bottom:0">
+      <strong>Un à deux conteneurs par mois valent 500 000 F.</strong> Le même
+      résultat par la boutique seule demande 87 ventes, soit près de trois par
+      jour, tous les jours. Ce n'est pas impossible, mais c'est un autre métier
+      et un autre rythme. <em>Le transit conteneur est la priorité commerciale
+      numéro un — et c'est aussi le seul service dont les écrans de cotation ne
+      sont pas encore branchés sur le barème. Il y a là une urgence.</em>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 33 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 33</p>
+  <h2 class="chapitre">Créer l'entreprise</h2>
+  <p class="accroche">
+    Rien de ce qui précède ne peut s'encaisser tant que l'entreprise n'existe pas
+    légalement. C'est le préalable absolu.
+  </p>
+
+  <h3>Étape 1 — Choisir la forme juridique</h3>
+  <table class="t">
+    <tr><th style="width:34mm">Forme</th><th>Ce que ça implique</th><th style="width:44mm">Pour qui</th></tr>
+    <tr><td><b>Entreprise individuelle</b></td><td>Pas de personne morale distincte. Le patrimoine personnel du fondateur répond des dettes</td><td>Le plus simple et le moins cher, mais le patrimoine personnel n'est pas protégé</td></tr>
+    <tr><td><b>SARL unipersonnelle</b></td><td>Personne morale. Responsabilité limitée aux apports. Un seul associé</td><td><b>Le choix naturel ici</b> : le fondateur reste seul maître, et son patrimoine est séparé</td></tr>
+    <tr><td><b>SAS unipersonnelle</b></td><td>Personne morale, statuts très souples, plus facile à ouvrir à des investisseurs</td><td>Si vous envisagez de faire entrer un associé ou un investisseur</td></tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Pourquoi une personne morale, et pas l'entreprise individuelle</div>
+    <p style="margin-bottom:0">
+      Le transit fait manipuler l'argent des clients — droits de douane, fret,
+      marchandise. <strong>Un incident sur un dossier peut porter sur des
+      millions.</strong> En entreprise individuelle, ce risque touche directement
+      vos biens personnels. Une SARLU ou une SASU pose un mur entre l'entreprise
+      et vous. Pour une activité qui avance des fonds, ce mur n'est pas un luxe.
+    </p>
+  </div>
+
+  <h3>Étape 2 — Les formalités, dans l'ordre</h3>
+  <div class="etapes">
+    <div class="etape"><div class="no">1</div><div class="txt"><b>Réserver la dénomination sociale</b>Vérifier que « MayLary Group » ou « Dems'Inc » est disponible, et le réserver. Le nom commercial peut différer de la raison sociale.</div></div>
+    <div class="etape"><div class="no">2</div><div class="txt"><b>Rédiger et faire enregistrer les statuts</b>Objet social, capital, gérance. Faites figurer dans l'objet : <em>commission de transport, transit, import-export, commerce électronique, vente en gros et au détail</em>. Un objet trop étroit vous obligerait à le modifier plus tard.</div></div>
+    <div class="etape"><div class="no">3</div><div class="txt"><b>Déposer le capital social</b>Sur un compte bloqué jusqu'à l'immatriculation.</div></div>
+    <div class="etape"><div class="no">4</div><div class="txt"><b>Immatriculer au RCCM</b>C'est le document que tout le monde vous demandera : la banque, les agrégateurs de paiement, les compagnies maritimes, vos clients entreprises.</div></div>
+    <div class="etape"><div class="no">5</div><div class="txt"><b>Obtenir le numéro de compte contribuable</b>Déclaration fiscale d'existence auprès de la Direction générale des impôts. Sans lui, vous ne pouvez pas facturer légalement.</div></div>
+    <div class="etape"><div class="no">6</div><div class="txt"><b>Déclarer à la CNPS</b>Même sans salarié, le gérant relève d'un régime.</div></div>
+    <div class="etape"><div class="no">7</div><div class="txt"><b>Déclarer à l'ARTCI</b>Traitement de données personnelles. <strong>Obligatoire</strong>, et déjà annoncé dans la politique publiée sur le site.</div></div>
+    <div class="etape"><div class="no">8</div><div class="txt"><b>Ouvrir le compte bancaire professionnel</b>Au nom de l'entreprise, avec le RCCM et le numéro de contribuable. C'est la porte d'entrée de tous les moyens de paiement.</div></div>
+  </div>
+
+  <h3>Étape 3 — Le régime fiscal</h3>
+  <p>
+    La facturation de la plateforme est aujourd'hui réglée sur
+    <strong>« non assujetti à la TVA »</strong> <span class="m mes">Mesuré</span>.
+    C'est cohérent avec un régime simplifié de début d'activité, mais cela devra
+    être revu : le régime dépend du chiffre d'affaires prévisionnel, à arbitrer
+    avec un comptable. Si vous devenez assujetti, il faudra modifier le réglage
+    et faire porter la TVA sur les factures — sachant qu'un assujetti
+    <em>récupère</em> la TVA sur ses achats professionnels, ce qui peut être
+    avantageux sur du transit.
+  </p>
+
+  <div class="encadre">
+    <div class="encadre-titre">Ce qu'il vous faut aussi, et qui n'est pas dans les formalités</div>
+    <ul style="margin-bottom:0">
+      <li><strong>Un comptable</strong>, dès l'immatriculation, avec une consigne précise : séparer les débours du chiffre d'affaires dès le départ.</li>
+      <li><strong>Une convention écrite avec le commissionnaire en douane agréé</strong> : périmètre, rétrocession, responsabilités, exclusivité éventuelle. Vous travaillez déjà avec un ; formalisez la relation, puisque ses honoraires figurent dans vos devis.</li>
+      <li><strong>Une police de responsabilité civile professionnelle.</strong> Vous manipulez la marchandise d'autrui.</li>
+    </ul>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Une question à régler avant toute immatriculation</div>
+    <p style="margin-bottom:0">
+      Le fondateur est salarié d'une entreprise de transit. Il crée une structure
+      qui exerce, en partie, le même métier. <strong>Le contrat de travail
+      contient-il une clause d'exclusivité, de non-concurrence, ou une obligation
+      de loyauté renforcée ?</strong> Une déclaration à l'employeur est-elle
+      requise ? Et surtout — <em>le partenariat avec un commissionnaire agréé
+      peut-il être conclu avec l'employeur actuel ?</em> Un employeur qui devient
+      partenaire et apporteur d'agrément neutralise le risque juridique et
+      apporte la crédibilité. C'est peut-être la meilleure porte de sortie.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 34 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 34</p>
+  <h2 class="chapitre">Encaisser</h2>
+  <p class="accroche">
+    C'est le blocage le plus concret aujourd'hui. Aucun moyen de paiement
+    professionnel ne s'ouvre sans les documents du chapitre précédent.
+  </p>
+
+  <table class="t">
+    <tr><th style="width:44mm">Moyen</th><th>Ce qu'il faut fournir</th><th style="width:34mm">Ce qu'il coûte</th></tr>
+    <tr><td><b>Mobile Money personnel</b><br><span class="petite">ce qui est en place</span></td><td>Rien — c'est un compte de particulier</td><td>Frais de retrait</td></tr>
+    <tr><td><b>Orange Money Marchand</b></td><td>RCCM, numéro de contribuable, pièce du gérant, compte bancaire</td><td>Commission par transaction <span class="m conf">À confirmer</span></td></tr>
+    <tr><td><b>Wave Business</b></td><td>RCCM, numéro de contribuable, pièce du gérant</td><td>Commission par transaction <span class="m conf">À confirmer</span></td></tr>
+    <tr><td><b>Agrégateur de paiement</b></td><td>RCCM, contribuable, compte bancaire, site conforme</td><td>Commission par transaction <span class="m conf">À confirmer</span></td></tr>
+    <tr><td><b>Virement bancaire</b></td><td>Compte professionnel</td><td>Frais fixes par opération</td></tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Pourquoi le Mobile Money personnel ne peut pas durer</div>
+    <p>
+      C'est ce qui est en place aujourd'hui : les coordonnées de paiement de la
+      plateforme portent un numéro personnel au nom du fondateur
+      <span class="m mes">Mesuré</span>.
+    </p>
+    <ul style="margin-bottom:0">
+      <li><strong>Un client entreprise ne paiera pas sur un compte personnel</strong> — il lui faut une facture et un virement traçable.</li>
+      <li><strong>Les plafonds d'un compte particulier</strong> sont vite atteints sur un dossier de transit.</li>
+      <li><strong>Comptablement</strong>, mélanger l'argent de l'entreprise et le vôtre rend toute déclaration impossible à tenir.</li>
+    </ul>
+  </div>
+
+  <div class="encadre">
+    <div class="encadre-titre">L'ordre à suivre</div>
+    <p style="margin-bottom:0">
+      <strong>L'agrégateur de paiement est le plus intéressant :</strong> il
+      branche plusieurs moyens à la fois — Orange Money, MTN, Moov, Wave, carte
+      bancaire — avec un seul contrat et un seul raccordement à la plateforme.
+      Commencez par lui, et gardez le virement bancaire pour les gros dossiers de
+      transit.
+    </p>
+  </div>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Le sujet réglementaire à traiter en même temps</div>
+    <p style="margin-bottom:0">
+      La garantie « payé, protégé » retient l'argent d'un acheteur jusqu'à
+      confirmation, puis le reverse à un vendeur tiers. C'est du
+      <strong>séquestre</strong>, donc de l'intermédiation en paiement — activité
+      réglementée par la BCEAO. Trois questions à poser en même temps que
+      l'ouverture des moyens de paiement : <em>un statut est-il nécessaire ? Le
+      passage par un opérateur agréé avec compte de cantonnement suffit-il ?
+      Faut-il un compte séquestre distinct du compte d'exploitation ?</em>
+      Mal traité : gel d'activité. Bien traité : un argument commercial fort, car
+      peu d'acteurs locaux le font proprement.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 35 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 35</p>
+  <h2 class="chapitre">La montée en charge</h2>
+  <div class="encadre">
+    <div class="encadre-titre"><span class="m hyp">Hypothèse</span> — lisez la forme, pas les montants</div>
+    <p style="margin-bottom:0">
+      Ces volumes ne reposent sur rien d'observé. Ils montrent la <em>forme</em>
+      de la montée, pas son montant. Corrigez-les avec ce que vous savez du
+      terrain — c'est le seul tableau du dossier que vous devez réécrire.
+    </p>
+  </div>
+
+  <table class="t">
+    <tr><th>Mois</th><th class="n" style="width:20mm">Ventes</th><th class="n" style="width:22mm">Dossiers</th><th class="n" style="width:24mm">Conteneurs</th><th class="n" style="width:22mm">Vendeurs</th><th class="n" style="width:28mm">Marge brute</th></tr>
+    <tr><td>1 — formalités et essais</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0 F</td></tr>
+    <tr><td>2 — premiers clients du carnet</td><td class="n">5</td><td class="n">1</td><td class="n">0</td><td class="n">0</td><td class="n">130 000 F</td></tr>
+    <tr><td>3 — bouche-à-oreille</td><td class="n">15</td><td class="n">2</td><td class="n">0</td><td class="n">1</td><td class="n">321 000 F</td></tr>
+    <tr><td>4 — premier conteneur</td><td class="n">25</td><td class="n">3</td><td class="n">1</td><td class="n">2</td><td class="n">1 012 000 F</td></tr>
+    <tr><td>5</td><td class="n">40</td><td class="n">4</td><td class="n">1</td><td class="n">3</td><td class="n">1 232 000 F</td></tr>
+    <tr><td>6</td><td class="n">60</td><td class="n">5</td><td class="n">2</td><td class="n">4</td><td class="n">1 984 000 F</td></tr>
+    <tr><td>9</td><td class="n">100</td><td class="n">7</td><td class="n">3</td><td class="n">8</td><td class="n">3 046 000 F</td></tr>
+    <tr class="total"><td>12</td><td class="n">150</td><td class="n">10</td><td class="n">4</td><td class="n">15</td><td class="n">4 359 000 F</td></tr>
+  </table>
+  <p class="petite">
+    Base de calcul : 6 061 F par vente boutique, 100 000 F par dossier aérien,
+    500 000 F par conteneur, 30 000 F de commission par vendeur actif et par
+    mois. Ces quatre valeurs unitaires sont mesurées ; seuls les volumes sont
+    supposés.
+  </p>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Ce que ce tableau montre vraiment</div>
+    <p>
+      <strong>Suivez la colonne « conteneurs ».</strong> Elle passe de 0 à 4 en
+      un an, et à elle seule elle apporte <strong>2 000 000 F au douzième
+      mois</strong> — soit deux fois plus que les 150 ventes de la boutique.
+    </p>
+    <p style="margin-bottom:0">
+      Le résultat de cette maison se joue sur le transit, pas sur le nombre
+      d'articles vendus. Le catalogue amène les clients ; les conteneurs paient.
+    </p>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le mois 1 est à zéro, et c'est normal</div>
+    <p style="margin-bottom:0">
+      Les formalités de création prennent du temps, et rien ne peut s'encaisser
+      proprement avant. <strong>Prévoyez ce mois blanc plutôt que de le
+      subir</strong> : c'est le moment de passer vos cinq premières commandes
+      vous-même, de bout en bout, pour éprouver la chaîne avant qu'un client la
+      découvre.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 36 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 36</p>
+  <h2 class="chapitre">Le marketing</h2>
+  <p class="accroche">
+    Sans budget publicitaire, la seule stratégie viable est celle de la preuve.
+    Elle est plus lente, et beaucoup plus solide.
+  </p>
+
+  <h3>Ce qui ne marche pas, et pourquoi</h3>
+  <p>
+    Payer de la publicité avant d'avoir livré cinq clients revient à acheter du
+    trafic vers une maison qui ne sait pas encore recevoir. Le visiteur arrive,
+    ne trouve pas d'avis, ne connaît personne qui a commandé, et repart. Vous
+    aurez payé pour rien.
+  </p>
+
+  <h3>Les six leviers, dans l'ordre où les activer</h3>
+  <table class="t">
+    <tr><th class="c" style="width:10mm">#</th><th style="width:56mm">Levier</th><th class="n" style="width:24mm">Ce qu'il coûte</th><th>Quand</th></tr>
+    <tr><td class="c">1</td><td><b>Votre carnet d'adresses</b><br><span class="petite">commerçants d'Adjamé, Treichville, Yopougon</span></td><td class="n">Du temps</td><td>Immédiatement</td></tr>
+    <tr><td class="c">2</td><td><b>Les dossiers publiés</b><br><span class="petite">ce que le client a payé, ce qu'il a reçu, en combien de temps</span></td><td class="n">Rien</td><td>Dès le 3<sup>e</sup> dossier livré</td></tr>
+    <tr><td class="c">3</td><td><b>WhatsApp</b><br><span class="petite">catalogue partagé, groupes de commerçants</span></td><td class="n">Rien</td><td>Dès le mois 2 — les aperçus de partage sont en place</td></tr>
+    <tr><td class="c">4</td><td><b>Le référencement</b><br><span class="petite">214 adresses au plan de site, 38 pages à titre distinct</span></td><td class="n">Rien</td><td>Déjà actif, effet à 3-6 mois</td></tr>
+    <tr><td class="c">5</td><td><b>Le Déclarant comme produit d'appel</b></td><td class="n">Rien</td><td>Dès le tarif fixé</td></tr>
+    <tr><td class="c">6</td><td><b>Publicité payante</b></td><td class="n"><span class="m dec">À décider</span></td><td>Pas avant le mois 3</td></tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Le Déclarant est votre meilleure porte d'entrée</div>
+    <p style="margin-bottom:0">
+      Un importateur qui cherche « combien la douane va me prendre sur un
+      conteneur de carrelage » trouve un outil qui lui donne une réponse chiffrée
+      et honnête — et depuis le 29 août, <em>sourcée</em>. Il ne cherchait pas un
+      transitaire : il en trouve un, et il constate au passage que celui-là ne
+      bluffe pas sur les chiffres. <strong>C'est du marketing qui ne ressemble
+      pas à du marketing</strong>, et sur ce marché c'est exactement ce qui
+      fonctionne.
+    </p>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">La règle des 90 jours</div>
+    <p style="margin-bottom:0">
+      Ne dépensez pas un franc en publicité avant le mois 3. D'ici là, tout se
+      joue sur votre carnet d'adresses et sur la qualité des cinq premiers
+      dossiers. <strong>Un dossier raté au mois 1 se raconte plus vite que dix
+      réussis au mois 6.</strong>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 37 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 37</p>
+  <h2 class="chapitre">Financement et trésorerie</h2>
+  <p class="accroche">
+    Une maison de transit ne meurt pas d'un manque de clients. Elle meurt d'avoir
+    avancé de l'argent qu'elle n'a pas récupéré à temps.
+  </p>
+
+  <h3>Le décalage, en clair</h3>
+  <div class="etapes">
+    <div class="etape"><div class="no">1</div><div class="txt"><b>Le client paie</b>L'argent entre. Il est retenu au titre de la garantie.</div></div>
+    <div class="etape"><div class="no">2</div><div class="txt"><b>Nous payons le fournisseur</b>L'argent sort, immédiatement.</div></div>
+    <div class="etape"><div class="no">3</div><div class="txt"><b>La marchandise voyage</b>Deux à six semaines. Rien ne rentre.</div></div>
+    <div class="etape"><div class="no">4</div><div class="txt"><b>Nous payons droits et frais de port</b>L'argent sort encore, et ce sont les gros montants.</div></div>
+    <div class="etape"><div class="no">5</div><div class="txt"><b>Le client confirme la livraison</b>Seulement là, la marge est acquise.</div></div>
+  </div>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">La règle de sécurité</div>
+    <p style="margin-bottom:0">
+      <strong>Ne prenez jamais un dossier dont l'avance dépasse la moitié de
+      votre réserve.</strong> Un incident sur ce dossier — un retard, un
+      redressement de valeur, une surestarie — doit rester absorbable sans
+      bloquer tous les autres.
+    </p>
+  </div>
+
+  <h3>L'autofinancement : la règle des trois tiers</h3>
+  <table class="t">
+    <tr><th class="c" style="width:16mm">Part</th><th style="width:44mm">Destination</th><th>Pourquoi</th></tr>
+    <tr><td class="c"><b>1/3</b></td><td>Réserve de trésorerie</td><td>Ce qui permet d'avancer les droits d'un dossier sans attendre le paiement du précédent. <strong>C'est ce fonds qui décide de la taille des dossiers que vous pouvez prendre</strong></td></tr>
+    <tr><td class="c"><b>1/3</b></td><td>Développement</td><td>Version professionnelle de la plateforme, suivi des colis, deuxième source d'approvisionnement, publicité quand elle sera justifiée</td></tr>
+    <tr><td class="c"><b>1/3</b></td><td>Rémunération du fondateur</td><td>Une entreprise qui ne nourrit pas son dirigeant finit par être abandonnée. Cette part est légitime et doit être prévue</td></tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">Ce que la réserve permet, concrètement</div>
+    <p style="margin-bottom:0">
+      Un conteneur 20 pieds depuis la Chine : le fret seul avoisine
+      <b>1 700 000 F</b>, et les droits de douane peuvent doubler ce montant.
+      Sans réserve, vous ne pouvez pas prendre ce dossier — même si le client est
+      bon. <strong>La taille de votre réserve fixe la taille de vos
+      clients.</strong>
+    </p>
+  </div>
+
+  <h3>Le préfinancement : faire payer l'aval, pas l'amont</h3>
+  <table class="t">
+    <tr><th style="width:44mm">Mécanisme</th><th>Ce qu'il apporte</th></tr>
+    <tr><td><b>L'acompte sur dossier d'import</b></td><td>Le client avance une part du fret et des droits à la validation du devis. C'est l'usage du métier, personne ne s'en offusque. <span class="m dec">À fixer une fois pour toutes — un pourcentage, pas une négociation à chaque dossier</span></td></tr>
+    <tr><td><b>L'achat groupé</b></td><td>Les acheteurs paient avant qu'on commande. Sur un article volumineux, c'est le seul moyen de le vendre sans rien avancer</td></tr>
+    <tr><td><b>L'abonnement au Déclarant</b></td><td>Payé d'avance, ne finance aucune marchandise, ne s'immobilise pas. <span class="m dec">Tarif à décider</span></td></tr>
+    <tr><td><b>La commission des vendeurs hébergés</b></td><td>Zéro avance, zéro stock, zéro risque marchandise. Chaque vendeur actif est un revenu qui ne mobilise rien</td></tr>
+  </table>
+
+  <div class="encadre alerte">
+    <div class="encadre-titre">Le piège qu'il faut nommer</div>
+    <p style="margin-bottom:0">
+      Nous encaissons pour le compte des commerçants hébergés et nous leur
+      reversons 7 jours après la livraison. <strong>Pendant ce délai, cet argent
+      est sur notre compte sans nous appartenir.</strong> Ne le comptez jamais
+      comme trésorerie disponible. Une maison qui finance ses achats avec
+      l'argent de ses vendeurs tient jusqu'au premier mois creux, puis s'effondre
+      d'un coup. Tenez-le sur une ligne séparée, mentalement et comptablement.
+    </p>
+  </div>
+
+  <h3>Et si vous voulez aller plus vite</h3>
+  <p>
+    Le financement extérieur n'est utile que pour une chose : <strong>agrandir la
+    réserve de trésorerie, donc la taille des dossiers accessibles.</strong> Il
+    ne sert pas à payer des charges — il n'y en a presque pas.
+  </p>
+  <ul>
+    <li><strong>Un associé apporteur</strong> — d'où l'intérêt de la SASU, plus souple pour faire entrer quelqu'un.</li>
+    <li><strong>Un crédit de campagne bancaire</strong>, adossé à des dossiers signés. Il faut au moins six mois d'existence et des relevés.</li>
+    <li><strong>Le crédit fournisseur</strong> — négocier un délai de paiement une fois un historique établi. C'est gratuit, et c'est le plus efficace.</li>
+  </ul>
+  <p class="petite">
+    Dans les trois cas, rien n'est possible avant l'immatriculation et quelques
+    mois d'historique bancaire. <strong>Le chapitre 33 est donc aussi le premier
+    chapitre du financement.</strong>
+  </p>
+</div>
+
+<!-- ============================== CH. 38 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 38</p>
+  <h2 class="chapitre">Les risques</h2>
+  <p class="accroche">
+    Classés par probabilité. Aucun n'a été vérifié auprès d'un juriste : les
+    risques juridiques sont formulés comme des questions à poser, jamais comme
+    des conclusions.
+  </p>
+
+  <h3>Risques d'exploitation</h3>
+  <table class="t">
+    <tr><th style="width:34mm">Le risque</th><th>Ce qui se passe</th><th style="width:52mm">Ce qui protège</th></tr>
+    <tr><td><b>Trésorerie</b><br><span class="petite">le plus probable</span></td><td>On avance marchandise, fret et droits ; un client tarde ; la caisse est vide au moment de payer le port</td><td>Acompte systématique. Réserve d'un tiers. Ne jamais toucher à l'argent des vendeurs</td></tr>
+    <tr><td><b>Un dossier qui tourne mal</b></td><td>Une pièce manquante bloque la marchandise au port ; le magasinage court ; le client est furieux</td><td>Contrôle documentaire avant tout devis : FDI, RFCV, BSC, BURIDA, certificat d'origine</td></tr>
+    <tr><td><b>Dépendance à un seul fournisseur</b></td><td>Le catalogue vient presque entièrement d'une source. Une panne, une hausse, une fermeture, et il meurt</td><td>Deuxième source à ouvrir. Un connecteur est déjà écrit, inerte, en attente d'identifiants</td></tr>
+    <tr><td><b>Change dollar</b></td><td>Le taux est figé à 600 F. S'il monte, les prix affichés deviennent faux et la marge fond</td><td>Vérifier le taux chaque mois et retarifer. Le franc CFA est arrimé à l'euro, pas au dollar</td></tr>
+    <tr><td><b>Réputation</b></td><td>Un client livré en retard raconte. Sur ce marché, un mauvais récit vaut dix bons</td><td>Annoncer des délais tenables plutôt que flatteurs</td></tr>
+    <tr><td><b>Confusion sur notre statut</b></td><td>Un client croit que nous signons les déclarations</td><td>Le dire à chaque dossier. Les honoraires du commissionnaire figurent au devis, séparés des nôtres</td></tr>
+  </table>
+
+  <h3>Risques juridiques — des questions, pas des conclusions</h3>
+  <table class="t">
+    <tr><th style="width:44mm">Le risque</th><th>La question à poser au juriste</th></tr>
+    <tr>
+      <td><b>L'encaissement de fonds pour compte de tiers</b><br><span class="petite">probablement le plus sérieux</span></td>
+      <td>Un statut ou une convention est-il nécessaire pour retenir des fonds destinés à des vendeurs tiers ? Le passage par un opérateur mobile money agréé avec compte de cantonnement suffit-il ? Faut-il un compte séquestre distinct ?</td>
+    </tr>
+    <tr>
+      <td><b>La situation du fondateur vis-à-vis de son employeur</b></td>
+      <td>Clause d'exclusivité, de non-concurrence, obligation de loyauté ? Une déclaration est-elle requise ? Le partenariat commissionnaire peut-il être conclu <em>avec</em> l'employeur ?</td>
+    </tr>
+    <tr>
+      <td><b>Responsabilité personnelle</b></td>
+      <td>Un incident sur un dossier de plusieurs millions engage le patrimoine du fondateur faute de personne morale. Créer une SARLU ou une SASU, souscrire une RC professionnelle</td>
+    </tr>
+    <tr>
+      <td><b>Responsabilité sur les marchandises vendues</b></td>
+      <td>Quelles obligations de conformité pèsent sur l'importateur-revendeur ? Quelle assurance produit ? Pour les vendeurs tiers : qui répond vis-à-vis de l'acheteur, la plateforme ou le vendeur ? Les CGV doivent le dire</td>
+    </tr>
+    <tr>
+      <td><b>Incompatibilité commerçant / transitaire</b></td>
+      <td>Le règlement UEMOA sur les commissionnaires pose-t-il une condition d'objet social exclusif ? L'incompatibilité, si elle existe, porte-t-elle sur la personne, sur la société, ou sur le titulaire de l'agrément ? Voir chapitre 28</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ============================== CH. 39 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 39</p>
+  <h2 class="chapitre">Ce qui bloque aujourd'hui</h2>
+  <p class="accroche">
+    <strong>Aucun de ces points n'est un problème de logiciel.</strong> Ce sont
+    des démarches et des décisions, et elles dépendent toutes de vous.
+  </p>
+
+  <table class="t">
+    <tr><th class="c" style="width:12mm">Ordre</th><th style="width:52mm">Ce qui manque</th><th>Ce que ça empêche</th></tr>
+    <tr><td class="c"><b>1</b></td><td><b>L'immatriculation de l'entreprise</b><br><span class="petite">RCCM, contribuable, compte professionnel</span></td><td><strong>Tout.</strong> Sans elle : pas de paiement professionnel, pas de facture légale, pas de client entreprise, pas de crédit</td></tr>
+    <tr><td class="c"><b>2</b></td><td><b>Les moyens de paiement</b><br><span class="petite">agrégateur, ou marchand mobile money</span></td><td>Un client ne peut pas payer autrement que sur un compte personnel. C'est aussi ce qui bloque les opérations 14 et 15 de la carte d'automatisation</td></tr>
+    <tr><td class="c"><b>3</b></td><td><b>L'envoi des courriels</b><br><span class="petite">configuration arrêtée à mi-parcours</span></td><td>Un client qui oublie son mot de passe ne peut pas le récupérer. Il ne revient pas</td></tr>
+    <tr><td class="c"><b>4</b></td><td><b>Les écrans de cotation conteneur</b></td><td>Le service le plus rentable de la maison se traite à la main. Le barème existe, l'écran non</td></tr>
+    <tr><td class="c"><b>5</b></td><td><b>Le tarif du Déclarant</b></td><td>Un outil construit, sourcé et vérifié, qui ne rapporte rien</td></tr>
+    <tr><td class="c"><b>6</b></td><td><b>Le passage en version professionnelle</b></td><td>La formule gratuite met le projet en pause après inactivité et ne tient pas une campagne. <em>Décision prise — reste à exécuter</em></td></tr>
+    <tr><td class="c"><b>7</b></td><td><b>La clé du service de suivi des colis</b></td><td>Le suivi se saisit à la main. Tenable à dix commandes, pas à cent. C'est l'opération 17 de la carte</td></tr>
+    <tr><td class="c"><b>8</b></td><td><b>Les dix postes de transit non confirmés</b></td><td>Le moteur refuse de totaliser un devis incomplet. Onze postes sur vingt et un sont confirmés</td></tr>
+    <tr><td class="c"><b>9</b></td><td><b>Les taux de fret réels avec leur validité</b></td><td>Trois liaisons seulement portent un taux. Ailleurs, aucun fret n'est coté</td></tr>
+    <tr><td class="c"><b>10</b></td><td><b>La liste APE de la Direction générale des douanes</b></td><td>Impossible de dire si une position bénéficie de l'exonération. C'est l'argument commercial qui vaut le plus d'argent immédiat</td></tr>
+    <tr><td class="c"><b>11</b></td><td><b>Le chapitre 42 du TEC et les compositions textiles</b></td><td>16 articles de maroquinerie sans taux, 25 vêtements non classables</td></tr>
+  </table>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">L'ordre n'est pas négociable</div>
+    <p style="margin-bottom:0">
+      <strong>Les points 1 et 2 commandent tous les autres.</strong> Tant que
+      l'entreprise n'existe pas et qu'on ne peut pas encaisser proprement,
+      améliorer la plateforme ne sert à rien : <em>elle est déjà plus avancée que
+      la structure qui la porte.</em>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 40 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 40</p>
+  <h2 class="chapitre">Les décisions qui vous attendent</h2>
+  <p class="accroche">
+    Tout ce que ce plan n'a pas pu trancher, parce que cela relève de vous seul.
+    Tant qu'elles sont ouvertes, le plan reste incomplet.
+  </p>
+
+  <table class="t">
+    <tr><th class="c" style="width:10mm">#</th><th style="width:48mm">Décision</th><th>Pourquoi elle compte</th></tr>
+    <tr><td class="c">1</td><td><b>La forme juridique, et une entité ou deux</b></td><td>Elle commande tout le reste : paiements, facturation, crédit, protection de votre patrimoine. SARLU si vous restez seul, SASU si vous envisagez un associé. Et la séparation commerce / prestation du chapitre 28</td></tr>
+    <tr><td class="c">2</td><td><b>Le montant de l'acompte d'import</b></td><td>Votre principale protection de trésorerie. Un pourcentage du fret et des droits, fixé une fois pour toutes — pas négocié à chaque dossier</td></tr>
+    <tr><td class="c">3</td><td><b>Le tarif du Déclarant</b></td><td>La seule ligne qui n'avance aucune trésorerie. Tant qu'elle est vide, elle rapporte zéro alors que l'outil est construit et sourcé</td></tr>
+    <tr><td class="c">4</td><td><b>La marge sur le fret conteneur</b></td><td>Le service le plus rentable de la maison n'a pas de marge définie. Sans elle, impossible de coter un conteneur complet</td></tr>
+    <tr><td class="c">5</td><td><b>Combien de commerçants héberger, et sur quels critères</b></td><td>Chaque vendeur validé engage notre réputation sur des marchandises que nous ne contrôlons pas</td></tr>
+    <tr><td class="c">6</td><td><b>La deuxième source d'approvisionnement</b></td><td>Tout le catalogue tient sur un seul fournisseur. Risque à terme, à traiter avant qu'il se réalise</td></tr>
+    <tr><td class="c">7</td><td><b>Le délai de réponse annoncé au client</b></td><td>24 heures ouvrées est écrit en base. Mieux vaut « sous 48 h » tenu que « sous 24 h » raté</td></tr>
+    <tr><td class="c">8</td><td><b>Qui répond en cas de produit défectueux vendu par un tiers</b></td><td>MayLary ou le vendeur ? Sous combien de jours l'acheteur peut-il refuser ? Les CGV et le calcul des reversements en dépendent</td></tr>
+    <tr><td class="c">9</td><td><b>Le budget publicitaire du mois 3</b></td><td>À décider une fois les blocages 1 à 3 levés, et pas avant</td></tr>
+    <tr><td class="c">10</td><td><b>Détenir du stock, ou non</b></td><td>Change le modèle économique en entier : délais courts et prix stables d'un côté, trésorerie immobilisée de l'autre</td></tr>
+  </table>
+
+  <div class="encadre">
+    <div class="encadre-titre">Une décision de rythme, qui vaut toutes les autres</div>
+    <p style="margin-bottom:0">
+      <strong>Combien d'heures par semaine pouvez-vous réellement consacrer aux
+      tâches qui n'appartiennent qu'à vous ?</strong> C'est ce chiffre, et non la
+      vitesse de développement, qui fixe la durée des trois premiers mois. La
+      plateforme n'attend plus rien ; les démarches, si.
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CH. 41 ============================== -->
+<div class="page">
+  <p class="num-chapitre">Chapitre 41</p>
+  <h2 class="chapitre">La feuille de route des 90 jours</h2>
+  <p class="accroche">
+    L'ordre exact. Chaque étape a une condition de sortie : on ne passe pas à la
+    suivante tant qu'elle n'est pas remplie. C'est la seule protection contre le
+    travail d'accumulation.
+  </p>
+
+  <h3>Mois 1 — Exister</h3>
+  <table class="t">
+    <tr><th style="width:60mm">Ce qu'on fait</th><th>Ce que ça débloque</th></tr>
+    <tr><td>Trancher la forme juridique avec un juriste ivoirien</td><td>Toute la suite</td></tr>
+    <tr><td>Vérifier votre situation vis-à-vis de votre employeur</td><td>Écarte le risque le plus personnel — ou transforme l'employeur en partenaire</td></tr>
+    <tr><td>Immatriculer : RCCM, contribuable, CNPS, ARTCI</td><td>La facturation légale et le compte bancaire</td></tr>
+    <tr><td><b>Passer la plateforme en version professionnelle</b></td><td>27 000 F / mois. Fin des mises en pause, sauvegardes assurées</td></tr>
+    <tr><td>Terminer la configuration d'envoi des courriels</td><td>Un client peut récupérer son mot de passe</td></tr>
+    <tr><td>Passer vous-même cinq commandes de bout en bout</td><td>Éprouver la chaîne avant qu'un client la découvre</td></tr>
+  </table>
+  <p class="petite"><b>Condition de sortie :</b> l'entreprise existe, elle a un compte bancaire, et vous avez fait tourner cinq commandes complètes.</p>
+
+  <h3>Mois 2 — Encaisser et prouver</h3>
+  <table class="t">
+    <tr><th style="width:60mm">Ce qu'on fait</th><th>Ce que ça débloque</th></tr>
+    <tr><td>Ouvrir un agrégateur de paiement</td><td>Opérations 14 et 15 automatisées. On passe de 61 % à 71 % d'automatisme</td></tr>
+    <tr><td>Traiter la question du séquestre avec un établissement agréé</td><td>La marketplace peut s'ouvrir sans risque réglementaire</td></tr>
+    <tr><td>Formaliser la convention avec le commissionnaire agréé</td><td>Périmètre, rétrocession, responsabilités</td></tr>
+    <tr><td>Souscrire la RC professionnelle et engager le comptable</td><td>Vous manipulez la marchandise d'autrui</td></tr>
+    <tr><td>Livrer les cinq premiers clients de votre carnet</td><td>Les premiers dossiers publiés, donc le levier n° 2 du marketing</td></tr>
+    <tr><td>Déposer la clé du service de suivi</td><td>Opération 17 automatisée. <strong>On atteint 82 %</strong></td></tr>
+  </table>
+  <p class="petite"><b>Condition de sortie :</b> une commande payée par un vrai client, livrée, comptabilisée, avec un avis déposé.</p>
+
+  <h3>Mois 3 — Vendre le transit</h3>
+  <table class="t">
+    <tr><th style="width:60mm">Ce qu'on fait</th><th>Ce que ça débloque</th></tr>
+    <tr><td>Confirmer les dix postes de transit manquants</td><td>Le moteur totalise enfin un devis complet</td></tr>
+    <tr><td>Charger les taux de fret réels avec leur date de validité</td><td>La cotation cesse d'être manuelle</td></tr>
+    <tr><td><b>Brancher les écrans de cotation conteneur</b></td><td>Le service le plus rentable devient vendable</td></tr>
+    <tr><td>Fixer le tarif du Déclarant</td><td>La seule recette qui rentre pendant qu'un conteneur navigue</td></tr>
+    <tr><td>Obtenir la liste APE auprès de la DGD</td><td>L'argument qui vaut 3,4 millions sur un seul dossier</td></tr>
+    <tr><td>Recruter les trois premiers commerçants hébergés</td><td>Du revenu sans avance, sans stock, sans transport</td></tr>
+    <tr><td>Décider du budget publicitaire</td><td>Pas avant, jamais avant</td></tr>
+  </table>
+  <p class="petite"><b>Condition de sortie :</b> un premier dossier de transit conteneur coté par la plateforme et accepté par un client.</p>
+
+  <div class="encadre sombre">
+    <div class="encadre-titre">Si vous ne deviez retenir que trois choses</div>
+    <p>
+      <strong>Un.</strong> La maison n'a presque pas de charges — 27 000 F par
+      mois pour toute la plateforme. Elle est rentable dès la première vente, et
+      vous pouvez attendre le bon dossier sans être forcé d'accepter une mauvaise
+      affaire. Très peu de vos concurrents ont cette liberté.
+    </p>
+    <p>
+      <strong>Deux.</strong> Un dossier conteneur vaut 82 ventes de montre. Le
+      transit fait le résultat ; le catalogue amène les clients. Toute votre
+      énergie commerciale doit aller là.
+    </p>
+    <p style="margin-bottom:0">
+      <strong>Trois.</strong> Rien de tout cela ne s'encaisse tant que
+      l'entreprise n'est pas immatriculée. La plateforme est déjà plus avancée
+      que la structure qui la porte — <em>et c'est le seul endroit où vous êtes
+      irremplaçable.</em>
+    </p>
+  </div>
+</div>
+
+<!-- ============================== CLÔTURE ============================== -->
+<div class="page">
+  <div style="height:40mm"></div>
+  <div class="filet-or"></div>
+  <p class="num-chapitre">Avertissement sur ce document</p>
+  <h2 class="chapitre" style="border:none;padding-bottom:0">Ce qui est vérifié,<br>et ce qui ne l'est pas</h2>
+
+  <h4>Ce que ce dossier contient de vérifié</h4>
+  <p>
+    L'état de la plateforme, relevé en base le 29 août 2026 : le catalogue, les
+    tables, les fonctions serveur, les paramètres de tarification, le barème de
+    transit, les règles de procédure, le corpus tarifaire et ses Notes légales.
+    Les tarifs des formules professionnelles d'hébergement et de base de
+    données, relevés sur les grilles publiques. Les chiffres du port d'Abidjan.
+    Le barème d'assurance de l'assureur. Les onze postes de transit confirmés sur
+    cotations et proformas réelles de la maison. Les douze conditions d'agrément
+    du commissionnaire en douane et le texte de la partie législative du Code des
+    douanes, lus directement sur le site de la Direction générale des douanes.
+  </p>
+
+  <h4>Ce qu'il contient de non vérifié, et signalé comme tel</h4>
+  <p>
+    Le règlement UEMOA sur les commissionnaires en douane, le texte intégral du
+    décret 90-663, les montants et délais des formalités de création, et toutes
+    les questions juridiques du chapitre 38. Elles sont formulées comme des
+    questions à poser, jamais comme des réponses. Les volumes du chapitre 35 ne
+    reposent sur rien d'observé.
+  </p>
+
+  <h4>Ce qu'il ne contient volontairement pas</h4>
+  <p>
+    Un prévisionnel de chiffre d'affaires. Des montants inventés pour combler un
+    tableau. Les postes non chiffrés sont marqués, et les montants que seul le
+    fondateur connaît sont regroupés au chapitre 31, en attente de ses chiffres.
+  </p>
+
+  <div class="encadre" style="margin-top:8mm">
+    <div class="encadre-titre">Les quatre marqueurs</div>
+    <p style="margin-bottom:1.5mm"><span class="m mes">Mesuré</span> &nbsp;Relevé en base ou dans un document réel, le 29 août 2026.</p>
+    <p style="margin-bottom:1.5mm"><span class="m hyp">Hypothèse</span> &nbsp;Supposition de travail. À corriger avec le terrain.</p>
+    <p style="margin-bottom:1.5mm"><span class="m dec">À décider</span> &nbsp;Valeur que personne n'a arrêtée.</p>
+    <p style="margin-bottom:0"><span class="m conf">À confirmer</span> &nbsp;Montant réel connu du fondateur seul.</p>
+  </div>
+
+  <div style="margin-top:14mm;padding-top:5mm;border-top:2px solid var(--encre);font-family:'Liberation Sans',Arial,sans-serif;font-size:8.4pt;color:var(--gris)">
+    <b style="color:var(--encre)">MayLary Group — Dems'Inc, Abidjan.</b> Document interne.<br>
+    Établi le 29 août 2026. Remplace l'édition du 26 août 2026.<br>
+    Plateforme en ligne : <b>maylarygroup.ci</b>
+  </div>
+</div>
+
+</body>
+</html>
