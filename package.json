@@ -8,7 +8,8 @@
     "build": "node scripts/verifier-vercel-json.mjs && node scripts/generer-sitemap.mjs && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "sitemap": "node scripts/generer-sitemap.mjs"
+    "sitemap": "node scripts/generer-sitemap.mjs",
+    "verifier:ecrans": "node scripts/verifier-ecrans.mjs"
   },
   "dependencies": {
     "@fontsource-variable/baloo-2": "^5.3.0",

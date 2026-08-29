@@ -111,8 +111,16 @@ export default function MenuServices({ surFondSombre = false }: Props) {
             : undefined
         }
       >
-        <LayoutGrid className="mr-1.5 h-4 w-4" />
-        Services
+        {/* LE MOT S'EFFACE SOUS 640 px, PAS L'ACCESSIBILITÉ.
+            Sur la couverture, ce bouton voisine le nom de la marque — qui ne
+            peut pas se couper — et le bouton de connexion. À 360 px les trois
+            ne tenaient plus : la page débordait de 24 px vers la droite, et il
+            fallait la pousser du doigt pour lire une ligne. Mesuré sur le
+            paquet construit, pas supposé.
+            `sr-only` garde le mot pour les lecteurs d'écran : le bouton
+            s'annonce toujours « Services », il ne l'écrit simplement plus. */}
+        <LayoutGrid className="h-4 w-4 sm:mr-1.5" />
+        <span className="sr-only sm:not-sr-only">Services</span>
       </Button>
 
       {/* PORTÉ SUR LE CORPS DU DOCUMENT, ET C'EST INDISPENSABLE.
