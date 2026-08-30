@@ -79,7 +79,19 @@ export default class FrontiereErreur extends Component<Props, State> {
     if (!this.state.erreur) return this.props.children;
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      /* UN MARQUEUR POUR QUE LES CONTRÔLES VOIENT CET ÉCRAN.
+         Une barrière d'erreur fait bien son travail : elle attrape le plantage
+         et rend une page propre. Mais du coup rien ne remonte au navigateur, et
+         un contrôle automatique voit une page qui s'affiche correctement — il
+         ne signale rien.
+         C'est arrivé : le tableau de bord d'administration plantait, et l'audit
+         des écrans rendait « aucun défaut ». Cet attribut lui donne de quoi
+         distinguer une page rendue d'une page rattrapée. Il ne change rien pour
+         le visiteur. */
+      <div
+        data-frontiere-erreur=""
+        className="flex min-h-screen items-center justify-center bg-background px-4 py-12"
+      >
         <div className="w-full max-w-md text-center">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
             {/* Pas d'icône importée : si le paquet d'icônes est justement ce

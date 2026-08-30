@@ -43,6 +43,159 @@ const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(RACINE, 'dist');
 const PORT = 4188;
 
+/* ===========================================================================
+   LE COMPTE D'ESSAI
+   ===========================================================================
+
+   Les écrans derrière connexion — l'espace client, les vingt-quatre écrans
+   d'administration — n'étaient pas contrôlés. C'est précisément là que vivent
+   les tableaux denses, ceux où deux textes se marchent dessus.
+
+   POURQUOI UNE SESSION FABRIQUÉE PLUTÔT QU'UN VRAI COMPTE
+
+   Trois raisons, dans cet ordre :
+
+   1. Le contrôle doit pouvoir tourner partout, y compris sans accès au
+      serveur. Un audit qui dépend du réseau ne tourne pas le jour où on en a
+      le plus besoin.
+   2. Il doit être REPRODUCTIBLE. Avec un vrai compte, le résultat change selon
+      ce que contient la base ce jour-là : un défaut apparaît lundi et
+      disparaît mardi parce qu'une commande a été livrée.
+   3. Un compte d'essai réel dans la base de production, c'est une porte de
+      plus à surveiller. Celui-ci n'existe nulle part.
+
+   Ce qu'on fabrique : une session déposée dans le stockage du navigateur, et
+   toutes les requêtes au serveur interceptées. La bibliothèque cliente ne
+   vérifie pas la signature du jeton — elle en lit seulement la date
+   d'expiration — donc un jeton de forme correcte suffit.
+
+   CE QUE ÇA CONTRÔLE, ET CE QUE ÇA NE CONTRÔLE PAS
+
+   Ça contrôle la MISE EN PAGE : plantages, débordements, chevauchements, sur
+   des écrans vides comme sur des écrans remplis. Ça ne contrôle ni les droits
+   d'accès, ni les calculs, ni ce que la base renvoie vraiment — pour cela il
+   faut le serveur, et ce sont d'autres contrôles.
+   =========================================================================== */
+
+const PROJET = 'oubowmftzxpruckjzwuq';
+const CLE_SESSION = `sb-${PROJET}-auth-token`;
+const UTILISATEUR = '00000000-0000-4000-8000-000000000001';
+
+/** Un jeton de forme correcte, valable très longtemps, jamais signé. */
+function jetonDEssai() {
+  const b64 = (o) =>
+    Buffer.from(JSON.stringify(o)).toString('base64')
+      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const entete = b64({ alg: 'HS256', typ: 'JWT' });
+  const charge = b64({
+    sub: UTILISATEUR,
+    email: 'essai@maylarygroup.ci',
+    role: 'authenticated',
+    aud: 'authenticated',
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
+    user_metadata: { nom_complet: 'Compte d’essai' },
+  });
+  return `${entete}.${charge}.signature-absente-volontairement`;
+}
+
+const UTILISATEUR_JSON = {
+  id: UTILISATEUR,
+  aud: 'authenticated',
+  role: 'authenticated',
+  email: 'essai@maylarygroup.ci',
+  email_confirmed_at: '2026-01-01T00:00:00Z',
+  created_at: '2026-01-01T00:00:00Z',
+  updated_at: '2026-01-01T00:00:00Z',
+  app_metadata: { provider: 'email' },
+  user_metadata: { nom_complet: 'Compte d’essai' },
+  identities: [],
+};
+
+/**
+ * Ce que le serveur répond, table par table.
+ *
+ * Le défaut est le TABLEAU VIDE : un écran sans donnée est un état réel, qu'il
+ * faut contrôler aussi — c'est même celui que voit le premier client. Seules
+ * les tables qui commandent la navigation reçoivent un contenu.
+ */
+/**
+ * DEUX COMPTES, ET NON UN SEUL.
+ *
+ * Les écrans client refusent explicitement les administrateurs :
+ *
+ *     if (!user || isAdmin) return <Navigate to="/boutique/compte" />;
+ *
+ * C'est voulu — un administrateur n'a rien à faire dans l'espace client — mais
+ * cela veut dire qu'un seul compte ne peut pas contrôler les deux espaces. Avec
+ * le seul compte administrateur, quatre écrans client renvoyaient ailleurs et
+ * n'étaient jamais vus.
+ *
+ * `role_equipe` compte autant : `AdminRoute` filtre écran par écran dessus, et
+ * « propriétaire » est le seul rôle qui les ouvre tous.
+ */
+const PROFILS = {
+  client: {
+    id: UTILISATEUR,
+    user_id: UTILISATEUR,
+    type_compte: 'client',
+    role_equipe: null,
+    nom_complet: 'Cliente d’essai',
+    email: 'essai@maylarygroup.ci',
+    telephone: '+225 00 00 00 00 00',
+    created_at: '2026-01-01T00:00:00Z',
+  },
+  admin: {
+    id: UTILISATEUR,
+    user_id: UTILISATEUR,
+    type_compte: 'admin',
+    role_equipe: 'proprietaire',
+    nom_complet: 'Compte d’essai',
+    email: 'essai@maylarygroup.ci',
+    telephone: '+225 00 00 00 00 00',
+    created_at: '2026-01-01T00:00:00Z',
+  },
+};
+
+const FIXTURES = {};
+
+/**
+ * Les PROCÉDURES rendent un OBJET, pas un tableau.
+ *
+ * Première version du contrôle : toutes les réponses étaient des tableaux
+ * vides, procédures comprises. Le tableau de bord faisait alors
+ * `tb.alertes.length` sur un tableau vide — `alertes` valait `undefined` — et
+ * plantait. Le contrôle a rapporté soixante-six défauts qui n'existaient pas.
+ *
+ * La leçon vaut d'être écrite : un contrôle mal réglé n'est pas neutre, il
+ * ment. Et il ment dans le sens qui coûte le plus cher — il envoie chercher des
+ * pannes ailleurs qu'où elles sont.
+ *
+ * Les formes ci-dessous sont RECOPIÉES DES TYPES DÉCLARÉS dans le code, pas
+ * inventées. Les valeurs sont neutres : ce qu'on contrôle est la mise en page,
+ * pas le contenu.
+ */
+const PROCEDURES = {
+  app_e08c374bc4_tableau_de_bord: {
+    pipeline_import: [],
+    pipeline_export: [],
+    alertes: [],
+    engage: { dossiers: 0, valeur_fcfa: 0 },
+    a_traiter: {},
+    argent: { a_reverser_fcfa: 0, encaisse_30j_fcfa: 0 },
+    sourcing: { fournisseurs: 0, api_branchees: 0, api_a_obtenir: 0, pistes_a_contacter: 0 },
+    catalogue: { produits_actifs: 0, ruptures: 0 },
+  },
+  app_e08c374bc4_tableau_dossiers: {
+    par_etape: [],
+    ouverts: 0,
+    archives: 0,
+    incomplets: [],
+    pieces_les_plus_absentes: [],
+  },
+  app_e08c374bc4_demonstration: { actif: false, imports: 0, exports: 0 },
+};
+
 /** Les écrans publics, ceux qu'un visiteur atteint sans compte. */
 const ECRANS = [
   ['/', 'Accueil'],
@@ -59,6 +212,36 @@ const ECRANS = [
   ['/conditions-generales', 'Conditions générales'],
   ['/confidentialite', 'Confidentialité'],
   ['/mentions-legales', 'Mentions légales'],
+];
+
+/** Les écrans de l'espace client — refusés aux administrateurs. */
+const ECRANS_CLIENT = [
+  ['/mon-compte', 'Mon compte'],
+  ['/boutique/panier', 'Panier'],
+  ['/boutique/mes-commandes', 'Mes commandes'],
+  ['/catalogue/mes-devis', 'Mes devis'],
+  ['/import/mes-demandes', 'Mes demandes d’import'],
+  ['/export/mes-demandes', 'Mes demandes d’export'],
+  ['/mes-expeditions', 'Mes expéditions'],
+];
+
+/** Les écrans d'administration. */
+const ECRANS_ADMIN = [
+  ['/admin', 'Administration — tableau de bord'],
+  ['/admin/commandes', 'Admin — commandes'],
+  ['/admin/produits', 'Admin — catalogue'],
+  ['/admin/import', 'Admin — import'],
+  ['/admin/export', 'Admin — export'],
+  ['/admin/devis', 'Admin — devis'],
+  ['/admin/dossiers', 'Admin — dossiers'],
+  ['/admin/comptabilite', 'Admin — comptabilité'],
+  ['/admin/vendeurs', 'Admin — vendeurs'],
+  ['/admin/assistance', 'Admin — assistance'],
+  ['/admin/parametres', 'Admin — paramètres'],
+  ['/admin/equipe', 'Admin — équipe'],
+  ['/admin/fournisseurs', 'Admin — fournisseurs'],
+  ['/admin/frais-destination', 'Admin — frais de destination'],
+  ['/admin/journal-erreurs', 'Admin — journal des erreurs'],
 ];
 
 /** Deux largeurs : le téléphone le plus étroit encore courant, et un portable. */
@@ -170,16 +353,94 @@ const CHERCHER_CHEVAUCHEMENTS = () => {
   return trouves.slice(0, 6);
 };
 
+/**
+ * Pose la session d'essai et détourne tout ce qui part vers le serveur.
+ *
+ * Rien ne sort de la machine : chaque appel reçoit une réponse fabriquée ici.
+ * C'est ce qui rend le contrôle reproductible — et exécutable hors ligne.
+ */
+async function connecter(page, role) {
+  const jeton = jetonDEssai();
+
+  await page.addInitScript(
+    ({ cle, jeton, utilisateur }) => {
+      const session = {
+        access_token: jeton,
+        refresh_token: 'essai-jamais-utilise',
+        token_type: 'bearer',
+        expires_in: 60 * 60 * 24 * 365,
+        expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
+        user: utilisateur,
+      };
+      try {
+        localStorage.setItem(cle, JSON.stringify(session));
+      } catch {
+        /* stockage refusé : la passe connectée n'aura simplement rien à dire */
+      }
+    },
+    { cle: CLE_SESSION, jeton, utilisateur: UTILISATEUR_JSON },
+  );
+
+  await page.route(`**://${PROJET}.supabase.co/**`, async (route) => {
+    const url = new URL(route.request().url());
+    const repondre = (corps, statut = 200) =>
+      route.fulfill({
+        status: statut,
+        contentType: 'application/json',
+        headers: { 'Access-Control-Allow-Origin': '*', 'Content-Range': '0-0/0' },
+        body: JSON.stringify(corps),
+      });
+
+    if (url.pathname.startsWith('/auth/v1/user')) return repondre(UTILISATEUR_JSON);
+    if (url.pathname.startsWith('/auth/v1/token')) {
+      return repondre({
+        access_token: jeton,
+        refresh_token: 'essai-jamais-utilise',
+        token_type: 'bearer',
+        expires_in: 60 * 60 * 24 * 365,
+        user: UTILISATEUR_JSON,
+      });
+    }
+    if (url.pathname.startsWith('/rest/v1/rpc/')) {
+      const procedure = url.pathname.replace('/rest/v1/rpc/', '').split('?')[0];
+      // `null` plutôt qu'un objet vide : les écrans testent `if (data)` avant
+      // de lire. Un objet vide passerait le test et ferait planter la lecture,
+      // exactement le défaut que ce contrôle a d'abord fabriqué.
+      return repondre(PROCEDURES[procedure] ?? null);
+    }
+    if (url.pathname.startsWith('/rest/v1/')) {
+      const table = url.pathname.replace('/rest/v1/', '').split('?')[0];
+      if (table === 'app_e08c374bc4_profiles') return repondre([PROFILS[role]]);
+      return repondre(FIXTURES[table] ?? []);
+    }
+    if (url.pathname.startsWith('/functions/v1/')) return repondre({});
+    // Images de produit et autres objets : une réponse vide suffit, la mise en
+    // page réserve déjà la place.
+    return route.fulfill({ status: 200, contentType: 'image/gif', body: '' });
+  });
+}
+
 const serveur = await servir();
 const navigateur = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 
-let defauts = 0;
+/** Les deux passes : sans session, puis avec le compte d'essai. */
+const PASSES = [
+  { nom: 'public', ecrans: ECRANS, role: null },
+  { nom: 'client', ecrans: ECRANS_CLIENT, role: 'client' },
+  { nom: 'administration', ecrans: ECRANS_ADMIN, role: 'admin' },
+];
 
+let defauts = 0;
+let controles = 0;
+
+for (const passe of PASSES)
 for (const { nom: taille, largeur, hauteur } of TAILLES) {
-  for (const [chemin, titre] of ECRANS) {
+  for (const [chemin, titre] of passe.ecrans) {
     const page = await navigateur.newPage({ viewport: { width: largeur, height: hauteur } });
     const plantages = [];
     page.on('pageerror', (e) => plantages.push(String(e).slice(0, 120)));
+    if (passe.role) await connecter(page, passe.role);
+    controles++;
 
     await page.goto(`http://localhost:${PORT}${chemin}`, { waitUntil: 'domcontentloaded' });
     // Le temps que les écrans différés arrivent et que la mise en page se pose.
@@ -190,7 +451,31 @@ for (const { nom: taille, largeur, hauteur } of TAILLES) {
     );
     const chevauchements = await page.evaluate(CHERCHER_CHEVAUCHEMENTS);
 
+    /*
+     * LA BARRIÈRE D'ERREUR REND UNE PAGE PROPRE — DONC MUETTE.
+     *
+     * Quand un écran plante, React l'attrape et affiche « Cette page s'est
+     * arrêtée en chemin ». Rien ne remonte au navigateur : `pageerror` ne se
+     * déclenche pas, la page n'a ni débordement ni chevauchement, et le
+     * contrôle rendait « aucun défaut » sur un tableau de bord qui ne
+     * fonctionnait pas. C'est le premier résultat qu'il a donné, et il était
+     * faux.
+     *
+     * On regarde donc aussi si la page rendue EST l'écran de secours.
+     */
+    const rattrapee = await page.evaluate(
+      () => document.querySelector('[data-frontiere-erreur]') !== null,
+    );
+    /*
+     * Et si l'écran demandé a renvoyé ailleurs — vers la connexion, par
+     * exemple — le contrôle ne porte pas sur ce qu'on croit. Mieux vaut le dire
+     * que de compter un succès qui n'en est pas un.
+     */
+    const arrivee = await page.evaluate(() => location.pathname);
+
     const soucis = [];
+    if (rattrapee) soucis.push("PLANTE — l'écran de secours s'affiche à la place");
+    if (arrivee !== chemin) soucis.push(`RENVOIE vers ${arrivee} — écran non contrôlé`);
     if (plantages.length) soucis.push(`PLANTAGE — ${plantages[0]}`);
     if (debordement > 2) soucis.push(`DÉBORDE de ${debordement} px vers la droite`);
     for (const c of chevauchements) {
@@ -199,7 +484,7 @@ for (const { nom: taille, largeur, hauteur } of TAILLES) {
 
     if (soucis.length) {
       defauts += soucis.length;
-      console.log(`\n✗ ${titre} — ${taille} (${largeur} px)`);
+      console.log(`\n✗ ${titre} — ${taille} (${largeur} px) — ${passe.nom}`);
       for (const s of soucis) console.log(`    ${s}`);
     }
 
@@ -212,7 +497,9 @@ serveur.close();
 
 console.log(
   defauts === 0
-    ? `\nAucun défaut mécanique sur ${ECRANS.length} écrans × ${TAILLES.length} largeurs.`
-    : `\n${defauts} défaut(s) à regarder.`,
+    ? `\nAucun défaut mécanique sur ${controles} contrôles ` +
+        `(${ECRANS.length} publics + ${ECRANS_CLIENT.length} client + ${ECRANS_ADMIN.length} administration, ` +
+        `× ${TAILLES.length} largeurs).`
+    : `\n${defauts} défaut(s) à regarder, sur ${controles} contrôles.`,
 );
 process.exit(defauts === 0 ? 0 : 1);
