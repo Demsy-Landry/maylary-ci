@@ -1,74 +1,53 @@
 /**
- * Redemander le fret à CJ À CHAQUE PALIER, et rallumer ce qui devient vendable.
+ * Demander le fret à CJ, palier par palier, et en tirer le MODE d'acheminement.
  *
- * POURQUOI CETTE FONCTION EXISTE
+ * ────────────────────────────────────────────────────────────────────────────
+ * ⚠️  UNE SEULE LIGNE DIFFÈRE ENTRE CE FICHIER ET LA FONCTION EN LIGNE
  *
- * Dix-sept articles étaient éteints. La plupart pour « fret disproportionné » ou
- * « fret non coté » — des verdicts prononcés sur UNE SEULE PIÈCE. Or le
- * transporteur cote un ENVOI : la part fixe de son devis se partage entre les
- * pièces, et un article invendable à l'unité peut être parfaitement vendable par
- * cinq. Personne ne l'avait vérifié, parce que vérifier coûte un appel par
- * palier et par article.
+ * L'import ci-dessous s'écrit `../_partage/amortir-le-fret.ts` dans le dépôt,
+ * où le module partagé vit en un seul exemplaire. Au déploiement, les fichiers
+ * sont mis à plat côte à côte et cette ligne devient `./amortir-le-fret.ts`.
+ * C'est la SEULE différence tolérée. Tout le reste doit rester identique.
  *
- * CE QU'ELLE NE FAIT PAS : DEVINER
+ * Pourquoi c'est écrit si haut : ce fichier avait divergé. Le dépôt était resté
+ * à une version simple pendant que la fonction en ligne gagnait le paramètre
+ * `cible`, la résolution des variantes manquantes et l'assistant d'écriture.
+ * Un correctif écrit sur la copie du dépôt, puis déployé tel quel, aurait effacé
+ * tout cela — un correctif qui régresse est pire que pas de correctif. Le
+ * 31 août, le fichier a donc été resynchronisé sur ce qui tournait vraiment,
+ * AVANT d'y reporter la correction.
+ * ────────────────────────────────────────────────────────────────────────────
  *
- * Elle ne modélise aucun barème. Pour chaque article elle demande à CJ le prix
- * réel d'un envoi de 1, 5, 20 puis 50 pièces, et compare ce que le fournisseur
- * répond. Bien lui en a pris : les devis relevés ne suivent aucune droite. Le
- * sac de voyage tombe de 100 248 F la pièce à 29 784 F par vingt, puis REMONTE
- * à 33 364 F par cinquante. Un modèle affine se serait trompé.
+ * LA RÈGLE, DITE PAR LE FONDATEUR
  *
- * LES DEUX CONDITIONS DU RALLUMAGE
+ * « Le groupage à tous les coups doit être les articles qui ne sont pas pris en
+ * charge par CJ. Lorsque les valeurs sont petites, mettre un achat minimum. »
  *
- * Un fret amorti ne suffit pas. Descendre le rapport en imposant cinquante
- * pièces ne sert à rien si la commande minimum devient inaccessible : on aurait
- * troqué un article invendable contre un article que personne ne peut acheter.
- * On garde donc la règle établie dans sa forme d'origine — on ne refuse que
- * lorsque le rapport dépasse le plafond ET que la commande minimum dépasse le
- * seuil surveillé.
+ * Le catalogue lui donnait tort : sur 73 articles en groupage, 36 pesaient
+ * moins de deux kilos. On ne les avait pas mis en groupage — on avait omis de
+ * demander à CJ, et une absence de question était traitée comme un refus.
  *
- * CE QU'ELLE NE SAIT PAS DISTINGUER, ET IL FAUT LE SAVOIR
+ * TROIS ÉTATS DE `fret_source`
  *
- * `devisLot` rend `null` sur n'importe quel échec — refus du transporteur pour
- * cette quantité, mais aussi dépassement de cadence ou incident réseau. Les
- * deux sont ensuite traités pareil. Quand un seul palier revient coté, le
- * verdict « aucune quantité n'y change rien » repose donc sur un seul point de
- * mesure : c'est une présomption, pas une preuve. Le rapport rend les essais
- * pour qu'on puisse en juger.
- *
- * ET ELLE NE TOUCHE PAS AU PRIX DE LA MARCHANDISE
- *
- * La marge commerciale a son propre moteur. Cette fonction n'écrit que la
- * quantité minimum, le fret unitaire qui en découle, et l'état de l'article.
- */
-
-/*
- * TROIS ÉTATS DE `fret_source`, ET NON PLUS DEUX
- *
- * `forfait` voulait dire « jamais demandé ». Mais l'article partait quand même
- * en groupage, comme si CJ avait refusé : une absence de question traitée comme
- * une réponse négative. Sur 73 articles en groupage, 36 pesaient MOINS DE DEUX
- * KILOS — on ne les avait pas mis en groupage, on avait omis de demander.
- *
- *   `forfait`    jamais demandé, à redemander.
+ *   `forfait`    jamais demandé.
  *   `cj_reel`    CJ a coté — porte-à-porte, avec la quantité minimum qui rend
  *                le fret tenable.
- *   `cj_refuse`  CJ interrogé à chaque palier, et n'a rien coté. SEUL cas où le
- *                groupage s'impose, comme le veut le fondateur.
+ *   `cj_refuse`  CJ interrogé à chaque palier, et n'a rien coté. Seul cas où le
+ *                groupage s'impose.
  *
  * UN ÉCHEC RÉSEAU N'EST PAS UN REFUS
  *
- * Le devis se demande sur une VARIANTE, pas sur un produit. Première version :
- * la recherche de variante rendait `null` sur n'importe quel incident — cadence
- * dépassée comprise — et l'appelant inscrivait `cj_refuse`. Neuf articles
- * légers ont ainsi été déclarés hors de portée de CJ sans qu'on le lui ait
- * demandé. Vérifié à la main sur l'un d'eux : le cadenas de 155 g a bel et bien
- * une variante, et CJ répond « Success ».
+ * Première version : `variantePour` rendait `null` sur n'importe quel incident
+ * — dépassement de cadence compris — et l'appelant inscrivait `cj_refuse`.
+ * Neuf articles légers ont ainsi été déclarés hors de portée de CJ alors que
+ * personne ne le lui avait demandé. Vérifié à la main sur l'un d'eux : le
+ * cadenas de 155 g a bel et bien une variante, et CJ répond « Success ».
  *
- * D'où une seconde tentative espacée, et surtout : quand elle échoue aussi, on
- * ne conclut plus au refus. L'article retourne en `forfait`, c'est-à-dire « à
- * redemander ». Mieux vaut un article en attente qu'un article mal classé — le
- * premier se rattrape au passage suivant, le second est perdu.
+ * Deux corrections. D'abord une SECONDE TENTATIVE espacée, car un 429 est
+ * passager par nature. Ensuite, quand même la seconde échoue, on ne conclut
+ * plus au refus : l'article reste en `forfait`, c'est-à-dire « à redemander ».
+ * Mieux vaut un article en attente qu'un article mal classé : le premier se
+ * rattrape au passage suivant, le second est perdu.
  */
 
 import { amortirLeFret } from '../_partage/amortir-le-fret.ts';
@@ -127,15 +106,10 @@ async function devisLot(vid: string, quantite: number, token: string, pays: stri
     const res = await fetch(`${CJ}/logistic/freightCalculate`, {
       method: 'POST',
       headers: { 'CJ-Access-Token': token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        startCountryCode: 'CN',
-        endCountryCode: pays,
-        products: [{ quantity: quantite, vid }],
-      }),
+      body: JSON.stringify({ startCountryCode: 'CN', endCountryCode: pays, products: [{ quantity: quantite, vid }] }),
     });
     const data = await res.json().catch(() => null);
     const options = Array.isArray(data?.data) ? (data.data as Record<string, unknown>[]) : [];
-    // La moins chère : c'est elle qui détermine si l'article peut exister.
     const prix = options
       .map((o) => Number(o.logisticPrice))
       .filter((n) => Number.isFinite(n) && n > 0)
@@ -148,18 +122,22 @@ async function devisLot(vid: string, quantite: number, token: string, pays: stri
 
 Deno.serve(async (req) => {
   const corps = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
-  const limite = Math.min(Number(corps.limite ?? 4), 8);
+  const limite = Math.min(Number(corps.limite ?? 4), 10);
   const simulation = corps.simulation === true;
-  /** Rejuger ce que la fonction a déjà refusé — sur demande seulement. */
   const rejuger = corps.rejuger === true;
+  /**
+   * `eteints`        hors ligne pour un motif de fret.
+   * `jamais_cotes`   fret jamais demandé à CJ.
+   * `sans_variante`  déclarés refusés alors que leur variante n'avait pas pu
+   *                  être obtenue — la réparation du défaut ci-dessus.
+   */
+  const cible = ['jamais_cotes', 'sans_variante'].includes(String(corps.cible))
+    ? String(corps.cible) : 'eteints';
 
   const token = await jetonCj();
   if (!token) return json({ erreur: 'Jeton CJ indisponible.' }, 503);
 
-  const rParam = await fetch(
-    `${URL_SB}/rest/v1/app_e08c374bc4_parametres_import?select=*&id=eq.1`,
-    { headers: enTetesSb },
-  );
+  const rParam = await fetch(`${URL_SB}/rest/v1/app_e08c374bc4_parametres_import?select=*&id=eq.1`, { headers: enTetesSb });
   const parametres = ((await rParam.json().catch(() => [])) as Record<string, unknown>[])[0] ?? {};
   const paliers = (parametres.paliers_quantite as number[]) ?? [1, 5, 20, 50];
   const ratioMax = Number(parametres.ratio_fret_maximum ?? 5);
@@ -167,73 +145,87 @@ Deno.serve(async (req) => {
   const taux = Number(parametres.taux_change_usd_fcfa ?? 600);
   const pays = String(parametres.pays_destination_code ?? 'CI');
 
-  // Les articles éteints pour un motif de FRET. Un doublon ou un retrait
-  // volontaire ne se règle pas par un devis : on n'y touche pas.
-  //
-  // `fret_non_amortissable` est le verdict de cette fonction elle-même. Il
-  // reste HORS de la liste par défaut : sans cela, chaque lot reprenait les
-  // articles qu'elle venait de refuser et n'atteignait jamais les suivants —
-  // observé, et contourné à la main la première fois. Le paramètre `rejuger`
-  // permet d'y revenir quand les tarifs du transporteur ont bougé.
-  const motifs = rejuger
-    ? 'fret_disproportionne,fret_non_cote,commande_minimum_trop_elevee,fret_non_amortissable'
-    : 'fret_disproportionne,fret_non_cote,commande_minimum_trop_elevee';
+  const champs = 'id,nom,reference_variante,reference_externe,prix_achat_fcfa,prix_unitaire_fcfa,indisponible_motif,actif';
+  const fin = `&order=prix_achat_fcfa.desc&limit=${limite}`;
 
-  const rListe = await fetch(
-    `${URL_SB}/rest/v1/app_e08c374bc4_produits` +
-      `?select=id,nom,reference_variante,prix_achat_fcfa,prix_unitaire_fcfa,indisponible_motif` +
-      `&actif=is.false&reference_variante=not.is.null` +
-      `&indisponible_motif=in.(${motifs})` +
-      `&order=prix_achat_fcfa.desc&limit=${limite}`,
-    { headers: enTetesSb },
-  );
+  const filtre =
+    cible === 'jamais_cotes'
+      ? `?select=${champs}&fret_source=eq.forfait&reference_externe=not.is.null${fin}`
+      : cible === 'sans_variante'
+        ? `?select=${champs}&fret_source=eq.cj_refuse&reference_variante=is.null&reference_externe=not.is.null${fin}`
+        : `?select=${champs}&actif=is.false&reference_externe=not.is.null&indisponible_motif=in.(${
+            rejuger
+              ? 'fret_disproportionne,fret_non_cote,commande_minimum_trop_elevee,fret_non_amortissable'
+              : 'fret_disproportionne,fret_non_cote,commande_minimum_trop_elevee'
+          })${fin}`;
+
+  const rListe = await fetch(`${URL_SB}/rest/v1/app_e08c374bc4_produits${filtre}`, { headers: enTetesSb });
   const aTraiter = (await rListe.json().catch(() => [])) as {
-    id: string; nom: string; reference_variante: string;
-    prix_achat_fcfa: number; prix_unitaire_fcfa: number; indisponible_motif: string;
+    id: string; nom: string; reference_variante: string | null; reference_externe: string;
+    prix_achat_fcfa: number; prix_unitaire_fcfa: number;
+    indisponible_motif: string | null; actif: boolean;
   }[];
 
-  if (aTraiter.length === 0) return json({ termine: true, traites: 0, message: 'Plus rien à amortir.' });
+  if (aTraiter.length === 0) return json({ termine: true, traites: 0, cible, message: 'Plus rien à traiter.' });
 
   const rapport: Record<string, unknown>[] = [];
 
-  for (const p of aTraiter) {
-    const devis: { quantite: number; fret_lot_fcfa: number }[] = [];
+  const ecrire = async (id: string, maj: Record<string, unknown>) => {
+    const r = await fetch(`${URL_SB}/rest/v1/app_e08c374bc4_produits?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: { ...enTetesSb, Prefer: 'return=representation' },
+      body: JSON.stringify(maj),
+    });
+    const texte = await r.text().catch(() => '');
+    let n = 0;
+    try { n = (JSON.parse(texte) as unknown[]).length; } catch { n = 0; }
+    return n > 0 ? null : `écriture sans effet (${r.status}) ${texte.slice(0, 110)}`;
+  };
 
+  for (const p of aTraiter) {
+    let vid = p.reference_variante;
+    if (!vid) {
+      vid = await variantePour(p.reference_externe, token);
+      await pause(1600);
+      if (vid && !simulation) await ecrire(p.id, { reference_variante: vid });
+    }
+
+    // VARIANTE NON OBTENUE : on ne conclut RIEN. L'article repasse en
+    // `forfait`, c'est-à-dire « à redemander ». Le classer refusé serait
+    // affirmer, sur la foi d'un incident réseau, que CJ ne le porte pas.
+    if (!vid) {
+      rapport.push({ nom: p.nom, decision: 'à redemander', motif: 'variante non obtenue après deux tentatives' });
+      if (!simulation) await ecrire(p.id, { fret_source: 'forfait' });
+      continue;
+    }
+
+    const devis: { quantite: number; fret_lot_fcfa: number }[] = [];
     for (const q of paliers) {
-      const usd = await devisLot(p.reference_variante, q, token, pays);
+      const usd = await devisLot(vid, q, token, pays);
       if (usd != null) devis.push({ quantite: q, fret_lot_fcfa: usd * taux });
-      await pause(1600);   // CJ plafonne à un appel par seconde
+      await pause(1600);
     }
 
     if (devis.length === 0) {
-      // Aucun palier coté : ce n'est pas un problème de quantité, c'est un refus
-      // du transporteur. L'article relève du groupage, pas du porte-à-porte.
       rapport.push({ nom: p.nom, decision: 'groupage', motif: 'aucun palier coté par CJ' });
       if (!simulation) {
-        const r = await fetch(`${URL_SB}/rest/v1/app_e08c374bc4_produits?id=eq.${p.id}`, {
-          method: 'PATCH',
-          headers: { ...enTetesSb, Prefer: 'return=representation' },
-          body: JSON.stringify({
-            mode_acheminement: 'groupage', fret_source: 'forfait',
-            cout_fret_fcfa: 0, indisponible_motif: null, actif: true,
-          }),
+        const err = await ecrire(p.id, {
+          mode_acheminement: 'groupage', fret_source: 'cj_refuse',
+          cout_fret_fcfa: 0, indisponible_motif: null, actif: true,
         });
-        await r.text().catch(() => '');
+        if (err) rapport[rapport.length - 1].ecriture = err;
       }
       continue;
     }
 
     const a = amortirLeFret({ prixAchatFcfa: p.prix_achat_fcfa, devis, ratioFretMaximum: ratioMax })!;
     const commandeMinimum = (p.prix_unitaire_fcfa + a.fret_unitaire_fcfa) * a.quantite;
-
-    // La règle d'origine, conservée : on ne refuse que si le transport écrase le
-    // prix ET que la facture devient salée. L'une sans l'autre reste acceptable.
     const refuse = !a.amorti && commandeMinimum > seuilSurveille;
 
     rapport.push({
       nom: p.nom,
-      ancien_motif: p.indisponible_motif,
-      decision: refuse ? 'groupage' : 'rallumé',
+      etait: p.actif ? 'en ligne' : 'éteint',
+      decision: refuse ? 'groupage (fret non amortissable)' : 'porte-à-porte CJ',
       quantite_minimum: a.quantite,
       fret_unitaire_fcfa: a.fret_unitaire_fcfa,
       ratio: Number(a.ratio.toFixed(2)),
@@ -243,45 +235,49 @@ Deno.serve(async (req) => {
 
     if (simulation) continue;
 
-    // UN FRET INAMORTISSABLE N'EST PAS UN MOTIF D'EXTINCTION
-    //
-    // Cette branche éteignait l'article. C'était une faute de raisonnement :
-    // « le transporteur porte-à-porte revient trop cher » ne veut pas dire
-    // « cet article est invendable », cela veut dire « cet article ne passe pas
-    // par le porte-à-porte ». Or la règle de la maison est que tout ce que le
-    // transporteur ne prend pas relève du GROUPAGE.
-    //
-    // Le résultat de l'ancienne écriture, mesuré le 29 août : sept articles
-    // éteints alors qu'ils avaient un prix, des photos et une fiche complète.
-    // L'un d'eux valait 363 F à l'achat pour 7 574 F de fret express — en
-    // groupage, ce rapport n'a plus aucun sens, puisque le fret y est vérifié
-    // séparément et n'est pas affiché tant qu'il ne l'est pas.
-    //
-    // On bascule donc, exactement comme la branche « aucun palier coté »
-    // au-dessus : même forme d'écriture, même conséquence. Le fret express est
-    // remis à zéro pour qu'aucune vitrine n'affiche le prix d'un acheminement
-    // qui ne sera pas utilisé.
+    /*
+     * UN FRET INAMORTISSABLE N'EST PAS UN MOTIF D'EXTINCTION
+     *
+     * Cette branche laissait l'article éteint dès lors qu'il l'était déjà —
+     * `indisponible_motif: p.actif ? null : 'fret_non_amortissable'`. C'était une
+     * faute de raisonnement : « le porte-à-porte revient trop cher » ne veut pas
+     * dire « cet article est invendable », cela veut dire « cet article ne passe
+     * pas par le porte-à-porte ». Or la règle de la maison est que tout ce que le
+     * transporteur ne prend pas relève du GROUPAGE.
+     *
+     * Observé le 31 août, en direct : une enceinte à 8 234 F d'achat pour
+     * 13 152 F de fret express est repartie « groupage (fret non amortissable) »
+     * — et est restée invisible, alors qu'elle avait un prix, des photos et une
+     * fiche complète. Cinq articles étaient dans ce cas, tous avec un prix.
+     *
+     * En groupage, ce rapport n'a plus aucun sens : le fret y est vérifié
+     * séparément et n'est PAS affiché tant qu'il ne l'est pas. Le fret express
+     * est donc remis à zéro, pour qu'aucune vitrine ne montre le prix d'un
+     * acheminement qui ne sera pas emprunté.
+     *
+     * La quantité minimum calculée sur l'express n'est pas reprise non plus :
+     * elle amortissait une part fixe propre au porte-à-porte, et imposer au
+     * client un lot pour une raison devenue caduque serait une barrière gratuite.
+     *
+     * On écrit désormais exactement comme la branche « aucun palier coté »
+     * ci-dessus, qui, elle, faisait déjà juste. Deux chemins qui mènent au même
+     * constat — CJ ne portera pas cet article — doivent produire le même état.
+     */
     const maj = refuse
-      ? { mode_acheminement: 'groupage', fret_source: 'forfait',
-          cout_fret_fcfa: 0, indisponible_motif: null, actif: true }
-      : { indisponible_motif: null, actif: true,
+      ? {
+          mode_acheminement: 'groupage', fret_source: 'cj_refuse',
+          cout_fret_fcfa: 0, indisponible_motif: null, actif: true,
+        }
+      : {
+          mode_acheminement: 'cj_ddp', fret_source: 'cj_reel',
           quantite_minimum: a.quantite, cout_fret_fcfa: a.fret_unitaire_fcfa,
-          fret_source: 'cj_reel', mode_acheminement: 'cj_ddp', retarife_le: new Date().toISOString() };
+          indisponible_motif: null, actif: true,
+          retarife_le: new Date().toISOString(),
+        };
 
-    // `return=representation` fait consommer le corps — ce qui empêche la
-    // requête d'être abandonnée — et prouve qu'une ligne a changé.
-    const rMaj = await fetch(`${URL_SB}/rest/v1/app_e08c374bc4_produits?id=eq.${p.id}`, {
-      method: 'PATCH',
-      headers: { ...enTetesSb, Prefer: 'return=representation' },
-      body: JSON.stringify(maj),
-    });
-    const texte = await rMaj.text().catch(() => '');
-    let touchees = 0;
-    try { touchees = (JSON.parse(texte) as unknown[]).length; } catch { touchees = 0; }
-    if (touchees === 0) {
-      rapport[rapport.length - 1].ecriture = `SANS EFFET (${rMaj.status}) ${texte.slice(0, 120)}`;
-    }
+    const err = await ecrire(p.id, maj);
+    if (err) rapport[rapport.length - 1].ecriture = err;
   }
 
-  return json({ termine: false, traites: rapport.length, simulation, rapport });
+  return json({ termine: false, cible, traites: rapport.length, simulation, rapport });
 });
