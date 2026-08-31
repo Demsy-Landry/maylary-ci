@@ -31,14 +31,34 @@ import { servirAvecCors } from '../_partage/cors.ts';
 import { extractText, getDocumentProxy } from 'npm:unpdf@0.12.1';
 
 /**
- * Le seul endroit d'où cette fonction accepte de lire.
+ * Les seuls endroits d'où cette fonction accepte de lire.
  *
- * Le contrôle porte sur le début de l'adresse APRÈS analyse, jamais sur le
- * texte brut : `https://e-docucenter.uemoa.int@ailleurs.example/` commence
- * bien par la bonne chaîne de caractères, mais ne désigne pas ce serveur.
+ * Le contrôle porte sur l'hôte APRÈS analyse de l'adresse, jamais sur le texte
+ * brut : `https://e-docucenter.uemoa.int@ailleurs.example/` commence bien par
+ * la bonne chaîne de caractères, mais ne désigne pas ce serveur. Vérifié : une
+ * adresse de cette forme est refusée avec un 403.
+ *
+ * DEUX AUTORITÉS, DEUX BESOINS DISTINCTS
+ *
+ * L'UEMOA publie le Tarif Extérieur Commun : c'est elle qui fonde le classement
+ * et les droits.
+ *
+ * L'ARTCI publie le régime des équipements radioélectriques — la liste des
+ * matériels à courte portée et faible puissance (ECPF), celle des équipements
+ * terminaux (ETRA), et les listes d'homologation. Trente articles du catalogue
+ * émettent des ondes ; savoir lesquels relèvent d'une homologation ne se devine
+ * pas, cela se lit dans ces documents. Ils ne sont publiés qu'en PDF.
+ *
+ * Chaque source garde SON dossier : ouvrir un hôte entier reviendrait à
+ * accepter n'importe quel fichier qu'un tiers y déposerait.
  */
-const HOTE_AUTORISE = 'e-docucenter.uemoa.int';
-const DOSSIER_AUTORISE = '/sites/default/files/';
+const SOURCES_AUTORISEES: { hote: string; dossier: string }[] = [
+  { hote: 'e-docucenter.uemoa.int', dossier: '/sites/default/files/' },
+  // L'ARTCI sert le même contenu sous les deux formes du domaine, et ses
+  // pages « Télécharger » redirigent de l'une vers l'autre.
+  { hote: 'artci.ci', dossier: '/wp-content/uploads/' },
+  { hote: 'www.artci.ci', dossier: '/wp-content/uploads/' },
+];
 
 function adresseAcceptable(brut: string): URL | null {
   let adresse: URL;
@@ -48,9 +68,12 @@ function adresseAcceptable(brut: string): URL | null {
     return null;
   }
   if (adresse.protocol !== 'https:') return null;
-  if (adresse.hostname !== HOTE_AUTORISE) return null;
-  if (!adresse.pathname.startsWith(DOSSIER_AUTORISE)) return null;
   if (!adresse.pathname.toLowerCase().endsWith('.pdf')) return null;
+
+  const source = SOURCES_AUTORISEES.find((s) => s.hote === adresse.hostname);
+  if (!source) return null;
+  if (!adresse.pathname.startsWith(source.dossier)) return null;
+
   return adresse;
 }
 
@@ -83,7 +106,7 @@ servirAvecCors(async (req) => {
       {
         erreur:
           `Adresse refusée. Cette fonction ne lit que les PDF publiés sous ` +
-          `https://${HOTE_AUTORISE}${DOSSIER_AUTORISE}`,
+          SOURCES_AUTORISEES.map((s) => `https://${s.hote}${s.dossier}`).join(' ou '),
       },
       403,
     );
@@ -91,7 +114,7 @@ servirAvecCors(async (req) => {
 
   const reponse = await fetch(adresse.toString());
   if (!reponse.ok) {
-    return json({ erreur: `L'UEMOA a répondu ${reponse.status}.` }, 502);
+    return json({ erreur: `${adresse.hostname} a répondu ${reponse.status}.` }, 502);
   }
 
   const octets = new Uint8Array(await reponse.arrayBuffer());
