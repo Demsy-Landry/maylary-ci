@@ -1,6 +1,14 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 import { supabase, type Profile } from '@/lib/supabase';
+import {
+  fermerSession,
+  messageDeFermeture,
+  motifDeFermeture,
+  noterActivite,
+  ouvrirSession,
+} from '@/lib/duree-session';
 
 /**
  * L'état de connexion de l'application.
@@ -139,8 +147,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         poserProfil(null);
         setProfilIndisponible(false);
         setProfilEnCours(false);
+        // Sans cet effacement, la session suivante hériterait de l'heure de
+        // connexion de la précédente et serait fermée bien trop tôt.
+        fermerSession();
         return;
       }
+
+      // Marque l'ouverture, une seule fois — la fonction ignore les appels
+      // suivants. Elle est appelée à chaque événement, y compris au
+      // renouvellement du jeton, et c'est voulu : c'est elle qui note aussi le
+      // dernier signe de vie.
+      ouvrirSession();
 
       // Un rafraîchissement de jeton ne change pas l'utilisateur : relire le
       // profil à chaque renouvellement ferait clignoter les écrans protégés
@@ -166,8 +183,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    fermerSession();
     poserProfil(null);
   };
+
+  /*
+   * LA SESSION NE DURE PAS INDÉFINIMENT.
+   *
+   * Elle se fermait seulement quand l'utilisateur le demandait : le jeton se
+   * renouvelait tout seul, sans fin. Un espace d'administration ouvert restait
+   * ouvert des mois.
+   *
+   * Deux bornes, et deux régimes — les durées et le pourquoi sont dans
+   * `src/lib/duree-session.ts`, pas ici.
+   *
+   * LE CONTRÔLE PASSE À LA MINUTE, ET AU RETOUR SUR L'ONGLET
+   *
+   * Une minuterie ne tourne pas quand le téléphone dort : au réveil, des heures
+   * ont pu passer sans qu'aucun tour ne se déclenche. On contrôle donc aussi au
+   * retour de visibilité, qui est précisément le moment où quelqu'un retrouve
+   * un écran laissé ouvert.
+   */
+  const estAdmin = profile?.type_compte === 'admin';
+
+  useEffect(() => {
+    if (!session?.user) return;
+
+    const fermerSiExpiree = () => {
+      const motif = motifDeFermeture(estAdmin);
+      if (!motif) return;
+      // On prévient AVANT de déconnecter : « vous avez été déconnecté » sans
+      // raison se lit comme une panne, et le client rappelle pour le signaler.
+      toast.info(messageDeFermeture(motif, estAdmin));
+      void signOut();
+    };
+
+    fermerSiExpiree();
+
+    const minuteur = window.setInterval(fermerSiExpiree, 60_000);
+
+    // Les gestes qui comptent comme une présence. `scroll` en fait partie : lire
+    // une longue page sans rien toucher d'autre reste une activité.
+    const gestes = ['pointerdown', 'keydown', 'scroll', 'touchstart'] as const;
+    // On n'écrit pas dans le stockage à chaque pixel de défilement : une fois
+    // toutes les trente secondes suffit à tenir la borne d'inactivité.
+    let derniereEcriture = 0;
+    const surGeste = () => {
+      const maintenant = Date.now();
+      if (maintenant - derniereEcriture < 30_000) return;
+      derniereEcriture = maintenant;
+      noterActivite();
+    };
+    for (const geste of gestes) {
+      window.addEventListener(geste, surGeste, { passive: true });
+    }
+
+    const auRetour = () => {
+      if (document.visibilityState !== 'visible') return;
+      noterActivite();
+      fermerSiExpiree();
+    };
+    document.addEventListener('visibilitychange', auRetour);
+
+    return () => {
+      window.clearInterval(minuteur);
+      for (const geste of gestes) window.removeEventListener(geste, surGeste);
+      document.removeEventListener('visibilitychange', auRetour);
+    };
+    // `signOut` est stable dans la portée de ce composant ; le relire à chaque
+    // rendu reposerait les écouteurs pour rien.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id, estAdmin]);
 
   return (
     <AuthContext.Provider
