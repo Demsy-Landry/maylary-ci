@@ -312,6 +312,12 @@ export function ProductCardGP({ produit }: { produit: Produit }) {
   const enRupture = produit.stock_disponible === 'rupture';
 
   const handleQuickAdd = (e: MouseEvent) => {
+    /* UN ARTICLE À DÉCLINER NE S'AJOUTE PAS DEPUIS LA LISTE.
+       Sans taille ni couleur, la commande partirait au fournisseur avec la
+       première déclinaison venue — c'est exactement le défaut qu'on corrige.
+       On ne bloque pas le clic : on le laisse suivre le lien vers la fiche, où
+       le choix est possible. Un bouton qui ne fait rien passerait pour cassé. */
+    if (produit.choix_requis) return;
     e.preventDefault();
     e.stopPropagation();
     // Les articles vendus par lot entrent au panier à leur quantité minimum.

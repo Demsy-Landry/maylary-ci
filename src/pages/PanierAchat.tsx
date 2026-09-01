@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
-import { useCartGP, prixLigne, type CartItemGP } from '@/hooks/useCartGP';
+import { useCartGP, prixLigne, cleLigne, type CartItemGP } from '@/hooks/useCartGP';
 import { Button } from '@/components/ui/button';
 import { Minus, Plus, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
 import ImageWithFallback from '@/components/ImageWithFallback';
@@ -21,9 +21,14 @@ export default function PanierAchat() {
   /* La même carte sert aux deux files. La dupliquer ferait diverger les deux
      affichages dès la première retouche — et c'est toujours la seconde qu'on
      oublie. */
-  const carteArticle = (item: CartItemGP) => (
+  const carteArticle = (item: CartItemGP) => {
+    /* La ligne s'identifie par sa DÉCLINAISON, pas par son produit : une même
+       robe en M et en L fait deux lignes, et les indexer sur le produit les
+       ferait se confondre — supprimer l'une supprimerait les deux. */
+    const cle = cleLigne(item);
+    return (
                 <div
-      key={item.produit_id}
+      key={cle}
       /* Sur un téléphone, la rangée unique écrasait le nom : « Écouteurs Bl… »
          pour un article qui s'appelle « Écouteurs Bluetooth sans fil ». Les
          commandes ont une largeur fixe, c'est donc toujours le nom qui cède.
@@ -41,6 +46,9 @@ export default function PanierAchat() {
                     <p className="font-medium text-foreground [overflow-wrap:anywhere] line-clamp-2 sm:truncate">
                       {item.nom}
                     </p>
+                    {item.declinaison_libelle && (
+                      <p className="text-xs text-muted-foreground">{item.declinaison_libelle}</p>
+                    )}
                     <p className="text-sm font-semibold text-primary">
                       {prixLigne(item).toLocaleString('fr-FR')} FCFA
                     </p>
@@ -49,7 +57,7 @@ export default function PanierAchat() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => updateQuantite(item.produit_id, item.quantite - 1)}
+                      onClick={() => updateQuantite(cle, item.quantite - 1)}
                     >
                       <Minus className="h-4 w-4" />
                     </Button>
@@ -57,7 +65,7 @@ export default function PanierAchat() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => updateQuantite(item.produit_id, item.quantite + 1)}
+                      onClick={() => updateQuantite(cle, item.quantite + 1)}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
@@ -66,12 +74,13 @@ export default function PanierAchat() {
                     variant="ghost"
                     size="icon"
                     className="shrink-0"
-                    onClick={() => removeItem(item.produit_id)}
+                    onClick={() => removeItem(cle)}
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">

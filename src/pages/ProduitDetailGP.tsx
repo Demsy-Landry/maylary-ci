@@ -22,6 +22,7 @@ import { prixPourQuantite } from '@/lib/cout-import';
 import OrigineProduitBadge from '@/components/OrigineProduitBadge';
 import { useAuth } from '@/hooks/useAuth';
 import { useCartGP } from '@/hooks/useCartGP';
+import ChoixDeclinaison, { type Declinaison } from '@/components/ChoixDeclinaison';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -50,6 +51,15 @@ export default function ProduitDetailGP() {
   const [quantite, setQuantite] = useState(1);
   const grilles = usePaliers(produitId ? [produitId] : []);
   const paliers = (produitId && grilles[produitId]) || [];
+  /*
+   * LE CHOIX DE TAILLE ET DE COULEUR
+   *
+   * `nbDeclinaisons` vient du sélecteur lui-même : la page ne sait pas d'avance
+   * combien il y en a, et une requête de plus ici ferait clignoter l'écran.
+   * Tant qu'il vaut 0 ou 1, il n'y a rien à choisir et l'achat reste ouvert.
+   */
+  const [declinaison, setDeclinaison] = useState<Declinaison | null>(null);
+  const [nbDeclinaisons, setNbDeclinaisons] = useState(0);
   const [isFavori, setIsFavori] = useState(false);
   const [favoriBusy, setFavoriBusy] = useState(false);
 
@@ -136,17 +146,32 @@ export default function ProduitDetailGP() {
     setFavoriBusy(false);
   };
 
+  /**
+   * Vrai quand l'article a plusieurs déclinaisons et qu'aucune n'est encore
+   * retenue. On bloque alors l'achat : envoyer au fournisseur une commande sans
+   * taille reviendrait à choisir à la place du client.
+   */
+  const choixIncomplet = nbDeclinaisons > 1 && !declinaison;
+
   const handleAddToCart = () => {
     if (!produit) return;
+    if (choixIncomplet) {
+      toast.error('Choisissez d’abord la taille et la couleur.');
+      return;
+    }
     addItem(
       {
         produit_id: produit.id,
         nom: produit.nom,
         prix_unitaire_fcfa: produit.prix_unitaire_fcfa,
-        photo: produit.photos?.[0] ?? null,
+        // La photo de la déclinaison montre la couleur réellement commandée ;
+        // celle de l'article ne montre qu'une des variantes.
+        photo: declinaison?.photo_url ?? produit.photos?.[0] ?? null,
         quantite_minimum: produit.quantite_minimum ?? 1,
         paliers,
         mode_acheminement: produit.mode_acheminement,
+        declinaison_id: declinaison?.id ?? null,
+        declinaison_libelle: declinaison?.libelle ?? null,
       },
       quantite,
     );
@@ -154,6 +179,10 @@ export default function ProduitDetailGP() {
   };
 
   const handleBuyNow = () => {
+    if (choixIncomplet) {
+      toast.error('Choisissez d’abord la taille et la couleur.');
+      return;
+    }
     handleAddToCart();
     navigate('/boutique/panier');
   };
@@ -336,6 +365,14 @@ export default function ProduitDetailGP() {
                 </div>
               )}
 
+              <div className="mt-6">
+                <ChoixDeclinaison
+                  produitId={produit.id}
+                  onChoix={setDeclinaison}
+                  onNombre={setNbDeclinaisons}
+                />
+              </div>
+
               <div className="mt-6 flex items-center gap-3">
                 <div className="flex items-center rounded-md border">
                   <Button
@@ -360,12 +397,15 @@ export default function ProduitDetailGP() {
                 <Button
                   variant="outline"
                   onClick={handleAddToCart}
-                  disabled={produit.stock_disponible === 'rupture'}
+                  disabled={produit.stock_disponible === 'rupture' || choixIncomplet}
                 >
                   <ShoppingCart className="mr-2 h-4 w-4" />
                   Ajouter au panier
                 </Button>
-                <Button onClick={handleBuyNow} disabled={produit.stock_disponible === 'rupture'}>
+                <Button
+                  onClick={handleBuyNow}
+                  disabled={produit.stock_disponible === 'rupture' || choixIncomplet}
+                >
                   Acheter maintenant
                 </Button>
               </div>

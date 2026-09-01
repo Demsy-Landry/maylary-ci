@@ -30,6 +30,30 @@ export interface CartItemGP {
    * séparation, faite ici plutôt que laissée à la vigilance du client.
    */
   mode_acheminement?: ModeAcheminement;
+  /**
+   * LA DÉCLINAISON CHOISIE — TAILLE, COULEUR, OU LES DEUX
+   *
+   * Sans elle, le fournisseur recevait la première déclinaison venue. Mesuré le
+   * 31 août sur « Robe fleurie col V » : quinze déclinaisons existaient, et
+   * toute cliente aurait reçu la taille S.
+   *
+   * `declinaison_libelle` est recopié plutôt que recalculé : le panier vit dans
+   * le téléphone du client, parfois pendant des jours. Si l'article change
+   * entre-temps, la ligne doit continuer d'afficher ce qui a été choisi.
+   */
+  declinaison_id?: string | null;
+  declinaison_libelle?: string | null;
+}
+
+/**
+ * L'identité d'une ligne de panier.
+ *
+ * Ce n'est PAS le produit : une même robe en M et en L fait deux lignes. Les
+ * indexer sur le seul `produit_id` les aurait fusionnées, et la cliente aurait
+ * reçu deux fois la même taille.
+ */
+export function cleLigne(item: Pick<CartItemGP, 'produit_id' | 'declinaison_id'>): string {
+  return `${item.produit_id}::${item.declinaison_id ?? ''}`;
 }
 
 /**
@@ -47,8 +71,9 @@ interface CartGPContextValue {
   /** Ce qui rejoint la prochaine campagne de groupage. */
   itemsGroupage: CartItemGP[];
   addItem: (item: Omit<CartItemGP, 'quantite'>, quantite?: number) => void;
-  updateQuantite: (produit_id: string, quantite: number) => void;
-  removeItem: (produit_id: string) => void;
+  /** La clé vient de `cleLigne`, pas du produit : deux tailles font deux lignes. */
+  updateQuantite: (cle: string, quantite: number) => void;
+  removeItem: (cle: string) => void;
   clearCart: () => void;
   totalFcfa: number;
   totalArticles: number;
@@ -86,25 +111,29 @@ export function CartGPProvider({ children }: { children: ReactNode }) {
   }, [items]);
 
   const addItem = (item: Omit<CartItemGP, 'quantite'>, quantite = 1) => {
+    const cle = cleLigne(item);
     setItems((prev) => {
-      const existing = prev.find((i) => i.produit_id === item.produit_id);
+      // Le regroupement se fait sur la DÉCLINAISON, pas sur le produit : ajouter
+      // une robe en L alors qu'une M est déjà au panier doit créer une seconde
+      // ligne, pas doubler la première.
+      const existing = prev.find((i) => cleLigne(i) === cle);
       if (existing) {
         return prev.map((i) =>
-          i.produit_id === item.produit_id ? { ...i, quantite: i.quantite + quantite } : i
+          cleLigne(i) === cle ? { ...i, quantite: i.quantite + quantite } : i,
         );
       }
       return [...prev, { ...item, quantite }];
     });
   };
 
-  const updateQuantite = (produit_id: string, quantite: number) => {
+  const updateQuantite = (cle: string, quantite: number) => {
     if (quantite <= 0) {
-      removeItem(produit_id);
+      removeItem(cle);
       return;
     }
     setItems((prev) =>
       prev.map((i) =>
-        i.produit_id === produit_id
+        cleLigne(i) === cle
           ? // On ne descend pas sous la quantité minimum de vente : en dessous,
             // la part fixe du transport ne serait plus couverte.
             { ...i, quantite: Math.max(quantite, i.quantite_minimum ?? 1) }
@@ -113,8 +142,8 @@ export function CartGPProvider({ children }: { children: ReactNode }) {
     );
   };
 
-  const removeItem = (produit_id: string) => {
-    setItems((prev) => prev.filter((i) => i.produit_id !== produit_id));
+  const removeItem = (cle: string) => {
+    setItems((prev) => prev.filter((i) => cleLigne(i) !== cle));
   };
 
   const clearCart = () => setItems([]);

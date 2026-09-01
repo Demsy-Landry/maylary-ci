@@ -97,6 +97,8 @@ export const PRODUITS_TABLE = 'app_e08c374bc4_produits';
 export const PRODUITS_PUBLIC_VIEW = 'app_e08c374bc4_produits_public';
 /** Grille de prix dégressive, exposée sans nos coûts. */
 export const PALIERS_PRIX_PUBLIC_VIEW = 'app_e08c374bc4_paliers_prix_public';
+/** Les tailles et couleurs d'un article, sans référence fournisseur ni prix d'achat. */
+export const DECLINAISONS_PUBLIC_VIEW = 'app_e08c374bc4_declinaisons_public';
 export const DEMANDES_DEVIS_TABLE = 'app_e08c374bc4_demandes_devis';
 export const LIGNES_DEVIS_TABLE = 'app_e08c374bc4_lignes_devis';
 export const HISTORIQUE_STATUT_TABLE = 'app_e08c374bc4_historique_statut_devis';
@@ -482,6 +484,16 @@ export interface Produit {
    * client doit l'avoir avant de choisir.
    */
   mode_acheminement?: ModeAcheminement;
+  /**
+   * Vrai quand l'article existe en plusieurs tailles ou couleurs.
+   *
+   * Calculé par la vue publique plutôt que par l'écran : la liste affiche
+   * jusqu'à cinquante articles, et interroger les déclinaisons une par une
+   * ferait cinquante requêtes pour une information qu'une jointure donne d'un
+   * coup. Un article marqué ainsi ne peut pas entrer au panier depuis la liste :
+   * il faut passer par la fiche pour choisir.
+   */
+  choix_requis?: boolean;
 }
 
 /** Vue admin complète du produit, incluant le prix d'achat privé — jamais utilisée côté public. */

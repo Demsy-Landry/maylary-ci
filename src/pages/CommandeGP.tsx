@@ -299,6 +299,10 @@ export default function CommandeGP() {
     // publique des produits, et le faire transiter par le navigateur
     // exposerait nos prix fournisseur. Un déclencheur le fige côté base au
     // moment de l'insertion.
+    // La déclinaison suit la ligne jusqu'au fournisseur : c'est elle qui dit
+    // quelle taille et quelle couleur préparer. Le libellé est recopié à côté
+    // de l'identifiant, pour que la facture et le bon de préparation restent
+    // lisibles même si l'article change ou disparaît du catalogue ensuite.
     const lignes = items.map((i) => ({
       commande_id: commande.id,
       produit_id: i.produit_id,
@@ -306,6 +310,8 @@ export default function CommandeGP() {
       quantite: i.quantite,
       prix_unitaire_fcfa: prixLigne(i),
       sous_total: prixLigne(i) * i.quantite,
+      declinaison_id: i.declinaison_id ?? null,
+      declinaison_libelle: i.declinaison_libelle ?? null,
     }));
 
     const { error: lignesError } = await supabase.from(LIGNES_COMMANDE_GP_TABLE).insert(lignes);

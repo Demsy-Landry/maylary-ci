@@ -213,7 +213,7 @@ servirAvecCors(async (req: Request) => {
 
     const { data: lignes } = await db
       .from('app_e08c374bc4_lignes_commande_gp')
-      .select('produit_id, nom_produit, quantite')
+      .select('produit_id, nom_produit, quantite, declinaison_id, declinaison_libelle')
       .eq('commande_id', commande.id);
     if (!lignes?.length) return reponse({ error: 'Commande sans ligne.' }, 400);
 
@@ -224,6 +224,20 @@ servirAvecCors(async (req: Request) => {
 
     // Seuls les articles du fournisseur partent chez lui. Un article local dans
     // la même commande n'est pas une erreur : il se prépare chez nous.
+    // Les déclinaisons choisies par le client. C'est ELLE qui fait foi : le
+    // `reference_variante` du produit n'est qu'une déclinaison par défaut,
+    // prise sur la première que le fournisseur renvoyait, et l'utiliser quand
+    // le client a choisi une taille reviendrait à lui en envoyer une autre.
+    const idsDeclinaison = lignes
+      .map((l) => l.declinaison_id)
+      .filter(Boolean) as string[];
+    const { data: declinaisons } = idsDeclinaison.length
+      ? await db
+          .from('app_e08c374bc4_declinaisons')
+          .select('id, reference_variante')
+          .in('id', idsDeclinaison)
+      : { data: [] as { id: string; reference_variante: string }[] };
+
     const aCommander: { vid: string; quantite: number; nom: string }[] = [];
     const nonTransmis: string[] = [];
 
@@ -233,7 +247,15 @@ servirAvecCors(async (req: Request) => {
         nonTransmis.push(ligne.nom_produit);
         continue;
       }
-      let vid = p.reference_variante as string | null;
+
+      // ORDRE DE PRIORITÉ : le choix du client d'abord, le défaut du produit
+      // ensuite, et seulement en dernier recours une interrogation du
+      // fournisseur.
+      const choisie = ligne.declinaison_id
+        ? declinaisons?.find((d) => d.id === ligne.declinaison_id)
+        : null;
+      let vid = (choisie?.reference_variante ?? p.reference_variante) as string | null;
+
       if (!vid && p.reference_externe) {
         const detail = await obtenirDetailProduitCj(String(p.reference_externe), token);
         vid = detail.vid;
@@ -246,7 +268,13 @@ servirAvecCors(async (req: Request) => {
         nonTransmis.push(ligne.nom_produit);
         continue;
       }
-      aCommander.push({ vid, quantite: ligne.quantite, nom: ligne.nom_produit });
+      // Le libellé de la déclinaison rejoint le nom transmis : sur le bon de
+      // préparation du fournisseur, « Robe fleurie » et « Robe fleurie —
+      // Rouge M » ne se confondent plus.
+      const nom = ligne.declinaison_libelle
+        ? `${ligne.nom_produit} — ${ligne.declinaison_libelle}`
+        : ligne.nom_produit;
+      aCommander.push({ vid, quantite: ligne.quantite, nom });
     }
 
     if (aCommander.length === 0) {
