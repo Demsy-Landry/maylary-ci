@@ -222,8 +222,6 @@ servirAvecCors(async (req: Request) => {
       .select('id, nom, reference_externe, reference_variante, source_donnee')
       .in('id', lignes.map((l) => l.produit_id).filter(Boolean) as string[]);
 
-    // Seuls les articles du fournisseur partent chez lui. Un article local dans
-    // la même commande n'est pas une erreur : il se prépare chez nous.
     // Les déclinaisons choisies par le client. C'est ELLE qui fait foi : le
     // `reference_variante` du produit n'est qu'une déclinaison par défaut,
     // prise sur la première que le fournisseur renvoyait, et l'utiliser quand
@@ -238,6 +236,8 @@ servirAvecCors(async (req: Request) => {
           .in('id', idsDeclinaison)
       : { data: [] as { id: string; reference_variante: string }[] };
 
+    // Seuls les articles du fournisseur partent chez lui. Un article local dans
+    // la même commande n'est pas une erreur : il se prépare chez nous.
     const aCommander: { vid: string; quantite: number; nom: string }[] = [];
     const nonTransmis: string[] = [];
 
