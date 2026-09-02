@@ -1,0 +1,51 @@
+-- Un article dont le transporteur a coté le fret ne doit pas partir en groupage.
+--
+-- LA CONTRADICTION, MESURÉE
+--
+-- Au 2 septembre, le catalogue actif se répartissait ainsi :
+--
+--   groupage + cj_refuse   285 articles   poids moyen 3 829 g   — normal
+--   cj_ddp   + cj_reel     117 articles   poids moyen   425 g   — normal
+--   groupage + cj_reel     109 articles   poids moyen   113 g   — ABSURDE
+--
+-- Les 109 derniers sont les articles les PLUS LÉGERS du catalogue — cent treize
+-- grammes de moyenne, 2 775 FCFA de prix moyen — et le fournisseur avait déjà
+-- coté leur transport. On les envoyait quand même attendre un départ maritime.
+--
+-- Des chaînes de cheville et des boucles d'oreilles en fret maritime.
+--
+-- D'OÙ ÇA VENAIT
+--
+-- `cj_amortir` basculait en groupage tout article dont le fret unitaire
+-- dépassait `ratio_fret_maximum` (1,5) fois son prix d'achat.
+--
+-- Ce garde-fou avait un sens quand le fret était INCLUS dans le prix de vente :
+-- un rapport élevé donnait alors un prix invendable. Mais
+-- `fret_inclus_dans_prix` est à FAUX depuis : le transport est coté sur le
+-- panier réel au passage en caisse, et facturé à part. Le rapport calculé sur
+-- une pièce isolée ne dit donc plus rien du prix que le client verra — et sur
+-- un article de cent grammes, le fret marginal dans un colis est celui d'une
+-- enveloppe. Le fondateur l'a relevé : « c'est quand même illogique ».
+--
+-- LA RÈGLE, TELLE QU'IL L'A POSÉE
+--
+-- « Le groupage à tous les coups doit être les articles qui ne sont pas pris en
+-- charge par CJ ou DHL, ou par choix du client. »
+--
+-- Elle tient en deux lignes : le transporteur cote, l'article part en
+-- porte-à-porte ; le transporteur refuse, l'article va en groupage.
+--
+-- CE QUI N'EST PAS TOUCHÉ
+--
+-- La quantité minimum de vente. Le fondateur l'a demandée : « lorsque les
+-- valeurs sont petites, mettre un achat minimum ». Cent trois de ces articles
+-- se vendent par cinq, et cela reste ainsi — c'est une décision commerciale,
+-- pas une conséquence du fret.
+--
+-- La fonction `cj_amortir` a été corrigée en même temps (version 6). Sans cela,
+-- son prochain passage aurait remis ces articles en groupage, et cette
+-- migration n'aurait tenu qu'une heure.
+update app_e08c374bc4_produits
+   set mode_acheminement = 'cj_ddp'
+ where mode_acheminement = 'groupage'
+   and fret_source = 'cj_reel';

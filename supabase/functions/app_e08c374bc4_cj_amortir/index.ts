@@ -140,8 +140,16 @@ Deno.serve(async (req) => {
   const rParam = await fetch(`${URL_SB}/rest/v1/app_e08c374bc4_parametres_import?select=*&id=eq.1`, { headers: enTetesSb });
   const parametres = ((await rParam.json().catch(() => [])) as Record<string, unknown>[])[0] ?? {};
   const paliers = (parametres.paliers_quantite as number[]) ?? [1, 5, 20, 50];
+  /*
+   * `ratio_fret_maximum` ne sert PLUS à décider de l'acheminement — voir le
+   * commentaire plus bas. Il ne sert qu'à choisir la plus petite quantité qui
+   * amortit le fret, ce qui reste utile pour renseigner une commande minimum.
+   *
+   * `seuil_commande_surveillee_fcfa` a été retiré d'ici avec le garde-fou qui
+   * l'utilisait : il ne restait plus qu'à faire basculer en groupage des
+   * articles de cent grammes que le transporteur acceptait de porter.
+   */
   const ratioMax = Number(parametres.ratio_fret_maximum ?? 5);
-  const seuilSurveille = Number(parametres.seuil_commande_surveillee_fcfa ?? 20000);
   const taux = Number(parametres.taux_change_usd_fcfa ?? 600);
   const pays = String(parametres.pays_destination_code ?? 'CI');
 
@@ -220,60 +228,80 @@ Deno.serve(async (req) => {
 
     const a = amortirLeFret({ prixAchatFcfa: p.prix_achat_fcfa, devis, ratioFretMaximum: ratioMax })!;
     const commandeMinimum = (p.prix_unitaire_fcfa + a.fret_unitaire_fcfa) * a.quantite;
-    const refuse = !a.amorti && commandeMinimum > seuilSurveille;
 
+    /*
+     * LE RAPPORT FRET/PRIX NE DÉCIDE PLUS DE L'ACHEMINEMENT.
+     *
+     * Cette fonction basculait en groupage tout article dont le fret unitaire
+     * dépassait 1,5 fois son prix d'achat. Ce garde-fou avait un sens quand le
+     * fret était INCLUS dans le prix de vente : un rapport élevé donnait alors
+     * un prix invendable.
+     *
+     * Il ne l'est plus. `fret_inclus_dans_prix` est à faux : le transport est
+     * coté sur le PANIER RÉEL au passage en caisse et facturé à part. Le
+     * rapport calculé sur une pièce isolée ne dit donc plus rien du prix que le
+     * client verra.
+     *
+     * Ce que ça donnait, mesuré le 2 septembre : 109 articles en groupage alors
+     * que le fournisseur avait coté leur fret. Poids moyen : CENT TREIZE
+     * GRAMMES. Prix moyen : 2 775 FCFA. Des chaînes de cheville et des boucles
+     * d'oreilles envoyées attendre un départ maritime, quand leur poids dans un
+     * colis est celui d'une enveloppe. Le fondateur l'a relevé dans ces termes :
+     * « c'est quand même illogique ».
+     *
+     * LA RÈGLE, TELLE QU'IL L'A POSÉE
+     *
+     * « Le groupage à tous les coups doit être les articles qui ne sont pas pris
+     * en charge par CJ ou DHL, ou par choix du client. »
+     *
+     * Donc : le transporteur cote, l'article part en porte-à-porte. Le
+     * transporteur refuse, l'article va en groupage. Et le groupage reste
+     * offert au client comme une OPTION — moins cher, plus lent — au lieu de
+     * lui être imposé par un calcul qu'il ne voit pas.
+     */
     rapport.push({
       nom: p.nom,
       etait: p.actif ? 'en ligne' : 'éteint',
-      decision: refuse ? 'groupage (fret non amortissable)' : 'porte-à-porte CJ',
-      quantite_minimum: a.quantite,
+      decision: 'porte-à-porte CJ',
+      quantite_minimum: a.amorti ? a.quantite : null,
       fret_unitaire_fcfa: a.fret_unitaire_fcfa,
       ratio: Number(a.ratio.toFixed(2)),
       commande_minimum_fcfa: Math.round(commandeMinimum),
+      fret_amorti: a.amorti,
       essais: a.essais,
     });
 
     if (simulation) continue;
 
     /*
-     * UN FRET INAMORTISSABLE N'EST PAS UN MOTIF D'EXTINCTION
+     * LE TRANSPORTEUR A COTÉ : L'ARTICLE PART EN PORTE-À-PORTE.
      *
-     * Cette branche laissait l'article éteint dès lors qu'il l'était déjà —
-     * `indisponible_motif: p.actif ? null : 'fret_non_amortissable'`. C'était une
-     * faute de raisonnement : « le porte-à-porte revient trop cher » ne veut pas
-     * dire « cet article est invendable », cela veut dire « cet article ne passe
-     * pas par le porte-à-porte ». Or la règle de la maison est que tout ce que le
-     * transporteur ne prend pas relève du GROUPAGE.
+     * Il n'y a plus qu'un seul cas ici, et c'est ce qui rend la règle lisible :
+     * si l'on est arrivé jusqu'à cette ligne, c'est qu'au moins un palier a été
+     * coté. Le transporteur prend donc l'article. Le seul chemin vers le
+     * groupage est celui d'au-dessus — aucun palier coté, c'est-à-dire un refus
+     * franc du transporteur.
      *
-     * Observé le 31 août, en direct : une enceinte à 8 234 F d'achat pour
-     * 13 152 F de fret express est repartie « groupage (fret non amortissable) »
-     * — et est restée invisible, alors qu'elle avait un prix, des photos et une
-     * fiche complète. Cinq articles étaient dans ce cas, tous avec un prix.
+     * LA QUANTITÉ MINIMUM N'EST IMPOSÉE QUE SI ELLE SERT VRAIMENT
      *
-     * En groupage, ce rapport n'a plus aucun sens : le fret y est vérifié
-     * séparément et n'est PAS affiché tant qu'il ne l'est pas. Le fret express
-     * est donc remis à zéro, pour qu'aucune vitrine ne montre le prix d'un
-     * acheminement qui ne sera pas emprunté.
+     * Quand le fret s'amortit, `a.quantite` est la PLUS PETITE quantité qui
+     * fait passer le fret sous le plafond : elle a un sens, on l'inscrit.
      *
-     * La quantité minimum calculée sur l'express n'est pas reprise non plus :
-     * elle amortissait une part fixe propre au porte-à-porte, et imposer au
-     * client un lot pour une raison devenue caduque serait une barrière gratuite.
-     *
-     * On écrit désormais exactement comme la branche « aucun palier coté »
-     * ci-dessus, qui, elle, faisait déjà juste. Deux chemins qui mènent au même
-     * constat — CJ ne portera pas cet article — doivent produire le même état.
+     * Quand il ne s'amortit pas, `amortirLeFret` rend sa meilleure tentative —
+     * souvent cinquante pièces. L'inscrire imposerait au client un lot de
+     * cinquante pour économiser un fret qui, de toute façon, ne figure plus
+     * dans le prix. Ce serait une barrière à l'achat sans contrepartie. On
+     * laisse alors la quantité minimum telle qu'elle est.
      */
-    const maj = refuse
-      ? {
-          mode_acheminement: 'groupage', fret_source: 'cj_refuse',
-          cout_fret_fcfa: 0, indisponible_motif: null, actif: true,
-        }
-      : {
-          mode_acheminement: 'cj_ddp', fret_source: 'cj_reel',
-          quantite_minimum: a.quantite, cout_fret_fcfa: a.fret_unitaire_fcfa,
-          indisponible_motif: null, actif: true,
-          retarife_le: new Date().toISOString(),
-        };
+    const maj: Record<string, unknown> = {
+      mode_acheminement: 'cj_ddp',
+      fret_source: 'cj_reel',
+      cout_fret_fcfa: a.fret_unitaire_fcfa,
+      indisponible_motif: null,
+      actif: true,
+      retarife_le: new Date().toISOString(),
+    };
+    if (a.amorti) maj.quantite_minimum = a.quantite;
 
     const err = await ecrire(p.id, maj);
     if (err) rapport[rapport.length - 1].ecriture = err;

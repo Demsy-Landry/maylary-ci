@@ -77,31 +77,72 @@ servirAvecCors(async (req: Request) => {
     const db = createClient(url, service);
     const { data: produits } = await db
       .from('app_e08c374bc4_produits')
-      .select('id, nom, reference_variante, cout_fret_fcfa, source_donnee')
+      .select('id, nom, reference_variante, cout_fret_fcfa, source_donnee, mode_acheminement')
       .in(
         'id',
         corps.lignes.map((l) => l.produit_id),
       );
 
-    // Seuls les articles expédiés depuis le fournisseur entrent dans le calcul.
-    // Un article local ou d'un vendeur de la place ne voyage pas avec eux.
+    /*
+     * ON N'INTERROGE LE TRANSPORTEUR QUE SUR CE QU'IL PORTE.
+     *
+     * Cette fonction lui soumettait le panier ENTIER, groupage compris. Or un
+     * article en groupage est précisément celui qu'il a refusé de coter : il
+     * répondait donc « aucune offre », et le panier était déclaré non
+     * expédiable — donc bloqué en caisse.
+     *
+     * Conséquence mesurée le 2 septembre : 285 articles actifs sur 511, soit
+     * PLUS DE LA MOITIÉ DU CATALOGUE, ne pouvaient pas être achetés. Le client
+     * les mettait au panier et se voyait refuser sa commande, sans que rien
+     * n'explique pourquoi.
+     *
+     * Le groupage n'est pas un empêchement : c'est un autre chemin. Il ne se
+     * cote pas chez ce transporteur, il se cote à l'ouverture de la campagne
+     * maritime. Les deux files sont donc séparées ici, et seule celle du
+     * porte-à-porte part en cotation.
+     */
     const aExpedier: { vid: string; quantite: number; nom: string }[] = [];
+    const enGroupage: string[] = [];
     let fretFactureArticles = 0;
 
     for (const ligne of corps.lignes) {
       const p = produits?.find((x) => x.id === ligne.produit_id);
+      // Un article local ou d'un vendeur de la place ne voyage pas avec eux.
       if (!p || p.source_donnee !== 'import_cj_dropshipping') continue;
       const quantite = Math.max(1, Math.round(ligne.quantite));
+
+      if (p.mode_acheminement === 'groupage') {
+        enGroupage.push(String(p.nom ?? ''));
+        continue;
+      }
+
       fretFactureArticles += Number(p.cout_fret_fcfa ?? 0) * quantite;
       if (p.reference_variante) {
         aExpedier.push({ vid: String(p.reference_variante), quantite, nom: String(p.nom ?? '') });
       }
     }
 
-    // Aucun article expédié depuis le fournisseur : rien à coter.
+    /*
+     * Rien à faire coter, mais le panier reste commandable.
+     *
+     * Deux cas se rejoignent ici, et aucun n'est un échec : un panier qui ne
+     * contient que des articles locaux, et un panier entièrement en groupage.
+     * Dans les deux cas il n'y a pas de transport à facturer maintenant — et
+     * surtout, il ne faut PAS afficher de prix de fret pour du groupage tant
+     * qu'il n'est pas vérifié. `expediable: true` est donc la bonne réponse :
+     * la commande peut être passée, le transport se règle ensuite.
+     */
     if (aExpedier.length === 0) {
       return reponse(
-        { success: true, remise_fcfa: 0, motif: 'aucun_article_fournisseur', options: [], articles_groupes: 0 },
+        {
+          success: true,
+          expediable: true,
+          remise_fcfa: 0,
+          motif: enGroupage.length > 0 ? 'tout_en_groupage' : 'aucun_article_fournisseur',
+          options: [],
+          articles_groupes: 0,
+          articles_en_groupage: enGroupage.length,
+        },
         200,
       );
     }
@@ -171,6 +212,7 @@ servirAvecCors(async (req: Request) => {
           remise_fcfa: 0,
           options: [],
           articles_groupes: aExpedier.length,
+          articles_en_groupage: enGroupage.length,
         },
         200,
       );
@@ -229,6 +271,9 @@ servirAvecCors(async (req: Request) => {
         options: optionsClient,
         fret_inclus_dans_prix: fretInclusDansPrix,
         articles_groupes: aExpedier.length,
+        // Un panier peut mêler les deux files. Le compte permet à la caisse de
+        // dire au client que cette partie-là partira séparément, par la mer.
+        articles_en_groupage: enGroupage.length,
       },
       200,
     );

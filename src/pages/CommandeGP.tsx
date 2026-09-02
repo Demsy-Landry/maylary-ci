@@ -55,6 +55,8 @@ export default function CommandeGP() {
     fret_facture_articles_fcfa?: number;
     fret_reel_panier_fcfa?: number;
     expediable?: boolean;
+    /** Combien de lignes du panier voyagent par la mer, et non en porte-à-porte. */
+    articles_en_groupage?: number;
     motif?: string;
     articles_en_cause?: string[];
     options?: OptionTransport[];
@@ -131,6 +133,21 @@ export default function CommandeGP() {
   // Un panier qu'aucun transporteur n'accepte ne doit pas être payé : on le
   // dirait après coup, et il faudrait revenir sur un prix encaissé.
   const panierBloque = remiseGroupage?.expediable === false;
+
+  /*
+   * LA PART DU PANIER QUI PART PAR LA MER
+   *
+   * Un panier peut mêler les deux acheminements. Le transporteur ne cote que le
+   * porte-à-porte ; le reste rejoint la prochaine campagne de groupage, dont le
+   * fret se chiffre à l'ouverture de la campagne et PAS avant. La règle de la
+   * maison est explicite là-dessus : « le groupage ne doit pas afficher le prix
+   * du fret tant qu'il n'est pas vérifié ».
+   *
+   * Il faut donc le DIRE, sans montant. Un client qui paie sans savoir qu'une
+   * partie de sa commande attend un bateau se croit lésé quand elle tarde — et
+   * il aurait raison.
+   */
+  const articlesEnGroupage = remiseGroupage?.articles_en_groupage ?? 0;
 
   /* Le chiffrage en groupage reprend les lignes refusées : leur libellé, la
    * quantité voulue et leur valeur marchande. Le client vient de se voir
@@ -505,6 +522,21 @@ export default function CommandeGP() {
               {/* Le transport, avant le paiement : le client voit ce que le
                   fournisseur propose réellement et arbitre lui-même entre prix
                   et délai. Sur un même colis, l'écart va du simple au septuple. */}
+              {articlesEnGroupage > 0 && !panierBloque && (
+                <div className="mb-4 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm text-foreground">
+                  <p className="font-medium">
+                    {articlesEnGroupage === 1
+                      ? 'Un article de votre panier voyage par groupage maritime.'
+                      : `${articlesEnGroupage} articles de votre panier voyagent par groupage maritime.`}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Ils partent avec notre prochaine campagne, et leur transport vous sera chiffré
+                    à ce moment-là — nous n’annonçons jamais un fret de groupage avant de l’avoir
+                    vérifié. Le reste de votre commande, s’il y en a, part immédiatement.
+                  </p>
+                </div>
+              )}
+
               {(remiseEnCours || optionsTransport.length > 0 || panierBloque) && (
                 <div className="rounded-md border p-4">
                   <h2 className="mb-1 flex items-center gap-2 font-semibold text-foreground">
