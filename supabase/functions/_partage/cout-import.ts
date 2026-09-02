@@ -186,6 +186,49 @@ export function calculerCout(params: {
   };
 }
 
+/**
+ * Un palier de la grille de remise, tel qu'il est stocké en base.
+ *
+ * La grille est UNIQUE et vaut pour les deux espaces. Un revendeur achète
+ * aussi bien depuis la Boutique que depuis l'Espace Pro : rien ne justifie
+ * qu'il paie plus cher parce qu'il est entré par la mauvaise porte.
+ */
+export interface PalierRemise {
+  quantite_min: number;
+  taux_marge: number;
+}
+
+/**
+ * La marge qui s'applique à une quantité donnée.
+ *
+ * On retient le palier le plus élevé que la quantité atteint : avec des seuils
+ * à 1, 10, 50 et 200, une commande de 60 pièces relève du palier 50.
+ *
+ * Une grille vide ou absente rend le taux par défaut. C'est volontaire : mieux
+ * vaut vendre à la marge normale que ne pas savoir quoi facturer.
+ */
+export function tauxMargePour(
+  quantite: number,
+  grille: PalierRemise[] | null,
+  parametres: ParametresCout,
+): number {
+  const parDefaut = Number(parametres.taux_marge_defaut);
+  if (!grille || grille.length === 0) return parDefaut;
+
+  const applicable = [...grille]
+    .sort((a, b) => a.quantite_min - b.quantite_min)
+    .filter((p) => quantite >= p.quantite_min)
+    .at(-1);
+
+  // Une quantité inférieure au plus petit palier n'est pas une erreur : c'est
+  // un article vendu à l'unité alors que la grille commence à cinq. Il paie le
+  // taux par défaut, jamais un taux de gros qu'il n'a pas atteint.
+  if (!applicable) return parDefaut;
+
+  const taux = Number(applicable.taux_marge);
+  return Number.isFinite(taux) ? taux : parDefaut;
+}
+
 export interface PalierMesure {
   quantite_min: number;
   cout_fret_unitaire_fcfa: number;
@@ -204,11 +247,13 @@ export interface PalierMesure {
  *
  *  - une quantité sans devis est écartée. On ne publie pas un prix qu'on ne
  *    sait pas tenir ;
- *  - un palier n'est retenu que si son prix unitaire est *strictement
- *    inférieur* à tous les paliers plus petits. Au-delà d'un certain poids le
- *    transporteur économique ne prend plus la marchandise, l'expédition bascule
- *    sur un service express et le prix par pièce remonte. Annoncer « plus vous
- *    en prenez, moins c'est cher » impose de le vérifier à chaque palier.
+ *  - un palier n'est retenu que si son PRIX RENDU unitaire — marchandise plus
+ *    transport — est *strictement inférieur* à tous les paliers plus petits.
+ *    Au-delà d'un certain poids le transporteur économique ne prend plus la
+ *    marchandise, l'expédition bascule sur un service express et le prix par
+ *    pièce remonte. Annoncer « plus vous en prenez, moins c'est cher » impose
+ *    de le vérifier à chaque palier, sur le total et non sur la seule
+ *    marchandise.
  */
 export function construirePaliers(params: {
   prixAchatFcfa: number;
@@ -216,9 +261,40 @@ export function construirePaliers(params: {
   parametres: ParametresCout;
   incoterm: RepartitionIncoterm;
   tauxMarge?: number | null;
+  /**
+   * La grille de remise, lue en base. Absente, le taux par défaut s'applique
+   * partout — c'est le comportement d'avant la grille, et il reste correct.
+   */
+  grilleRemise?: PalierRemise[] | null;
 }): PalierMesure[] {
   const retenus: PalierMesure[] = [];
-  let meilleurPrix = Number.POSITIVE_INFINITY;
+  let meilleurRendu = Number.POSITIVE_INFINITY;
+
+  /*
+   * ON COMPARE LE PRIX RENDU, PAS LE PRIX DE LA MARCHANDISE.
+   *
+   * Ce garde-fou a été écrit quand le transport était COMPRIS dans le prix de
+   * vente : comparer les prix de vente revenait alors à comparer les prix
+   * rendus, et il faisait son travail.
+   *
+   * Depuis que le transport est facturé à part, `prix_unitaire_fcfa` ne le
+   * contient plus. Le garde-fou comparait donc des prix de marchandise, qui
+   * baissent MÉCANIQUEMENT avec la quantité — le prix d'achat est fixe et le
+   * plancher se divise. Il ne pouvait plus rien détecter, et le fret était
+   * libre de remonter sans que rien ne s'y oppose.
+   *
+   * Mesuré chez le transporteur le 2 septembre, sur « Bague homme large motif
+   * aigle » : 1 170 F de fret la pièce à l'unité, 459 F à dix, 396 F à
+   * cinquante — puis 684 F à deux cents. La cause est visible dans sa réponse :
+   * il proposait quatre offres jusqu'à cinquante pièces, plus qu'une seule au
+   * delà, l'économique ayant disparu. Le palier de deux cents faisait donc
+   * payer 73 % plus cher la pièce que celui de cinquante.
+   *
+   * On compare désormais ce que le client paie EN TOUT. Quand le réglage remet
+   * le fret dans le prix, `cout_fret_fcfa` y est déjà et on ne l'ajoute pas
+   * deux fois — le comportement d'origine est préservé à l'identique.
+   */
+  const fretInclusDansPrix = params.parametres.fret_inclus_dans_prix !== false;
 
   const parQuantiteCroissante = [...params.devis].sort((a, b) => a.quantite - b.quantite);
 
@@ -231,11 +307,19 @@ export function construirePaliers(params: {
       fretReel: fret,
       parametres: params.parametres,
       incoterm: params.incoterm,
-      tauxMarge: params.tauxMarge ?? null,
+      // Un taux imposé pour ce produit l'emporte sur la grille : c'est un
+      // arbitrage commercial pris article par article, et la grille ne doit pas
+      // le défaire. Sinon, la quantité décide.
+      tauxMarge:
+        params.tauxMarge ??
+        tauxMargePour(quantite, params.grilleRemise ?? null, params.parametres),
     });
 
-    if (cout.prix_unitaire_fcfa >= meilleurPrix) continue;
-    meilleurPrix = cout.prix_unitaire_fcfa;
+    const rendu_unitaire_fcfa =
+      cout.prix_unitaire_fcfa + (fretInclusDansPrix ? 0 : cout.cout_fret_fcfa);
+
+    if (rendu_unitaire_fcfa >= meilleurRendu) continue;
+    meilleurRendu = rendu_unitaire_fcfa;
 
     retenus.push({
       quantite_min: quantite,

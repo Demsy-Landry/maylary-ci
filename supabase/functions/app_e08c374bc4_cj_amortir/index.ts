@@ -139,7 +139,22 @@ Deno.serve(async (req) => {
 
   const rParam = await fetch(`${URL_SB}/rest/v1/app_e08c374bc4_parametres_import?select=*&id=eq.1`, { headers: enTetesSb });
   const parametres = ((await rParam.json().catch(() => [])) as Record<string, unknown>[])[0] ?? {};
-  const paliers = (parametres.paliers_quantite as number[]) ?? [1, 5, 20, 50];
+  /*
+   * Les quantités à essayer viennent de la grille de remise, qui en est la
+   * seule source depuis le 3 septembre. `parametres.paliers_quantite` portait
+   * ce réglage auparavant ; deux sources auraient fini par se contredire.
+   *
+   * Le repli sur la grille historique ne sert qu'au cas où la table serait
+   * vide : mieux vaut amortir sur des quantités approchées que ne rien coter.
+   */
+  const rGrille = await fetch(
+    `${URL_SB}/rest/v1/app_e08c374bc4_grille_remise?select=quantite_min&actif=eq.true&order=quantite_min`,
+    { headers: enTetesSb },
+  );
+  const grilleLue = ((await rGrille.json().catch(() => [])) as { quantite_min: number }[]) ?? [];
+  const paliers = grilleLue.length > 0
+    ? grilleLue.map((p) => Number(p.quantite_min))
+    : [1, 5, 20, 50];
   /*
    * `ratio_fret_maximum` ne sert PLUS à décider de l'acheminement — voir le
    * commentaire plus bas. Il ne sert qu'à choisir la plus petite quantité qui

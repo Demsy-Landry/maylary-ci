@@ -126,6 +126,24 @@ servirAvecCors(async (req: Request) => {
       .maybeSingle();
     if (!repartition) return jsonResponse({ error: `Incoterm inconnu : ${incotermChoisi}.` }, 400);
 
+    /*
+     * LA GRILLE DE REMISE, SOURCE UNIQUE DES QUANTITÉS ET DES MARGES.
+     *
+     * Elle sert deux fois, et c'est ce qui garantit qu'on ne dérive pas : ses
+     * seuils sont les quantités auxquelles on fait coter le transport, et ses
+     * taux sont les marges appliquées à ces mêmes quantités. Deux réglages
+     * séparés auraient fini par se contredire — on aurait coté le transport à
+     * des quantités où le prix ne change plus.
+     *
+     * La grille est commune à la Boutique et à l'Espace Pro. Un revendeur peut
+     * acheter par l'une comme par l'autre.
+     */
+    const { data: grilleRemise } = await supabaseService
+      .from('app_e08c374bc4_grille_remise')
+      .select('quantite_min, taux_marge')
+      .eq('actif', true)
+      .order('quantite_min');
+
     let requete = supabaseService
       .from('app_e08c374bc4_produits')
       .select('id, nom, reference_externe, prix_achat_fcfa, prix_unitaire_fcfa, paliers_calcules_le')
@@ -173,9 +191,9 @@ servirAvecCors(async (req: Request) => {
       const grille: number[] = Array.from(
         new Set<number>([
           quantiteEntree,
-          ...((parametres.paliers_quantite as number[] | null) ?? []).filter(
-            (q) => q > quantiteEntree,
-          ),
+          ...(grilleRemise ?? [])
+            .map((p) => Number(p.quantite_min))
+            .filter((q) => q > quantiteEntree),
         ]),
       ).sort((a, b) => a - b);
 
@@ -199,6 +217,7 @@ servirAvecCors(async (req: Request) => {
         devis,
         parametres,
         incoterm: repartition,
+        grilleRemise,
       });
 
       // SANS DEVIS DE FRET, L'ARTICLE RELÈVE DU GROUPAGE — PAS DE L'EXTINCTION
