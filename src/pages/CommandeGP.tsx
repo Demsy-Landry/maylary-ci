@@ -44,7 +44,7 @@ import {
 export default function CommandeGP() {
   useReferencement(PAGES["/boutique/commande"]);
 
-  const { items, totalFcfa, clearCart } = useCartGP();
+  const { items, totalFcfa, clearCart, prefereGroupage } = useCartGP();
   /**
    * Remise de groupage : la part fixe de transport que les prix article
    * facturent une fois chacun, alors que le panier ne part qu'en un seul colis.
@@ -94,6 +94,10 @@ export default function CommandeGP() {
           },
           body: JSON.stringify({
             lignes: items.map((i) => ({ produit_id: i.produit_id, quantite: i.quantite })),
+            // Le client a peut-être choisi d'attendre le conteneur. Sans cette
+            // information, la cotation demanderait au transporteur un prix
+            // express pour des articles qui ne partiront pas par lui.
+            prefere_groupage: prefereGroupage,
           }),
         });
         const json = await res.json().catch(() => null);
@@ -115,7 +119,9 @@ export default function CommandeGP() {
       annule = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, items.length]);
+    // Le choix du client change la cotation : il faut la refaire, sinon
+    // l'écran continuerait d'afficher un fret express qu'il ne paiera pas.
+  }, [user, items.length, prefereGroupage]);
 
   const remise = remiseGroupage?.remise_fcfa ?? 0;
   const optionsTransport = remiseGroupage?.options ?? [];
@@ -302,6 +308,10 @@ export default function CommandeGP() {
         adresse_livraison: adresseLivraison.trim(),
         ville_livraison: villeLivraison.trim(),
         notes_client: notesClient.trim() || null,
+        // Consigné pour que l'administration comprenne pourquoi une commande
+        // attend un bateau alors que ses articles pouvaient partir tout de
+        // suite : ce n'est pas une contrainte, c'est l'arbitrage du client.
+        groupage_choisi_par_le_client: prefereGroupage,
       })
       .select('id, reference_publique')
       .single();
@@ -329,6 +339,21 @@ export default function CommandeGP() {
       sous_total: prixLigne(i) * i.quantite,
       declinaison_id: i.declinaison_id ?? null,
       declinaison_libelle: i.declinaison_libelle ?? null,
+      /*
+       * COMMENT CETTE LIGNE VOYAGE, FIGÉ MAINTENANT.
+       *
+       * Deux raisons de partir par la mer, et il faut les deux : le
+       * transporteur refuse l'article, ou le client a préféré attendre. La
+       * seconde ne peut qu'ajouter à la première — un article refusé ne
+       * repasse jamais en express.
+       *
+       * On le fige sur la ligne plutôt que de relire l'article plus tard : le
+       * mode d'un article peut changer après la commande, et la transmission
+       * au fournisseur enverrait alors en porte-à-porte ce que le client avait
+       * choisi de faire voyager autrement.
+       */
+      mode_acheminement:
+        i.mode_acheminement === 'groupage' || prefereGroupage ? 'groupage' : 'cj_ddp',
     }));
 
     const { error: lignesError } = await supabase.from(LIGNES_COMMANDE_GP_TABLE).insert(lignes);

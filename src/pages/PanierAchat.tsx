@@ -14,8 +14,17 @@ import { PAGES } from '@/lib/referencement-pages';
 export default function PanierAchat() {
   useReferencement(PAGES["/boutique/panier"]);
 
-  const { items, itemsExpress, itemsGroupage, updateQuantite, removeItem, totalFcfa } =
-    useCartGP();
+  const {
+    items,
+    itemsExpress,
+    itemsGroupage,
+    updateQuantite,
+    removeItem,
+    totalFcfa,
+    prefereGroupage,
+    setPrefereGroupage,
+    groupageOptionnel,
+  } = useCartGP();
   const navigate = useNavigate();
 
   /* La même carte sert aux deux files. La dupliquer ferait diverger les deux
@@ -116,6 +125,36 @@ export default function PanierAchat() {
                 </p>
               )}
               {itemsExpress.map(carteArticle)}
+
+              {/* LE CLIENT ARBITRE ENTRE LE PRIX ET LE DÉLAI.
+                  La règle de la maison prévoit le groupage « par choix du
+                  client », mais rien ne le lui offrait : un article que le
+                  transporteur acceptait partait forcément en porte-à-porte, au
+                  tarif express, sans qu'il puisse dire qu'il n'était pas
+                  pressé.
+                  Le choix vaut pour tout le panier : deux acheminements ne
+                  voyagent pas ensemble, et cocher article par article créerait
+                  deux expéditions là où le client croit n'en payer qu'une. */}
+              {groupageOptionnel && (
+                <label className="mt-2 flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors hover:bg-muted">
+                  <input
+                    type="checkbox"
+                    checked={prefereGroupage}
+                    onChange={(e) => setPrefereGroupage(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-[hsl(var(--primary))]"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-foreground">
+                      Je ne suis pas pressé : tout envoyer par groupage maritime
+                    </span>
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
+                      Nettement moins cher que l’expédition rapide, mais votre commande part
+                      avec notre prochain conteneur. Le transport vous est communiqué après
+                      vérification du volume, jamais avant.
+                    </span>
+                  </span>
+                </label>
+              )}
 
               {itemsGroupage.length > 0 && (
                 <div className="space-y-3 pt-2">

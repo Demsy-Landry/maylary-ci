@@ -44,6 +44,13 @@ const reponse = (corps: unknown, statut: number) =>
 
 interface CorpsRequete {
   lignes?: { produit_id: string; quantite: number }[];
+  /**
+   * Le client a choisi d'attendre le conteneur, sur un panier que le
+   * transporteur acceptait de porter. La règle de la maison le prévoit : le
+   * groupage vaut pour ce que le transporteur refuse « ou par choix du
+   * client ». Sans ce drapeau, on lui coterait un express qu'il ne paiera pas.
+   */
+  prefere_groupage?: boolean;
 }
 
 servirAvecCors(async (req: Request) => {
@@ -111,7 +118,10 @@ servirAvecCors(async (req: Request) => {
       if (!p || p.source_donnee !== 'import_cj_dropshipping') continue;
       const quantite = Math.max(1, Math.round(ligne.quantite));
 
-      if (p.mode_acheminement === 'groupage') {
+      // Deux raisons de rejoindre la file maritime, et la seconde ne peut
+      // qu'ajouter à la première : un article que le transporteur refuse ne
+      // repassera jamais en porte-à-porte, quel que soit le choix du client.
+      if (p.mode_acheminement === 'groupage' || corps.prefere_groupage === true) {
         enGroupage.push(String(p.nom ?? ''));
         continue;
       }

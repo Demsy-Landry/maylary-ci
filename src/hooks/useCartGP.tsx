@@ -70,6 +70,23 @@ interface CartGPContextValue {
   itemsExpress: CartItemGP[];
   /** Ce qui rejoint la prochaine campagne de groupage. */
   itemsGroupage: CartItemGP[];
+  /**
+   * LE CLIENT PRÉFÈRE ATTENDRE LE GROUPAGE.
+   *
+   * La règle de la maison dit que le groupage s'impose pour ce que le
+   * transporteur ne prend pas — « ou par choix du client ». Ce dernier cas
+   * n'existait nulle part : un article que le transporteur acceptait partait
+   * forcément en porte-à-porte, sans que le client puisse arbitrer entre le
+   * prix et le délai.
+   *
+   * Le choix vaut pour TOUT le panier, et non ligne par ligne. Deux
+   * acheminements ne voyagent pas ensemble : laisser le client cocher article
+   * par article créerait deux expéditions là où il croit n'en payer qu'une.
+   */
+  prefereGroupage: boolean;
+  setPrefereGroupage: (v: boolean) => void;
+  /** Vrai quand au moins un article pourrait partir tout de suite : sans cela, le choix ne se pose pas. */
+  groupageOptionnel: boolean;
   addItem: (item: Omit<CartItemGP, 'quantite'>, quantite?: number) => void;
   /** La clé vient de `cleLigne`, pas du produit : deux tailles font deux lignes. */
   updateQuantite: (cle: string, quantite: number) => void;
@@ -101,10 +118,38 @@ const estLigneValide = (e: unknown): e is CartItemGP => {
   return true;
 };
 
+const CLE_PREFERENCE_GROUPAGE = 'maylary_panier_gp_prefere_groupage';
+
 export function CartGPProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItemGP[]>(() =>
     lireListeStockee(STORAGE_KEY, estLigneValide),
   );
+
+  /*
+   * Le choix survit au rechargement, comme le panier lui-même. Un client qui
+   * ferme son téléphone et revient le lendemain ne doit pas redécouvrir sa
+   * commande passée en express alors qu'il avait choisi d'attendre.
+   *
+   * La lecture est enveloppée : un navigateur en navigation privée, ou dont le
+   * stockage est refusé, lève à la simple lecture. Le panier fonctionne alors
+   * sans mémoire du choix, ce qui vaut mieux qu'un écran blanc.
+   */
+  const [prefereGroupage, setPrefereGroupageEtat] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem(CLE_PREFERENCE_GROUPAGE) === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  const setPrefereGroupage = (v: boolean) => {
+    setPrefereGroupageEtat(v);
+    try {
+      localStorage.setItem(CLE_PREFERENCE_GROUPAGE, v ? '1' : '0');
+    } catch {
+      /* stockage refusé : le choix vaut pour cette visite seulement */
+    }
+  };
 
   useEffect(() => {
     ecrireListeStockee(STORAGE_KEY, items);
@@ -155,7 +200,21 @@ export function CartGPProvider({ children }: { children: ReactNode }) {
   // L'absence de mode vaut `cj_ddp` : c'est le cas des paniers déjà enregistrés
   // sur le téléphone d'un client avant cette séparation, et les articles qu'ils
   // contiennent étaient tous expédiables par CJ.
-  const estGroupage = (i: CartItemGP) => i.mode_acheminement === 'groupage';
+  /*
+   * Un article rejoint la file maritime pour DEUX raisons, et il faut les
+   * garder distinctes : le transporteur le refuse, ou le client l'a choisi.
+   *
+   * `groupageImpose` est ce que dit l'article. `prefereGroupage` est ce que dit
+   * le client. La seconde ne peut qu'ajouter à la première : un article que le
+   * transporteur refuse ne repassera jamais en express, quel que soit le choix.
+   */
+  const groupageImpose = (i: CartItemGP) => i.mode_acheminement === 'groupage';
+  const estGroupage = (i: CartItemGP) => groupageImpose(i) || prefereGroupage;
+
+  // Le choix ne se pose que s'il y a quelque chose à arbitrer : proposer
+  // « attendre le groupage » sur un panier déjà entièrement maritime serait une
+  // case à cocher sans effet, et le client se demanderait ce qu'elle change.
+  const groupageOptionnel = items.some((i) => !groupageImpose(i));
   const itemsExpress = items.filter((i) => !estGroupage(i));
   const itemsGroupage = items.filter(estGroupage);
 
@@ -173,6 +232,9 @@ export function CartGPProvider({ children }: { children: ReactNode }) {
         items,
         itemsExpress,
         itemsGroupage,
+        prefereGroupage,
+        setPrefereGroupage,
+        groupageOptionnel,
         addItem,
         updateQuantite,
         removeItem,

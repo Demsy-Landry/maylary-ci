@@ -213,13 +213,13 @@ servirAvecCors(async (req: Request) => {
 
     const { data: lignes } = await db
       .from('app_e08c374bc4_lignes_commande_gp')
-      .select('produit_id, nom_produit, quantite, declinaison_id, declinaison_libelle')
+      .select('produit_id, nom_produit, quantite, declinaison_id, declinaison_libelle, mode_acheminement')
       .eq('commande_id', commande.id);
     if (!lignes?.length) return reponse({ error: 'Commande sans ligne.' }, 400);
 
     const { data: produits } = await db
       .from('app_e08c374bc4_produits')
-      .select('id, nom, reference_externe, reference_variante, source_donnee')
+      .select('id, nom, reference_externe, reference_variante, source_donnee, mode_acheminement')
       .in('id', lignes.map((l) => l.produit_id).filter(Boolean) as string[]);
 
     // Les déclinaisons choisies par le client. C'est ELLE qui fait foi : le
@@ -244,6 +244,25 @@ servirAvecCors(async (req: Request) => {
     for (const ligne of lignes) {
       const p = produits?.find((x) => x.id === ligne.produit_id);
       if (!p || p.source_donnee !== 'import_cj_dropshipping') {
+        nonTransmis.push(ligne.nom_produit);
+        continue;
+      }
+
+      /*
+       * UNE LIGNE EN GROUPAGE NE PART PAS CHEZ CE TRANSPORTEUR.
+       *
+       * Elle rejoint la consolidation maritime : lui demander un porte-à-porte
+       * ferait échouer la commande entière, puisqu'il a précisément refusé de
+       * la coter — ou, quand c'est le client qui a choisi d'attendre, ferait
+       * partir en express ce qu'il a payé au tarif maritime.
+       *
+       * La ligne fait foi, pas l'article. Le mode d'un article peut changer
+       * après la commande ; celui de la ligne a été figé à l'achat. Vide, on
+       * retombe sur l'article : c'est le cas des commandes antérieures à cette
+       * colonne, et c'est exactement ce que le code faisait avant.
+       */
+      const modeRetenu = ligne.mode_acheminement ?? p.mode_acheminement;
+      if (modeRetenu === 'groupage') {
         nonTransmis.push(ligne.nom_produit);
         continue;
       }
@@ -279,7 +298,12 @@ servirAvecCors(async (req: Request) => {
 
     if (aCommander.length === 0) {
       return reponse(
-        { error: 'Aucun article de cette commande ne provient du fournisseur.', non_transmis: nonTransmis },
+        {
+          error:
+            'Aucun article de cette commande ne part en porte-à-porte : ils sont locaux ' +
+            'ou en groupage maritime. Le groupage se traite à l’ouverture de la campagne.',
+          non_transmis: nonTransmis,
+        },
         400,
       );
     }
