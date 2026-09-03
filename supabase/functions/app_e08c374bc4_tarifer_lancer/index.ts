@@ -94,18 +94,40 @@ async function sessionAdministrateur(): Promise<{ jwt: string } | { erreur: stri
 }
 
 /**
- * Les articles sans prix de vente, et eux seuls.
+ * Les articles à retarifer — désignés EN BASE, jamais par l'appelant.
  *
- * C'est la clé de voûte de la protection : la cible est LUE EN BASE, jamais
- * reçue de l'appelant. Un `produit_ids` envoyé dans la requête est ignoré —
- * sans quoi il suffirait de nommer un article en vente pour le faire
- * retarifer.
+ * C'est la clé de voûte de la protection, et elle n'a pas changé : un
+ * `produit_ids` envoyé dans la requête est ignoré. Sans cela, il suffirait de
+ * nommer un article en vente pour en faire bouger le prix.
+ *
+ * DEUX FAÇONS D'ÊTRE DANS LA LISTE
+ *
+ * 1. Pas de prix de vente. L'article n'est montré à personne — la vue publique
+ *    refuse un article sans prix — donc le tarifer ne peut que l'améliorer.
+ *
+ * 2. `paliers_calcules_le` est vide : sa grille est à (re)calculer. C'est la
+ *    file d'attente normale de la retarification, et c'est le seul ajout du
+ *    3 septembre.
+ *
+ * CE QUE CET AJOUT CHANGE, ET POURQUOI IL RESTE ACCEPTABLE
+ *
+ * Avant, aucun prix affiché ne pouvait bouger par cette porte. Désormais, un
+ * article déjà en vente peut être recalculé — mais UNIQUEMENT si quelqu'un a
+ * d'abord vidé sa colonne `paliers_calcules_le`, ce qui demande un accès en
+ * écriture à la base. Un inconnu ne peut donc pas choisir sa cible : il ne peut
+ * qu'avancer un travail qu'un administrateur a explicitement mis en file.
+ *
+ * La correction du 3 septembre l'imposait : le garde-fou des paliers comparait
+ * des prix qui ne contenaient plus le transport, et le catalogue entier porte
+ * des grilles calculées sous cette règle fausse. Les recalculer suppose de
+ * pouvoir viser des articles qui ont déjà un prix.
  */
-async function articlesSansPrix(): Promise<string[]> {
+async function articlesARetarifer(): Promise<string[]> {
   const r = await fetch(
     `${URL_SB}/rest/v1/app_e08c374bc4_produits` +
       `?select=id&source_donnee=eq.import_cj_dropshipping` +
-      `&reference_externe=not.is.null&or=(prix_unitaire_fcfa.is.null,prix_unitaire_fcfa.lte.0)` +
+      `&reference_externe=not.is.null` +
+      `&or=(prix_unitaire_fcfa.is.null,prix_unitaire_fcfa.lte.0,paliers_calcules_le.is.null)` +
       `&order=created_at.asc&limit=200`,
     { headers: enTetesSb },
   );
@@ -121,9 +143,9 @@ Deno.serve(async (req) => {
   const lots = Math.min(Number(corps.lots ?? 1), 3);
   const tailleLot = Math.min(Math.max(Number(corps.taille_lot ?? 5), 1), 10);
 
-  const cibles = await articlesSansPrix();
+  const cibles = await articlesARetarifer();
   if (cibles.length === 0) {
-    return json({ simulation, restants: 0, message: 'Aucun article sans prix.', passages: [] });
+    return json({ simulation, restants: 0, message: 'Aucun article à retarifer.', passages: [] });
   }
 
   const s = await sessionAdministrateur();
