@@ -323,50 +323,42 @@ servirAvecCors(async (req: Request) => {
         continue;
       }
 
-      // Second garde-fou, sur le rapport et non sur le montant : le transport ne
-      // doit pas écraser la marchandise. Les deux conditions sont exigées
-      // ensemble — un rapport élevé sur une petite commande reste acceptable,
-      // une pochette bulle vendue 500 FCFA ne gêne personne. C'est la
-      // conjonction « transport écrasant » et « facture salée » qu'on écarte.
+      /*
+       * LE RAPPORT FRET/PRIX NE RETIRE PLUS UN ARTICLE DE LA VENTE.
+       *
+       * Un second garde-fou éteignait ici tout article dont le fret unitaire
+       * dépassait `ratio_fret_maximum` fois son prix d'achat, dès lors que la
+       * commande minimum passait le seuil de surveillance. Il avait un sens
+       * quand le fret était COMPRIS dans le prix affiché : un rapport élevé
+       * donnait alors un prix de vente invendable, et mieux valait ne pas le
+       * publier.
+       *
+       * `fret_inclus_dans_prix` est à faux. Le prix affiché ne contient plus le
+       * transport ; celui-ci est coté sur le panier réel et facturé en ligne
+       * séparée. Un rapport élevé ne rend donc plus aucun prix absurde — il dit
+       * seulement que le transport coûte cher, ce que le client voit de ses
+       * yeux en caisse, et qu'il peut éviter en cochant le groupage.
+       *
+       * La règle de la maison ne laisse pas de place à ce garde-fou : « le
+       * groupage à tous les coups doit être les articles qui ne sont pas pris
+       * en charge par CJ ou DHL, ou par choix du client. » Le transporteur a
+       * coté celui-ci. Il est donc vendable, et l'éteindre revient à décider à
+       * la place du client qu'il trouve cela trop cher.
+       *
+       * Mesuré le 3 septembre, dès les six premiers articles du recalcul :
+       * « General Packaging Black Corrugated Cardboard Box » a été retiré de la
+       * vente pour 22 810 FCFA de commande minimum — un montant élevé, mais
+       * réel, annoncé, et que personne n'était obligé de payer.
+       *
+       * Le rapport reste CALCULÉ et rapporté : il sert à repérer les articles
+       * qu'il vaudrait mieux verser au groupage. Il ne décide plus rien.
+       */
       const ratioFret =
         prixAchatFcfa > 0 ? entree.cout_fret_unitaire_fcfa / prixAchatFcfa : Infinity;
-      const ratioMaximum = Number(parametres.ratio_fret_maximum);
-      const seuilSurveille = Number(parametres.seuil_commande_surveillee_fcfa);
-
-      if (ratioFret > ratioMaximum && commandeMinimum > seuilSurveille) {
-        resultats.push({
-          id: produit.id,
-          nom: produit.nom,
-          publiable: false,
-          motif: 'fret_disproportionne',
-          ratio_fret: Number(ratioFret.toFixed(1)),
-          commande_minimum_fcfa: commandeMinimum,
-        });
-
-        if (!simulation) {
-          await supabaseService
-            .from('app_e08c374bc4_produits')
-            .update({
-              prix_achat_fcfa: prixAchatFcfa,
-              prix_unitaire_fcfa: entree.prix_unitaire_fcfa,
-              cout_fret_fcfa: entree.cout_fret_unitaire_fcfa,
-              cout_assurance_fcfa: entree.cout_assurance_unitaire_fcfa,
-              quantite_minimum: entree.quantite_min,
-              actif: false,
-              indisponible_motif: 'fret_disproportionne',
-              retarife_le: new Date().toISOString(),
-              paliers_calcules_le: new Date().toISOString(),
-            })
-            .eq('id', produit.id);
-          await supabaseService
-            .from('app_e08c374bc4_paliers_prix')
-            .delete()
-            .eq('produit_id', produit.id);
-        }
-        continue;
-      }
 
       resultats.push({
+        ratio_fret: Number.isFinite(ratioFret) ? Number(ratioFret.toFixed(1)) : null,
+        commande_minimum_fcfa: commandeMinimum,
         id: produit.id,
         nom: produit.nom,
         publiable: true,
@@ -395,6 +387,22 @@ servirAvecCors(async (req: Request) => {
             cout_fret_fcfa: entree.cout_fret_unitaire_fcfa,
             cout_assurance_fcfa: entree.cout_assurance_unitaire_fcfa,
             quantite_minimum: entree.quantite_min,
+            /*
+             * LE TRANSPORTEUR A COTÉ : L'ARTICLE REPASSE EN PORTE-À-PORTE.
+             *
+             * Cette ligne manquait, et son absence reproduisait ici le défaut
+             * déjà corrigé dans `cj_amortir` : on inscrivait `fret_source:
+             * 'cj_reel'` — donc « le transporteur a répondu » — sans jamais
+             * toucher au MODE d'acheminement. Un article versé au groupage un
+             * jour y restait pour toujours, même une fois son fret coté.
+             *
+             * Constaté le 3 septembre sur les premiers articles du recalcul :
+             * « Écouteurs Bluetooth sans fil avec housse silicone » portait une
+             * grille complète — 5 → 500 F, 10 → 250 F, 50 → 154 F — un fret de
+             * 690 FCFA, et restait marqué `groupage`. Il attendait un départ
+             * maritime que rien ne justifiait.
+             */
+            mode_acheminement: 'cj_ddp',
             // La variante conditionne toute cotation et toute commande future.
             // Le recalcul vient de la résoudre : on la garde, sans quoi
             // l'article resterait ingroupable et inexpédiable.
