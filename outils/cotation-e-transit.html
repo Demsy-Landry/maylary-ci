@@ -3,939 +3,941 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cotation douanière — E-Transit</title>
+<title>E-Transit — Cotation et déclaration en douane</title>
 <!--
-  COTATION DOUANIÈRE — E-TRANSIT
-  Outil de calcul des droits et taxes à l'importation et à l'exportation,
-  Côte d'Ivoire.
+  E-TRANSIT — COTATION ET DÉCLARATION EN DOUANE
+  Côte d'Ivoire. Modèle SYDAM / Document Administratif Unique.
 
   ─────────────────────────────────────────────────────────────────────────
-  POURQUOI UN SEUL FICHIER, ET PAS UN LOGICIEL À INSTALLER
+  POURQUOI UN SEUL FICHIER
 
-  Ce fichier n'a besoin de rien : ni installation, ni droits administrateur,
-  ni connexion internet, ni mise à jour. On double-clique, il s'ouvre dans le
-  navigateur, il fonctionne. Il tient sur une clé USB et s'envoie par courriel.
+  Ni installation, ni droits administrateur, ni connexion, ni mise à jour.
+  On double-clique, il s'ouvre. Il tient sur une clé USB.
 
-  Un vrai logiciel installé aurait demandé des droits sur la machine, une
-  réinstallation à chaque correction, et serait tombé en panne le jour d'une
-  mise à jour de Windows. Pour un poste de travail qui doit produire un devis
-  juste tous les jours, la simplicité est la performance.
-
-  LES DONNÉES RESTENT SUR LA MACHINE
-
-  Les cotations sont enregistrées dans le navigateur du poste, en local.
-  Rien ne part sur internet. Le bouton « Sauvegarde » produit un fichier à
-  conserver ou à transporter sur un autre ordinateur.
+  Les données restent sur le poste. Rien ne part sur internet. Le bouton
+  « Sauvegarde » produit un fichier à conserver ou à transporter.
 
   ─────────────────────────────────────────────────────────────────────────
-  D'OÙ VIENNENT LES FORMULES
+  LES CASES SUIVENT LE MODÈLE SYDAM
 
-  Elles sont reprises à l'identique du moteur de liquidation de MayLary Group,
-  lui-même vérifié sur une déclaration SYDAM réelle par un déclarant agréé.
-  Barème : TEC CEDEAO — Côte d'Ivoire, version du 7 août 2026.
+  Chaque champ porte SON NUMÉRO DE CASE du Document Administratif Unique, à
+  l'écran comme à l'impression. Une personne qui remplit une déclaration
+  SYDAM retrouve ses repères sans traduction mentale.
 
-  LES SEPT RÈGLES QUI FONT LA JUSTESSE DU CALCUL
+  Les cases 49 à 53 — entrepôt et transit communautaire — sont écartées : un
+  formulaire qui demande vingt champs sans objet fait abandonner la saisie.
+
+  ─────────────────────────────────────────────────────────────────────────
+  LES SEPT RÈGLES DU CALCUL
+
+  Reprises à l'identique du moteur de liquidation de MayLary Group, vérifié
+  sur une déclaration SYDAM réelle par un déclarant agréé. Barème : TEC
+  CEDEAO — Côte d'Ivoire, version du 7 août 2026.
 
   1. Valeur en douane (CAF) = FOB + fret + assurance.
-  2. Le fret se répartit entre les lignes AU POIDS BRUT. Sans poids, on ne
-     répartit pas : on refuse, plutôt que d'appliquer une autre formule sous
+  2. Le fret se répartit entre les lignes AU POIDS BRUT. Sans poids, on
+     refuse de répartir : répartir à la valeur serait une autre formule sous
      le même nom.
   3. L'assurance se répartit À LA VALEUR FOB.
   4. L'ASSURANCE EST TOUJOURS EN FRANCS CFA, jamais convertie. La police
-     facultés d'une marchandise importée en Côte d'Ivoire se souscrit
-     localement : la prime est émise en XOF quelle que soit la monnaie de la
-     facture du fournisseur.
+     facultés se souscrit localement en Côte d'Ivoire : la prime est émise en
+     XOF quelle que soit la monnaie de la facture.
   5. L'assiette de la TVA est CAF + DD + RST, et RIEN D'AUTRE. Les
      prélèvements communautaires (PCS, PUA, PCC) n'y entrent jamais.
-  6. La RPI est due PAR DÉCLARATION, sur le FOB total, avec un plancher de
-     100 000 XOF. Ce n'est pas une taxe par ligne.
+  6. La RPI est due PAR DÉCLARATION, sur le FOB total, plancher 100 000 XOF.
   7. Le timbre statistique est un FORFAIT PAR DÉCLARATION de 20 000 XOF,
      jamais par ligne ni par quantité.
 
-  À L'EXPORTATION : seul le timbre statistique est dû. Ni droits, ni TVA, ni
-  prélèvements, ni redevance informatique.
+  CE QUE L'OUTIL REFUSE
 
-  CE QUE L'OUTIL REFUSE DE FAIRE
-
-  Il n'invente jamais un taux de droit de douane. Si la position n'est pas
-  renseignée, il le dit et ne calcule pas. Un chiffre inventé sur un devis
-  remis à un client est pire qu'une case vide : le premier engage, la seconde
-  fait poser la question.
+  Inventer un taux de droit de douane. Répartir un fret sans poids. Produire
+  un document quand une case indispensable est vide. Un chiffre inventé sur
+  un devis engage ; une case vide fait poser la question.
 
   ─────────────────────────────────────────────────────────────────────────
   By Dems'Inc — Demsy Landry
 -->
 <style>
   :root{
-    --encre:#0d1b2a; --encre-doux:#40566d; --gris:#e4e9ef; --gris-clair:#f5f7fa;
-    --bleu:#123a63; --bleu-clair:#1f5c96; --ambre:#c47d16; --ambre-clair:#fdf6e9;
-    --rouge:#a3231f; --vert:#1c6b45; --blanc:#fff;
-    --rayon:10px; --ombre:0 1px 2px rgba(13,27,42,.06),0 4px 14px rgba(13,27,42,.05);
+    --encre:#0d1b2a;--doux:#40566d;--gris:#e4e9ef;--fond:#f5f7fa;
+    --bleu:#123a63;--bleu2:#1f5c96;--ambre:#c47d16;--ambre-f:#fdf6e9;
+    --rouge:#a3231f;--vert:#1c6b45;--r:9px;
+    --ombre:0 1px 2px rgba(13,27,42,.06),0 4px 14px rgba(13,27,42,.05);
   }
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
-  body{
-    margin:0;font:15px/1.55 "Segoe UI",Roboto,-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
-    color:var(--encre);background:var(--gris-clair);
-  }
+  body{margin:0;font:15px/1.5 "Segoe UI",Roboto,-apple-system,Helvetica,Arial,sans-serif;color:var(--encre);background:var(--fond)}
   h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.01em}
   button,input,select,textarea{font:inherit;color:inherit}
 
-  /* ---------- Ossature ---------- */
-  .bandeau{background:var(--bleu);color:#fff;padding:18px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-  .bandeau .marque{font-size:20px;font-weight:800;letter-spacing:-.02em}
-  .bandeau .sous{font-size:13px;opacity:.82}
-  .bandeau .pousse{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
-  .page{max-width:1180px;margin:0 auto;padding:22px 20px 90px}
-  .carte{background:#fff;border:1px solid var(--gris);border-radius:var(--rayon);box-shadow:var(--ombre);margin-bottom:18px;overflow:hidden}
-  .carte>h2{
-    font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--encre-doux);
-    padding:13px 18px;border-bottom:1px solid var(--gris);background:#fafbfd;
-    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  }
-  .carte>h2 .num{
-    background:var(--bleu);color:#fff;width:22px;height:22px;border-radius:50%;
-    display:inline-flex;align-items:center;justify-content:center;font-size:12px;flex:none;
-  }
-  .corps{padding:18px}
+  .bandeau{background:var(--bleu);color:#fff;padding:14px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+  .bandeau .marque{font-size:19px;font-weight:800;letter-spacing:-.02em}
+  .bandeau .sous{font-size:12px;opacity:.8}
+  .bandeau .pousse{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
 
-  /* ---------- Formulaire ---------- */
-  .grille{display:grid;gap:14px}
-  .g2{grid-template-columns:repeat(2,1fr)}
-  .g3{grid-template-columns:repeat(3,1fr)}
-  .g4{grid-template-columns:repeat(4,1fr)}
-  @media(max-width:860px){.g2,.g3,.g4{grid-template-columns:1fr}}
-  label{display:block;font-size:12px;font-weight:600;color:var(--encre-doux);margin-bottom:5px}
-  .aide{font-size:11.5px;color:var(--encre-doux);margin-top:4px;line-height:1.4}
-  input[type=text],input[type=date],input[type=number],select,textarea{
-    width:100%;padding:9px 11px;border:1px solid #cfd8e3;border-radius:7px;background:#fff;
-  }
-  input:focus,select:focus,textarea:focus{outline:2px solid var(--bleu-clair);outline-offset:-1px;border-color:var(--bleu-clair)}
-  input[readonly]{background:var(--gris-clair);color:var(--encre-doux)}
-  textarea{resize:vertical;min-height:60px}
-  .avec-unite{display:flex;align-items:stretch;gap:0}
-  .avec-unite input{border-radius:7px 0 0 7px}
-  .avec-unite .unite{
-    display:flex;align-items:center;padding:0 11px;border:1px solid #cfd8e3;border-left:0;
-    border-radius:0 7px 7px 0;background:var(--gris-clair);font-size:12.5px;font-weight:700;color:var(--encre-doux);
-  }
-  .num{font-variant-numeric:tabular-nums}
-  input.num,td.num{font-variant-numeric:tabular-nums}
+  .onglets{background:#fff;border-bottom:1px solid var(--gris);padding:0 22px;display:flex;gap:2px;position:sticky;top:60px;z-index:19;overflow-x:auto}
+  .onglet{padding:12px 17px;border:0;background:none;cursor:pointer;font-weight:600;font-size:14px;color:var(--doux);border-bottom:3px solid transparent;white-space:nowrap}
+  .onglet.actif{color:var(--bleu);border-bottom-color:var(--bleu)}
+  .onglet:hover{color:var(--encre)}
 
-  /* ---------- Boutons ---------- */
-  .btn{
-    display:inline-flex;align-items:center;gap:7px;padding:9px 15px;border-radius:7px;
-    border:1px solid transparent;background:var(--bleu);color:#fff;font-weight:600;font-size:14px;cursor:pointer;
-  }
-  .btn:hover{background:var(--bleu-clair)}
+  .page{max-width:1240px;margin:0 auto;padding:20px 18px 80px}
+  .vue{display:none}.vue.actif{display:block}
+  .carte{background:#fff;border:1px solid var(--gris);border-radius:var(--r);box-shadow:var(--ombre);margin-bottom:16px;overflow:hidden}
+  .carte>h2{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--doux);padding:12px 17px;border-bottom:1px solid var(--gris);background:#fafbfd;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .carte>h2 .n{background:var(--bleu);color:#fff;min-width:21px;height:21px;padding:0 5px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;flex:none}
+  .carte>h2 .desc{font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;opacity:.85}
+  .corps{padding:16px 17px}
+
+  .grille{display:grid;gap:13px}
+  .g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+  .plein{grid-column:1/-1}
+  @media(max-width:900px){.g2,.g3,.g4{grid-template-columns:1fr}}
+
+  label{display:flex;align-items:baseline;gap:6px;font-size:12px;font-weight:600;color:var(--doux);margin-bottom:4px}
+  label .case{font-weight:800;color:var(--bleu);font-variant-numeric:tabular-nums;background:#eef4fb;border-radius:4px;padding:0 5px;font-size:11px;flex:none}
+  .aide{font-size:11px;color:var(--doux);margin-top:3px;line-height:1.4}
+  input[type=text],input[type=date],input[type=number],select,textarea{width:100%;padding:8px 10px;border:1px solid #cfd8e3;border-radius:7px;background:#fff}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--bleu2);outline-offset:-1px;border-color:var(--bleu2)}
+  input[readonly]{background:var(--fond);color:var(--doux)}
+  textarea{resize:vertical;min-height:56px}
+  .num,input.num,td.num,th.num{font-variant-numeric:tabular-nums}
+  td.num,th.num{text-align:right}
+  .avec-u{display:flex}
+  .avec-u input{border-radius:7px 0 0 7px}
+  .avec-u .u{display:flex;align-items:center;padding:0 10px;border:1px solid #cfd8e3;border-left:0;border-radius:0 7px 7px 0;background:var(--fond);font-size:12px;font-weight:700;color:var(--doux)}
+  .modes{display:flex;gap:6px;flex-wrap:wrap}
+  .mode{padding:7px 12px;border:1px solid #cfd8e3;border-radius:7px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;color:var(--doux)}
+  .mode.actif{background:var(--bleu);color:#fff;border-color:var(--bleu)}
+
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:7px;border:1px solid transparent;background:var(--bleu);color:#fff;font-weight:600;font-size:13.5px;cursor:pointer}
+  .btn:hover{background:var(--bleu2)}
   .btn.sec{background:#fff;color:var(--encre);border-color:#cfd8e3}
-  .btn.sec:hover{background:var(--gris-clair)}
+  .btn.sec:hover{background:var(--fond)}
   .btn.clair{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.3)}
   .btn.clair:hover{background:rgba(255,255,255,.24)}
   .btn.danger{background:#fff;color:var(--rouge);border-color:#e8c4c3}
-  .btn.danger:hover{background:#fdf2f2}
-  .btn.petit{padding:5px 10px;font-size:13px}
-  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.petit{padding:5px 9px;font-size:12.5px}
 
-  /* ---------- Tableaux ---------- */
   table{width:100%;border-collapse:collapse}
-  th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--gris);font-size:14px;vertical-align:middle}
-  th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--encre-doux);background:#fafbfd;font-weight:700}
-  td.num,th.num{text-align:right}
+  th,td{padding:8px 9px;text-align:left;border-bottom:1px solid var(--gris);font-size:13.5px;vertical-align:middle}
+  th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--doux);background:#fafbfd;font-weight:700}
+  th .case{color:var(--bleu);background:#eef4fb;border-radius:3px;padding:0 4px;margin-right:3px}
   tbody tr:last-child td{border-bottom:0}
-  .tbl-enveloppe{overflow-x:auto}
-  table.lignes input,table.lignes select{padding:7px 9px;font-size:13.5px}
-  table.lignes td{padding:7px 8px}
+  .tbl{overflow-x:auto}
+  table.saisie input,table.saisie select{padding:6px 8px;font-size:13px}
+  table.saisie td{padding:6px 7px}
 
-  /* ---------- Étiquettes & messages ---------- */
-  .etiq{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.02em}
+  .etiq{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10.5px;font-weight:700}
   .etiq.ok{background:#e6f4ec;color:var(--vert)}
-  .etiq.att{background:var(--ambre-clair);color:var(--ambre)}
-  .msg{padding:12px 14px;border-radius:8px;font-size:13.5px;margin-bottom:14px;border:1px solid}
+  .etiq.att{background:var(--ambre-f);color:var(--ambre)}
+  .msg{padding:11px 13px;border-radius:8px;font-size:13px;margin-bottom:13px;border:1px solid}
   .msg.err{background:#fdf2f2;border-color:#e8c4c3;color:var(--rouge)}
   .msg.info{background:#eef4fb;border-color:#cddef2;color:var(--bleu)}
-  .msg.att{background:var(--ambre-clair);border-color:#f0dcb4;color:#8a5a10}
-  .msg ul{margin:7px 0 0;padding-left:20px}
+  .msg.att{background:var(--ambre-f);border-color:#f0dcb4;color:#8a5a10}
+  .msg ul{margin:6px 0 0;padding-left:19px}
+  .msg:last-child{margin-bottom:0}
 
-  /* ---------- Résultat ---------- */
-  .total-grand{
-    background:var(--bleu);color:#fff;padding:18px 22px;display:flex;justify-content:space-between;
-    align-items:center;gap:16px;flex-wrap:wrap;
-  }
-  .total-grand .lib{font-size:13px;text-transform:uppercase;letter-spacing:.07em;opacity:.85}
-  .total-grand .val{font-size:27px;font-weight:800;font-variant-numeric:tabular-nums}
-  .sous-total{background:var(--gris-clair);font-weight:700}
-  .rappel{font-size:12px;color:var(--encre-doux);padding:12px 18px;background:#fafbfd;border-top:1px solid var(--gris);line-height:1.6}
+  .total{background:var(--bleu);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+  .total .lib{font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;opacity:.85}
+  .total .val{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+  .st{background:var(--fond);font-weight:700}
+  .rappel{font-size:11.5px;color:var(--doux);padding:11px 17px;background:#fafbfd;border-top:1px solid var(--gris);line-height:1.6}
+  .vide{padding:24px 17px;text-align:center;color:var(--doux);font-size:13.5px}
 
-  /* ---------- Cotations enregistrées ---------- */
-  .liste-cot{list-style:none;margin:0;padding:0}
-  .liste-cot li{display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid var(--gris);flex-wrap:wrap}
-  .liste-cot li:last-child{border-bottom:0}
-  .liste-cot .titre{font-weight:700}
-  .liste-cot .meta{font-size:12px;color:var(--encre-doux)}
-  .liste-cot .actions{margin-left:auto;display:flex;gap:6px}
-  .vide{padding:26px 18px;text-align:center;color:var(--encre-doux);font-size:14px}
+  .hist li{display:flex;align-items:center;gap:11px;padding:11px 17px;border-bottom:1px solid var(--gris);flex-wrap:wrap}
+  .hist{list-style:none;margin:0;padding:0}
+  .hist li:last-child{border-bottom:0}
+  .hist .t{font-weight:700}
+  .hist .m{font-size:11.5px;color:var(--doux)}
+  .hist .a{margin-left:auto;display:flex;gap:5px}
+  .barre-rech{display:flex;gap:9px;padding:13px 17px;border-bottom:1px solid var(--gris);flex-wrap:wrap;align-items:center}
+  .barre-rech input,.barre-rech select{width:auto;flex:1;min-width:160px}
 
-  /* ---------- Pied ---------- */
-  .pied{text-align:center;padding:26px 20px;color:var(--encre-doux);font-size:12.5px;line-height:1.7}
+  .pied{text-align:center;padding:24px 18px;color:var(--doux);font-size:12px;line-height:1.7}
   .pied strong{color:var(--encre)}
+  .entete-imp{display:none}
 
-  /* ---------- En-tête d'impression ---------- */
-  .entete-impression{display:none}
-
-  /* ---------- Impression ---------- */
   @media print{
-    @page{size:A4;margin:13mm 12mm}
-    body{background:#fff;font-size:11.5px}
-    .bandeau,.sans-impression,.carte>h2 .btn,.btn{display:none!important}
+    @page{size:A4;margin:12mm 11mm}
+    body{background:#fff;font-size:10.5px}
+    .bandeau,.onglets,.sans-imp,.btn,.barre-rech{display:none!important}
     .page{max-width:none;padding:0}
-    .carte{border:0;box-shadow:none;margin-bottom:11px;break-inside:avoid;border-radius:0}
-    .carte>h2{background:#fff;border-bottom:1.5px solid var(--encre);padding:0 0 5px;font-size:11px;color:var(--encre)}
-    .carte>h2 .num{background:var(--encre)}
-    .corps{padding:9px 0}
-    th,td{padding:5px 6px;font-size:11px}
-    th{background:#f0f2f5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .total-grand{background:#fff!important;color:var(--encre)!important;border:2px solid var(--encre);padding:11px 13px}
-    .total-grand .val{font-size:20px}
-    .entete-impression{
-      display:flex;justify-content:space-between;align-items:flex-start;gap:18px;
-      border-bottom:2.5px solid var(--bleu);padding-bottom:9px;margin-bottom:14px;
-    }
-    .entete-impression .g .nom{font-size:19px;font-weight:800;color:var(--bleu);letter-spacing:-.02em}
-    .entete-impression .g .st{font-size:11px;color:var(--encre-doux);margin-top:2px}
-    .entete-impression .d{text-align:right;font-size:11px;color:var(--encre-doux);line-height:1.6}
-    .entete-impression .d b{color:var(--encre);font-size:12.5px}
-    input,select,textarea{border:0!important;background:#fff!important;padding:0!important;color:var(--encre)!important}
-    .avec-unite .unite{border:0;background:#fff;padding:0 0 0 4px}
+    .vue{display:none!important}.vue.imprimer{display:block!important}
+    .carte{border:0;box-shadow:none;margin-bottom:9px;break-inside:avoid;border-radius:0}
+    .carte>h2{background:#fff;border-bottom:1.4px solid var(--encre);padding:0 0 4px;font-size:10px;color:var(--encre)}
+    .carte>h2 .n{background:var(--encre)}
+    .carte>h2 .desc{display:none}
+    .corps{padding:7px 0}
+    .grille{gap:7px}
+    th,td{padding:4px 5px;font-size:10px}
+    th{background:#eef1f5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    label{margin-bottom:1px;font-size:9.5px}
+    label .case{background:#eef1f5!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    input,select,textarea{border:0!important;background:#fff!important;padding:0!important;font-weight:600}
+    textarea{min-height:0;height:auto}
+    .avec-u .u{border:0;background:#fff;padding:0 0 0 3px}
     .aide,.msg.info{display:none}
-    .pied{border-top:1px solid var(--gris);margin-top:14px;padding:9px 0 0;font-size:10px;text-align:left}
-    .rappel{background:#fff;border-top:1px solid var(--gris);font-size:9.5px;padding:7px 0 0}
+    .total{background:#fff!important;color:var(--encre)!important;border:2px solid var(--encre);padding:9px 11px}
+    .total .val{font-size:18px}
+    .mode{padding:0;border:0;font-size:10px}
+    .mode:not(.actif){display:none}
+    .entete-imp{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:2.4px solid var(--bleu);padding-bottom:8px;margin-bottom:12px}
+    .entete-imp .nom{font-size:18px;font-weight:800;color:var(--bleu);letter-spacing:-.02em}
+    .entete-imp .st2{font-size:10px;color:var(--doux);margin-top:1px}
+    .entete-imp .d{text-align:right;font-size:10px;color:var(--doux);line-height:1.55}
+    .entete-imp .d b{color:var(--encre);font-size:11.5px}
+    .rappel{background:#fff;border-top:1px solid var(--gris);font-size:9px;padding:6px 0 0}
+    .pied{border-top:1px solid var(--gris);margin-top:12px;padding:8px 0 0;font-size:9px;text-align:left}
   }
 </style>
 </head>
 <body>
 
-<div class="bandeau sans-impression">
+<div class="bandeau sans-imp">
   <div>
-    <div class="marque">E-Transit — Cotation douanière</div>
-    <div class="sous">Droits et taxes à l'importation et à l'exportation — Côte d'Ivoire</div>
+    <div class="marque">E-Transit</div>
+    <div class="sous">Cotation et déclaration en douane — modèle SYDAM</div>
   </div>
   <div class="pousse">
     <button class="btn clair" onclick="enregistrer()">Enregistrer</button>
-    <button class="btn clair" onclick="nouvelle()">Nouvelle cotation</button>
-    <button class="btn clair" onclick="window.print()">Imprimer</button>
+    <button class="btn clair" onclick="nouvelle()">Nouvelle</button>
+    <button class="btn clair" onclick="imprimer()">Imprimer</button>
   </div>
+</div>
+
+<div class="onglets sans-imp">
+  <button class="onglet actif" data-vue="saisie" onclick="allerA('saisie')">Déclaration</button>
+  <button class="onglet" data-vue="articles" onclick="allerA('articles')">Articles</button>
+  <button class="onglet" data-vue="liquidation" onclick="allerA('liquidation')">Liquidation et devis</button>
+  <button class="onglet" data-vue="historique" onclick="allerA('historique')">Historique</button>
 </div>
 
 <div class="page">
 
-  <!-- En-tête visible uniquement à l'impression -->
-  <div class="entete-impression">
-    <div class="g">
-      <div class="nom">E-Transit</div>
-      <div class="st">Cotation des droits et taxes — Côte d'Ivoire</div>
-    </div>
-    <div class="d">
-      <b id="imp-client">—</b><br>
-      <span id="imp-ref">—</span><br>
-      <span id="imp-date">—</span>
-    </div>
+<div class="entete-imp">
+  <div>
+    <div class="nom">E-Transit</div>
+    <div class="st2">Cotation des droits et taxes — Côte d'Ivoire · modèle SYDAM</div>
   </div>
+  <div class="d">
+    <b id="i-imp">—</b><br><span id="i-ref"></span><br><span id="i-date"></span><br><span id="i-bur"></span>
+  </div>
+</div>
 
-  <div id="alertes"></div>
+<!-- ═══════════ VUE 1 : DÉCLARATION ═══════════ -->
+<div class="vue actif imprimer" id="vue-saisie">
 
-  <!-- 1. DOSSIER -->
   <section class="carte">
-    <h2><span class="num">1</span> Dossier</h2>
+    <h2><span class="n">1</span> En-tête de la déclaration
+      <span class="desc">Qui déclare, pour qui, sous quel régime et à quel bureau.</span></h2>
     <div class="corps">
       <div class="grille g3">
-        <div>
-          <label for="client">Client</label>
-          <input type="text" id="client" oninput="rendre()" placeholder="Nom du client">
-        </div>
-        <div>
-          <label for="reference">Référence du dossier</label>
+        <div><label><span class="case">1</span>Type de déclaration</label>
+          <select id="type_declaration" onchange="rendre()"></select></div>
+        <div><label><span class="case">7</span>Référence déclaration</label>
           <input type="text" id="reference" oninput="rendre()" placeholder="Ex. ET-2026-001">
-        </div>
-        <div>
-          <label for="date">Date</label>
-          <input type="date" id="date" oninput="rendre()">
-        </div>
+          <p class="aide">Votre référence interne de dossier.</p></div>
+        <div><label><span class="case">—</span>Date</label>
+          <input type="date" id="date" oninput="rendre()"></div>
+        <div><label><span class="case">37</span>Régime douanier</label>
+          <select id="regime" onchange="rendre()"></select></div>
+        <div class="plein" style="grid-column:span 2"><label><span class="case">29</span>Bureau de douane</label>
+          <input type="text" id="bureau" list="l-bureaux" oninput="rendre()" placeholder="Bureau de dédouanement">
+          <datalist id="l-bureaux"></datalist></div>
       </div>
-      <div class="grille g2" style="margin-top:14px">
-        <div>
-          <label for="marchandise">Nature de la marchandise</label>
-          <input type="text" id="marchandise" oninput="rendre()" placeholder="Description générale">
-        </div>
-        <div>
-          <label for="provenance">Provenance / destination</label>
-          <input type="text" id="provenance" oninput="rendre()" placeholder="Ex. Chine — Abidjan">
-        </div>
+      <div class="grille g3" style="margin-top:13px">
+        <div><label><span class="case">8</span>Importateur / Destinataire</label>
+          <textarea id="importateur" list="l-importateur" oninput="rendre()" placeholder="Nom, adresse, code importateur"></textarea>
+          <p class="aide">Mémorisé : ce qui est saisi une fois se repropose ensuite.</p></div>
+        <div><label><span class="case">2</span>Fournisseur / Exportateur</label>
+          <textarea id="exportateur" oninput="rendre()" placeholder="Nom et adresse complets du fournisseur étranger"></textarea></div>
+        <div><label><span class="case">14</span>Déclarant / Représentant</label>
+          <textarea id="declarant" oninput="rendre()" placeholder="Commissionnaire en douane agréé"></textarea></div>
       </div>
+      <div class="grille g3" style="margin-top:13px">
+        <div><label><span class="case">—</span>N° RCCM / CC de l'importateur</label>
+          <input type="text" id="rccm_cc" oninput="rendre()"></div>
+      </div>
+      <div id="carnet" class="sans-imp"></div>
     </div>
   </section>
 
-  <!-- 2. RÉGIME ET MONNAIE -->
   <section class="carte">
-    <h2><span class="num">2</span> Régime et monnaie</h2>
+    <h2><span class="n">2</span> Origine, transport et documents
+      <span class="desc">D'où vient la marchandise, par quel moyen, sous quels titres.</span></h2>
     <div class="corps">
       <div class="grille g3">
-        <div>
-          <label for="regime">Régime douanier</label>
-          <select id="regime" onchange="rendre()">
-            <option value="4000">4000 — Mise à la consommation (importation)</option>
-            <option value="1000">1000 — Exportation définitive</option>
-          </select>
-          <p class="aide" id="aide-regime"></p>
-        </div>
-        <div>
-          <label for="devise">Monnaie de la facture</label>
-          <select id="devise" onchange="majDevise()">
-            <option value="XOF">XOF — Franc CFA</option>
-            <option value="EUR">EUR — Euro</option>
-            <option value="USD">USD — Dollar</option>
-            <option value="CNY">CNY — Yuan</option>
-            <option value="GBP">GBP — Livre sterling</option>
-          </select>
-        </div>
-        <div>
-          <label for="taux">Taux de change (1 unité = ? XOF)</label>
-          <input type="number" id="taux" class="num" step="0.000001" oninput="rendre()">
-          <p class="aide" id="aide-taux"></p>
-        </div>
+        <div><label><span class="case">15</span>Pays d'expédition</label>
+          <select id="pays_expedition" onchange="rendre()"></select></div>
+        <div><label><span class="case">16</span>Pays d'origine</label>
+          <select id="pays_origine" onchange="rendre()"></select>
+          <p class="aide">Origine réelle de fabrication — elle décide du régime préférentiel.</p></div>
+        <div><label><span class="case">17</span>Pays de destination</label>
+          <select id="pays_destination" onchange="rendre()"></select></div>
+      </div>
+      <div style="margin-top:13px">
+        <label><span class="case">25</span>Mode de transport à la frontière</label>
+        <div class="modes" id="modes"></div>
+      </div>
+      <div class="grille g3" style="margin-top:13px">
+        <div><label><span class="case">21</span>Identité du moyen de transport</label>
+          <input type="text" id="moyen_transport" oninput="rendre()" placeholder="Navire, n° de vol, immatriculation"></div>
+        <div><label><span class="case">19</span>Conteneur</label>
+          <input type="text" id="conteneur" oninput="rendre()" placeholder="N° de conteneur, ou « néant »"></div>
+        <div><label><span class="case">27</span>Lieu de chargement</label>
+          <input type="text" id="lieu_chargement" oninput="rendre()"></div>
+        <div><label><span class="case">30</span>Localisation des marchandises</label>
+          <input type="text" id="localisation" oninput="rendre()" placeholder="Terminal, magasin sous douane"></div>
+        <div><label><span class="case">40</span>Document précédent</label>
+          <input type="text" id="document_precedent" oninput="rendre()" placeholder="Manifeste, connaissement, LTA"></div>
+        <div><label><span class="case">—</span>N° Facture</label>
+          <input type="text" id="numero_facture" oninput="rendre()"></div>
+        <div><label><span class="case">—</span>N° Connaissement (BL / LTA)</label>
+          <input type="text" id="numero_connaissement" oninput="rendre()"></div>
+        <div><label><span class="case">20</span>Conditions de livraison (Incoterm)</label>
+          <select id="incoterm" onchange="rendre()"></select></div>
+        <div><label><span class="case">24</span>Nature de la transaction</label>
+          <select id="nature_transaction" onchange="rendre()"></select></div>
+      </div>
+      <div style="margin-top:13px">
+        <label><span class="case">44</span>Documents produits, certificats et autorisations</label>
+        <textarea id="documents_joints" oninput="rendre()" placeholder="FDI, RFCV, certificat d'origine, BSC, BURIDA…"></textarea>
       </div>
     </div>
   </section>
 
-  <!-- 3. MARCHANDISES -->
   <section class="carte">
-    <h2>
-      <span class="num">3</span> Marchandises
-      <button class="btn sec petit" style="margin-left:auto" onclick="ajouterLigne()">+ Ajouter une ligne</button>
-    </h2>
-    <div class="tbl-enveloppe">
-      <table class="lignes">
-        <thead>
-          <tr>
-            <th style="width:34px">N°</th>
-            <th style="min-width:190px">Désignation</th>
-            <th style="min-width:135px">Position tarifaire</th>
-            <th style="width:150px">Taux DD</th>
-            <th class="num" style="min-width:120px">Valeur FOB</th>
-            <th class="num" style="min-width:105px">Poids brut (kg)</th>
-            <th style="width:40px" class="sans-impression"></th>
-          </tr>
-        </thead>
+    <h2><span class="n">3</span> Colis et masses
+      <span class="desc">Ce qui est présenté à la douane.</span></h2>
+    <div class="corps">
+      <div class="grille g4">
+        <div><label><span class="case">5</span>Nombre d'articles</label>
+          <input type="text" id="nombre_articles" class="num" readonly>
+          <p class="aide">Compté sur les lignes saisies.</p></div>
+        <div><label><span class="case">6</span>Total des colis</label>
+          <input type="number" id="total_colis" class="num" oninput="rendre()"></div>
+        <div><label><span class="case">31</span>Type de colis</label>
+          <select id="type_colis" onchange="rendre()"></select></div>
+        <div><label><span class="case">35</span>Masse brute totale (kg)</label>
+          <input type="number" id="masse_brute" class="num" step="0.001" oninput="rendre()">
+          <p class="aide">Sert de base à la répartition du fret.</p></div>
+        <div><label><span class="case">38</span>Masse nette totale (kg)</label>
+          <input type="number" id="masse_nette" class="num" step="0.001" oninput="rendre()"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="carte">
+    <h2><span class="n">4</span> Monnaie, fret et assurance
+      <span class="desc">Ce qui construit la valeur en douane.</span></h2>
+    <div class="corps">
+      <div class="grille g4">
+        <div><label><span class="case">22</span>Monnaie de la facture</label>
+          <select id="devise" onchange="majDevise()"></select></div>
+        <div><label><span class="case">23</span>Taux de change</label>
+          <input type="number" id="taux_change" class="num" step="0.000001" oninput="rendre()">
+          <p class="aide" id="aide-taux"></p></div>
+        <div><label><span class="case">12</span>Fret total</label>
+          <div class="avec-u"><input type="number" id="fret" class="num" step="0.01" oninput="rendre()" placeholder="0"><span class="u" id="u-fret">XOF</span></div>
+          <p class="aide">Dans la monnaie de la facture. Réparti au poids brut.</p></div>
+        <div><label><span class="case">12</span>Assurance totale</label>
+          <div class="avec-u"><input type="number" id="assurance" class="num" step="0.01" oninput="rendre()" placeholder="0"><span class="u">XOF</span></div>
+          <p class="aide"><b>Toujours en francs CFA.</b> Police souscrite localement : jamais convertie. Répartie à la valeur FOB.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════ VUE 2 : ARTICLES ═══════════ -->
+<div class="vue imprimer" id="vue-articles">
+  <section class="carte">
+    <h2><span class="n">5</span> Articles
+      <span class="desc">Une ligne par position tarifaire.</span>
+      <button class="btn sec petit sans-imp" style="margin-left:auto" onclick="ajouterLigne()">+ Ajouter un article</button></h2>
+    <div class="tbl">
+      <table class="saisie">
+        <thead><tr>
+          <th style="width:38px">N°</th>
+          <th style="min-width:200px"><span class="case">31</span>Désignation</th>
+          <th style="min-width:125px"><span class="case">33</span>Code HS</th>
+          <th style="min-width:110px"><span class="case">34</span>Origine</th>
+          <th style="min-width:90px"><span class="case">36</span>Préf.</th>
+          <th style="width:140px">Taux DD</th>
+          <th class="num" style="min-width:110px"><span class="case">42</span>FOB</th>
+          <th class="num" style="min-width:95px"><span class="case">35</span>Brut kg</th>
+          <th class="num" style="min-width:95px"><span class="case">38</span>Net kg</th>
+          <th class="num" style="min-width:85px"><span class="case">41</span>Qté</th>
+          <th style="min-width:80px">Unité</th>
+          <th style="width:36px" class="sans-imp"></th>
+        </tr></thead>
         <tbody id="corps-lignes"></tbody>
       </table>
     </div>
-    <p class="aide" style="padding:11px 18px;margin:0;border-top:1px solid var(--gris)">
-      Le taux de droit de douane vient du tarif — il ne s'invente pas.
-      Catégories du TEC CEDEAO : <b>C0 = 0 %</b> (biens sociaux essentiels),
-      <b>C1 = 5 %</b> (matières premières, biens d'équipement),
-      <b>C2 = 10 %</b> (intrants intermédiaires),
-      <b>C3 = 20 %</b> (biens de consommation finale),
-      <b>C4 = 35 %</b> (biens spécifiques pour le développement).
+    <p class="aide" style="padding:11px 17px;margin:0;border-top:1px solid var(--gris)">
+      Le taux de droit vient du tarif — il ne s'invente pas. Catégories du TEC CEDEAO :
+      <b>C0 = 0 %</b> biens sociaux essentiels · <b>C1 = 5 %</b> matières premières et biens d'équipement ·
+      <b>C2 = 10 %</b> intrants intermédiaires · <b>C3 = 20 %</b> biens de consommation finale ·
+      <b>C4 = 35 %</b> biens spécifiques. Un taux hors catégorie se saisit dans « Autre ».
     </p>
   </section>
+</div>
 
-  <!-- 4. FRET ET ASSURANCE -->
+<!-- ═══════════ VUE 3 : LIQUIDATION ═══════════ -->
+<div class="vue imprimer" id="vue-liquidation">
+  <div id="alertes"></div>
+  <section class="carte"><h2><span class="n">6</span> Liquidation des droits et taxes</h2><div id="z-liq"></div></section>
   <section class="carte">
-    <h2><span class="num">4</span> Fret et assurance</h2>
-    <div class="corps">
-      <div class="grille g2">
-        <div>
-          <label for="fret">Fret total</label>
-          <div class="avec-unite">
-            <input type="number" id="fret" class="num" step="0.01" oninput="rendre()" placeholder="0">
-            <span class="unite" id="unite-fret">XOF</span>
-          </div>
-          <p class="aide">Libellé dans la monnaie de la facture. Réparti entre les lignes au poids brut.</p>
-        </div>
-        <div>
-          <label for="assurance">Assurance totale</label>
-          <div class="avec-unite">
-            <input type="number" id="assurance" class="num" step="0.01" oninput="rendre()" placeholder="0">
-            <span class="unite">XOF</span>
-          </div>
-          <p class="aide">
-            <b>Toujours en francs CFA, jamais convertie.</b> La police facultés se souscrit
-            localement en Côte d'Ivoire : la prime est émise en XOF quelle que soit la monnaie
-            de la facture. Répartie entre les lignes à la valeur FOB.
-          </p>
-        </div>
-      </div>
-    </div>
+    <h2><span class="n">7</span> Prestations et débours E-Transit
+      <span class="desc">Ce qui revient à E-Transit, séparé de ce qui revient à la douane.</span>
+      <button class="btn sec petit sans-imp" style="margin-left:auto" onclick="ajouterFrais()">+ Ajouter un poste</button></h2>
+    <div class="tbl"><table class="saisie"><thead><tr>
+      <th style="min-width:280px">Libellé du poste</th><th class="num" style="min-width:150px">Montant (XOF)</th>
+      <th style="width:36px" class="sans-imp"></th></tr></thead><tbody id="corps-frais"></tbody></table></div>
   </section>
-
-  <!-- 5. LIQUIDATION -->
+  <section class="carte"><div id="z-total"></div></section>
   <section class="carte">
-    <h2><span class="num">5</span> Droits et taxes</h2>
-    <div id="zone-liquidation"></div>
+    <h2><span class="n">8</span> Observations</h2>
+    <div class="corps"><textarea id="notes" oninput="rendre()" placeholder="Conditions, réserves, validité de l'offre, délais…"></textarea></div>
   </section>
+</div>
 
-  <!-- 6. PRESTATIONS -->
+<!-- ═══════════ VUE 4 : HISTORIQUE ═══════════ -->
+<div class="vue" id="vue-historique">
   <section class="carte">
-    <h2>
-      <span class="num">6</span> Prestations et débours E-Transit
-      <button class="btn sec petit" style="margin-left:auto" onclick="ajouterFrais()">+ Ajouter un poste</button>
-    </h2>
-    <div class="tbl-enveloppe">
-      <table class="lignes">
-        <thead>
-          <tr>
-            <th style="min-width:260px">Libellé du poste</th>
-            <th class="num" style="min-width:150px">Montant (XOF)</th>
-            <th style="width:40px" class="sans-impression"></th>
-          </tr>
-        </thead>
-        <tbody id="corps-frais"></tbody>
-      </table>
-    </div>
-    <p class="aide" style="padding:11px 18px;margin:0;border-top:1px solid var(--gris)">
-      Ces postes s'ajoutent librement : honoraires de transit, acconage, magasinage, transport
-      local, frais de dossier, débours divers. Ils sont présentés <b>séparément</b> des droits
-      et taxes, pour que le client voie ce qui revient à la douane et ce qui revient à E-Transit.
-    </p>
-  </section>
-
-  <!-- 7. TOTAL -->
-  <section class="carte">
-    <div id="zone-total"></div>
-  </section>
-
-  <!-- 8. NOTES -->
-  <section class="carte">
-    <h2><span class="num">7</span> Observations</h2>
-    <div class="corps">
-      <textarea id="notes" oninput="rendre()" placeholder="Conditions, réserves, validité de l'offre, délais…"></textarea>
-    </div>
-  </section>
-
-  <!-- COTATIONS ENREGISTRÉES -->
-  <section class="carte sans-impression">
-    <h2>
-      Cotations enregistrées
+    <h2>Historique des cotations
       <span style="margin-left:auto;display:flex;gap:6px">
-        <button class="btn sec petit" onclick="sauvegarder()">Sauvegarde (fichier)</button>
-        <button class="btn sec petit" onclick="document.getElementById('fichier-restaurer').click()">Restaurer</button>
-        <input type="file" id="fichier-restaurer" accept="application/json" style="display:none" onchange="restaurer(event)">
-      </span>
-    </h2>
-    <div id="zone-liste"></div>
+        <button class="btn sec petit" onclick="sauvegarder()">Sauvegarde</button>
+        <button class="btn sec petit" onclick="document.getElementById('f-rest').click()">Restaurer</button>
+        <input type="file" id="f-rest" accept="application/json" style="display:none" onchange="restaurer(event)">
+      </span></h2>
+    <div class="barre-rech">
+      <input type="text" id="rech" placeholder="Rechercher : importateur, référence, fournisseur, n° facture…" oninput="rendreHist()">
+      <select id="rech-regime" onchange="rendreHist()"><option value="">Tous les régimes</option></select>
+      <select id="rech-tri" onchange="rendreHist()">
+        <option value="recent">Plus récentes d'abord</option>
+        <option value="ancien">Plus anciennes d'abord</option>
+        <option value="montant">Montant décroissant</option>
+      </select>
+    </div>
+    <div id="z-hist"></div>
   </section>
+</div>
 
-  <div class="pied">
-    <strong>E-Transit</strong> — Cotation des droits et taxes, Côte d'Ivoire<br>
-    Barème : TEC CEDEAO — Côte d'Ivoire, version du 7 août 2026.<br>
-    Document d'estimation. La liquidation définitive appartient à l'Administration des douanes.<br>
-    <strong>By Dems'Inc — Demsy Landry</strong>
-  </div>
-
+<div class="pied">
+  <strong>E-Transit</strong> — Cotation et déclaration en douane, Côte d'Ivoire<br>
+  Modèle SYDAM / Document Administratif Unique. Barème : TEC CEDEAO — Côte d'Ivoire, version du 7 août 2026.<br>
+  Document d'estimation : la liquidation définitive appartient à l'Administration des douanes.<br>
+  <strong>By Dems'Inc — Demsy Landry</strong>
+</div>
 </div>
 
 <script>
 "use strict";
 
-/* ═══════════════════════════════════════════════════════════════════════
-   RÉFÉRENTIEL — repris du moteur de liquidation vérifié
-   ═══════════════════════════════════════════════════════════════════════ */
+/* ══════════════ RÉFÉRENTIELS — repris du Déclarant MayLary ══════════════ */
 
-/**
- * Les taxes, dans l'ordre où une liquidation se lit.
- *
- * `assiette` dit sur quoi la taxe porte, `entre_base_tva` si elle grossit
- * l'assiette de la TVA. C'est cette colonne qui fait toute la différence :
- * seuls le droit de douane et la redevance statistique y entrent. Les
- * prélèvements communautaires, non.
- */
 const TAXES = [
-  { code:'DD',  libelle:'Droit de douane',                                 taux:null,   assiette:'caf',      niveau:'ligne',        base_tva:true  },
-  { code:'RST', libelle:'Redevance statistique',                           taux:0.01,   assiette:'caf',      niveau:'ligne',        base_tva:true  },
-  { code:'PCS', libelle:'Prélèvement communautaire de solidarité (UEMOA)', taux:0.008,  assiette:'caf',      niveau:'ligne',        base_tva:false },
-  { code:'PUA', libelle:'Prélèvement Union africaine',                     taux:0.002,  assiette:'caf',      niveau:'ligne',        base_tva:false },
-  { code:'PCC', libelle:'Prélèvement communautaire (CEDEAO)',              taux:0.005,  assiette:'caf',      niveau:'ligne',        base_tva:false },
-  { code:'TVA', libelle:'Taxe sur la valeur ajoutée',                      taux:0.18,   assiette:'base_tva', niveau:'ligne',        base_tva:false },
-  { code:'RPI', libelle:'Redevance prestations informatiques',             taux:0.0075, assiette:'fob',      niveau:'declaration',  base_tva:false, minimum:100000 },
-  { code:'TS',  libelle:'Timbre statistique',                              taux:null,   assiette:'forfait',  niveau:'declaration',  base_tva:false, forfait:20000 },
+  { code:'DD',  libelle:'Droit de douane',                                 taux:null,   assiette:'caf',      niveau:'ligne',       base_tva:true  },
+  { code:'RST', libelle:'Redevance statistique',                           taux:0.01,   assiette:'caf',      niveau:'ligne',       base_tva:true  },
+  { code:'PCS', libelle:'Prélèvement communautaire de solidarité (UEMOA)', taux:0.008,  assiette:'caf',      niveau:'ligne',       base_tva:false },
+  { code:'PUA', libelle:'Prélèvement Union africaine',                     taux:0.002,  assiette:'caf',      niveau:'ligne',       base_tva:false },
+  { code:'PCC', libelle:'Prélèvement communautaire (CEDEAO)',              taux:0.005,  assiette:'caf',      niveau:'ligne',       base_tva:false },
+  { code:'TVA', libelle:'Taxe sur la valeur ajoutée',                      taux:0.18,   assiette:'base_tva', niveau:'ligne',       base_tva:false },
+  { code:'RPI', libelle:'Redevance prestations informatiques',             taux:0.0075, assiette:'fob',      niveau:'declaration', base_tva:false, minimum:100000 },
+  { code:'TS',  libelle:'Timbre statistique',                              taux:null,   assiette:'forfait',  niveau:'declaration', base_tva:false, forfait:20000 },
 ];
 
-/**
- * Les régimes. `droits` commande les taxes de ligne, `rpi` et `ts` les taxes
- * de déclaration — et ils sont indépendants : sous entrepôt les droits sont
- * suspendus mais le timbre reste dû.
- */
-const REGIMES = {
-  '4000': {
-    libelle:'Mise à la consommation directe', droits:true, rpi:true, ts:true,
-    mention:'Régime de droit commun : droits et taxes exigibles en totalité, redevance informatique et timbre statistique dus.',
-  },
-  '1000': {
-    libelle:'Exportation définitive', droits:false, rpi:false, ts:true,
-    mention:"Exportation : seul le timbre statistique de 20 000 XOF est dû, une fois par déclaration. Ni droits de douane, ni TVA, ni prélèvements communautaires, ni redevance informatique. Hors produits soumis au Droit Unique de Sortie (cacao, café, noix de cajou…), qui reste à confirmer.",
-  },
-};
-
-/**
- * Parités fixes de droit. L'euro est arrimé au franc CFA par un accord
- * monétaire : ce taux ne se saisit pas et ne se négocie pas.
- */
-const PARITES_FIXES = { XOF:1, EUR:655.957 };
-
-const CATEGORIES_TEC = [
-  { code:'C0', taux:0,    libelle:'Biens sociaux essentiels' },
-  { code:'C1', taux:0.05, libelle:"Matières premières et biens d'équipement" },
-  { code:'C2', taux:0.10, libelle:'Intrants intermédiaires' },
-  { code:'C3', taux:0.20, libelle:'Biens de consommation finale' },
-  { code:'C4', taux:0.35, libelle:'Biens spécifiques pour le développement' },
+const REGIMES = [
+  ['4000','Mise à la consommation directe',true,true,true,"Régime de droit commun : droits et taxes exigibles en totalité, redevance informatique et timbre statistique dus."],
+  ['1000','Exportation définitive',false,false,true,"Exportation : seul le timbre statistique de 20 000 XOF est dû, une fois par déclaration. Ni droits de douane, ni TVA, ni prélèvements communautaires, ni redevance informatique. Hors produits soumis au Droit Unique de Sortie (cacao, café, noix de cajou…), qui reste à confirmer."],
+  ['3051',"Réexportation en suite d'admission temporaire spéciale",false,false,true,"Réexportation : seul le timbre statistique est dû. Les droits et taxes à l'importation ne s'appliquent pas à une marchandise qui quitte le territoire."],
+  ['5100',"Admission temporaire spéciale (matériels d'entreprises)",false,true,true,"Admission temporaire : droits et taxes suspendus, en totalité ou en partie selon l'autorisation détenue. Redevance informatique et timbre restent dus — les montants affichés sont indicatifs."],
+  ['5200','AT pour perfectionnement actif',false,true,true,"Admission temporaire : droits et taxes suspendus selon l'autorisation détenue. Redevance informatique et timbre restent dus — montants indicatifs."],
+  ['7000','Entrée en entrepôt de stockage',false,true,true,"Entrepôt sous douane : droits et taxes suspendus jusqu'à la mise à la consommation. Redevance informatique et timbre statistique restent dus."],
 ];
 
-const CLE_STOCKAGE = 'etransit_cotations_v1';
+const MONNAIES = [['XOF','Franc CFA (BCEAO)',1],['EUR','Euro',655.957],['USD','Dollar des États-Unis',null],['CNY','Yuan chinois',null],['GBP','Livre sterling',null],['AED','Dirham des Émirats',null],['MAD','Dirham marocain',null],['TND','Dinar tunisien',null],['TRY','Livre turque',null],['GHS','Cedi ghanéen',null],['NGN','Naira nigérian',null],['ZAR','Rand sud-africain',null],['INR','Roupie indienne',null],['JPY','Yen japonais',null],['CHF','Franc suisse',null],['CAD','Dollar canadien',null],['XAF','Franc CFA (BEAC)',1]];
 
-/* ═══════════════════════════════════════════════════════════════════════
-   ÉTAT
-   ═══════════════════════════════════════════════════════════════════════ */
+const PAYS = [['ZA','Afrique du Sud'],['DZ','Algérie'],['DE','Allemagne'],['AO','Angola'],['SA','Arabie saoudite'],['AR','Argentine'],['AU','Australie'],['AT','Autriche'],['BD','Bangladesh'],['BE','Belgique'],['BJ','Bénin'],['BR','Brésil'],['BG','Bulgarie'],['BF','Burkina Faso'],['CV','Cabo Verde'],['CM','Cameroun'],['CA','Canada'],['CL','Chili'],['CN','Chine'],['CG','Congo'],['CD','Congo (RDC)'],['KR','Corée du Sud'],['CI',"Côte d'Ivoire"],['DK','Danemark'],['EG','Égypte'],['AE','Émirats arabes unis'],['ES','Espagne'],['US','États-Unis'],['ET','Éthiopie'],['FI','Finlande'],['FR','France'],['GA','Gabon'],['GM','Gambie'],['GH','Ghana'],['GR','Grèce'],['GN','Guinée'],['GW','Guinée-Bissau'],['HK','Hong Kong'],['HU','Hongrie'],['IN','Inde'],['ID','Indonésie'],['IR','Iran'],['IE','Irlande'],['IL','Israël'],['IT','Italie'],['JP','Japon'],['JO','Jordanie'],['KE','Kenya'],['KW','Koweït'],['LB','Liban'],['LR','Libéria'],['LY','Libye'],['MG','Madagascar'],['MY','Malaisie'],['ML','Mali'],['MA','Maroc'],['MU','Maurice'],['MR','Mauritanie'],['MX','Mexique'],['MZ','Mozambique'],['NE','Niger'],['NG','Nigéria'],['NO','Norvège'],['NZ','Nouvelle-Zélande'],['OM','Oman'],['UG','Ouganda'],['PK','Pakistan'],['NL','Pays-Bas'],['PH','Philippines'],['PL','Pologne'],['PT','Portugal'],['QA','Qatar'],['CF','République centrafricaine'],['RO','Roumanie'],['GB','Royaume-Uni'],['RU','Russie'],['RW','Rwanda'],['SN','Sénégal'],['SL','Sierra Leone'],['SG','Singapour'],['SD','Soudan'],['LK','Sri Lanka'],['SE','Suède'],['CH','Suisse'],['TW','Taïwan'],['TZ','Tanzanie'],['TD','Tchad'],['CZ','Tchéquie'],['TH','Thaïlande'],['TG','Togo'],['TN','Tunisie'],['TR','Turquie'],['UA','Ukraine'],['VN','Viêt Nam'],['ZM','Zambie'],['ZW','Zimbabwe']];
 
-let lignes = [];
-let frais  = [];
-let idCourant = null;
+const BUREAUX = ['Abidjan Port — Vridi','Abidjan Port — Terminal à conteneurs','Abidjan Aéroport Félix Houphouët-Boigny','Abidjan — Bureau des colis postaux','San Pédro Port','Bouaké','Yamoussoukro','Ferkessédougou','Ouangolodougou','Pogo (frontière Mali)','Noé (frontière Ghana)','Aboisso','Korhogo','Man','Danané (frontière Guinée/Libéria)','Odienné','Daloa','Gagnoa','Bondoukou'];
 
-const nb = (v) => {
-  const n = Number(String(v ?? '').replace(/\s/g,'').replace(',','.'));
-  return Number.isFinite(n) ? n : 0;
-};
+const TYPES_DECLARATION = [['IM','IM — Importation'],['EX','EX — Exportation'],['EU','EU — Transit']];
+const NATURES = [['1','Achat / vente ferme'],['6','Échantillon'],['5','Retour de marchandise'],['2','Livraison en consignation'],['4','Aide, don, secours'],['7','Réparation ou entretien'],['8','Location, crédit-bail'],['3','Troc'],['9','Autre nature']];
+const COLIS = [['CT','Carton'],['PK','Colis'],['PL','Palette'],['BG','Sac'],['CS','Caisse'],['DR','Fût'],['RL','Rouleau'],['BX','Boîte'],['CN','Conteneur'],['BL','Balle'],['NE','Non emballé / en vrac']];
+const INCOTERMS = [['EXW','EXW — Ex Works (départ usine)'],['FCA','FCA — Free Carrier'],['FOB','FOB — Free On Board'],['CFR','CFR — Cost and Freight'],['CIF','CIF — Cost, Insurance and Freight'],['DAP','DAP — Delivered At Place'],['DDP','DDP — Delivered Duty Paid']];
+const MODES = [['1','Maritime','⚓'],['4','Aérien','✈'],['3','Routier','🚚'],['2','Ferroviaire','🚂'],['5','Postal','✉']];
+const UNITES = [['U','Unité'],['KG','Kilogramme'],['L','Litre'],['M','Mètre'],['M2','Mètre carré'],['M3','Mètre cube'],['T','Tonne'],['BTE','Boîte'],['SAC','Sac'],['CTN','Carton']];
+const CATEGORIES_TEC = [['0','C0 — 0 %'],['0.05','C1 — 5 %'],['0.10','C2 — 10 %'],['0.20','C3 — 20 %'],['0.35','C4 — 35 %']];
+
+const PARITES_FIXES = { XOF:1, EUR:655.957, XAF:1 };
+
+const CHAMPS = ['type_declaration','reference','date','regime','bureau','importateur','rccm_cc','exportateur','declarant',
+  'pays_expedition','pays_origine','pays_destination','mode_transport','moyen_transport','conteneur','lieu_chargement',
+  'localisation','document_precedent','numero_facture','numero_connaissement','incoterm','nature_transaction',
+  'documents_joints','total_colis','type_colis','masse_brute','masse_nette','devise','taux_change','fret','assurance','notes'];
+
+const CLE = 'etransit_v2';
+const CLE_CARNET = 'etransit_carnet_v2';
+
+/* ══════════════ ÉTAT ══════════════ */
+
+let lignes = [], frais = [], idCourant = null, modeTransport = '1';
+
+const nb = (v) => { const n = Number(String(v ?? '').replace(/\s/g,'').replace(',','.')); return Number.isFinite(n) ? n : 0; };
 const xof = (n) => Math.round(n).toLocaleString('fr-FR') + ' XOF';
 const pct = (t) => (t*100).toLocaleString('fr-FR',{maximumFractionDigits:2}) + ' %';
-const val = (id) => document.getElementById(id).value;
-const ech = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
-  ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+const el = (id) => document.getElementById(id);
+const val = (id) => { const e = el(id); return e ? e.value : ''; };
+const ech = (s) => String(s ?? '').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const opts = (liste, vide) => (vide ? `<option value="">${vide}</option>` : '') +
+  liste.map(([v,l]) => `<option value="${ech(v)}">${ech(l)}</option>`).join('');
+const regimeDe = (code) => REGIMES.find((r) => r[0] === code);
 
-/* ═══════════════════════════════════════════════════════════════════════
-   LE CALCUL
-   ═══════════════════════════════════════════════════════════════════════ */
+/* ══════════════ LE CALCUL — identique au moteur vérifié ══════════════ */
 
-/**
- * Liquide la déclaration.
- *
- * Rend soit `{ erreurs:[...] }` — et alors rien n'est calculé — soit le détail
- * complet. On ne rend jamais un résultat partiel : un total incomplet présenté
- * comme un total est la pire des sorties.
- */
 function liquider() {
   const erreurs = [];
-  const regime = REGIMES[val('regime')];
-  const taux   = nb(val('taux'));
+  const reg = regimeDe(val('regime'));
+  const taux = nb(val('taux_change'));
   const utiles = lignes.filter((l) => nb(l.fob) > 0);
 
-  if (utiles.length === 0) erreurs.push("Aucune ligne de marchandise avec une valeur FOB.");
-  if (taux <= 0) erreurs.push("Le taux de change doit être supérieur à zéro.");
+  if (!reg) erreurs.push('Régime douanier inconnu.');
+  if (utiles.length === 0) erreurs.push('Aucun article avec une valeur FOB.');
+  if (taux <= 0) erreurs.push('Le taux de change doit être supérieur à zéro.');
 
-  // Le taux de droit ne s'invente pas. Si le régime l'exige et qu'il manque,
-  // on refuse de calculer plutôt que de retenir zéro en silence.
-  if (regime && regime.droits) {
-    utiles.forEach((l) => {
-      if (l.taux_dd === '' || l.taux_dd === null || l.taux_dd === undefined) {
-        erreurs.push(`Ligne ${l.numero} : taux de droit de douane non renseigné.`);
-      }
-    });
-  }
+  // Le taux de droit ne s'invente jamais.
+  if (reg && reg[2]) utiles.forEach((l) => {
+    if (l.taux_dd === '' || l.taux_dd == null) erreurs.push(`Article ${l.numero} : taux de droit de douane non renseigné.`);
+  });
 
-  // Le FOB est converti, l'assurance non : elle est déjà en francs CFA.
-  const fobTotalXof   = utiles.reduce((t,l) => t + nb(l.fob)*taux, 0);
-  const fretTotalXof  = nb(val('fret')) * taux;
-  const assuranceXof  = nb(val('assurance'));
-  const poidsTotal    = utiles.reduce((t,l) => t + nb(l.poids), 0);
+  const fobT   = utiles.reduce((t,l) => t + nb(l.fob)*taux, 0);
+  const fretT  = nb(val('fret')) * taux;
+  const assurT = nb(val('assurance'));                     // jamais converti
+  // La masse brute déclarée en case 35 fait foi si elle est saisie ; sinon on
+  // somme les lignes. C'est ce que fait le moteur.
+  const poidsT = nb(val('masse_brute')) || utiles.reduce((t,l) => t + nb(l.poids_brut), 0);
 
-  // Le fret se répartit AU POIDS. Sans poids, on ne peut pas répartir — et
-  // répartir à la valeur serait une autre formule sous le même nom.
-  if (fretTotalXof > 0 && poidsTotal <= 0) {
-    erreurs.push("Fret à répartir mais aucun poids brut renseigné : la répartition du fret se fait au poids.");
-  }
+  if (fretT > 0 && poidsT <= 0)
+    erreurs.push('Fret à répartir mais aucune masse brute renseignée : la répartition du fret se fait au poids.');
 
   if (erreurs.length) return { erreurs };
 
-  const detail = [];
-  const totaux = {};
+  const detail = [], totaux = {};
   TAXES.forEach((t) => { totaux[t.code] = 0; });
 
   utiles.forEach((l) => {
-    const fob    = nb(l.fob) * taux;
-    const poids  = nb(l.poids);
-    const tauxDd = nb(l.taux_dd);
+    const fob = nb(l.fob) * taux, poids = nb(l.poids_brut), tdd = nb(l.taux_dd);
+    const fret  = poidsT > 0 ? fretT / poidsT * poids : 0;
+    const assur = fobT  > 0 ? assurT / fobT  * fob   : 0;
+    const caf = fob + fret + assur;
 
-    const fret   = poidsTotal > 0 ? fretTotalXof / poidsTotal * poids : 0;
-    const assur  = fobTotalXof > 0 ? assuranceXof / fobTotalXof * fob : 0;
-    const caf    = fob + fret + assur;
-
-    // L'assiette de la TVA se construit AVANT de calculer les taxes, parce
-    // qu'elle dépend de certaines d'entre elles. D'où les deux passages.
     let baseTva = caf;
-    TAXES.filter((t) => t.niveau === 'ligne' && t.base_tva).forEach((t) => {
-      baseTva += Math.round(caf * (t.taux ?? tauxDd));
-    });
+    TAXES.filter((t) => t.niveau === 'ligne' && t.base_tva)
+         .forEach((t) => { baseTva += Math.round(caf * (t.taux ?? tdd)); });
 
     const taxes = TAXES.filter((t) => t.niveau === 'ligne').map((t) => {
-      const base = t.assiette === 'base_tva' ? baseTva : caf;
-      const tx   = t.taux ?? tauxDd;
-      const montant = !regime.droits ? 0
+      const m = !reg[2] ? 0
         : t.assiette === 'base_tva' ? Math.round(baseTva * t.taux)
-        : Math.round(caf * tx);
-      totaux[t.code] += montant;
-      return { code:t.code, libelle:t.libelle, base, taux:tx, montant };
+        : Math.round(caf * (t.taux ?? tdd));
+      totaux[t.code] += m;
+      return { code:t.code, libelle:t.libelle, montant:m };
     });
 
-    detail.push({
-      numero:l.numero, designation:l.designation, position:l.position,
-      taux_dd:tauxDd, fob, poids, fret, assurance:assur, caf, base_tva:baseTva, taxes,
-    });
+    detail.push({ ...l, fob, poids, fret, assurance:assur, caf, base_tva:baseTva, taux_dd:tdd, taxes });
   });
 
-  // Taxes de déclaration : une seule fois, quel que soit le nombre de lignes.
-  const defRpi = TAXES.find((t) => t.code === 'RPI');
-  const defTs  = TAXES.find((t) => t.code === 'TS');
-  totaux.RPI = regime.rpi ? Math.max(Math.round(fobTotalXof * defRpi.taux), defRpi.minimum) : 0;
-  totaux.TS  = regime.ts  ? defTs.forfait : 0;
+  const dRpi = TAXES.find((t) => t.code === 'RPI'), dTs = TAXES.find((t) => t.code === 'TS');
+  totaux.RPI = reg[3] ? Math.max(Math.round(fobT * dRpi.taux), dRpi.minimum) : 0;
+  totaux.TS  = reg[4] ? dTs.forfait : 0;
 
-  const totalDouane = Object.values(totaux).reduce((a,b) => a+b, 0);
-  const cafTotal    = detail.reduce((t,l) => t + l.caf, 0);
-
-  return {
-    erreurs:[], regime, detail, totaux, totalDouane,
-    globaux:{ fob:fobTotalXof, fret:fretTotalXof, assurance:assuranceXof, caf:cafTotal, poids:poidsTotal },
-  };
+  return { erreurs:[], reg, detail, totaux,
+    totalDouane: Object.values(totaux).reduce((a,b)=>a+b,0),
+    globaux:{ fob:fobT, fret:fretT, assurance:assurT, poids:poidsT, caf:detail.reduce((t,l)=>t+l.caf,0) } };
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   AFFICHAGE
-   ═══════════════════════════════════════════════════════════════════════ */
+/** Ce qui manque avant de pouvoir remettre le document au client. */
+function manques() {
+  const m = [], vide = (c) => !String(val(c)).trim();
+  if (vide('reference')) m.push('la référence');
+  if (vide('bureau')) m.push('le bureau de douane');
+  if (vide('importateur')) m.push("l'importateur");
+  if (vide('pays_origine')) m.push("le pays d'origine");
+  if (!nb(val('taux_change'))) m.push('le taux de change');
+  const u = lignes.filter((l) => nb(l.fob) > 0);
+  if (u.length === 0) m.push('au moins un article avec une valeur FOB');
+  else if (u.some((l) => !String(l.code_hs).trim())) m.push('le code HS de chaque article');
+  return m;
+}
 
-function majDevise() {
-  const d = val('devise');
-  const champ = document.getElementById('taux');
-  const fixe = PARITES_FIXES[d];
-  if (fixe !== undefined) { champ.value = fixe; champ.readOnly = true; }
-  else { champ.readOnly = false; if (nb(champ.value) === 0 || PARITES_FIXES[champ.value]) champ.value = ''; }
-  document.getElementById('aide-taux').textContent =
-    fixe !== undefined ? 'Parité fixe de droit — elle ne se saisit pas.' : 'Taux du jour retenu pour la déclaration.';
-  document.getElementById('unite-fret').textContent = d;
+/* ══════════════ SAISIE ══════════════ */
+
+function ligneVide(){ return { cle:Date.now()+Math.random(), numero:String(lignes.length+1),
+  designation:'', code_hs:'', origine:'', preference:'', taux_dd:'', fob:'', poids_brut:'', poids_net:'', quantite:'', unite:'U' }; }
+function ajouterLigne(){ lignes.push(ligneVide()); rendre(); }
+function retirerLigne(c){ lignes = lignes.filter((l)=>l.cle!==c); lignes.forEach((l,i)=>{l.numero=String(i+1);}); rendre(); }
+function majLigne(c,ch,v){ const l = lignes.find((x)=>x.cle===c); if(l){ l[ch]=v; rendre(); } }
+function ajouterFrais(){ frais.push({cle:Date.now()+Math.random(),libelle:'',montant:''}); rendre(); }
+function retirerFrais(c){ frais = frais.filter((f)=>f.cle!==c); rendre(); }
+function majFrais(c,ch,v){ const f = frais.find((x)=>x.cle===c); if(f){ f[ch]=v; rendre(); } }
+
+function allerA(v){
+  document.querySelectorAll('.vue').forEach((x)=>x.classList.remove('actif'));
+  el('vue-'+v).classList.add('actif');
+  document.querySelectorAll('.onglet').forEach((o)=>o.classList.toggle('actif', o.dataset.vue===v));
+  if (v==='historique') rendreHist();
+  window.scrollTo({top:0});
+}
+
+function choisirMode(c){ modeTransport = c; rendre(); }
+
+function majDevise(){
+  const d = val('devise'), fixe = PARITES_FIXES[d], champ = el('taux_change');
+  if (fixe !== undefined){ champ.value = fixe; champ.readOnly = true; }
+  else { champ.readOnly = false; if (PARITES_FIXES[nb(champ.value)] || nb(champ.value)===1) champ.value=''; }
+  el('aide-taux').textContent = fixe !== undefined
+    ? 'Parité fixe de droit — elle ne se saisit pas.' : 'Taux du jour retenu pour la déclaration.';
+  el('u-fret').textContent = d || 'XOF';
   rendre();
 }
 
-function ligneVide() {
-  return { cle:Date.now()+Math.random(), numero:String(lignes.length+1),
-           designation:'', position:'', taux_dd:'', fob:'', poids:'' };
-}
-function ajouterLigne(){ lignes.push(ligneVide()); rendre(); }
-function retirerLigne(cle){ lignes = lignes.filter((l) => l.cle !== cle);
-  lignes.forEach((l,i) => { l.numero = String(i+1); }); rendre(); }
-function majLigne(cle, champ, v){ const l = lignes.find((x) => x.cle === cle); if (l) { l[champ] = v; rendre(); } }
+/* ══════════════ AFFICHAGE ══════════════ */
 
-function ajouterFrais(){ frais.push({ cle:Date.now()+Math.random(), libelle:'', montant:'' }); rendre(); }
-function retirerFrais(cle){ frais = frais.filter((f) => f.cle !== cle); rendre(); }
-function majFrais(cle, champ, v){ const f = frais.find((x) => x.cle === cle); if (f) { f[champ] = v; rendre(); } }
-
-function rendreLignes() {
-  const corps = document.getElementById('corps-lignes');
-  if (lignes.length === 0) {
-    corps.innerHTML = `<tr><td colspan="7" class="vide">Aucune marchandise. Cliquez sur « Ajouter une ligne ».</td></tr>`;
-    return;
-  }
-  corps.innerHTML = lignes.map((l) => `
-    <tr>
+function rendreLignes(){
+  const c = el('corps-lignes');
+  if (!lignes.length){ c.innerHTML = `<tr><td colspan="12" class="vide">Aucun article. Cliquez sur « Ajouter un article ».</td></tr>`; return; }
+  c.innerHTML = lignes.map((l)=>{
+    const hors = l.taux_dd !== '' && !CATEGORIES_TEC.some(([v])=>v===String(l.taux_dd));
+    return `<tr>
       <td class="num" style="font-weight:700">${ech(l.numero)}</td>
-      <td><input type="text" value="${ech(l.designation)}" placeholder="Désignation commerciale"
-                 oninput="majLigne(${l.cle},'designation',this.value)"></td>
-      <td><input type="text" value="${ech(l.position)}" placeholder="0000.00.00.00"
-                 oninput="majLigne(${l.cle},'position',this.value)"></td>
+      <td><input type="text" value="${ech(l.designation)}" oninput="majLigne(${l.cle},'designation',this.value)" placeholder="Désignation commerciale"></td>
+      <td><input type="text" value="${ech(l.code_hs)}" oninput="majLigne(${l.cle},'code_hs',this.value)" placeholder="0000.00.00.00"></td>
+      <td><select onchange="majLigne(${l.cle},'origine',this.value)">${opts(PAYS,'—')}</select></td>
+      <td><input type="text" value="${ech(l.preference)}" oninput="majLigne(${l.cle},'preference',this.value)"></td>
       <td>
-        <select onchange="majLigne(${l.cle},'taux_dd',this.value)">
+        <select onchange="majLigne(${l.cle},'taux_dd',this.value==='autre'?'':this.value)">
           <option value="" ${l.taux_dd===''?'selected':''}>— à préciser —</option>
-          ${CATEGORIES_TEC.map((c) => `<option value="${c.taux}" ${String(l.taux_dd)===String(c.taux)?'selected':''}
-            title="${ech(c.libelle)}">${c.code} — ${pct(c.taux)}</option>`).join('')}
+          ${CATEGORIES_TEC.map(([v,lib])=>`<option value="${v}" ${String(l.taux_dd)===v?'selected':''}>${lib}</option>`).join('')}
+          <option value="autre" ${hors?'selected':''}>Autre…</option>
         </select>
+        ${hors?`<input type="number" step="0.0001" value="${ech(l.taux_dd)}" class="num" style="margin-top:4px"
+           oninput="majLigne(${l.cle},'taux_dd',this.value)" placeholder="0.20 pour 20 %">`:''}
       </td>
-      <td><input type="number" class="num" step="0.01" value="${ech(l.fob)}" placeholder="0"
-                 oninput="majLigne(${l.cle},'fob',this.value)"></td>
-      <td><input type="number" class="num" step="0.001" value="${ech(l.poids)}" placeholder="0"
-                 oninput="majLigne(${l.cle},'poids',this.value)"></td>
-      <td class="sans-impression">
-        <button class="btn danger petit" onclick="retirerLigne(${l.cle})" title="Retirer">×</button>
-      </td>
-    </tr>`).join('');
+      <td><input type="number" class="num" step="0.01" value="${ech(l.fob)}" oninput="majLigne(${l.cle},'fob',this.value)"></td>
+      <td><input type="number" class="num" step="0.001" value="${ech(l.poids_brut)}" oninput="majLigne(${l.cle},'poids_brut',this.value)"></td>
+      <td><input type="number" class="num" step="0.001" value="${ech(l.poids_net)}" oninput="majLigne(${l.cle},'poids_net',this.value)"></td>
+      <td><input type="number" class="num" step="0.001" value="${ech(l.quantite)}" oninput="majLigne(${l.cle},'quantite',this.value)"></td>
+      <td><select onchange="majLigne(${l.cle},'unite',this.value)">${opts(UNITES)}</select></td>
+      <td class="sans-imp"><button class="btn danger petit" onclick="retirerLigne(${l.cle})">×</button></td>
+    </tr>`;}).join('');
+  // Les listes déroulantes se repositionnent après réécriture du tableau.
+  lignes.forEach((l,i)=>{
+    const tr = c.children[i]; if(!tr) return;
+    tr.querySelectorAll('select')[0].value = l.origine || '';
+    tr.querySelectorAll('select')[2].value = l.unite || 'U';
+  });
 }
 
-function rendreFrais() {
-  const corps = document.getElementById('corps-frais');
-  if (frais.length === 0) {
-    corps.innerHTML = `<tr><td colspan="3" class="vide">Aucun poste. Cliquez sur « Ajouter un poste » pour compléter le devis.</td></tr>`;
-    return;
-  }
-  corps.innerHTML = frais.map((f) => `
-    <tr>
-      <td><input type="text" value="${ech(f.libelle)}" placeholder="Ex. Honoraires de transit"
-                 oninput="majFrais(${f.cle},'libelle',this.value)"></td>
-      <td><input type="number" class="num" step="1" value="${ech(f.montant)}" placeholder="0"
-                 oninput="majFrais(${f.cle},'montant',this.value)"></td>
-      <td class="sans-impression">
-        <button class="btn danger petit" onclick="retirerFrais(${f.cle})" title="Retirer">×</button>
-      </td>
-    </tr>`).join('');
+function rendreFrais(){
+  const c = el('corps-frais');
+  if (!frais.length){ c.innerHTML = `<tr><td colspan="3" class="vide">Aucun poste. Honoraires, acconage, magasinage, transport local, débours…</td></tr>`; return; }
+  c.innerHTML = frais.map((f)=>`<tr>
+    <td><input type="text" value="${ech(f.libelle)}" oninput="majFrais(${f.cle},'libelle',this.value)" placeholder="Ex. Honoraires de transit"></td>
+    <td><input type="number" class="num" step="1" value="${ech(f.montant)}" oninput="majFrais(${f.cle},'montant',this.value)"></td>
+    <td class="sans-imp"><button class="btn danger petit" onclick="retirerFrais(${f.cle})">×</button></td></tr>`).join('');
 }
 
-function rendre() {
-  rendreLignes();
-  rendreFrais();
+function rendre(){
+  rendreLignes(); rendreFrais();
+  el('nombre_articles').value = String(lignes.filter((l)=>nb(l.fob)>0).length);
+  el('modes').innerHTML = MODES.map(([c,l,i])=>
+    `<button class="mode ${modeTransport===c?'actif':''}" onclick="choisirMode('${c}')">${i} ${l}</button>`).join('');
 
-  const regime = REGIMES[val('regime')];
-  document.getElementById('aide-regime').textContent = regime ? regime.mention : '';
-
-  document.getElementById('imp-client').textContent = val('client') || '—';
-  document.getElementById('imp-ref').textContent = val('reference') ? 'Réf. ' + val('reference') : '';
+  el('i-imp').textContent  = (val('importateur')||'—').split('\n')[0];
+  el('i-ref').textContent  = val('reference') ? 'Réf. ' + val('reference') : '';
+  el('i-bur').textContent  = val('bureau') || '';
   const d = val('date');
-  document.getElementById('imp-date').textContent = d
-    ? new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '';
+  el('i-date').textContent = d ? new Date(d+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}) : '';
 
-  const r = liquider();
-  const zone  = document.getElementById('zone-liquidation');
-  const total = document.getElementById('zone-total');
-  const totalFrais = frais.reduce((t,f) => t + nb(f.montant), 0);
+  const r = liquider(), zl = el('z-liq'), zt = el('z-total'), za = el('alertes');
+  const totalFrais = frais.reduce((t,f)=>t+nb(f.montant),0);
+  const mq = manques();
 
-  if (r.erreurs.length) {
-    zone.innerHTML = `<div class="corps"><div class="msg att" style="margin:0">
-        <b>Le calcul n'est pas lancé :</b>
-        <ul>${r.erreurs.map((e) => `<li>${ech(e)}</li>`).join('')}</ul>
-      </div></div>`;
-    total.innerHTML = `<div class="total-grand">
-        <span class="lib">Total à régler par le client</span>
-        <span class="val">—</span>
-      </div>`;
+  za.innerHTML = mq.length
+    ? `<div class="msg att"><b>Avant de remettre ce document au client, il manque :</b> ${mq.join(', ')}.
+       <br><span style="font-size:12px">La saisie n'est pas bloquée — personne ne remplit une déclaration dans l'ordre. C'est la remise du document qui l'est.</span></div>`
+    : '';
+
+  if (r.erreurs.length){
+    zl.innerHTML = `<div class="corps"><div class="msg err" style="margin:0"><b>Le calcul n'est pas lancé :</b>
+      <ul>${r.erreurs.map((e)=>`<li>${ech(e)}</li>`).join('')}</ul></div></div>`;
+    zt.innerHTML = `<div class="total"><span class="lib">Total à régler par le client</span><span class="val">—</span></div>`;
     return;
   }
 
   const g = r.globaux;
-  zone.innerHTML = `
-    <div class="corps" style="padding-bottom:0">
-      <div class="msg info" style="margin-bottom:14px">
-        <b>Valeur en douane (CAF)</b> = marchandise ${xof(g.fob)} + fret ${xof(g.fret)}
-        + assurance ${xof(g.assurance)} = <b>${xof(g.caf)}</b>
-      </div>
-    </div>
-    <div class="tbl-enveloppe">
-      <table>
-        <thead>
-          <tr>
-            <th style="width:34px">N°</th><th style="min-width:150px">Désignation</th>
-            <th class="num">FOB</th><th class="num">Fret</th><th class="num">Assur.</th>
-            <th class="num">CAF</th><th class="num">Taux DD</th><th class="num">Droits + taxes</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${r.detail.map((l) => `
-            <tr>
-              <td class="num">${ech(l.numero)}</td>
-              <td>${ech(l.designation || '—')}${l.position ? `<br><span style="font-size:11px;color:var(--encre-doux)">${ech(l.position)}</span>` : ''}</td>
-              <td class="num">${xof(l.fob)}</td>
-              <td class="num">${xof(l.fret)}</td>
-              <td class="num">${xof(l.assurance)}</td>
-              <td class="num" style="font-weight:600">${xof(l.caf)}</td>
-              <td class="num">${pct(l.taux_dd)}</td>
-              <td class="num">${xof(l.taxes.reduce((t,x) => t+x.montant, 0))}</td>
-            </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
-    <div class="tbl-enveloppe" style="border-top:1px solid var(--gris)">
-      <table>
-        <thead><tr><th>Imposition</th><th class="num">Assiette</th><th class="num">Taux</th><th class="num">Montant</th></tr></thead>
-        <tbody>
-          ${TAXES.map((t) => {
-            const m = r.totaux[t.code] || 0;
-            if (!r.regime.droits && t.niveau === 'ligne') return '';
-            let assiette = '—', tx = '—';
-            if (t.niveau === 'ligne') { assiette = t.assiette === 'base_tva' ? 'CAF + DD + RST' : 'CAF'; tx = t.taux ? pct(t.taux) : 'selon position'; }
-            else if (t.code === 'RPI') { assiette = 'FOB ' + xof(g.fob); tx = pct(t.taux); }
-            else if (t.code === 'TS')  { assiette = 'Forfait par déclaration'; tx = '—'; }
-            if (m === 0 && ((t.code === 'RPI' && !r.regime.rpi) || (t.code === 'TS' && !r.regime.ts))) return '';
-            return `<tr>
-              <td><b>${t.code}</b> — ${ech(t.libelle)}
-                ${t.code === 'RPI' ? `<br><span style="font-size:11px;color:var(--encre-doux)">Plancher de ${t.minimum.toLocaleString('fr-FR')} XOF par déclaration</span>` : ''}
-                ${t.code === 'TS' ? `<br><span style="font-size:11px;color:var(--encre-doux)">Une fois par déclaration, jamais par ligne</span>` : ''}
-              </td>
-              <td class="num">${assiette}</td><td class="num">${tx}</td>
-              <td class="num" style="font-weight:600">${xof(m)}</td>
-            </tr>`;
-          }).join('')}
-          <tr class="sous-total">
-            <td colspan="3">Total droits et taxes de douane</td>
-            <td class="num">${xof(r.totalDouane)}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  zl.innerHTML = `
+    <div class="corps" style="padding-bottom:0"><div class="msg info" style="margin-bottom:13px">
+      <b>Valeur en douane (CAF)</b> = marchandise ${xof(g.fob)} + fret ${xof(g.fret)} + assurance ${xof(g.assurance)}
+      = <b>${xof(g.caf)}</b> &nbsp;·&nbsp; Masse brute retenue : ${g.poids.toLocaleString('fr-FR')} kg
+    </div></div>
+    <div class="tbl"><table><thead><tr>
+      <th style="width:34px">N°</th><th style="min-width:170px">Désignation</th><th>Code HS</th>
+      <th class="num">FOB</th><th class="num">Fret</th><th class="num">Assur.</th><th class="num">CAF</th>
+      <th class="num">Taux DD</th><th class="num">Droits + taxes</th></tr></thead><tbody>
+      ${r.detail.map((l)=>`<tr>
+        <td class="num">${ech(l.numero)}</td>
+        <td>${ech(l.designation||'—')}</td>
+        <td style="font-size:12px">${ech(l.code_hs||'—')}</td>
+        <td class="num">${xof(l.fob)}</td><td class="num">${xof(l.fret)}</td>
+        <td class="num">${xof(l.assurance)}</td><td class="num" style="font-weight:600">${xof(l.caf)}</td>
+        <td class="num">${pct(l.taux_dd)}</td>
+        <td class="num">${xof(l.taxes.reduce((t,x)=>t+x.montant,0))}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="tbl" style="border-top:1px solid var(--gris)"><table>
+      <thead><tr><th>Imposition</th><th class="num">Assiette</th><th class="num">Taux</th><th class="num">Montant</th></tr></thead><tbody>
+      ${TAXES.map((t)=>{
+        const m = r.totaux[t.code]||0;
+        if (!r.reg[2] && t.niveau==='ligne') return '';
+        if (t.code==='RPI' && !r.reg[3]) return '';
+        if (t.code==='TS'  && !r.reg[4]) return '';
+        let a='—', tx='—';
+        if (t.niveau==='ligne'){ a = t.assiette==='base_tva' ? 'CAF + DD + RST' : 'CAF'; tx = t.taux ? pct(t.taux) : 'selon position'; }
+        else if (t.code==='RPI'){ a = 'FOB ' + xof(g.fob); tx = pct(t.taux); }
+        else { a = 'Forfait par déclaration'; }
+        return `<tr><td><b>${t.code}</b> — ${ech(t.libelle)}
+          ${t.code==='RPI'?`<br><span style="font-size:11px;color:var(--doux)">Plancher de ${t.minimum.toLocaleString('fr-FR')} XOF par déclaration</span>`:''}
+          ${t.code==='TS'?`<br><span style="font-size:11px;color:var(--doux)">Une fois par déclaration, jamais par ligne</span>`:''}</td>
+          <td class="num">${a}</td><td class="num">${tx}</td><td class="num" style="font-weight:600">${xof(m)}</td></tr>`;
+      }).join('')}
+      <tr class="st"><td colspan="3">Total droits et taxes de douane</td><td class="num">${xof(r.totalDouane)}</td></tr>
+    </tbody></table></div>
     <div class="rappel">
-      <b>Assiette de la TVA :</b> CAF + DD + RST uniquement. Les prélèvements communautaires
-      (PCS, PUA, PCC) n'y entrent jamais. &nbsp;·&nbsp;
-      <b>Répartition :</b> le fret au poids brut, l'assurance à la valeur FOB. &nbsp;·&nbsp;
-      <b>Régime ${ech(val('regime'))} :</b> ${ech(r.regime.mention)}
+      <b>Assiette de la TVA :</b> CAF + DD + RST uniquement — les prélèvements communautaires n'y entrent jamais. ·
+      <b>Répartition :</b> fret au poids brut, assurance à la valeur FOB. ·
+      <b>Régime ${ech(r.reg[0])} :</b> ${ech(r.reg[5])}
     </div>`;
 
-  total.innerHTML = `
-    <div class="tbl-enveloppe">
-      <table>
-        <tbody>
-          <tr><td>Droits et taxes de douane</td><td class="num" style="font-weight:600">${xof(r.totalDouane)}</td></tr>
-          <tr><td>Prestations et débours E-Transit</td><td class="num" style="font-weight:600">${xof(totalFrais)}</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="total-grand">
-      <span class="lib">Total à régler par le client</span>
-      <span class="val">${xof(r.totalDouane + totalFrais)}</span>
-    </div>`;
+  zt.innerHTML = `
+    <div class="tbl"><table><tbody>
+      <tr><td>Droits et taxes de douane</td><td class="num" style="font-weight:600">${xof(r.totalDouane)}</td></tr>
+      <tr><td>Prestations et débours E-Transit</td><td class="num" style="font-weight:600">${xof(totalFrais)}</td></tr>
+    </tbody></table></div>
+    <div class="total"><span class="lib">Total à régler par le client</span>
+      <span class="val">${xof(r.totalDouane + totalFrais)}</span></div>`;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   ENREGISTREMENT — dans le navigateur du poste, rien ne sort de la machine
-   ═══════════════════════════════════════════════════════════════════════ */
+/* ══════════════ CARNET D'ADRESSES ══════════════ */
 
-function lire() {
-  try { return JSON.parse(localStorage.getItem(CLE_STOCKAGE) || '[]'); }
-  catch { return []; }
+function carnet(){ try { return JSON.parse(localStorage.getItem(CLE_CARNET)||'{}'); } catch { return {}; } }
+function memoriser(){
+  const c = carnet();
+  ['importateur','exportateur','declarant'].forEach((k)=>{
+    const v = String(val(k)).trim();
+    if (!v) return;
+    c[k] = c[k] || [];
+    if (!c[k].includes(v)) { c[k].unshift(v); c[k] = c[k].slice(0,25); }
+  });
+  try { localStorage.setItem(CLE_CARNET, JSON.stringify(c)); } catch { /* mémoire pleine : sans gravité */ }
+  rendreCarnet();
 }
-function ecrire(liste) {
-  try { localStorage.setItem(CLE_STOCKAGE, JSON.stringify(liste)); return true; }
-  catch { alert("Impossible d'enregistrer : la mémoire du navigateur est pleine ou bloquée."); return false; }
+function rendreCarnet(){
+  const c = carnet(), z = el('carnet');
+  const blocs = ['importateur','exportateur','declarant'].filter((k)=>(c[k]||[]).length);
+  if (!blocs.length){ z.innerHTML=''; return; }
+  z.innerHTML = `<div style="margin-top:13px;padding-top:12px;border-top:1px dashed var(--gris)">
+    <div style="font-size:11.5px;font-weight:700;color:var(--doux);margin-bottom:7px">Carnet — cliquez pour reprendre</div>
+    ${blocs.map((k)=>`<div style="margin-bottom:6px"><span style="font-size:11px;color:var(--doux)">${k} :</span>
+      ${(c[k]||[]).slice(0,6).map((v,i)=>`<button class="btn sec petit" style="margin:2px"
+        onclick="reprendreCarnet('${k}',${i})" title="${ech(v)}">${ech(v.split('\n')[0].slice(0,32))}</button>`).join('')}</div>`).join('')}
+  </div>`;
+}
+function reprendreCarnet(k,i){ const c = carnet(); if (c[k] && c[k][i]){ el(k).value = c[k][i]; rendre(); } }
+
+/* ══════════════ ENREGISTREMENT ══════════════ */
+
+function lire(){ try { return JSON.parse(localStorage.getItem(CLE)||'[]'); } catch { return []; } }
+function ecrire(l){ try { localStorage.setItem(CLE, JSON.stringify(l)); return true; }
+  catch { alert("Impossible d'enregistrer : mémoire du navigateur pleine ou bloquée."); return false; } }
+
+function instantane(){
+  const r = liquider();
+  const o = { id: idCourant || (Date.now()+'-'+Math.random().toString(36).slice(2,8)),
+              enregistre_le: new Date().toISOString(), mode_transport: modeTransport,
+              lignes: lignes.map(({cle,...x})=>x), frais: frais.map(({cle,...x})=>x),
+              total_douane: r.erreurs.length ? null : r.totalDouane,
+              total_frais: frais.reduce((t,f)=>t+nb(f.montant),0) };
+  CHAMPS.forEach((c)=>{ o[c] = val(c); });
+  return o;
 }
 
-function instantane() {
-  return {
-    id: idCourant || (Date.now() + '-' + Math.random().toString(36).slice(2,8)),
-    enregistre_le: new Date().toISOString(),
-    client:val('client'), reference:val('reference'), date:val('date'),
-    marchandise:val('marchandise'), provenance:val('provenance'),
-    regime:val('regime'), devise:val('devise'), taux:val('taux'),
-    fret:val('fret'), assurance:val('assurance'), notes:val('notes'),
-    lignes: lignes.map(({cle, ...r}) => r),
-    frais:  frais.map(({cle, ...r}) => r),
-  };
-}
-
-function enregistrer() {
-  if (!val('client').trim()) { alert("Indiquez au moins le nom du client avant d'enregistrer."); return; }
-  const c = instantane();
-  const liste = lire();
-  const i = liste.findIndex((x) => x.id === c.id);
-  if (i >= 0) liste[i] = c; else liste.unshift(c);
+function enregistrer(){
+  if (!String(val('importateur')).trim() && !String(val('reference')).trim()){
+    alert("Indiquez au moins l'importateur ou la référence avant d'enregistrer."); return;
+  }
+  const c = instantane(), liste = lire(), i = liste.findIndex((x)=>x.id===c.id);
+  if (i>=0) liste[i]=c; else liste.unshift(c);
   if (!ecrire(liste)) return;
-  idCourant = c.id;
-  rendreListe();
-  alert('Cotation enregistrée.');
+  idCourant = c.id; memoriser(); rendreHist();
+  alert('Cotation enregistrée. Retrouvez-la dans l\'onglet Historique.');
 }
 
-function charger(id) {
-  const c = lire().find((x) => x.id === id);
-  if (!c) return;
+function charger(id){
+  const c = lire().find((x)=>x.id===id); if (!c) return;
   idCourant = c.id;
-  ['client','reference','date','marchandise','provenance','regime','devise','taux','fret','assurance','notes']
-    .forEach((k) => { const e = document.getElementById(k); if (e) e.value = c[k] ?? ''; });
-  document.getElementById('taux').readOnly = PARITES_FIXES[c.devise] !== undefined;
-  document.getElementById('unite-fret').textContent = c.devise || 'XOF';
-  lignes = (c.lignes || []).map((l) => ({ ...l, cle: Date.now()+Math.random() }));
-  frais  = (c.frais  || []).map((f) => ({ ...f, cle: Date.now()+Math.random() }));
+  CHAMPS.forEach((k)=>{ const e = el(k); if (e) e.value = c[k] ?? ''; });
+  modeTransport = c.mode_transport || '1';
+  el('taux_change').readOnly = PARITES_FIXES[c.devise] !== undefined;
+  el('u-fret').textContent = c.devise || 'XOF';
+  lignes = (c.lignes||[]).map((l)=>({...l, cle:Date.now()+Math.random()}));
+  frais  = (c.frais ||[]).map((f)=>({...f, cle:Date.now()+Math.random()}));
+  if (!lignes.length) lignes = [ligneVide()];
+  rendre(); allerA('saisie');
+}
+
+function dupliquer(id){
+  const c = lire().find((x)=>x.id===id); if (!c) return;
+  charger(id);
+  idCourant = null;                               // une copie est un dossier neuf
+  el('reference').value = (c.reference||'') + ' (copie)';
+  el('date').value = new Date().toISOString().slice(0,10);
   rendre();
-  window.scrollTo({ top:0, behavior:'smooth' });
+  alert('Copie ouverte. Elle sera enregistrée comme un nouveau dossier.');
 }
 
-function supprimer(id) {
+function supprimer(id){
   if (!confirm('Supprimer définitivement cette cotation ?')) return;
-  ecrire(lire().filter((x) => x.id !== id));
-  if (idCourant === id) idCourant = null;
-  rendreListe();
+  ecrire(lire().filter((x)=>x.id!==id));
+  if (idCourant===id) idCourant = null;
+  rendreHist();
 }
 
-function nouvelle() {
-  if (!confirm('Vider l\'écran et repartir d\'une cotation vierge ?')) return;
+function nouvelle(){
+  if (!confirm("Vider l'écran et repartir d'un dossier vierge ?")) return;
   idCourant = null;
-  ['client','reference','marchandise','provenance','fret','assurance','notes']
-    .forEach((k) => { document.getElementById(k).value = ''; });
-  document.getElementById('regime').value = '4000';
-  document.getElementById('devise').value = 'XOF';
-  document.getElementById('date').value = new Date().toISOString().slice(0,10);
-  lignes = [ligneVide()]; frais = [];
-  majDevise();
+  CHAMPS.forEach((k)=>{ const e = el(k); if (e) e.value=''; });
+  el('type_declaration').value='IM'; el('regime').value='4000';
+  el('pays_destination').value='CI'; el('devise').value='XOF';
+  el('date').value = new Date().toISOString().slice(0,10);
+  el('type_colis').value='CT'; el('incoterm').value=''; el('nature_transaction').value='1';
+  modeTransport='1'; lignes=[ligneVide()]; frais=[];
+  majDevise(); allerA('saisie');
 }
 
-function rendreListe() {
-  const liste = lire();
-  const zone = document.getElementById('zone-liste');
-  if (liste.length === 0) {
-    zone.innerHTML = `<div class="vide">Aucune cotation enregistrée pour l'instant.</div>`;
+/* ══════════════ HISTORIQUE ══════════════ */
+
+function rendreHist(){
+  const q = String(val('rech')).trim().toLowerCase();
+  const fr = val('rech-regime'), tri = val('rech-tri') || 'recent';
+  let liste = lire();
+
+  if (q) liste = liste.filter((c)=>[c.importateur,c.reference,c.exportateur,c.numero_facture,c.numero_connaissement,c.bureau,c.declarant]
+    .some((v)=>String(v||'').toLowerCase().includes(q)));
+  if (fr) liste = liste.filter((c)=>c.regime===fr);
+
+  liste.sort((a,b)=>{
+    if (tri==='montant') return (b.total_douane||0)+(b.total_frais||0) - ((a.total_douane||0)+(a.total_frais||0));
+    const x = String(a.enregistre_le||''), y = String(b.enregistre_le||'');
+    return tri==='ancien' ? x.localeCompare(y) : y.localeCompare(x);
+  });
+
+  const z = el('z-hist');
+  if (!liste.length){
+    z.innerHTML = `<div class="vide">${lire().length ? 'Aucune cotation ne correspond à cette recherche.' : 'Aucune cotation enregistrée pour l\'instant.'}</div>`;
     return;
   }
-  zone.innerHTML = `<ul class="liste-cot">${liste.map((c) => {
+  z.innerHTML = `<ul class="hist">${liste.map((c)=>{
     const d = c.date ? new Date(c.date+'T00:00:00').toLocaleDateString('fr-FR') : '—';
+    const tot = (c.total_douane||0)+(c.total_frais||0);
+    const reg = regimeDe(c.regime);
     return `<li>
-      <div>
-        <div class="titre">${ech(c.client || 'Sans nom')}</div>
-        <div class="meta">${ech(c.reference || 'sans référence')} · ${d} · régime ${ech(c.regime)}
-          · ${(c.lignes||[]).length} ligne(s)${c.id === idCourant ? ' · <span class="etiq ok">à l\'écran</span>' : ''}</div>
+      <div style="min-width:230px">
+        <div class="t">${ech((c.importateur||'Sans importateur').split('\n')[0])}</div>
+        <div class="m">${ech(c.reference||'sans référence')} · ${d} · ${ech(c.bureau||'bureau non précisé')}</div>
+        <div class="m">Régime ${ech(c.regime||'—')}${reg?' — '+ech(reg[1]):''} · ${(c.lignes||[]).length} article(s)
+          ${c.id===idCourant?' · <span class="etiq ok">à l\'écran</span>':''}</div>
       </div>
-      <div class="actions">
+      <div style="text-align:right;min-width:135px">
+        <div style="font-weight:800;font-variant-numeric:tabular-nums">${c.total_douane==null?'—':xof(tot)}</div>
+        <div class="m">${c.total_douane==null?'calcul incomplet':'douane '+xof(c.total_douane)}</div>
+      </div>
+      <div class="a">
         <button class="btn sec petit" onclick="charger('${c.id}')">Ouvrir</button>
+        <button class="btn sec petit" onclick="dupliquer('${c.id}')">Dupliquer</button>
         <button class="btn danger petit" onclick="supprimer('${c.id}')">Supprimer</button>
-      </div>
-    </li>`; }).join('')}</ul>`;
+      </div></li>`;}).join('')}</ul>`;
 }
 
-/* ---------- Sauvegarde et restauration par fichier ---------- */
-
-function sauvegarder() {
+function sauvegarder(){
   const liste = lire();
-  if (liste.length === 0) { alert('Aucune cotation à sauvegarder.'); return; }
-  const blob = new Blob([JSON.stringify({ outil:'cotation-e-transit', version:1, exporte_le:new Date().toISOString(), cotations:liste }, null, 2)],
-                        { type:'application/json' });
+  if (!liste.length){ alert('Aucune cotation à sauvegarder.'); return; }
+  const b = new Blob([JSON.stringify({outil:'e-transit',version:2,exporte_le:new Date().toISOString(),
+    cotations:liste, carnet:carnet()},null,2)],{type:'application/json'});
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'cotations-e-transit-' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  URL.revokeObjectURL(a.href);
+  a.href = URL.createObjectURL(b);
+  a.download = 'e-transit-sauvegarde-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(a.href);
 }
 
-function restaurer(ev) {
-  const f = ev.target.files && ev.target.files[0];
-  if (!f) return;
-  const lecteur = new FileReader();
-  lecteur.onload = () => {
-    try {
-      const d = JSON.parse(String(lecteur.result));
+function restaurer(ev){
+  const f = ev.target.files && ev.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const d = JSON.parse(String(r.result));
       const entrantes = Array.isArray(d) ? d : d.cotations;
       if (!Array.isArray(entrantes)) throw new Error('format');
-      // On complète, on n'écrase pas : une restauration ne doit jamais faire
-      // disparaître une cotation faite depuis la dernière sauvegarde.
-      const liste = lire();
-      const connus = new Set(liste.map((c) => c.id));
-      let ajoutees = 0;
-      entrantes.forEach((c) => { if (c && c.id && !connus.has(c.id)) { liste.push(c); ajoutees++; } });
-      liste.sort((a,b) => String(b.enregistre_le||'').localeCompare(String(a.enregistre_le||'')));
+      // On complète, on n'écrase pas : une cotation faite depuis la dernière
+      // sauvegarde ne doit pas disparaître.
+      const liste = lire(), connus = new Set(liste.map((c)=>c.id));
+      let n = 0;
+      entrantes.forEach((c)=>{ if (c && c.id && !connus.has(c.id)){ liste.push(c); n++; } });
+      liste.sort((a,b)=>String(b.enregistre_le||'').localeCompare(String(a.enregistre_le||'')));
       ecrire(liste);
-      rendreListe();
-      alert(ajoutees + ' cotation(s) ajoutée(s). Les cotations déjà présentes ont été conservées.');
-    } catch {
-      alert("Ce fichier n'est pas une sauvegarde de cotations valide.");
-    }
+      if (d.carnet){
+        const c = carnet();
+        Object.keys(d.carnet).forEach((k)=>{
+          c[k] = Array.from(new Set([...(c[k]||[]), ...(d.carnet[k]||[])])).slice(0,25);
+        });
+        try { localStorage.setItem(CLE_CARNET, JSON.stringify(c)); } catch { /* sans gravité */ }
+      }
+      rendreHist(); rendreCarnet();
+      alert(n + ' cotation(s) ajoutée(s). Les cotations déjà présentes ont été conservées.');
+    } catch { alert("Ce fichier n'est pas une sauvegarde E-Transit valide."); }
     ev.target.value = '';
   };
-  lecteur.readAsText(f);
+  r.readAsText(f);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   DÉMARRAGE
-   ═══════════════════════════════════════════════════════════════════════ */
+/** À l'impression, on sort la déclaration entière, pas l'onglet courant. */
+function imprimer(){
+  document.querySelectorAll('.vue').forEach((v)=>v.classList.add('imprimer'));
+  el('vue-historique').classList.remove('imprimer');
+  window.print();
+}
 
-document.getElementById('date').value = new Date().toISOString().slice(0,10);
+/* ══════════════ DÉMARRAGE ══════════════ */
+
+el('type_declaration').innerHTML = opts(TYPES_DECLARATION);
+el('regime').innerHTML = opts(REGIMES.map((r)=>[r[0], r[0]+' — '+r[1]]));
+el('devise').innerHTML = opts(MONNAIES.map((m)=>[m[0], m[0]+' — '+m[1]]));
+['pays_expedition','pays_origine','pays_destination'].forEach((k)=>{ el(k).innerHTML = opts(PAYS,'—'); });
+el('incoterm').innerHTML = opts(INCOTERMS,'—');
+el('nature_transaction').innerHTML = opts(NATURES,'—');
+el('type_colis').innerHTML = opts(COLIS,'—');
+el('l-bureaux').innerHTML = BUREAUX.map((b)=>`<option value="${ech(b)}">`).join('');
+el('rech-regime').innerHTML = '<option value="">Tous les régimes</option>' + opts(REGIMES.map((r)=>[r[0], r[0]+' — '+r[1]]));
+
+el('type_declaration').value = 'IM';
+el('regime').value = '4000';
+el('pays_destination').value = 'CI';
+el('devise').value = 'XOF';
+el('type_colis').value = 'CT';
+el('nature_transaction').value = '1';
+el('date').value = new Date().toISOString().slice(0,10);
 lignes = [ligneVide()];
 majDevise();
-rendreListe();
+rendreCarnet();
+rendreHist();
 </script>
 </body>
 </html>
