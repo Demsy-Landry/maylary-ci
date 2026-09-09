@@ -268,7 +268,19 @@ export default function DeclarantDeclaration() {
         poids_brut: nombre(l.poids_brut),
       })),
       p_fret_total: nombre(valeurs.fret) * taux,
-      p_assurance_total: nombre(valeurs.assurance) * taux,
+      // L'ASSURANCE NE SE CONVERTIT PAS : ELLE EST DÉJÀ EN FRANCS CFA.
+      //
+      // Elle était multipliée par le taux de change comme le FOB et le fret.
+      // C'est faux, et pour une raison de droit, pas d'arrondi : la police
+      // facultés d'une marchandise importée en Côte d'Ivoire se souscrit
+      // LOCALEMENT, auprès d'un assureur ivoirien. La prime est donc émise en
+      // XOF, quelle que soit la monnaie de la facture du fournisseur.
+      //
+      // La convertir revenait à prendre une prime déjà en francs et à la
+      // multiplier par 655,957 sur une facture en euros — soit six cent
+      // cinquante fois trop d'assurance dans la valeur en douane, et donc dans
+      // toutes les taxes qui en découlent.
+      p_assurance_total: nombre(valeurs.assurance),
       p_poids_brut_total: nombre(valeurs.masse_brute) || null,
       p_regime: valeurs.regime,
     });
@@ -337,8 +349,10 @@ export default function DeclarantDeclaration() {
 
   /* ---------- Sommes en direct ---------- */
   const fobTotal = useMemo(() => lignes.reduce((t, l) => t + nombre(l.fob), 0), [lignes]);
+  // Seuls le FOB et le fret se convertissent : ils sont libellés dans la
+  // monnaie de la facture. L'assurance est une prime locale, déjà en XOF.
   const cafTotalXof = useMemo(
-    () => (fobTotal + nombre(valeurs.fret) + nombre(valeurs.assurance)) * taux,
+    () => (fobTotal + nombre(valeurs.fret)) * taux + nombre(valeurs.assurance),
     [fobTotal, valeurs.fret, valeurs.assurance, taux],
   );
   const manques = useMemo(() => manquesAvantDocument(valeurs, lignes), [valeurs, lignes]);
@@ -379,7 +393,10 @@ export default function DeclarantDeclaration() {
       p_resultat: liquidation,
       p_regime: valeurs.regime,
       p_fret: nombre(valeurs.fret) * taux,
-      p_assurance: nombre(valeurs.assurance) * taux,
+      // Déjà en XOF — voir la note à la liquidation. L'archive doit porter le
+      // même montant que le calcul, sans quoi une liquidation reprise plus
+      // tard ne redonnerait pas le même total.
+      p_assurance: nombre(valeurs.assurance),
       p_intitule: valeurs.importateur?.split('\n')[0] || valeurs.reference || null,
     });
     setArchivage(false);
@@ -626,12 +643,19 @@ export default function DeclarantDeclaration() {
                     </p>
                   </div>
 
+                  {/*
+                    Le fret suit la monnaie de la facture ; l'assurance non.
+                    Afficher « EUR » à côté d'un champ qu'on n'a pas converti
+                    ferait saisir des euros et sous-évaluerait la valeur en
+                    douane de six cent cinquante fois. L'unité affichée doit
+                    dire exactement ce que le calcul attend.
+                  */}
                   {(
                     [
-                      ['fret', '12', 'Fret total'],
-                      ['assurance', '12', 'Assurance totale'],
+                      ['fret', '12', 'Fret total', null],
+                      ['assurance', '12', 'Assurance totale', 'XOF'],
                     ] as const
-                  ).map(([cle, num, libelle]) => (
+                  ).map(([cle, num, libelle, uniteFixe]) => (
                     <div key={cle}>
                       <Label htmlFor={cle} className="flex items-baseline gap-1.5 text-xs">
                         <span className="font-display font-bold tabular-nums text-primary">{num}</span>
@@ -646,9 +670,14 @@ export default function DeclarantDeclaration() {
                           className="tabular-nums"
                         />
                         <span className="shrink-0 text-sm font-medium text-muted-foreground">
-                          {valeurs.devise}
+                          {uniteFixe ?? valeurs.devise}
                         </span>
                       </div>
+                      {uniteFixe && (
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          Prime souscrite localement : toujours en francs CFA, jamais convertie.
+                        </p>
+                      )}
                     </div>
                   ))}
 
