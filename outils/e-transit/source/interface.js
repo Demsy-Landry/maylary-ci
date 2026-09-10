@@ -265,6 +265,7 @@
     BASE.ouvrir()
       .then(function () { return BASE.semer(window.REFERENCE); })
       .then(function () { return BASE.oublierAncienCodeAcces(); })
+      .then(function () { return BASE.oublierResponsableParDefaut(); })
       .then(chargerContexte)
       .then(ouvrirApplication)
       .catch(function (e) {

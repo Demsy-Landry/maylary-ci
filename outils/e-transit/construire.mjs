@@ -1,8 +1,8 @@
 /* Assemblage de l'application en un seul fichier.
  *
  * Les sources vivent dans source/ pour rester lisibles et modifiables. Le
- * livrable, lui, est un fichier unique : madame Estelle le copie sur son
- * bureau, elle double-clique, et rien ne peut être laissé derrière.
+ * livrable, lui, est un fichier unique : on le copie sur le bureau du poste,
+ * on double-clique, et rien ne peut être laissé derrière.
  *
  *   node outils/e-transit/construire.mjs
  *   → outils/cotation-e-transit.html

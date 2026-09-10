@@ -155,6 +155,19 @@ window.BASE = (function () {
     return ecrire('parametres', { cle: cle, valeur: valeur });
   }
 
+  /* Une amorce antérieure inscrivait un nom de responsable dans la fiche
+   * société. On efface cette valeur-là si elle n'a pas été touchée — jamais
+   * une saisie de l'utilisateur. */
+  function oublierResponsableParDefaut() {
+    return parametre('societe', null).then(function (societe) {
+      if (!societe) return false;
+      var pose = false;
+      if (societe.responsable === 'Madame Estelle') { societe.responsable = ''; pose = true; }
+      if (societe.fonction_responsable === 'Responsable cotation') { societe.fonction_responsable = ''; pose = true; }
+      return pose ? poserParametre('societe', societe).then(function () { return true; }) : false;
+    });
+  }
+
   /* Une version antérieure fermait l'application par un code d'accès. Il a été
    * retiré : sur un poste de bureau il ajoutait une porte à ouvrir chaque matin
    * sans rien protéger de plus que la session Windows. On efface l'empreinte
@@ -166,9 +179,9 @@ window.BASE = (function () {
   }
 
   /* -------------------------------------------------- listes de référence */
-  /* Les listes vivent en base, pas dans le code : madame Estelle peut en
-   * ajouter, en corriger, en retirer. L'amorce livrée avec l'application ne
-   * sert qu'au premier démarrage. */
+  /* Les listes vivent en base, pas dans le code : E-Transit peut en ajouter,
+   * en corriger, en retirer. L'amorce livrée avec l'application ne sert qu'au
+   * premier démarrage. */
 
   var LISTES = ['taxes', 'monnaies', 'pays', 'bureaux', 'regimes', 'incoterms',
     'modes', 'colis', 'types_conteneur', 'unites', 'documents', 'origines', 'postes_devis'];
@@ -195,8 +208,8 @@ window.BASE = (function () {
         contribuable: '',
         compte_bancaire: '',
         agrement_declarant: '',
-        responsable: 'Madame Estelle',
-        fonction_responsable: 'Responsable cotation'
+        responsable: '',
+        fonction_responsable: ''
       }));
       ecritures.push(poserParametre('devis_conditions',
         "Devis établi sur la base des documents communiqués. Les droits et taxes sont ceux résultant du tarif " +
@@ -338,6 +351,7 @@ window.BASE = (function () {
     parametre: parametre, poserParametre: poserParametre,
     liste: liste, poserListe: poserListe, semer: semer, LISTES: LISTES,
     oublierAncienCodeAcces: oublierAncienCodeAcces,
+    oublierResponsableParDefaut: oublierResponsableParDefaut,
     numeroSuivant: numeroSuivant, identifiant: identifiant,
     sourceTec: sourceTec, SOURCE_TEC_DEFAUT: SOURCE_TEC_DEFAUT,
     synchroniserTec: synchroniserTec, importerTecDepuisTexte: importerTecDepuisTexte,

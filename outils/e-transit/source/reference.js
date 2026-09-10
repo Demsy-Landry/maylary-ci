@@ -71,7 +71,7 @@ window.REFERENCE = (function () {
 
   /* --------------------------------------------------------------- bureaux */
   /* Les codes bureau SYDAM ne sont pas confirmés dans nos sources : la colonne
-   * reste vide, à saisir une fois par madame Estelle. Elle sera mémorisée. */
+   * reste vide, à saisir une fois ; elle sera mémorisée. */
   var BUREAUX = [
     { code: '', nom: 'Abidjan Port — Vridi',                       ville: 'Abidjan',        type: 'maritime' },
     { code: '', nom: 'Abidjan Port — Terminal à conteneurs',       ville: 'Abidjan',        type: 'maritime' },

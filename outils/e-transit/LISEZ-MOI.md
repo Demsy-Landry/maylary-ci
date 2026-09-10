@@ -1,7 +1,7 @@
 # Cotation E-Transit
 
 Application de chiffrage des droits et taxes de douane, et d'établissement des
-devis clients. Elle est faite pour le poste de madame Estelle.
+devis clients. Elle est faite pour E-Transit, sur un poste de bureau.
 
 Elle n'a **rien à voir avec MayLary** : c'est une application séparée, avec sa
 propre base, sa propre identité, ses propres dossiers. Elle emprunte seulement
@@ -31,6 +31,11 @@ perdre des données en silence.
 L'application s'ouvre directement, sans mot de passe. Sur un poste de bureau,
 un code à retaper chaque matin n'aurait rien protégé de plus que la session
 Windows : c'est elle qui garde l'accès à l'ordinateur.
+
+Première chose à faire, une fois pour toutes : **Réglages → Identité de la
+société**. Raison sociale, adresse, téléphone, RCCM, compte contribuable,
+agrément de déclarant, et le nom de la personne qui signe les devis. Ce bloc
+est repris en tête de chaque devis et de chaque impression.
 
 Au premier lancement, l'application propose de **charger le tarif douanier** :
 6 298 positions, quelques secondes, une connexion. Une fois descendu, le tarif
