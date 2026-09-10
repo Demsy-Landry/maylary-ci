@@ -32,19 +32,32 @@ window.BASE = (function () {
     modeles_devis:   { keyPath: 'id' }
   };
 
-  var MESSAGE_SANS_BASE =
-    "Cette application a besoin d\u2019enregistrer les dossiers sur l\u2019appareil, et cet " +
-    "appareil ne l\u2019autorise pas.\n\n" +
-    "C\u2019est le cas d\u2019un iPhone ou d\u2019un iPad qui ouvre le fichier depuis un aper\u00e7u, " +
-    "d\u2019une fen\u00eatre de navigation priv\u00e9e, et de Firefox pour un fichier ouvert depuis " +
-    "le disque.\n\n" +
-    "Copiez le fichier sur l\u2019ordinateur et ouvrez-le avec Microsoft Edge ou Google Chrome.";
+  /* Le motif n'est pas le m\u00eame selon d'o\u00f9 l'application est ouverte, et la
+   * marche \u00e0 suivre non plus. Donner la mauvaise consigne serait pire que de
+   * n'en donner aucune. */
+  function messageSansBase() {
+    var debut = "Cette application a besoin d\u2019enregistrer les dossiers sur l\u2019appareil, " +
+      "et cet appareil ne l\u2019autorise pas.\n\n";
+    if (location.protocol.indexOf('http') === 0) {
+      return debut +
+        "C\u2019est le cas d\u2019une fen\u00eatre de navigation priv\u00e9e, et d\u2019un navigateur r\u00e9gl\u00e9 " +
+        "pour bloquer les donn\u00e9es de sites.\n\n" +
+        "Rouvrez l\u2019adresse dans une fen\u00eatre ordinaire, et autorisez ce site \u00e0 " +
+        "conserver des donn\u00e9es.";
+    }
+    return debut +
+      "C\u2019est le cas d\u2019un t\u00e9l\u00e9phone ou d\u2019une tablette qui ouvre le fichier depuis un " +
+      "aper\u00e7u, et de Firefox pour un fichier ouvert depuis le disque.\n\n" +
+      "Sur ordinateur : copiez le fichier sur le disque et ouvrez-le avec Microsoft Edge " +
+      "ou Google Chrome.\nSur t\u00e9l\u00e9phone : c\u2019est la version en ligne qu\u2019il faut, " +
+      "un fichier pos\u00e9 sur l\u2019appareil ne peut pas y fonctionner.";
+  }
 
   function ouvrir() {
     if (bd) return Promise.resolve(bd);
     return new Promise(function (resoudre, rejeter) {
       if (typeof indexedDB === 'undefined') {
-        rejeter(new Error(MESSAGE_SANS_BASE));
+        rejeter(new Error(messageSansBase()));
         return;
       }
 
@@ -55,7 +68,7 @@ window.BASE = (function () {
       var minuterie = setTimeout(function () {
         if (repondu) return;
         repondu = true;
-        rejeter(new Error(MESSAGE_SANS_BASE));
+        rejeter(new Error(messageSansBase()));
       }, 6000);
 
       function fini(action) {
@@ -80,7 +93,7 @@ window.BASE = (function () {
         });
       };
       requete.onsuccess = fini(function () { bd = requete.result; resoudre(bd); });
-      requete.onerror = fini(function () { rejeter(new Error(MESSAGE_SANS_BASE)); });
+      requete.onerror = fini(function () { rejeter(new Error(messageSansBase())); });
       requete.onblocked = fini(function () {
         rejeter(new Error(
           "Une autre fenêtre de l'application est déjà ouverte. Fermez-la, puis rechargez cette page."

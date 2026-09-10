@@ -1,3 +1,1463 @@
+/* ===== reference.js ===== */
+/* Données de référence semées dans la base locale au premier démarrage.
+ *
+ * Tout ce qui est ici provient soit de la base tarifaire vérifiée, soit d'une
+ * nomenclature internationale publique (UN/ECE, Incoterms 2020, ISO 3166).
+ * Rien n'est inventé. Ce qui n'a pas de source certaine — les codes des
+ * bureaux de douane, par exemple — est laissé vide et saisissable, jamais
+ * rempli au jugé.
+ *
+ * Toutes ces listes sont recopiées en base au premier lancement, puis
+ * modifiables et complétables depuis l'écran Réglages. Cette copie n'est
+ * qu'une amorce.
+ */
+window.REFERENCE = (function () {
+  'use strict';
+
+  /* ------------------------------------------------------------------ taxes */
+  /* Source : table des taxes douanières, Côte d'Ivoire.
+   * assiette  : caf | fob | base_tva | forfait
+   * niveau    : ligne (par article) | declaration (une fois)
+   * base_tva  : la taxe entre-t-elle dans l'assiette de la TVA */
+  var TAXES = [
+    { code: 'DD',  libelle: 'Droit de douane',                                   assiette: 'caf',      taux: null,    niveau: 'ligne',       base_tva: true,  fixe: null,   minimum: null,   verrou: true },
+    { code: 'RST', libelle: 'Redevance statistique',                             assiette: 'caf',      taux: 0.01,    niveau: 'ligne',       base_tva: true,  fixe: null,   minimum: null,   verrou: true },
+    { code: 'PCS', libelle: 'Prélèvement communautaire de solidarité (UEMOA)',   assiette: 'caf',      taux: 0.008,   niveau: 'ligne',       base_tva: false, fixe: null,   minimum: null,   verrou: true },
+    { code: 'PUA', libelle: 'Prélèvement Union africaine',                       assiette: 'caf',      taux: 0.002,   niveau: 'ligne',       base_tva: false, fixe: null,   minimum: null,   verrou: true },
+    { code: 'PCC', libelle: 'Prélèvement communautaire (CEDEAO)',                assiette: 'caf',      taux: 0.005,   niveau: 'ligne',       base_tva: false, fixe: null,   minimum: null,   verrou: true },
+    { code: 'TVA', libelle: 'Taxe sur la valeur ajoutée',                        assiette: 'base_tva', taux: 0.18,    niveau: 'ligne',       base_tva: false, fixe: null,   minimum: null,   verrou: true },
+    { code: 'RPI', libelle: 'Redevance prestations informatiques',               assiette: 'fob',      taux: 0.0075,  niveau: 'declaration', base_tva: false, fixe: null,   minimum: 100000, verrou: true },
+    { code: 'TS',  libelle: 'Timbre statistique',                                assiette: 'forfait',  taux: null,    niveau: 'declaration', base_tva: false, fixe: 20000,  minimum: null,   verrou: true }
+  ];
+
+  /* --------------------------------------------------------------- monnaies */
+  /* La parité EUR/XOF est un ancrage légal fixe, pas un cours de marché :
+   * elle ne bouge jamais et ne vient d'aucune API de change. Les monnaies
+   * sans parité fixe demandent un taux saisi, celui du jour de la facture. */
+  var MONNAIES = [
+    { code: 'XOF', nom: 'Franc CFA (BCEAO)',       parite: 1,        courant: true },
+    { code: 'EUR', nom: 'Euro',                    parite: 655.957,  courant: true },
+    { code: 'USD', nom: 'Dollar des États-Unis',   parite: null,     courant: true },
+    { code: 'CNY', nom: 'Yuan chinois',            parite: null,     courant: true },
+    { code: 'XAF', nom: 'Franc CFA (BEAC)',        parite: 1,        courant: false },
+    { code: 'GBP', nom: 'Livre sterling',          parite: null,     courant: false },
+    { code: 'AED', nom: 'Dirham des Émirats',      parite: null,     courant: false },
+    { code: 'MAD', nom: 'Dirham marocain',         parite: null,     courant: false },
+    { code: 'TND', nom: 'Dinar tunisien',          parite: null,     courant: false },
+    { code: 'TRY', nom: 'Livre turque',            parite: null,     courant: false },
+    { code: 'GHS', nom: 'Cedi ghanéen',            parite: null,     courant: false },
+    { code: 'NGN', nom: 'Naira nigérian',          parite: null,     courant: false },
+    { code: 'ZAR', nom: 'Rand sud-africain',       parite: null,     courant: false },
+    { code: 'INR', nom: 'Roupie indienne',         parite: null,     courant: false },
+    { code: 'JPY', nom: 'Yen japonais',            parite: null,     courant: false },
+    { code: 'CHF', nom: 'Franc suisse',            parite: null,     courant: false },
+    { code: 'CAD', nom: 'Dollar canadien',         parite: null,     courant: false }
+  ];
+
+  /* ------------------------------------------------------------------- pays */
+  /* Codes ISO 3166-1 alpha-2. U = UEMOA, C = CEDEAO hors UEMOA. */
+  var PAYS_BRUT = "ZA|Afrique du Sud|-*;DZ|Algérie|-;DE|Allemagne|-*;AO|Angola|-;SA|Arabie saoudite|-;AR|Argentine|-;AU|Australie|-;AT|Autriche|-;BD|Bangladesh|-*;BE|Belgique|-*;BJ|Bénin|U;BR|Brésil|-;BG|Bulgarie|-;BF|Burkina Faso|U*;CV|Cabo Verde|C;CM|Cameroun|-;CA|Canada|-;CL|Chili|-;CN|Chine|-*;CG|Congo|-;CD|Congo (RDC)|-;KR|Corée du Sud|-;CI|Côte d'Ivoire|U*;DK|Danemark|-;EG|Égypte|-;AE|Émirats arabes unis|-*;ES|Espagne|-*;US|États-Unis|-*;ET|Éthiopie|-;FI|Finlande|-;FR|France|-*;GA|Gabon|-;GM|Gambie|C;GH|Ghana|C*;GR|Grèce|-;GN|Guinée|C;GW|Guinée-Bissau|U;HK|Hong Kong|-*;HU|Hongrie|-;IN|Inde|-*;ID|Indonésie|-;IR|Iran|-;IE|Irlande|-;IL|Israël|-;IT|Italie|-*;JP|Japon|-;JO|Jordanie|-;KE|Kenya|-;KW|Koweït|-;LB|Liban|-;LR|Libéria|C;LY|Libye|-;MG|Madagascar|-;MY|Malaisie|-;ML|Mali|U*;MA|Maroc|-*;MU|Maurice|-;MR|Mauritanie|-;MX|Mexique|-;MZ|Mozambique|-;NE|Niger|U;NG|Nigéria|C*;NO|Norvège|-;NZ|Nouvelle-Zélande|-;OM|Oman|-;UG|Ouganda|-;PK|Pakistan|-;NL|Pays-Bas|-*;PH|Philippines|-;PL|Pologne|-;PT|Portugal|-;QA|Qatar|-;CF|République centrafricaine|-;RO|Roumanie|-;GB|Royaume-Uni|-*;RU|Russie|-;RW|Rwanda|-;SN|Sénégal|U*;SL|Sierra Leone|C;SG|Singapour|-;SD|Soudan|-;LK|Sri Lanka|-;SE|Suède|-;CH|Suisse|-;TW|Taïwan|-;TZ|Tanzanie|-;TD|Tchad|-;CZ|Tchéquie|-;TH|Thaïlande|-;TG|Togo|U*;TN|Tunisie|-*;TR|Turquie|-*;UA|Ukraine|-;VN|Viêt Nam|-*;ZM|Zambie|-;ZW|Zimbabwe|-";
+
+  var PAYS = PAYS_BRUT.split(';').map(function (bloc) {
+    var p = bloc.split('|');
+    var drapeaux = p[2] || '-';
+    return {
+      code: p[0],
+      nom: p[1],
+      uemoa: drapeaux.charAt(0) === 'U',
+      cedeao: drapeaux.charAt(0) === 'U' || drapeaux.charAt(0) === 'C',
+      courant: drapeaux.indexOf('*') >= 0
+    };
+  });
+
+  /* --------------------------------------------------------------- bureaux */
+  /* Les codes bureau SYDAM ne sont pas confirmés dans nos sources : la colonne
+   * reste vide, à saisir une fois ; elle sera mémorisée. */
+  var BUREAUX = [
+    { code: '', nom: 'Abidjan Port — Vridi',                       ville: 'Abidjan',        type: 'maritime' },
+    { code: '', nom: 'Abidjan Port — Terminal à conteneurs',       ville: 'Abidjan',        type: 'maritime' },
+    { code: '', nom: 'Abidjan Aéroport Félix Houphouët-Boigny',    ville: 'Abidjan',        type: 'aerien' },
+    { code: '', nom: 'Abidjan — Bureau des colis postaux',         ville: 'Abidjan',        type: 'postal' },
+    { code: '', nom: 'San Pédro Port',                             ville: 'San Pédro',      type: 'maritime' },
+    { code: '', nom: 'Bouaké',                                     ville: 'Bouaké',         type: 'terrestre' },
+    { code: '', nom: 'Yamoussoukro',                               ville: 'Yamoussoukro',   type: 'terrestre' },
+    { code: '', nom: 'Ferkessédougou',                             ville: 'Ferkessédougou', type: 'terrestre' },
+    { code: '', nom: 'Ouangolodougou',                             ville: 'Ouangolodougou', type: 'frontiere' },
+    { code: '', nom: 'Pogo (frontière Mali)',                      ville: 'Pogo',           type: 'frontiere' },
+    { code: '', nom: 'Noé (frontière Ghana)',                      ville: 'Noé',            type: 'frontiere' },
+    { code: '', nom: 'Aboisso',                                    ville: 'Aboisso',        type: 'terrestre' },
+    { code: '', nom: 'Korhogo',                                    ville: 'Korhogo',        type: 'terrestre' },
+    { code: '', nom: 'Man',                                        ville: 'Man',            type: 'terrestre' },
+    { code: '', nom: 'Danané (frontière Guinée/Libéria)',          ville: 'Danané',         type: 'frontiere' },
+    { code: '', nom: 'Odienné',                                    ville: 'Odienné',        type: 'terrestre' },
+    { code: '', nom: 'Daloa',                                      ville: 'Daloa',          type: 'terrestre' },
+    { code: '', nom: 'Gagnoa',                                     ville: 'Gagnoa',         type: 'terrestre' },
+    { code: '', nom: 'Bondoukou',                                  ville: 'Bondoukou',      type: 'terrestre' }
+  ];
+
+  /* --------------------------------------------------------------- régimes */
+  /* Les 84 régimes SYDAM. Format compact :
+   * code|sens|droits|rpi|ts|catégorie|libellé
+   * droits/rpi/ts : 1 exigible, 0 non exigible. Le commentaire affiché à
+   * l'écran est reconstitué à partir de la catégorie. */
+  var REGIMES_BRUT = [
+    "1000|export|0|0|1|exportation|Exportation définitive",
+    "1022|export|0|0|1|exportation|Exportation définitive en suite de perfectionnement passif pour transformation",
+    "1023|export|0|0|1|exportation|Exportation définitive en suite de perfectionnement passif pour réparation",
+    "1024|export|0|0|1|exportation|Exportation définitive en suite de perfectionnement passif autre",
+    "1052|export|0|0|1|exportation|Exportation définitive en suite de perfectionnement actif",
+    "1094|export|0|0|1|exportation|Exportation en régularisation de Bon Provisoire",
+    "2200|export|0|0|1|perfectionnement_passif|Perfectionnement passif pour transformation",
+    "2300|export|0|0|1|perfectionnement_passif|Perfectionnement passif en suite de réparation",
+    "2400|export|0|0|1|perfectionnement_passif|Perfectionnement passif autre",
+    "3000|export|0|0|1|reexportation|Réexportation directe",
+    "3050|export|0|0|1|reexportation|Réexportation en suite d'admission temporaire ordinaire",
+    "3051|export|0|0|1|reexportation|Réexportation en suite d'admission temporaire spéciale",
+    "3052|export|0|0|1|reexportation|Réexportation en suite d'AT pour perfectionnement actif",
+    "3070|export|0|0|1|reexportation|Réexportation en suite d'entrepôt de stockage",
+    "3079|export|0|0|1|reexportation|Réexportation en suite de dépôt",
+    "3080|export|0|0|1|reexportation|Réexportation en suite de transit national",
+    "3092|export|0|0|1|reexportation|Réexportation en sortie de zone franche",
+    "3094|export|0|0|1|reexportation|Réexportation en régularisation de Bon Provisoire",
+    "4000|import|1|1|1|mise_consommation|Mise à la consommation directe",
+    "4050|import|1|1|1|mise_consommation|Mise à la consommation en suite d'admission temporaire ordinaire",
+    "4051|import|1|1|1|mise_consommation|Mise à la consommation en suite d'admission temporaire spéciale",
+    "4052|import|1|1|1|mise_consommation|Mise à la consommation en suite d'AT pour perfectionnement actif",
+    "4070|import|1|1|1|mise_consommation|Mise à la consommation en suite d'entrepôt de stockage",
+    "4079|import|1|1|1|mise_consommation|Mise à la consommation en suite de dépôt",
+    "4080|import|1|1|1|mise_consommation|Mise à la consommation en suite de transit national",
+    "4094|import|1|1|1|mise_consommation|Mise à la consommation en régularisation de Bon Provisoire",
+    "5000|import|0|1|1|admission_temporaire|Admission temporaire ordinaire",
+    "5050|import|0|1|1|admission_temporaire|Mutation d'admission temporaire ordinaire",
+    "5052|import|0|1|1|admission_temporaire|Admission temporaire ordinaire en suite de perfectionnement actif",
+    "5070|import|0|1|1|admission_temporaire|Admission temporaire en suite d'entrepôt de stockage",
+    "5079|import|0|1|1|admission_temporaire|Admission temporaire ordinaire en suite de dépôt",
+    "5080|import|0|1|1|admission_temporaire|Admission temporaire ordinaire en suite de transit national",
+    "5092|import|0|1|1|admission_temporaire|Admission temporaire en suite de zone franche",
+    "5094|import|0|1|1|admission_temporaire|Admission temporaire en régularisation de Bon Provisoire",
+    "5100|import|0|1|1|admission_temporaire|Admission temporaire spéciale (matériels d'entreprises)",
+    "5150|import|0|1|1|admission_temporaire|Admission temporaire spéciale en suite d'ATO",
+    "5170|import|0|1|1|admission_temporaire|Admission temporaire spéciale en suite d'entrepôt de stockage",
+    "5179|import|0|1|1|admission_temporaire|Admission temporaire spéciale en suite de dépôt",
+    "5180|import|0|1|1|admission_temporaire|Admission temporaire spéciale en suite de transit national",
+    "5200|import|0|1|1|admission_temporaire|AT pour perfectionnement actif (ouvraison, réparation, transformation)",
+    "5250|import|0|1|1|admission_temporaire|Mutation d'ATO en ATT",
+    "5252|import|0|1|1|admission_temporaire|Mutation de perfectionnement actif (ouvraison, réparation…)",
+    "5270|import|0|1|1|admission_temporaire|AT pour perfectionnement actif en suite d'entrepôt de stockage",
+    "5279|import|0|1|1|admission_temporaire|Perfectionnement actif en suite de dépôt",
+    "5280|import|0|1|1|admission_temporaire|Perfectionnement actif en suite de transit national",
+    "5294|import|0|1|1|admission_temporaire|AT pour perfectionnement actif en régularisation de Bon Provisoire",
+    "6022|import|0|0|0|reimportation|Réimportation en suite de perfectionnement passif pour transformation",
+    "6023|import|0|0|0|reimportation|Réimportation en suite de perfectionnement passif pour réparation",
+    "6024|import|0|0|0|reimportation|Réimportation en suite de perfectionnement passif autre",
+    "7000|import|0|1|1|entrepot|Entrée en entrepôt de stockage",
+    "7050|import|0|1|1|entrepot|Entrée en entrepôt de stockage en suite d'AT ordinaire",
+    "7051|import|0|1|1|entrepot|Entrée en entrepôt de stockage en suite d'AT spéciale",
+    "7052|import|0|1|1|entrepot|Entrée en entrepôt de stockage en suite d'AT perfectionnement actif",
+    "7070|import|0|1|1|entrepot|Mutation d'entrepôt de stockage",
+    "7079|import|0|1|1|entrepot|Entrepôt de stockage en suite de dépôt",
+    "7080|import|0|1|1|entrepot|Mise en entrepôt en suite de transit national",
+    "7094|import|0|1|1|entrepot|Entrepôt de stockage en régularisation de Bon Provisoire",
+    "8000|transit|0|0|0|transit|Transit national",
+    "8052|transit|0|0|0|transit|Transit national en suite de perfectionnement actif",
+    "8070|transit|0|0|0|transit|Transit national en suite d'entrepôt de stockage",
+    "8079|transit|0|0|0|transit|Transit national en suite de dépôt",
+    "8080|transit|0|0|0|transit|Transit national par mer vers port/aéroport CI en suite de transit",
+    "8100|transit|0|0|0|transit|Transbordement",
+    "9100|special|0|0|0|special|Cabotage",
+    "9200|special|0|0|0|special|Entrée en zone franche",
+    "9280|special|0|0|0|special|Entrée en zone franche industrielle en suite de transit national",
+    "9292|special|0|0|0|special|Mutation de zone franche",
+    "9294|special|0|0|0|special|Entrée en zone franche en régularisation de Bon Provisoire",
+    "9351|special|0|0|0|special|Déclaration anniversaire d'AT spéciale (matériels d'entreprises)",
+    "9900|special|0|0|0|special|Déclaration manuelle",
+    "9910|special|0|0|0|special|Liquidation manuelle en suite d'exportation",
+    "9922|special|0|0|0|special|Liquidation manuelle en suite de perfectionnement passif pour transformation",
+    "9923|special|0|0|0|special|Liquidation manuelle en suite de perfectionnement passif pour réparation",
+    "9924|special|0|0|0|special|Liquidation manuelle en suite de perfectionnement passif autre",
+    "9930|special|0|0|0|special|Liquidation manuelle en suite de réexportation",
+    "9950|special|0|0|0|special|Liquidation manuelle en suite d'admission temporaire ordinaire",
+    "9951|special|0|0|0|special|Liquidation manuelle en suite d'ATME",
+    "9952|special|0|0|0|special|Liquidation manuelle en suite de perfectionnement actif",
+    "9970|special|0|0|0|special|Liquidation manuelle en suite d'entrepôt de stockage",
+    "9980|special|0|0|0|special|Liquidation manuelle en suite de transit national",
+    "9992|special|0|0|0|special|Liquidation manuelle en suite de zone franche"
+  ];
+
+  var MENTIONS_REGIME = {
+    exportation: "Exportation : seul le timbre statistique de 20 000 XOF est dû, une fois par déclaration. Ni droits de douane, ni TVA, ni prélèvements communautaires, ni redevance informatique — ces impositions sont liées à l'importation. Hors produits soumis au Droit Unique de Sortie (cacao, café, noix de cajou…), qui reste à confirmer.",
+    perfectionnement_passif: "Perfectionnement passif : à la sortie, seul le timbre statistique de 20 000 XOF est dû, une fois par déclaration. Les droits et taxes se poseront au retour de la marchandise, sur la déclaration d'importation. Hors produits soumis au Droit Unique de Sortie.",
+    reexportation: "Réexportation : seul le timbre statistique de 20 000 XOF est dû, une fois par déclaration. Les droits et taxes à l'importation ne s'appliquent pas à une marchandise qui quitte le territoire. Hors produits soumis au Droit Unique de Sortie.",
+    mise_consommation: "Régime de droit commun : droits et taxes exigibles en totalité, redevance informatique et timbre statistique dus.",
+    admission_temporaire: "Admission temporaire : droits et taxes suspendus, en totalité ou en partie selon l'autorisation détenue. Redevance informatique et timbre restent dus, et les montants affichés sont indicatifs.",
+    entrepot: "Entrepôt sous douane : droits et taxes suspendus jusqu'à la mise à la consommation. Redevance informatique et timbre statistique restent dus.",
+    transit: "Transit : aucun droit ni taxe acquitté à ce stade. Une caution ou un acquit-à-caution est exigé à la place.",
+    reimportation: "Traitement fiscal non confirmé pour ce régime. Aucune liquidation n'est proposée tant que la règle n'a pas été validée par un déclarant agréé.",
+    special: "Traitement fiscal non confirmé pour ce régime. Aucune liquidation n'est proposée tant que la règle n'a pas été validée par un déclarant agréé."
+  };
+
+  var REGIMES = REGIMES_BRUT.map(function (bloc) {
+    var p = bloc.split('|');
+    return {
+      code: p[0],
+      sens: p[1],
+      droits: p[2] === '1',
+      rpi: p[3] === '1',
+      ts: p[4] === '1',
+      categorie: p[5],
+      libelle: p[6],
+      mention: MENTIONS_REGIME[p[5]] || ''
+    };
+  });
+
+  /* ------------------------------------------------------------ incoterms */
+  /* Incoterms 2020, règles publiées par la Chambre de commerce internationale.
+   * part_fret : la part du transport principal déjà comprise dans le prix
+   * facturé — 1 signifie que le fret est dedans, 0 qu'il reste à ajouter.
+   * assurance : le vendeur souscrit-il l'assurance. */
+  var INCOTERMS = [
+    { code: 'EXW', libelle: 'À l’usine',                        part_fret: 0, assurance: false, point: "Départ usine du vendeur" },
+    { code: 'FCA', libelle: 'Franco transporteur',              part_fret: 0, assurance: false, point: "Remise au transporteur désigné" },
+    { code: 'FAS', libelle: 'Franco le long du navire',         part_fret: 0, assurance: false, point: "Le long du navire au port d'embarquement" },
+    { code: 'FOB', libelle: 'Franco à bord',                    part_fret: 0, assurance: false, point: "À bord du navire au port d'embarquement" },
+    { code: 'CFR', libelle: 'Coût et fret',                     part_fret: 1, assurance: false, point: "À bord du navire, fret payé jusqu'au port d'arrivée" },
+    { code: 'CIF', libelle: 'Coût, assurance et fret',          part_fret: 1, assurance: true,  point: "À bord du navire, fret et assurance payés" },
+    { code: 'CPT', libelle: 'Port payé jusqu’à',                part_fret: 1, assurance: false, point: "Remise au premier transporteur, port payé" },
+    { code: 'CIP', libelle: 'Port payé, assurance comprise',    part_fret: 1, assurance: true,  point: "Remise au premier transporteur, port et assurance payés" },
+    { code: 'DAP', libelle: 'Rendu au lieu de destination',     part_fret: 1, assurance: false, point: "Au lieu convenu, non déchargé, non dédouané import" },
+    { code: 'DPU', libelle: 'Rendu au lieu déchargé',           part_fret: 1, assurance: false, point: "Au lieu convenu, déchargé, non dédouané import" },
+    { code: 'DDP', libelle: 'Rendu droits acquittés',           part_fret: 1, assurance: false, point: "Au lieu convenu, droits et taxes payés par le vendeur" }
+  ];
+
+  /* ------------------------------------------------- modes de transport */
+  /* Nomenclature UN/ECE Recommandation 19, celle de la case 25 du DAU. */
+  var MODES = [
+    { code: '1', libelle: 'Transport maritime' },
+    { code: '2', libelle: 'Transport par chemin de fer' },
+    { code: '3', libelle: 'Transport par route' },
+    { code: '4', libelle: 'Transport aérien' },
+    { code: '5', libelle: 'Envois postaux' },
+    { code: '7', libelle: 'Installations de transport fixes' },
+    { code: '8', libelle: 'Transport par voies navigables intérieures' },
+    { code: '9', libelle: 'Propulsion propre' }
+  ];
+
+  /* ------------------------------------------------- natures de colis */
+  /* Nomenclature UN/ECE Recommandation 21, celle de la case 31 du DAU. */
+  var COLIS = [
+    { code: 'CN', libelle: 'Conteneur' },
+    { code: 'CT', libelle: 'Carton' },
+    { code: 'CS', libelle: 'Caisse' },
+    { code: 'BX', libelle: 'Boîte' },
+    { code: 'PK', libelle: 'Colis' },
+    { code: 'PX', libelle: 'Palette' },
+    { code: 'BG', libelle: 'Sac' },
+    { code: 'BL', libelle: 'Balle' },
+    { code: 'DR', libelle: 'Fût' },
+    { code: 'RO', libelle: 'Rouleau' },
+    { code: 'CY', libelle: 'Bouteille à gaz / cylindre' },
+    { code: 'BD', libelle: 'Planche / madrier' },
+    { code: 'VL', libelle: 'Vrac liquide' },
+    { code: 'VR', libelle: 'Vrac solide' },
+    { code: 'NE', libelle: 'Non emballé' }
+  ];
+
+  /* ----------------------------------------------------------- conteneurs */
+  var TYPES_CONTENEUR = [
+    { code: '20DV', libelle: "20 pieds sec (dry)" },
+    { code: '40DV', libelle: "40 pieds sec (dry)" },
+    { code: '40HC', libelle: "40 pieds high cube" },
+    { code: '45HC', libelle: "45 pieds high cube" },
+    { code: '20RF', libelle: "20 pieds frigorifique" },
+    { code: '40RF', libelle: "40 pieds frigorifique" },
+    { code: '20OT', libelle: "20 pieds open top" },
+    { code: '40OT', libelle: "40 pieds open top" },
+    { code: '20FR', libelle: "20 pieds flat rack" },
+    { code: '40FR', libelle: "40 pieds flat rack" },
+    { code: '20TK', libelle: "20 pieds citerne" },
+    { code: 'LCL',  libelle: "Groupage — pas de conteneur complet" }
+  ];
+
+  /* ------------------------------------------------- unités de mesure */
+  var UNITES = [
+    { code: 'kg',  libelle: 'Kilogramme' },
+    { code: 'u',   libelle: 'Unité / pièce' },
+    { code: 'l',   libelle: 'Litre' },
+    { code: 'm',   libelle: 'Mètre' },
+    { code: 'm2',  libelle: 'Mètre carré' },
+    { code: 'm3',  libelle: 'Mètre cube' },
+    { code: 'pr',  libelle: 'Paire' },
+    { code: 'dz',  libelle: 'Douzaine' },
+    { code: 'ct',  libelle: 'Carat' },
+    { code: 'mil', libelle: 'Millier' },
+    { code: '1000kWh', libelle: 'Millier de kilowattheures' },
+    { code: 'gi F/S',  libelle: 'Gramme de matière fissile' }
+  ];
+
+  /* ------------------------------------------------- documents joints */
+  /* Pièces habituelles d'un dossier d'importation en Côte d'Ivoire. La liste
+   * est modifiable : ce n'est pas une obligation réglementaire figée. */
+  var DOCUMENTS = [
+    { code: 'FACT', libelle: 'Facture commerciale',                       obligatoire: true },
+    { code: 'BL',   libelle: 'Connaissement maritime (B/L)',              obligatoire: false },
+    { code: 'LTA',  libelle: 'Lettre de transport aérien (LTA)',          obligatoire: false },
+    { code: 'CMR',  libelle: 'Lettre de voiture routière (CMR)',          obligatoire: false },
+    { code: 'PACK', libelle: 'Liste de colisage',                         obligatoire: true },
+    { code: 'ORIG', libelle: "Certificat d'origine",                      obligatoire: false },
+    { code: 'FDI',  libelle: "Fiche de déclaration à l'importation (FDI)", obligatoire: true },
+    { code: 'BSC',  libelle: 'Bordereau de suivi des cargaisons (BSC)',   obligatoire: true },
+    { code: 'ASS',  libelle: "Certificat d'assurance",                    obligatoire: true },
+    { code: 'COC',  libelle: 'Certificat de conformité (VOC / COC)',      obligatoire: false },
+    { code: 'PHYT', libelle: 'Certificat phytosanitaire',                 obligatoire: false },
+    { code: 'SANI', libelle: 'Certificat sanitaire / vétérinaire',        obligatoire: false },
+    { code: 'EXON', libelle: "Attestation d'exonération",                 obligatoire: false },
+    { code: 'AUTO', libelle: "Autorisation spéciale d'importation",       obligatoire: false },
+    { code: 'PROC', libelle: 'Procuration du client',                     obligatoire: false }
+  ];
+
+  /* ------------------------------------------------- régimes d'origine */
+  /* Une origine préférentielle ne se présume pas : elle se prouve. Sans le
+   * document, on liquide au taux plein. */
+  var ORIGINES = [
+    { code: 'TIERS',  libelle: 'Pays tiers — tarif plein',                     preuve: 'Aucune',                                           reduction: 0 },
+    { code: 'UEMOA',  libelle: 'Origine UEMOA agréée',                         preuve: "Certificat d'origine UEMOA + agrément produit",    reduction: null },
+    { code: 'CEDEAO', libelle: 'Origine CEDEAO agréée (SLEC)',                 preuve: "Certificat d'origine CEDEAO + agrément SLEC",      reduction: null },
+    { code: 'APE',    libelle: "Accord de partenariat économique — UE",        preuve: "Déclaration d'origine sur facture / EUR.1",         reduction: null },
+    { code: 'ZLECAf', libelle: 'Zone de libre-échange continentale africaine', preuve: "Certificat d'origine ZLECAf",                       reduction: null }
+  ];
+
+  /* --------------------------------------------------- lignes de devis */
+  /* Aucun montant n'est proposé : ce sont les honoraires et débours propres à
+   * E-Transit, et personne d'autre qu'E-Transit ne peut les fixer. Ce sont
+   * seulement des intitulés, pour que rien ne soit oublié dans un devis. */
+  var POSTES_DEVIS = [
+    { code: 'HON',   libelle: 'Honoraires de transit et de dédouanement', nature: 'honoraire' },
+    { code: 'DECL',  libelle: 'Établissement de la déclaration en douane', nature: 'honoraire' },
+    { code: 'FDI',   libelle: 'Frais de FDI',                             nature: 'debours' },
+    { code: 'BSC',   libelle: 'Bordereau de suivi des cargaisons',        nature: 'debours' },
+    { code: 'REDOC', libelle: 'Retrait documentaire compagnie',           nature: 'debours' },
+    { code: 'MAG',   libelle: 'Magasinage et surestaries',                nature: 'debours' },
+    { code: 'MANU',  libelle: 'Manutention et acconage',                  nature: 'debours' },
+    { code: 'SCAN',  libelle: 'Scanner / visite douanière',               nature: 'debours' },
+    { code: 'TRANS', libelle: 'Transport terrestre jusqu’au magasin',     nature: 'debours' },
+    { code: 'CAUT',  libelle: 'Caution / consignation conteneur',         nature: 'debours' },
+    { code: 'DIV',   libelle: 'Frais divers',                             nature: 'debours' }
+  ];
+
+  return {
+    TAXES: TAXES,
+    MONNAIES: MONNAIES,
+    PAYS: PAYS,
+    BUREAUX: BUREAUX,
+    REGIMES: REGIMES,
+    INCOTERMS: INCOTERMS,
+    MODES: MODES,
+    COLIS: COLIS,
+    TYPES_CONTENEUR: TYPES_CONTENEUR,
+    UNITES: UNITES,
+    DOCUMENTS: DOCUMENTS,
+    ORIGINES: ORIGINES,
+    POSTES_DEVIS: POSTES_DEVIS
+  };
+})();
+
+
+/* ===== liquidation.js ===== */
+/* Liquidation des droits et taxes.
+ *
+ * Ce fichier est la transcription exacte de la fonction de liquidation qui
+ * tourne en base côté Déclarant. Même enchaînement, mêmes arrondis, mêmes
+ * refus. Si les deux divergent un jour, c'est un défaut, pas une variante :
+ * un devis remis au client et une déclaration déposée à la douane doivent
+ * donner le même chiffre au franc près.
+ *
+ * Les règles, une par une :
+ *   CAF        = FOB + fret réparti + assurance répartie
+ *   fret       réparti au poids brut  (jamais à la valeur)
+ *   assurance  répartie à la valeur FOB, et toujours libellée en francs CFA
+ *   DD         = CAF x taux de la position tarifaire
+ *   RST        = CAF x 1 %
+ *   PCS        = CAF x 0,8 %      PUA = CAF x 0,2 %      PCC = CAF x 0,5 %
+ *   base TVA   = CAF + DD + RST      (et rien d'autre)
+ *   TVA        = base TVA x 18 %
+ *   RPI        = max(FOB total x 0,75 % ; 100 000)  une fois par déclaration
+ *   TS         = 20 000                              une fois par déclaration
+ *
+ * Chaque taxe est arrondie au franc dès son calcul, exactement comme en base,
+ * et l'assiette de la TVA est construite avec les montants déjà arrondis.
+ */
+window.LIQUIDATION = (function () {
+  'use strict';
+
+  var f = Math.round;
+
+  function nombre(v) {
+    if (v === null || v === undefined || v === '') return 0;
+    var n = typeof v === 'number' ? v : parseFloat(String(v).replace(',', '.').replace(/\s/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  /* Erreur porteuse d'un message destiné à l'écran, pas d'une trace technique.
+   * On refuse de calculer plutôt que de calculer sur une donnée absente. */
+  function Refus(message) {
+    var e = new Error(message);
+    e.name = 'Refus';
+    return e;
+  }
+
+  /**
+   * @param dossier {
+   *   regime      : { code, libelle, droits, rpi, ts, categorie, mention }
+   *   taxes       : liste des taxes (référence)
+   *   fret_xof    : fret total déjà converti en francs CFA
+   *   assurance_xof : prime totale, en francs CFA, jamais convertie
+   *   lignes      : [{ numero, designation, position, taux_dd (fraction),
+   *                    fob_xof, poids_brut_kg, origine, exoneration (fraction) }]
+   * }
+   */
+  function liquider(dossier) {
+    var regime = dossier.regime || { droits: true, rpi: true, ts: true };
+    var taxes = (dossier.taxes || []).slice().filter(function (t) { return t.actif !== false; });
+    var lignes = (dossier.lignes || []).filter(function (l) {
+      return l && (nombre(l.fob_xof) > 0 || nombre(l.poids_brut_kg) > 0 || l.designation);
+    });
+
+    if (lignes.length === 0) throw new Refus("Aucun article saisi : il n'y a rien à liquider.");
+
+    var fretTotal = nombre(dossier.fret_xof);
+    var assuranceTotal = nombre(dossier.assurance_xof);
+
+    var fobTotal = 0;
+    var poidsTotal = 0;
+    lignes.forEach(function (l) {
+      fobTotal += nombre(l.fob_xof);
+      poidsTotal += nombre(l.poids_brut_kg);
+    });
+
+    if (fobTotal <= 0) {
+      throw new Refus("La valeur FOB totale est nulle : l'assurance et la redevance informatique ne peuvent pas être réparties.");
+    }
+    if (fretTotal > 0 && poidsTotal <= 0) {
+      throw new Refus("Fret à répartir mais aucun poids brut renseigné : la répartition du fret se fait au poids. Renseignez le poids brut de chaque article.");
+    }
+
+    var taxesLigne = taxes.filter(function (t) { return t.niveau === 'ligne'; });
+    var taxesBaseTva = taxesLigne.filter(function (t) { return t.base_tva; });
+
+    var resultats = lignes.map(function (l, index) {
+      var fob = nombre(l.fob_xof);
+      var poids = nombre(l.poids_brut_kg);
+      var tauxDd = l.taux_dd;
+
+      if (tauxDd === null || tauxDd === undefined || tauxDd === '') {
+        throw new Refus(
+          'Ligne « ' + (l.designation || ('n° ' + (index + 1))) + ' » : droit de douane inconnu. ' +
+          'Le code ' + (l.position || '(vide)') + " n'est pas dans le tarif — saisissez le taux à la main ou corrigez la position."
+        );
+      }
+      tauxDd = nombre(tauxDd);
+      if (tauxDd > 1) {
+        throw new Refus(
+          'Ligne « ' + (l.designation || ('n° ' + (index + 1))) + ' » : le taux de droit se donne en fraction (0,20 pour 20 %), pas en pourcentage.'
+        );
+      }
+      // Une exonération partielle réduit le seul droit de douane.
+      var exoneration = Math.min(Math.max(nombre(l.exoneration), 0), 1);
+      var tauxDdApplique = tauxDd * (1 - exoneration);
+
+      var fret = fretTotal === 0 ? 0 : (fretTotal / poidsTotal) * poids;
+      var assurance = (assuranceTotal / fobTotal) * fob;
+      var poidsStat = (poidsTotal / fobTotal) * fob;
+      var caf = fob + fret + assurance;
+
+      // L'assiette de la TVA se construit d'abord, avec les montants arrondis.
+      var baseTva = caf;
+      taxesBaseTva.forEach(function (t) {
+        baseTva += f(caf * (t.taux === null || t.taux === undefined ? tauxDdApplique : t.taux));
+      });
+
+      var detail = taxesLigne.map(function (t) {
+        var taux = (t.taux === null || t.taux === undefined) ? tauxDdApplique : t.taux;
+        var montant;
+        if (!regime.droits) montant = 0;
+        else if (t.assiette === 'caf') montant = f(caf * taux);
+        else if (t.assiette === 'base_tva') montant = f(baseTva * taux);
+        else montant = 0;
+        return {
+          code: t.code,
+          libelle: t.libelle,
+          base_xof: f(t.assiette === 'base_tva' ? baseTva : caf),
+          taux: taux,
+          montant_xof: montant
+        };
+      });
+
+      return {
+        numero: l.numero || (index + 1),
+        designation: l.designation || '',
+        position: l.position || '',
+        designation_tec: l.designation_tec || '',
+        unite: l.unite || '',
+        origine: l.origine || '',
+        verifie_en_base: !!l.verifie_en_base,
+        taux_dd: tauxDd,
+        taux_dd_applique: tauxDdApplique,
+        exoneration: exoneration,
+        taux_dd_saisi: !!l.taux_dd_saisi,
+        quantite: nombre(l.quantite),
+        fob_xof: f(fob),
+        poids_brut_kg: poids,
+        poids_stat_kg: Math.round(poidsStat * 1000) / 1000,
+        fret_xof: f(fret),
+        assurance_xof: f(assurance),
+        part_fret: poidsTotal > 0 ? poids / poidsTotal : 0,
+        part_valeur: fob / fobTotal,
+        caf_xof: f(caf),
+        base_tva_xof: f(baseTva),
+        taxes: detail
+      };
+    });
+
+    // Taxes de niveau déclaration : une seule fois, quel que soit le nombre
+    // de lignes. Le timbre suit son propre drapeau — sous entrepôt les droits
+    // sont suspendus mais le timbre reste dû.
+    var totaux = {};
+    var rpi = 0;
+    var ts = 0;
+    taxes.filter(function (t) { return t.niveau === 'declaration'; }).forEach(function (t) {
+      if (t.code === 'RPI') {
+        rpi = regime.rpi ? Math.max(f(fobTotal * nombre(t.taux)), nombre(t.minimum)) : 0;
+      } else if (t.code === 'TS') {
+        ts = regime.ts ? nombre(t.fixe) : 0;
+      }
+    });
+
+    taxesLigne.forEach(function (t) {
+      totaux[t.code] = resultats.reduce(function (somme, ligne) {
+        var trouve = ligne.taxes.filter(function (x) { return x.code === t.code; })[0];
+        return somme + (trouve ? trouve.montant_xof : 0);
+      }, 0);
+    });
+    totaux.RPI = rpi;
+    totaux.TS = ts;
+
+    var totalAPayer = Object.keys(totaux).reduce(function (s, k) { return s + totaux[k]; }, 0);
+
+    var cafTotal = resultats.reduce(function (s, l) { return s + l.caf_xof; }, 0);
+
+    return {
+      regime: regime,
+      globaux: {
+        fob_total_xof: f(fobTotal),
+        fret_total_xof: f(fretTotal),
+        assurance_total_xof: f(assuranceTotal),
+        poids_brut_total_kg: poidsTotal,
+        caf_total_xof: cafTotal,
+        nombre_lignes: resultats.length
+      },
+      lignes: resultats,
+      totaux_taxes: totaux,
+      total_a_payer_xof: totalAPayer
+    };
+  }
+
+  /* Le devis remis au client : les droits et taxes, plus ce qu'E-Transit
+   * facture pour son propre compte. Aucun montant d'honoraire n'est proposé
+   * ici — ils appartiennent à E-Transit, et personne d'autre ne les fixe. */
+  function devis(liquidation, postes, options) {
+    options = options || {};
+    var tvaHonoraires = options.taux_tva_honoraires;
+    if (tvaHonoraires === null || tvaHonoraires === undefined) tvaHonoraires = 0.18;
+
+    var honoraires = 0;
+    var debours = 0;
+    (postes || []).forEach(function (p) {
+      var montant = nombre(p.montant_xof);
+      if (p.nature === 'honoraire') honoraires += montant;
+      else debours += montant;
+    });
+
+    // La TVA ne frappe que la prestation d'E-Transit. Les débours sont des
+    // sommes avancées pour le compte du client : les refacturer avec TVA
+    // reviendrait à taxer deux fois.
+    var tvaSurHonoraires = f(honoraires * tvaHonoraires);
+    var droitsEtTaxes = liquidation ? liquidation.total_a_payer_xof : 0;
+
+    return {
+      droits_et_taxes_xof: droitsEtTaxes,
+      honoraires_xof: honoraires,
+      tva_honoraires_xof: tvaSurHonoraires,
+      taux_tva_honoraires: tvaHonoraires,
+      debours_xof: debours,
+      total_xof: droitsEtTaxes + honoraires + tvaSurHonoraires + debours
+    };
+  }
+
+  return { liquider: liquider, devis: devis, nombre: nombre, Refus: Refus };
+})();
+
+
+/* ===== base.js ===== */
+/* La base de données locale.
+ *
+ * Tout ce que l'application retient vit ici : les dossiers, les carnets
+ * d'adresses, le tarif douanier, les listes de référence, le logo, les
+ * réglages. C'est une base IndexedDB, celle que le navigateur met à
+ * disposition — pas un fichier à côté qu'on peut perdre en déplaçant
+ * l'application.
+ *
+ * Ce qu'il faut savoir, et que l'application dit à l'écran :
+ *   - la base vit dans le navigateur du poste. Elle survit à la fermeture, au
+ *     redémarrage, à la mise à jour de l'application.
+ *   - elle ne suit pas d'un poste à l'autre. Deux ordinateurs = deux bases.
+ *     D'où la sauvegarde complète en un fichier, dans les Réglages.
+ *   - « Effacer les données de navigation » avec la case « données de site »
+ *     l'effacerait. La sauvegarde régulière n'est pas une précaution de luxe.
+ */
+window.BASE = (function () {
+  'use strict';
+
+  var NOM = 'etransit-cotation';
+  var VERSION = 1;
+  var bd = null;
+
+  var MAGASINS = {
+    parametres:      { keyPath: 'cle' },
+    dossiers:        { keyPath: 'id', index: { date: 'date_creation', importateur: 'importateur_nom', statut: 'statut' } },
+    importateurs:    { keyPath: 'id', index: { nom: 'nom' } },
+    fournisseurs:    { keyPath: 'id', index: { nom: 'nom' } },
+    transporteurs:   { keyPath: 'id', index: { nom: 'nom' } },
+    tec:             { keyPath: 'code' },
+    taux_personnels: { keyPath: 'code' },
+    modeles_devis:   { keyPath: 'id' }
+  };
+
+  /* Le motif n'est pas le m\u00eame selon d'o\u00f9 l'application est ouverte, et la
+   * marche \u00e0 suivre non plus. Donner la mauvaise consigne serait pire que de
+   * n'en donner aucune. */
+  function messageSansBase() {
+    var debut = "Cette application a besoin d\u2019enregistrer les dossiers sur l\u2019appareil, " +
+      "et cet appareil ne l\u2019autorise pas.\n\n";
+    if (location.protocol.indexOf('http') === 0) {
+      return debut +
+        "C\u2019est le cas d\u2019une fen\u00eatre de navigation priv\u00e9e, et d\u2019un navigateur r\u00e9gl\u00e9 " +
+        "pour bloquer les donn\u00e9es de sites.\n\n" +
+        "Rouvrez l\u2019adresse dans une fen\u00eatre ordinaire, et autorisez ce site \u00e0 " +
+        "conserver des donn\u00e9es.";
+    }
+    return debut +
+      "C\u2019est le cas d\u2019un t\u00e9l\u00e9phone ou d\u2019une tablette qui ouvre le fichier depuis un " +
+      "aper\u00e7u, et de Firefox pour un fichier ouvert depuis le disque.\n\n" +
+      "Sur ordinateur : copiez le fichier sur le disque et ouvrez-le avec Microsoft Edge " +
+      "ou Google Chrome.\nSur t\u00e9l\u00e9phone : c\u2019est la version en ligne qu\u2019il faut, " +
+      "un fichier pos\u00e9 sur l\u2019appareil ne peut pas y fonctionner.";
+  }
+
+  function ouvrir() {
+    if (bd) return Promise.resolve(bd);
+    return new Promise(function (resoudre, rejeter) {
+      if (typeof indexedDB === 'undefined') {
+        rejeter(new Error(messageSansBase()));
+        return;
+      }
+
+      // Certains navigateurs n'ouvrent pas la base et ne refusent pas non plus :
+      // ils ne répondent jamais. Sans garde-fou, l'application attend
+      // indéfiniment sans rien dire à personne.
+      var repondu = false;
+      var minuterie = setTimeout(function () {
+        if (repondu) return;
+        repondu = true;
+        rejeter(new Error(messageSansBase()));
+      }, 6000);
+
+      function fini(action) {
+        return function () {
+          if (repondu) return;
+          repondu = true;
+          clearTimeout(minuterie);
+          action();
+        };
+      }
+
+      var requete = indexedDB.open(NOM, VERSION);
+      requete.onupgradeneeded = function () {
+        var base = requete.result;
+        Object.keys(MAGASINS).forEach(function (nom) {
+          if (base.objectStoreNames.contains(nom)) return;
+          var def = MAGASINS[nom];
+          var magasin = base.createObjectStore(nom, { keyPath: def.keyPath });
+          Object.keys(def.index || {}).forEach(function (cle) {
+            magasin.createIndex(cle, def.index[cle], { unique: false });
+          });
+        });
+      };
+      requete.onsuccess = fini(function () { bd = requete.result; resoudre(bd); });
+      requete.onerror = fini(function () { rejeter(new Error(messageSansBase())); });
+      requete.onblocked = fini(function () {
+        rejeter(new Error(
+          "Une autre fenêtre de l'application est déjà ouverte. Fermez-la, puis rechargez cette page."
+        ));
+      });
+    });
+  }
+
+  function transaction(magasins, mode) {
+    return ouvrir().then(function (base) { return base.transaction(magasins, mode); });
+  }
+
+  function promesse(requete) {
+    return new Promise(function (resoudre, rejeter) {
+      requete.onsuccess = function () { resoudre(requete.result); };
+      requete.onerror = function () { rejeter(requete.error); };
+    });
+  }
+
+  function lire(magasin, cle) {
+    return transaction(magasin, 'readonly').then(function (tx) {
+      return promesse(tx.objectStore(magasin).get(cle));
+    });
+  }
+
+  function tout(magasin) {
+    return transaction(magasin, 'readonly').then(function (tx) {
+      return promesse(tx.objectStore(magasin).getAll());
+    });
+  }
+
+  function ecrire(magasin, valeur) {
+    return transaction(magasin, 'readwrite').then(function (tx) {
+      var r = promesse(tx.objectStore(magasin).put(valeur));
+      return r.then(function () { return valeur; });
+    });
+  }
+
+  function ecrireLot(magasin, valeurs) {
+    return transaction(magasin, 'readwrite').then(function (tx) {
+      return new Promise(function (resoudre, rejeter) {
+        var m = tx.objectStore(magasin);
+        valeurs.forEach(function (v) { m.put(v); });
+        tx.oncomplete = function () { resoudre(valeurs.length); };
+        tx.onerror = function () { rejeter(tx.error); };
+        tx.onabort = function () { rejeter(tx.error || new Error('transaction interrompue')); };
+      });
+    });
+  }
+
+  function supprimer(magasin, cle) {
+    return transaction(magasin, 'readwrite').then(function (tx) {
+      return promesse(tx.objectStore(magasin).delete(cle));
+    });
+  }
+
+  function vider(magasin) {
+    return transaction(magasin, 'readwrite').then(function (tx) {
+      return promesse(tx.objectStore(magasin).clear());
+    });
+  }
+
+  /* ------------------------------------------------------------ paramètres */
+
+  function parametre(cle, defaut) {
+    return lire('parametres', cle).then(function (r) {
+      return r === undefined ? defaut : r.valeur;
+    });
+  }
+
+  function poserParametre(cle, valeur) {
+    return ecrire('parametres', { cle: cle, valeur: valeur });
+  }
+
+  /* Une amorce antérieure inscrivait un nom de responsable dans la fiche
+   * société. On efface cette valeur-là si elle n'a pas été touchée — jamais
+   * une saisie de l'utilisateur. */
+  function oublierResponsableParDefaut() {
+    return parametre('societe', null).then(function (societe) {
+      if (!societe) return false;
+      var pose = false;
+      if (societe.responsable === 'Madame Estelle') { societe.responsable = ''; pose = true; }
+      if (societe.fonction_responsable === 'Responsable cotation') { societe.fonction_responsable = ''; pose = true; }
+      return pose ? poserParametre('societe', societe).then(function () { return true; }) : false;
+    });
+  }
+
+  /* Une version antérieure fermait l'application par un code d'accès. Il a été
+   * retiré : sur un poste de bureau il ajoutait une porte à ouvrir chaque matin
+   * sans rien protéger de plus que la session Windows. On efface l'empreinte
+   * laissée en base plutôt que de la garder à traîner. */
+  function oublierAncienCodeAcces() {
+    return lire('parametres', 'acces').then(function (a) {
+      return a === undefined ? false : supprimer('parametres', 'acces').then(function () { return true; });
+    });
+  }
+
+  /* -------------------------------------------------- listes de référence */
+  /* Les listes vivent en base, pas dans le code : E-Transit peut en ajouter,
+   * en corriger, en retirer. L'amorce livrée avec l'application ne sert qu'au
+   * premier démarrage. */
+
+  var LISTES = ['taxes', 'monnaies', 'pays', 'bureaux', 'regimes', 'incoterms',
+    'modes', 'colis', 'types_conteneur', 'unites', 'documents', 'origines', 'postes_devis'];
+
+  function semer(reference) {
+    return parametre('amorce_faite', false).then(function (faite) {
+      if (faite) return false;
+      var ecritures = LISTES.map(function (nom) {
+        var cle = nom.toUpperCase();
+        return poserParametre('liste_' + nom, reference[cle] || []);
+      });
+      ecritures.push(poserParametre('societe', {
+        nom: 'E-TRANSIT',
+        forme: '',
+        activite: 'Transit — Dédouanement — Logistique',
+        adresse: '',
+        boite_postale: '',
+        ville: 'Abidjan',
+        pays: 'Côte d’Ivoire',
+        telephone: '',
+        courriel: 'etransit@etransitci.com',
+        site: '',
+        rccm: '',
+        contribuable: '',
+        compte_bancaire: '',
+        agrement_declarant: '',
+        responsable: '',
+        fonction_responsable: ''
+      }));
+      ecritures.push(poserParametre('devis_conditions',
+        "Devis établi sur la base des documents communiqués. Les droits et taxes sont ceux résultant du tarif " +
+        "en vigueur à la date d'établissement ; ils seront ajustés au montant réellement liquidé par la Douane. " +
+        "Les débours sont refacturés à l'euro l'euro sur justificatifs."));
+      ecritures.push(poserParametre('devis_validite_jours', 15));
+      ecritures.push(poserParametre('taux_tva_honoraires', 0.18));
+      ecritures.push(poserParametre('compteur_dossier', 0));
+      ecritures.push(poserParametre('amorce_faite', true));
+      return Promise.all(ecritures).then(function () { return true; });
+    });
+  }
+
+  function liste(nom) {
+    return parametre('liste_' + nom, []);
+  }
+
+  function poserListe(nom, valeurs) {
+    return poserParametre('liste_' + nom, valeurs);
+  }
+
+  /* -------------------------------------------------------------- dossiers */
+
+  function numeroSuivant() {
+    return parametre('compteur_dossier', 0).then(function (n) {
+      var suivant = n + 1;
+      return poserParametre('compteur_dossier', suivant).then(function () {
+        return String(new Date().getFullYear()) + '-' + ('0000' + suivant).slice(-4);
+      });
+    });
+  }
+
+  function identifiant() {
+    return 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  }
+
+  /* ------------------------------------------------------------------ TEC */
+  /* Le tarif est chargé une fois depuis la source, puis vit en base. Ensuite
+   * l'application n'a plus besoin du réseau. Le bouton « Mettre à jour »
+   * refait le voyage quand le tarif change. */
+
+  var SOURCE_TEC_DEFAUT = 'https://oubowmftzxpruckjzwuq.supabase.co/functions/v1/app_e08c374bc4_tec_public';
+
+  function sourceTec() {
+    return parametre('source_tec', SOURCE_TEC_DEFAUT);
+  }
+
+  function synchroniserTec(surAvancement) {
+    var dire = surAvancement || function () {};
+    return sourceTec().then(function (url) {
+      dire('Connexion au tarif…');
+      return fetch(url, { cache: 'no-store' });
+    }).then(function (reponse) {
+      if (!reponse.ok) throw new Error('Le tarif a répondu ' + reponse.status + '.');
+      dire('Téléchargement du tarif…');
+      return reponse.json();
+    }).then(function (charge) {
+      if (!charge || !Array.isArray(charge.lignes) || charge.lignes.length === 0) {
+        throw new Error('Le tarif reçu est vide. Rien n’a été remplacé.');
+      }
+      dire('Enregistrement de ' + charge.lignes.length.toLocaleString('fr-FR') + ' positions…');
+      var enregistrements = charge.lignes.map(function (l) {
+        return {
+          code: l[0],
+          // Le corpus porte les taux en pourcentage ; on range en fraction,
+          // qui est l'unité de tout le reste du calcul.
+          taux_dd: (l[1] === null || l[1] === undefined) ? null : Number(l[1]) / 100,
+          unite: l[2] || '',
+          designation: l[3] || '',
+          categorie: l[4],
+          recherche: (l[0] + ' ' + (l[3] || '')).toLowerCase()
+        };
+      });
+      return vider('tec')
+        .then(function () { return ecrireLot('tec', enregistrements); })
+        .then(function () {
+          return Promise.all([
+            poserParametre('tec_source_libelle', charge.source || ''),
+            poserParametre('tec_version', charge.version || null),
+            poserParametre('tec_charge_le', new Date().toISOString()),
+            poserParametre('tec_nombre', enregistrements.length)
+          ]);
+        })
+        .then(function () { return enregistrements.length; });
+    });
+  }
+
+  function importerTecDepuisTexte(texte) {
+    var charge;
+    try { charge = JSON.parse(texte); }
+    catch { throw new Error("Ce fichier n'est pas un tarif au format attendu."); }
+    var lignes = Array.isArray(charge) ? charge : charge.lignes;
+    if (!Array.isArray(lignes) || lignes.length === 0) throw new Error('Aucune position dans ce fichier.');
+    var enregistrements = lignes.map(function (l) {
+      if (Array.isArray(l)) {
+        return { code: l[0], taux_dd: l[1] === null ? null : Number(l[1]) / 100, unite: l[2] || '', designation: l[3] || '', categorie: l[4], recherche: (l[0] + ' ' + (l[3] || '')).toLowerCase() };
+      }
+      return { code: l.code, taux_dd: l.taux_dd === null ? null : Number(l.taux_dd), unite: l.unite || '', designation: l.designation || '', categorie: l.categorie, recherche: ((l.code || '') + ' ' + (l.designation || '')).toLowerCase() };
+    });
+    return vider('tec')
+      .then(function () { return ecrireLot('tec', enregistrements); })
+      .then(function () {
+        return Promise.all([
+          poserParametre('tec_source_libelle', charge.source || 'Fichier importé'),
+          poserParametre('tec_charge_le', new Date().toISOString()),
+          poserParametre('tec_nombre', enregistrements.length)
+        ]);
+      })
+      .then(function () { return enregistrements.length; });
+  }
+
+  /* -------------------------------------------- sauvegarde et restauration */
+
+  function exporterTout(avecTarif) {
+    var magasins = ['parametres', 'dossiers', 'importateurs', 'fournisseurs',
+      'transporteurs', 'taux_personnels', 'modeles_devis'];
+    if (avecTarif) magasins.push('tec');
+    return Promise.all(magasins.map(tout)).then(function (resultats) {
+      var paquet = { application: 'Cotation E-Transit', version: VERSION, exporte_le: new Date().toISOString(), donnees: {} };
+      magasins.forEach(function (nom, i) { paquet.donnees[nom] = resultats[i]; });
+      return paquet;
+    });
+  }
+
+  function importerTout(paquet) {
+    if (!paquet || !paquet.donnees) throw new Error("Ce fichier n'est pas une sauvegarde de l'application.");
+    var noms = Object.keys(paquet.donnees).filter(function (n) { return MAGASINS[n]; });
+    return noms.reduce(function (chaine, nom) {
+      return chaine.then(function () {
+        var valeurs = paquet.donnees[nom] || [];
+        return vider(nom).then(function () { return valeurs.length ? ecrireLot(nom, valeurs) : 0; });
+      });
+    }, Promise.resolve()).then(function () { return noms; });
+  }
+
+  return {
+    ouvrir: ouvrir, lire: lire, tout: tout, ecrire: ecrire, ecrireLot: ecrireLot,
+    supprimer: supprimer, vider: vider,
+    parametre: parametre, poserParametre: poserParametre,
+    liste: liste, poserListe: poserListe, semer: semer, LISTES: LISTES,
+    oublierAncienCodeAcces: oublierAncienCodeAcces,
+    oublierResponsableParDefaut: oublierResponsableParDefaut,
+    numeroSuivant: numeroSuivant, identifiant: identifiant,
+    sourceTec: sourceTec, SOURCE_TEC_DEFAUT: SOURCE_TEC_DEFAUT,
+    synchroniserTec: synchroniserTec, importerTecDepuisTexte: importerTecDepuisTexte,
+    exporterTout: exporterTout, importerTout: importerTout
+  };
+})();
+
+
+/* ===== pdf.js ===== */
+/* Génération des documents PDF.
+ *
+ * Deux pièces sortent d'ici :
+ *   - le devis remis au client, qui dit ce qu'il aura à payer et pourquoi ;
+ *   - la note de liquidation, ligne par ligne, qui montre le détail du calcul
+ *     et se garde au dossier.
+ *
+ * Le tableau est dessiné à la main plutôt qu'avec une extension : moins de
+ * poids embarqué, et la maîtrise complète de la mise en page à l'impression.
+ */
+window.PDF = (function () {
+  'use strict';
+
+  // Dimensions de la page en cours. Le devis se lit en portrait ; la note de
+  // liquidation, avec ses douze colonnes de taxes, ne tient qu'en paysage —
+  // c'est d'ailleurs le format des feuilles de liquidation.
+  var MARGE = 14;
+  var LARGEUR = 210;
+  var HAUTEUR = 297;
+  var UTILE = LARGEUR - 2 * MARGE;
+
+  var ENCRE = [23, 37, 54];
+  var GRIS = [107, 118, 132];
+  var TRAIT = [214, 220, 228];
+  var ACCENT = [11, 87, 164];
+  var FOND_ENTETE = [239, 244, 250];
+
+  function fr(n, decimales) {
+    var d = decimales === undefined ? 0 : decimales;
+    return (Math.round(n * Math.pow(10, d)) / Math.pow(10, d))
+      .toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d })
+      .replace(/ | /g, ' ');
+  }
+
+  function creer(paysage) {
+    var constructeur = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if (!constructeur) throw new Error("Le générateur PDF n'a pas été chargé avec l'application.");
+    LARGEUR = paysage ? 297 : 210;
+    HAUTEUR = paysage ? 210 : 297;
+    UTILE = LARGEUR - 2 * MARGE;
+    return new constructeur({
+      unit: 'mm', format: 'a4', compress: true,
+      orientation: paysage ? 'landscape' : 'portrait'
+    });
+  }
+
+  /* ------------------------------------------------------------- fragments */
+
+  function entete(doc, contexte, titre, sousTitre) {
+    var societe = contexte.societe || {};
+    var y = MARGE;
+    var xTexte = MARGE;
+
+    if (contexte.logo) {
+      try {
+        // Le logo garde ses proportions : une identité déformée fait amateur.
+        var h = 18;
+        var l = Math.min(46, h * (contexte.logo_ratio || 2.6));
+        doc.addImage(contexte.logo, MARGE, y - 2, l, h, undefined, 'FAST');
+        xTexte = MARGE + l + 6;
+      } catch { /* un logo illisible ne doit pas empêcher le devis de sortir */ }
+    }
+
+    doc.setTextColor(ENCRE[0], ENCRE[1], ENCRE[2]);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(societe.nom || 'E-TRANSIT', xTexte, y + 4);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
+    var lignes = [];
+    if (societe.activite) lignes.push(societe.activite);
+    var adresse = [societe.adresse, societe.boite_postale, societe.ville, societe.pays].filter(Boolean).join(' — ');
+    if (adresse) lignes.push(adresse);
+    var contact = [societe.telephone && ('Tél. ' + societe.telephone), societe.courriel].filter(Boolean).join('  ·  ');
+    if (contact) lignes.push(contact);
+    var legal = [societe.rccm && ('RCCM ' + societe.rccm), societe.contribuable && ('CC ' + societe.contribuable),
+      societe.agrement_declarant && ('Agrément ' + societe.agrement_declarant)].filter(Boolean).join('  ·  ');
+    if (legal) lignes.push(legal);
+    lignes.forEach(function (l, i) { doc.text(l, xTexte, y + 9 + i * 3.6); });
+
+    // Bloc titre, calé à droite.
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+    doc.text(titre, LARGEUR - MARGE, y + 4, { align: 'right' });
+    if (sousTitre) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
+      doc.text(sousTitre, LARGEUR - MARGE, y + 9.5, { align: 'right' });
+    }
+
+    var bas = Math.max(y + 9 + lignes.length * 3.6, y + 14);
+    doc.setDrawColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+    doc.setLineWidth(0.8);
+    doc.line(MARGE, bas + 2, LARGEUR - MARGE, bas + 2);
+    doc.setLineWidth(0.2);
+    return bas + 9;
+  }
+
+  function piedDePage(doc, contexte) {
+    var pages = doc.getNumberOfPages();
+    for (var p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      doc.setDrawColor(TRAIT[0], TRAIT[1], TRAIT[2]);
+      doc.line(MARGE, HAUTEUR - 15, LARGEUR - MARGE, HAUTEUR - 15);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
+      doc.text((contexte.societe && contexte.societe.nom) || 'E-TRANSIT', MARGE, HAUTEUR - 11);
+      doc.text('By Dems’Inc — Demsy Landry', LARGEUR / 2, HAUTEUR - 11, { align: 'center' });
+      doc.text('Page ' + p + ' / ' + pages, LARGEUR - MARGE, HAUTEUR - 11, { align: 'right' });
+      doc.setFontSize(6.5);
+      doc.text(
+        'Montants en francs CFA (XOF). Document établi le ' + new Date().toLocaleDateString('fr-FR') + '.',
+        MARGE, HAUTEUR - 7.5
+      );
+    }
+  }
+
+  /* Deux colonnes d'informations en vis-à-vis, façon en-tête de déclaration. */
+  function blocsParties(doc, y, gauche, droite) {
+    var largeurBloc = (UTILE - 6) / 2;
+    var hauteur = 4 + Math.max(gauche.lignes.length, droite.lignes.length) * 4.2 + 4;
+
+    [[MARGE, gauche], [MARGE + largeurBloc + 6, droite]].forEach(function (paire) {
+      var x = paire[0], bloc = paire[1];
+      doc.setFillColor(FOND_ENTETE[0], FOND_ENTETE[1], FOND_ENTETE[2]);
+      doc.setDrawColor(TRAIT[0], TRAIT[1], TRAIT[2]);
+      doc.roundedRect(x, y, largeurBloc, hauteur, 1.5, 1.5, 'FD');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+      doc.text(bloc.titre.toUpperCase(), x + 3, y + 4.5);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(ENCRE[0], ENCRE[1], ENCRE[2]);
+      bloc.lignes.forEach(function (l, i) {
+        if (i === 0) doc.setFont('helvetica', 'bold'); else doc.setFont('helvetica', 'normal');
+        doc.text(String(l || ''), x + 3, y + 9.5 + i * 4.2, { maxWidth: largeurBloc - 6 });
+      });
+    });
+    return y + hauteur + 6;
+  }
+
+  /* Tableau générique. colonnes : [{ titre, largeur, aligne, gras }] */
+  function tableau(doc, y, colonnes, lignes, options) {
+    options = options || {};
+    var hauteurLigne = options.hauteurLigne || 6;
+    var tailleTexte = options.taille || 8;
+    // Le cadre suit les colonnes : un tableau étroit ne traîne pas derrière lui
+    // un bandeau qui court jusqu'au bord de la page.
+    var largeurTableau = colonnes.reduce(function (s, c) { return s + c.largeur; }, 0);
+
+    function enteteTableau(yy) {
+      doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+      doc.rect(MARGE, yy, largeurTableau, 7, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(tailleTexte);
+      doc.setTextColor(255, 255, 255);
+      var x = MARGE;
+      colonnes.forEach(function (c) {
+        var ax = c.aligne === 'right' ? x + c.largeur - 2 : (c.aligne === 'center' ? x + c.largeur / 2 : x + 2);
+        doc.text(c.titre, ax, yy + 4.7, { align: c.aligne || 'left' });
+        x += c.largeur;
+      });
+      return yy + 7;
+    }
+
+    y = enteteTableau(y);
+    doc.setTextColor(ENCRE[0], ENCRE[1], ENCRE[2]);
+
+    lignes.forEach(function (ligne, i) {
+      if (y + hauteurLigne > HAUTEUR - 24) {
+        doc.addPage();
+        y = MARGE;
+        y = enteteTableau(y);
+        doc.setTextColor(ENCRE[0], ENCRE[1], ENCRE[2]);
+      }
+      if (ligne.__separateur) {
+        doc.setDrawColor(TRAIT[0], TRAIT[1], TRAIT[2]);
+        doc.line(MARGE, y + 1, MARGE + largeurTableau, y + 1);
+        y += 2.5;
+        return;
+      }
+      if (i % 2 === 1 && !ligne.__total) {
+        doc.setFillColor(249, 250, 252);
+        doc.rect(MARGE, y, largeurTableau, hauteurLigne, 'F');
+      }
+      if (ligne.__total) {
+        doc.setFillColor(FOND_ENTETE[0], FOND_ENTETE[1], FOND_ENTETE[2]);
+        doc.rect(MARGE, y, largeurTableau, hauteurLigne, 'F');
+      }
+      var x = MARGE;
+      colonnes.forEach(function (c, j) {
+        var valeur = ligne.cellules[j];
+        doc.setFont('helvetica', (ligne.__total || c.gras) ? 'bold' : 'normal');
+        doc.setFontSize(tailleTexte);
+        if (ligne.__attention) doc.setTextColor(176, 106, 0);
+        else doc.setTextColor(ENCRE[0], ENCRE[1], ENCRE[2]);
+        var ax = c.aligne === 'right' ? x + c.largeur - 2 : (c.aligne === 'center' ? x + c.largeur / 2 : x + 2);
+        doc.text(String(valeur === null || valeur === undefined ? '' : valeur), ax, y + hauteurLigne / 2 + 1.4, {
+          align: c.aligne || 'left',
+          maxWidth: c.largeur - 4
+        });
+        x += c.largeur;
+      });
+      y += hauteurLigne;
+    });
+
+    doc.setDrawColor(TRAIT[0], TRAIT[1], TRAIT[2]);
+    doc.line(MARGE, y, MARGE + largeurTableau, y);
+    return y + 6;
+  }
+
+  function paragraphe(doc, y, texte, options) {
+    options = options || {};
+    doc.setFont('helvetica', options.gras ? 'bold' : 'normal');
+    doc.setFontSize(options.taille || 8);
+    var couleur = options.couleur || GRIS;
+    doc.setTextColor(couleur[0], couleur[1], couleur[2]);
+    var lignes = doc.splitTextToSize(texte, UTILE);
+    if (y + lignes.length * 3.8 > HAUTEUR - 24) { doc.addPage(); y = MARGE; }
+    doc.text(lignes, MARGE, y);
+    return y + lignes.length * 3.8 + 3;
+  }
+
+  function nomFichier(prefixe, dossier) {
+    var client = (dossier.importateur_nom || 'client').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 28);
+    return prefixe + '_' + (dossier.numero || 'sans-numero') + '_' + client + '.pdf';
+  }
+
+  /* ----------------------------------------------------------------- devis */
+
+  function devis(dossier, liquidation, chiffrage, contexte) {
+    var doc = creer();
+    var y = entete(doc, contexte, 'DEVIS', 'N° ' + (dossier.numero || '—'));
+
+    y = blocsParties(doc, y,
+      {
+        titre: 'Client — importateur',
+        lignes: [
+          dossier.importateur_nom || '—',
+          dossier.importateur_adresse || '',
+          dossier.importateur_contribuable ? ('Compte contribuable : ' + dossier.importateur_contribuable) : '',
+          dossier.importateur_telephone || ''
+        ].filter(function (l) { return l !== ''; })
+      },
+      {
+        titre: 'Opération',
+        lignes: [
+          (dossier.regime_code || '') + (dossier.regime_libelle ? ' — ' + dossier.regime_libelle : ''),
+          dossier.bureau_nom ? ('Bureau : ' + dossier.bureau_nom) : '',
+          dossier.provenance_nom ? ('Provenance : ' + dossier.provenance_nom) : '',
+          [dossier.incoterm, dossier.incoterm_lieu].filter(Boolean).join(' ') || '',
+          dossier.navire ? ((dossier.mode_libelle || 'Transport') + ' : ' + dossier.navire) : '',
+          dossier.connaissement ? ('Titre de transport : ' + dossier.connaissement) : ''
+        ].filter(function (l) { return l !== ''; })
+      }
+    );
+
+    // Valeur en douane : le client doit voir sur quoi la douane se fonde.
+    var g = liquidation.globaux;
+    y = tableau(doc, y, [
+      { titre: 'Valeur en douane', largeur: UTILE - 45 },
+      { titre: 'Montant (XOF)', largeur: 45, aligne: 'right' }
+    ], [
+      { cellules: ['Valeur FOB des marchandises', fr(g.fob_total_xof)] },
+      { cellules: ['Fret', fr(g.fret_total_xof)] },
+      { cellules: ['Assurance', fr(g.assurance_total_xof)] },
+      { cellules: ['Valeur CAF servant d’assiette', fr(g.caf_total_xof)], __total: true }
+    ], { hauteurLigne: 6 });
+
+    // Droits et taxes.
+    var t = liquidation.totaux_taxes;
+    var libelles = {};
+    (contexte.taxes || []).forEach(function (x) { libelles[x.code] = x.libelle; });
+    var lignesTaxes = Object.keys(t)
+      .filter(function (code) { return t[code] > 0 || code === 'DD'; })
+      .map(function (code) {
+        return { cellules: [code + ' — ' + (libelles[code] || ''), fr(t[code])] };
+      });
+    lignesTaxes.push({ cellules: ['Total des droits et taxes dus à la Douane', fr(liquidation.total_a_payer_xof)], __total: true });
+
+    y = tableau(doc, y, [
+      { titre: 'Droits et taxes', largeur: UTILE - 45 },
+      { titre: 'Montant (XOF)', largeur: 45, aligne: 'right' }
+    ], lignesTaxes, { hauteurLigne: 6 });
+
+    // Prestations et débours.
+    var postes = (dossier.postes_devis || []).filter(function (p) { return LIQ().nombre(p.montant_xof) !== 0 || p.libelle; });
+    if (postes.length) {
+      var lignesPostes = postes.map(function (p) {
+        return { cellules: [p.libelle, p.nature === 'honoraire' ? 'Honoraires' : 'Débours', fr(LIQ().nombre(p.montant_xof))] };
+      });
+      if (chiffrage.honoraires_xof > 0) {
+        lignesPostes.push({
+          cellules: ['TVA sur honoraires', fr(chiffrage.taux_tva_honoraires * 100, 0) + ' %', fr(chiffrage.tva_honoraires_xof)]
+        });
+      }
+      y = tableau(doc, y, [
+        { titre: 'Prestations et débours', largeur: UTILE - 75 },
+        { titre: 'Nature', largeur: 30 },
+        { titre: 'Montant (XOF)', largeur: 45, aligne: 'right' }
+      ], lignesPostes, { hauteurLigne: 6 });
+    }
+
+    // Total à régler, mis en évidence.
+    if (y + 20 > HAUTEUR - 30) { doc.addPage(); y = MARGE; }
+    doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+    doc.roundedRect(MARGE, y, UTILE, 16, 2, 2, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text('TOTAL À RÉGLER', MARGE + 5, y + 6.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(17);
+    doc.text(fr(chiffrage.total_xof) + ' XOF', LARGEUR - MARGE - 5, y + 11, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.text('Droits et taxes + prestations + débours', MARGE + 5, y + 12);
+    y += 22;
+
+    doc.setTextColor(ENCRE[0], ENCRE[1], ENCRE[2]);
+    if (contexte.validite_jours) {
+      y = paragraphe(doc, y, 'Validité du devis : ' + contexte.validite_jours + ' jours à compter de sa date.', { gras: true, couleur: ENCRE });
+    }
+    if (liquidation.regime && liquidation.regime.mention) {
+      y = paragraphe(doc, y, liquidation.regime.mention);
+    }
+    if (contexte.conditions) y = paragraphe(doc, y, contexte.conditions);
+
+    var nonVerifies = liquidation.lignes.filter(function (l) { return !l.verifie_en_base; }).length;
+    if (nonVerifies > 0) {
+      y = paragraphe(doc, y,
+        'Réserve : ' + nonVerifies + ' position' + (nonVerifies > 1 ? 's' : '') + ' du présent devis ' +
+        (nonVerifies > 1 ? 'ont' : 'a') + ' été liquidée' + (nonVerifies > 1 ? 's' : '') +
+        ' avec un taux saisi manuellement, faute de correspondance dans le tarif chargé. ' +
+        'Ces lignes sont à confirmer avant dépôt de la déclaration.',
+        { couleur: [176, 106, 0], gras: true });
+    }
+
+    // Signature.
+    if (y + 26 > HAUTEUR - 24) { doc.addPage(); y = MARGE; }
+    y += 4;
+    var societe = contexte.societe || {};
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
+    doc.text('Fait à ' + (societe.ville || 'Abidjan') + ', le ' + new Date().toLocaleDateString('fr-FR'),
+      LARGEUR - MARGE, y, { align: 'right' });
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(ENCRE[0], ENCRE[1], ENCRE[2]);
+    doc.text(societe.responsable || '', LARGEUR - MARGE, y + 5, { align: 'right' });
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
+    doc.text(societe.fonction_responsable || '', LARGEUR - MARGE, y + 9, { align: 'right' });
+
+    piedDePage(doc, contexte);
+    return { doc: doc, nom: nomFichier('Devis', dossier) };
+  }
+
+  /* --------------------------------------------------- note de liquidation */
+
+  function note(dossier, liquidation, contexte) {
+    var doc = creer(true);
+    var y = entete(doc, contexte, 'NOTE DE LIQUIDATION', 'Dossier ' + (dossier.numero || '—'));
+
+    y = blocsParties(doc, y,
+      {
+        titre: 'Déclaration',
+        lignes: [
+          (dossier.regime_code || '—') + ' — ' + (dossier.regime_libelle || ''),
+          dossier.bureau_nom ? ('Bureau : ' + dossier.bureau_nom) : '',
+          dossier.numero_declaration ? ('N° déclaration : ' + dossier.numero_declaration) : '',
+          'Devise : ' + (dossier.devise || 'XOF') + (dossier.taux_change && dossier.devise !== 'XOF' ? ('  ·  1 ' + dossier.devise + ' = ' + fr(dossier.taux_change, 3) + ' XOF') : '')
+        ].filter(function (l) { return l !== ''; })
+      },
+      {
+        titre: 'Parties',
+        lignes: [
+          'Importateur : ' + (dossier.importateur_nom || '—'),
+          'Fournisseur : ' + (dossier.fournisseur_nom || '—'),
+          'Origine / provenance : ' +
+            ([dossier.origine_nom, dossier.provenance_nom].filter(Boolean).join(' / ') || '—')
+        ]
+      }
+    );
+
+    var codes = ['DD', 'RST', 'PCS', 'PUA', 'PCC', 'TVA'];
+    // Les largeurs sont données en parts, puis étalées sur la largeur utile :
+    // le tableau ne peut donc pas déborder de la page, quel que soit le format.
+    var parts = [
+      { titre: 'N°', part: 9, aligne: 'center' },
+      { titre: 'Position', part: 30 },
+      { titre: 'Désignation', part: 64 },
+      { titre: 'Poids br.', part: 22, aligne: 'right' },
+      { titre: 'Fret', part: 24, aligne: 'right' },
+      { titre: 'Assurance', part: 24, aligne: 'right' },
+      { titre: 'CAF', part: 28, aligne: 'right' },
+      { titre: 'DD %', part: 16, aligne: 'right' },
+      { titre: 'DD', part: 26, aligne: 'right' },
+      { titre: 'RST', part: 22, aligne: 'right' },
+      { titre: 'PCS', part: 21, aligne: 'right' },
+      { titre: 'PUA', part: 20, aligne: 'right' },
+      { titre: 'PCC', part: 20, aligne: 'right' },
+      { titre: 'TVA', part: 27, aligne: 'right' },
+      { titre: 'Total ligne', part: 29, aligne: 'right' }
+    ];
+    var sommeParts = parts.reduce(function (s, c) { return s + c.part; }, 0);
+    var colonnes = parts.map(function (c) {
+      return { titre: c.titre, aligne: c.aligne, largeur: UTILE * c.part / sommeParts };
+    });
+
+    var lignes = liquidation.lignes.map(function (l) {
+      function montant(code) {
+        var t = l.taxes.filter(function (x) { return x.code === code; })[0];
+        return t ? t.montant_xof : 0;
+      }
+      var totalLigne = codes.reduce(function (s, c) { return s + montant(c); }, 0);
+      return {
+        __attention: !l.verifie_en_base,
+        cellules: [
+          l.numero, l.position || '—', l.designation,
+          fr(l.poids_brut_kg, 2), fr(l.fret_xof), fr(l.assurance_xof), fr(l.caf_xof),
+          fr(l.taux_dd_applique * 100, 1),
+          fr(montant('DD')), fr(montant('RST')), fr(montant('PCS')),
+          fr(montant('PUA')), fr(montant('PCC')), fr(montant('TVA')), fr(totalLigne)
+        ]
+      };
+    });
+
+    // Ligne de totaux, pour que la note se recoupe d'un coup d'œil.
+    var g = liquidation.globaux;
+    lignes.push({
+      __total: true,
+      cellules: ['', '', 'Totaux', fr(g.poids_brut_total_kg, 2), fr(g.fret_total_xof),
+        fr(g.assurance_total_xof), fr(g.caf_total_xof), '',
+        fr(liquidation.totaux_taxes.DD || 0), fr(liquidation.totaux_taxes.RST || 0),
+        fr(liquidation.totaux_taxes.PCS || 0), fr(liquidation.totaux_taxes.PUA || 0),
+        fr(liquidation.totaux_taxes.PCC || 0), fr(liquidation.totaux_taxes.TVA || 0),
+        fr(codes.reduce(function (s, c) { return s + (liquidation.totaux_taxes[c] || 0); }, 0))]
+    });
+
+    y = tableau(doc, y, colonnes, lignes, { hauteurLigne: 6.5, taille: 6.6 });
+
+    var t = liquidation.totaux_taxes;
+    var recap = [
+      { cellules: ['Total des taxes de ligne', fr(codes.reduce(function (s, c) { return s + (t[c] || 0); }, 0))] },
+      { cellules: ['RPI — redevance prestations informatiques (une fois)', fr(t.RPI || 0)] },
+      { cellules: ['TS — timbre statistique (une fois)', fr(t.TS || 0)] },
+      { cellules: ['TOTAL DES DROITS ET TAXES', fr(liquidation.total_a_payer_xof)], __total: true }
+    ];
+    // En paysage, un récapitulatif étalé sur toute la page se lit mal : on le
+    // garde à la largeur d'une colonne de lecture.
+    y = tableau(doc, y, [
+      { titre: 'Récapitulatif', largeur: 110 },
+      { titre: 'Montant (XOF)', largeur: 45, aligne: 'right' }
+    ], recap, { hauteurLigne: 6 });
+
+    y = paragraphe(doc, y,
+      'Règles appliquées — valeur en douane CAF = FOB + fret + assurance ; le fret est réparti au poids brut, ' +
+      'l’assurance à la valeur FOB ; l’assiette de la TVA est la valeur CAF augmentée du droit de douane et de la ' +
+      'redevance statistique, à l’exclusion des prélèvements communautaires ; la redevance informatique et le ' +
+      'timbre statistique sont dus une seule fois par déclaration. La prime d’assurance est retenue en francs CFA, ' +
+      'sans conversion.');
+
+    if (liquidation.regime && liquidation.regime.mention) {
+      y = paragraphe(doc, y, liquidation.regime.mention, { couleur: ENCRE });
+    }
+
+    piedDePage(doc, contexte);
+    return { doc: doc, nom: nomFichier('Liquidation', dossier) };
+  }
+
+  function LIQ() { return window.LIQUIDATION; }
+
+  return { devis: devis, note: note, fr: fr };
+})();
+
+
+/* ===== interface.js ===== */
 /* L'interface.
  *
  * Une règle tient tout le fichier : rien ne s'affiche qui ne vienne d'une

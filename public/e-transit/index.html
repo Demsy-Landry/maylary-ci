@@ -1,11 +1,28 @@
 <!doctype html>
+<!--
+  Cotation E-Transit — version en ligne.
+  Ouvrir l'adresse au navigateur, puis « Ajouter à l'écran d'accueil » sur
+  téléphone. Les dossiers restent sur l'appareil : un téléphone et un
+  ordinateur gardent chacun les leurs.
+  Construit le 2026-09-10. By Dems'Inc — Demsy Landry.
+-->
+
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cotation E-Transit — droits, taxes et devis</title>
 <meta name="description" content="Chiffrage des droits et taxes de douane et établissement des devis clients. E-Transit, Abidjan.">
-<style>/*@css style.css*/</style>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0d2340">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="E-Transit">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone-192.png">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -587,11 +604,7 @@
 <div id="messages"></div>
 <input type="file" id="fichier-generique" style="display:none">
 
-<script>/*@js reference.js*/</script>
-<script>/*@js liquidation.js*/</script>
-<script>/*@js base.js*/</script>
-<script>/*@js jspdf*/</script>
-<script>/*@js pdf.js*/</script>
-<script>/*@js interface.js*/</script>
+<script src="app.js"></script>
+<script src="jspdf.js"></script>
 </body>
 </html>

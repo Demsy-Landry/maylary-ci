@@ -1,7 +1,17 @@
 # Cotation E-Transit
 
 Application de chiffrage des droits et taxes de douane, et d'établissement des
-devis clients. Elle est faite pour E-Transit, sur un poste de bureau.
+devis clients. Elle est faite pour E-Transit.
+
+Elle existe en **deux versions, construites depuis les mêmes sources** :
+
+| | Pour | Où |
+| --- | --- | --- |
+| **En ligne** | téléphone, tablette, ordinateur | `https://maylarygroup.ci/e-transit/` |
+| **Hors ligne** | un ordinateur sans connexion | le fichier `outils/cotation-e-transit.html` |
+
+Les deux calculent exactement pareil. Elles ne partagent pas leurs dossiers :
+chaque appareil garde les siens.
 
 Elle n'a **rien à voir avec MayLary** : c'est une application séparée, avec sa
 propre base, sa propre identité, ses propres dossiers. Elle emprunte seulement
@@ -10,19 +20,37 @@ sont celles de la Douane.
 
 ---
 
-## Installer
+## Installer sur un téléphone
 
-1. Copier le fichier **`outils/cotation-e-transit.html`** sur le poste, par
-   exemple dans `Documents\E-Transit\`.
-2. Faire un clic droit → *Ouvrir avec* → **Microsoft Edge** (ou Google Chrome).
-3. Épingler l'onglet à la barre des tâches pour le retrouver d'un clic.
+1. Ouvrir **`https://maylarygroup.ci/e-transit/`** au navigateur.
+2. **iPhone** : bouton Partager → *Sur l'écran d'accueil*.
+   **Android** : menu ⋮ → *Installer l'application* (ou *Ajouter à l'écran d'accueil*).
+3. L'icône se pose comme celle d'une vraie application. Elle s'ouvre en plein
+   écran, sans barre de navigateur, et **fonctionne ensuite sans connexion**.
+
+Le pavé de navigation passe en bas de l'écran, sous le pouce, et les tableaux
+larges se présentent en fiches, une ligne par article.
+
+## Installer sur un ordinateur
+
+Le plus simple est la même adresse, ouverte avec Edge ou Chrome — et l'icône
+d'installation dans la barre d'adresse pour en faire une fenêtre à part.
+
+**Pour un poste sans connexion**, c'est le fichier unique :
+
+1. Copier **`outils/cotation-e-transit.html`** sur le poste, par exemple dans
+   `Documents\E-Transit\`.
+2. Clic droit → *Ouvrir avec* → **Microsoft Edge** (ou Google Chrome).
 
 Il n'y a rien d'autre à installer. Pas de compte, pas de serveur, pas de
-licence. Le fichier contient toute l'application.
+licence.
 
-**Edge ou Chrome, pas Firefox.** Firefox refuse la base de données locale à une
-page ouverte depuis le disque : l'application le dira clairement plutôt que de
-perdre des données en silence.
+**Ce fichier ne marchera jamais sur un téléphone.** Un appareil mobile refuse
+d'accorder une base de données à une page ouverte depuis un fichier posé sur
+l'appareil ; c'est pour cela que la version en ligne existe. L'application le
+dit à l'écran plutôt que de rester bloquée.
+
+**Ni sur Firefox depuis le disque**, pour la même raison. Edge ou Chrome.
 
 ---
 
@@ -65,9 +93,11 @@ vit dans la base du poste et l'application fonctionne entièrement hors ligne.
 
 ## Ce qu'elle ne fait pas
 
-- **Elle ne se partage pas entre deux postes.** La base vit dans le navigateur
-  de l'ordinateur où elle est installée. Deux ordinateurs = deux bases
-  séparées. Pour un travail à plusieurs, il faudrait une version hébergée.
+- **Elle ne se partage pas entre deux appareils.** La base vit dans le
+  navigateur de l'appareil. Téléphone et ordinateur gardent chacun leurs
+  dossiers, et un dossier commencé au bureau ne se retrouve pas sur le
+  téléphone. Pour cela il faudrait une base en ligne et un compte par
+  personne : c'est un autre chantier, choisi de ne pas être fait pour l'instant.
 - **Elle ne dépose pas la déclaration.** Elle chiffre, elle édite le devis ;
   le dépôt se fait dans SYDAM comme d'habitude.
 - **Elle ne fixe pas les honoraires.** Aucun montant d'honoraire ou de débours
@@ -116,8 +146,19 @@ Après modification :
 node outils/e-transit/construire.mjs
 ```
 
-Cela réécrit `outils/cotation-e-transit.html` en assemblant les sources et
-jsPDF en un seul fichier.
+Cela écrit les deux livrables :
+
+- `outils/cotation-e-transit.html` — tout en un seul fichier ;
+- `public/e-transit/` — index.html, style.css, app.js, jspdf.js, le manifeste
+  et l'ouvrier de service, déployés avec le site.
+
+**Pourquoi la version en ligne est en fichiers séparés** : le site applique
+`script-src 'self'`, qui interdit le script écrit dans la page. Un fichier
+unique ne s'exécuterait pas. Plutôt que d'affaiblir la politique de sécurité
+du site pour un dossier, on livre ce qu'elle attend.
+
+L'adresse `/e-transit/` porte `noindex` et figure en `Disallow` dans
+`robots.txt` : elle ne sort dans aucun résultat de recherche.
 
 ### Le tarif douanier
 

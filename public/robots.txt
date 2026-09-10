@@ -25,4 +25,8 @@ Disallow: /mot-de-passe-oublie
 Disallow: /declarant/tableau-de-bord
 Disallow: /declarant/historique
 
+# Outil interne d'une autre société, posé ici faute d'adresse propre. Il n'a
+# rien à faire dans un résultat de recherche et ne parle pas de MayLary.
+Disallow: /e-transit/
+
 Sitemap: https://maylarygroup.ci/sitemap.xml
