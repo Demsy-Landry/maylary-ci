@@ -37,156 +37,11 @@
 <symbol id="i-dossier" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
 </defs></svg>
 
-<!-- ============================================================== accès -->
-<div id="ecran-acces">
-  <div class="acces-scene">
-    <!-- Le port au petit matin : la grue tourne, le porte-conteneurs entre,
-         l'avion passe. Dessin vectoriel, il reste net sur n'importe quel écran. -->
-    <svg viewBox="0 0 700 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#20527f"/><stop offset="42%" stop-color="#163a63"/><stop offset="100%" stop-color="#0b2242"/>
-        </linearGradient>
-        <linearGradient id="eau" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#123c67"/><stop offset="100%" stop-color="#071729"/>
-        </linearGradient>
-        <radialGradient id="aube" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#f0b76b" stop-opacity=".30"/>
-          <stop offset="55%" stop-color="#c9834a" stop-opacity=".12"/>
-          <stop offset="100%" stop-color="#c9834a" stop-opacity="0"/>
-        </radialGradient>
-        <radialGradient id="refletDoux" cx="50%" cy="0%" r="100%">
-          <stop offset="0%" stop-color="#8fc0f0" stop-opacity=".22"/>
-          <stop offset="100%" stop-color="#8fc0f0" stop-opacity="0"/>
-        </radialGradient>
-        <clipPath id="souslEau"><rect x="0" y="634" width="700" height="366"/></clipPath>
-      </defs>
-
-      <rect width="700" height="1000" fill="url(#ciel)"/>
-
-      <!-- lueur de l'aube derrière le port, sans bord franc -->
-      <ellipse cx="470" cy="600" rx="420" ry="300" fill="url(#aube)"/>
-
-      <g fill="#d7e8fb" opacity=".5">
-        <circle cx="90" cy="86" r="1.4"/><circle cx="228" cy="52" r="1"/><circle cx="356" cy="120" r="1.2"/>
-        <circle cx="512" cy="64" r="1"/><circle cx="620" cy="104" r="1.5"/><circle cx="668" cy="42" r="1"/>
-        <circle cx="150" cy="168" r="1"/><circle cx="430" cy="196" r="1.1"/><circle cx="290" cy="240" r="1"/>
-        <circle cx="596" cy="228" r="1.2"/>
-      </g>
-
-      <!-- l'avion traverse le ciel -->
-      <g style="animation: traverse 30s linear infinite">
-        <g transform="translate(0,200) scale(1.05)" fill="#9dc0e6" opacity=".75">
-          <path d="M0 0 34 6 44 2 40 8 66 10 40 12 44 18 34 14 0 20 12 10z"/>
-        </g>
-      </g>
-
-      <!-- silhouette de la ville, au loin -->
-      <g fill="#0e2c4e" opacity=".95">
-        <rect x="0" y="470" width="42" height="180"/><rect x="48" y="430" width="30" height="220"/>
-        <rect x="84" y="502" width="46" height="148"/><rect x="136" y="452" width="24" height="198"/>
-        <rect x="166" y="510" width="36" height="140"/>
-        <rect x="556" y="462" width="34" height="188"/><rect x="596" y="498" width="50" height="152"/>
-        <rect x="652" y="474" width="48" height="176"/>
-      </g>
-      <g fill="#e7c26a" opacity=".5">
-        <rect x="56" y="452" width="5" height="7"/><rect x="66" y="472" width="5" height="7"/>
-        <rect x="56" y="500" width="5" height="7"/><rect x="94" y="524" width="5" height="7"/>
-        <rect x="110" y="552" width="5" height="7"/><rect x="604" y="520" width="5" height="7"/>
-        <rect x="624" y="548" width="5" height="7"/><rect x="664" y="496" width="5" height="7"/>
-      </g>
-
-      <!-- grues portuaires -->
-      <g stroke="#5c8bbe" stroke-width="5" fill="none" stroke-linecap="round">
-        <g transform="translate(78,392)">
-          <path d="M0 258V44M46 258V44M-26 44h150"/>
-          <path d="M24 44V16"/>
-          <path d="M110 44v46" stroke-width="3.5" style="animation: pulse 3.6s ease-in-out infinite"/>
-          <rect x="98" y="90" width="26" height="17" fill="#c1743a" stroke="none" style="animation: pulse 3.6s ease-in-out infinite"/>
-        </g>
-        <g transform="translate(448,416)" opacity=".62">
-          <path d="M0 234V38M40 234V38M-22 38h132"/>
-          <path d="M20 38V14"/>
-          <path d="M96 38v40" stroke-width="3.5"/>
-        </g>
-      </g>
-
-      <!-- conteneurs empilés sur le quai, en retrait derrière le navire -->
-      <g opacity=".82">
-        <rect x="18" y="586" width="48" height="22" fill="#2f6ea8"/><rect x="70" y="586" width="48" height="22" fill="#c1743a"/>
-        <rect x="122" y="586" width="48" height="22" fill="#3f8a6a"/>
-        <rect x="44" y="562" width="48" height="22" fill="#a5483f"/><rect x="96" y="562" width="48" height="22" fill="#2f6ea8"/>
-        <rect x="70" y="538" width="48" height="22" fill="#3f8a6a"/>
-      </g>
-
-      <!-- quai -->
-      <rect x="0" y="610" width="700" height="18" fill="#0a2039"/>
-      <rect x="0" y="628" width="700" height="6" fill="#071729" opacity=".7"/>
-
-      <!-- eau -->
-      <rect x="0" y="634" width="700" height="366" fill="url(#eau)"/>
-
-      <!-- porte-conteneurs, à quai -->
-      <g style="animation: flotte 8s ease-in-out infinite">
-        <g transform="translate(190,660)">
-          <g>
-            <rect x="14" y="-22" width="40" height="20" fill="#2f6ea8"/><rect x="58" y="-22" width="40" height="20" fill="#c1743a"/>
-            <rect x="102" y="-22" width="40" height="20" fill="#3f8a6a"/><rect x="146" y="-22" width="40" height="20" fill="#a5483f"/>
-            <rect x="190" y="-22" width="40" height="20" fill="#2f6ea8"/><rect x="234" y="-22" width="40" height="20" fill="#3f8a6a"/>
-            <rect x="36" y="-44" width="40" height="20" fill="#a5483f"/><rect x="124" y="-44" width="40" height="20" fill="#2f6ea8"/>
-            <rect x="212" y="-44" width="40" height="20" fill="#c1743a"/>
-          </g>
-          <rect x="276" y="-56" width="34" height="54" fill="#e8eef6" opacity=".9"/>
-          <rect x="281" y="-49" width="24" height="9" fill="#16406c"/>
-          <rect x="281" y="-34" width="24" height="7" fill="#16406c" opacity=".7"/>
-          <path d="M0 0h318l-22 40H14z" fill="#16406c"/>
-          <path d="M0 0h318v7H0z" fill="#3d7cb5" opacity=".55"/>
-        </g>
-      </g>
-
-      <!-- reflets et vaguelettes -->
-      <g clip-path="url(#souslEau)">
-        <g stroke="#3877b3" stroke-width="2.5" fill="none" opacity=".45">
-          <g style="animation: vaguelette 6s linear infinite">
-            <path d="M-70 712q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
-            <path d="M-70 764q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
-            <path d="M-70 820q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
-            <path d="M-70 880q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
-            <path d="M-70 944q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
-          </g>
-        </g>
-        <!-- le reflet du navire s'étale sur l'eau, sans bord franc -->
-        <ellipse cx="349" cy="700" rx="190" ry="110" fill="url(#refletDoux)" opacity=".55"/>
-      </g>
-    </svg>
-
-    <div class="marque">
-      <div class="nom" id="marque-nom">E-TRANSIT</div>
-      <div class="accroche">Chiffrage des droits et taxes de douane, et devis client.<br>Le calcul de la Douane, à la virgule, avant le dépôt.</div>
-    </div>
-    <div class="signature">BY DEMS’INC — DEMSY LANDRY</div>
-  </div>
-
-  <div class="acces-panneau">
-    <div id="acces-logo" style="margin-bottom:22px"></div>
-    <h2 id="acces-titre">Accès à l’application</h2>
-    <p class="sous" id="acces-sous">Saisissez le code d’accès du poste.</p>
-    <div id="acces-message"></div>
-    <form id="form-acces" autocomplete="off">
-      <div class="champ">
-        <label for="acces-code">Code d’accès</label>
-        <input type="password" id="acces-code" autocomplete="current-password" placeholder="••••••" required>
-      </div>
-      <div class="champ" id="champ-confirmation" style="display:none">
-        <label for="acces-code2">Confirmez le code</label>
-        <input type="password" id="acces-code2" autocomplete="new-password" placeholder="••••••">
-      </div>
-      <button class="b primaire" type="submit" style="width:100%;justify-content:center;padding:12px" id="acces-bouton" disabled>Ouverture de la base…</button>
-    </form>
-    <p class="aide" style="margin-top:18px" id="acces-aide">
-      Ce code empêche l’ouverture de l’application sur un poste laissé sans surveillance.
-      Il ne chiffre pas les données : la vraie protection reste la session Windows du poste.
-    </p>
+<!-- ========================================================= ouverture -->
+<div id="chargement">
+  <div class="fenetre">
+    <div class="rotatif"><svg width="26" height="26"><use href="#i-sync"/></svg></div>
+    <div class="texte" id="chargement-texte">Ouverture de la base…</div>
   </div>
 </div>
 
@@ -227,6 +82,121 @@
 
     <!-- ------------------------------------------------ tableau de bord -->
     <section class="page" id="page-bord">
+      <div class="banniere">
+      <!-- Le port d'Abidjan au petit matin. Dessin vectoriel : il reste net sur
+           n'importe quel écran, et il ne pèse rien. Le décor est porté à droite
+           pour laisser le texte respirer à gauche. -->
+      <svg viewBox="0 0 1400 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0d2340"/><stop offset="62%" stop-color="#143a63"/><stop offset="100%" stop-color="#1b4c7e"/>
+          </linearGradient>
+          <linearGradient id="eau" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#0f3055"/><stop offset="100%" stop-color="#081c33"/>
+          </linearGradient>
+          <radialGradient id="aube" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#f0b76b" stop-opacity=".26"/>
+            <stop offset="60%" stop-color="#c9834a" stop-opacity=".08"/>
+            <stop offset="100%" stop-color="#c9834a" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="voileGauche" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#0d2340" stop-opacity=".92"/>
+            <stop offset="46%" stop-color="#0d2340" stop-opacity=".55"/>
+            <stop offset="100%" stop-color="#0d2340" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+
+        <rect width="1400" height="220" fill="url(#ciel)"/>
+        <ellipse cx="1010" cy="168" rx="420" ry="120" fill="url(#aube)"/>
+
+        <g fill="#d7e8fb" opacity=".45">
+          <circle cx="180" cy="30" r="1.2"/><circle cx="420" cy="18" r="1"/><circle cx="640" cy="42" r="1.3"/>
+          <circle cx="880" cy="24" r="1"/><circle cx="1120" cy="46" r="1.2"/><circle cx="1310" cy="20" r="1"/>
+          <circle cx="760" cy="66" r="1"/><circle cx="1230" cy="72" r="1.1"/>
+        </g>
+
+        <!-- l'avion traverse le ciel -->
+        <g style="animation: traverse 34s linear infinite">
+          <g transform="translate(0,52) scale(.62)" fill="#9dc0e6" opacity=".7">
+            <path d="M0 0 34 6 44 2 40 8 66 10 40 12 44 18 34 14 0 20 12 10z"/>
+          </g>
+        </g>
+
+        <!-- silhouette du front de mer -->
+        <g fill="#0b2440" opacity=".92">
+          <rect x="560" y="118" width="26" height="42"/><rect x="592" y="104" width="18" height="56"/>
+          <rect x="616" y="126" width="30" height="34"/><rect x="652" y="112" width="16" height="48"/>
+          <rect x="1188" y="110" width="22" height="50"/><rect x="1216" y="124" width="34" height="36"/>
+          <rect x="1256" y="116" width="30" height="44"/><rect x="1292" y="130" width="42" height="30"/>
+          <rect x="1340" y="108" width="20" height="52"/>
+        </g>
+        <g fill="#e7c26a" opacity=".45">
+          <rect x="597" y="114" width="3" height="4"/><rect x="597" y="128" width="3" height="4"/>
+          <rect x="624" y="136" width="3" height="4"/><rect x="1194" y="122" width="3" height="4"/>
+          <rect x="1264" y="128" width="3" height="4"/><rect x="1346" y="120" width="3" height="4"/>
+        </g>
+
+        <!-- grues portuaires -->
+        <g stroke="#4d7cae" stroke-width="3" fill="none" stroke-linecap="round">
+          <g transform="translate(700,64)">
+            <path d="M0 96V26M26 96V26M-14 26h84"/>
+            <path d="M13 26V12"/>
+            <path d="M62 26v22" stroke-width="2.4" style="animation: pulse 3.8s ease-in-out infinite"/>
+            <rect x="54" y="48" width="16" height="10" fill="#c1743a" stroke="none" style="animation: pulse 3.8s ease-in-out infinite"/>
+          </g>
+          <g transform="translate(1080,72)" opacity=".7">
+            <path d="M0 88V22M22 88V22M-12 22h74"/>
+            <path d="M11 22V10"/>
+            <path d="M54 22v20" stroke-width="2.4"/>
+          </g>
+        </g>
+
+        <!-- conteneurs sur le quai -->
+        <g opacity=".9">
+          <rect x="790" y="140" width="34" height="15" fill="#2f6ea8"/><rect x="826" y="140" width="34" height="15" fill="#c1743a"/>
+          <rect x="862" y="140" width="34" height="15" fill="#3f8a6a"/><rect x="898" y="140" width="34" height="15" fill="#a5483f"/>
+          <rect x="808" y="123" width="34" height="15" fill="#3f8a6a"/><rect x="844" y="123" width="34" height="15" fill="#2f6ea8"/>
+          <rect x="880" y="123" width="34" height="15" fill="#c1743a"/>
+          <rect x="826" y="106" width="34" height="15" fill="#a5483f"/>
+        </g>
+
+        <!-- quai puis eau -->
+        <rect x="0" y="155" width="1400" height="9" fill="#08203a"/>
+        <rect x="0" y="164" width="1400" height="56" fill="url(#eau)"/>
+
+        <!-- porte-conteneurs -->
+        <g style="animation: flotte 9s ease-in-out infinite">
+          <g transform="translate(1000,180)">
+            <rect x="12" y="-15" width="26" height="13" fill="#2f6ea8"/><rect x="40" y="-15" width="26" height="13" fill="#c1743a"/>
+            <rect x="68" y="-15" width="26" height="13" fill="#3f8a6a"/><rect x="96" y="-15" width="26" height="13" fill="#a5483f"/>
+            <rect x="124" y="-15" width="26" height="13" fill="#2f6ea8"/>
+            <rect x="26" y="-29" width="26" height="13" fill="#a5483f"/><rect x="82" y="-29" width="26" height="13" fill="#2f6ea8"/>
+            <rect x="152" y="-36" width="22" height="34" fill="#e8eef6" opacity=".9"/>
+            <rect x="156" y="-31" width="14" height="6" fill="#16406c"/>
+            <rect x="156" y="-21" width="14" height="5" fill="#16406c" opacity=".7"/>
+            <path d="M0 0h180l-14 22H10z" fill="#16406c"/>
+            <path d="M0 0h180v4H0z" fill="#3d7cb5" opacity=".5"/>
+          </g>
+        </g>
+
+        <!-- vaguelettes -->
+        <g stroke="#2f6ba6" stroke-width="1.8" fill="none" opacity=".4">
+          <g style="animation: vaguelette 7s linear infinite">
+            <path d="M-70 186q30-7 60 0t60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0"/>
+            <path d="M-70 204q30-7 60 0t60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0 60 0"/>
+          </g>
+        </g>
+
+        <!-- voile qui dégage la colonne du texte -->
+        <rect x="0" y="0" width="740" height="220" fill="url(#voileGauche)"/>
+      </svg>
+        <div class="dedans">
+          <div class="nom" id="banniere-nom">E-TRANSIT</div>
+          <div class="accroche">Chiffrage des droits et taxes de douane, et devis client.<br>Le calcul de la Douane, à la virgule, avant le dépôt.</div>
+        </div>
+        <div class="signature">BY DEMS’INC — DEMSY LANDRY</div>
+      </div>
+
       <div class="grille quatre echelonne" id="vignettes-bord"></div>
 
       <div class="grille deux" style="margin-top:16px">
@@ -590,31 +560,18 @@
       </div>
 
       <div class="carte">
-        <header><h3>Sécurité et sauvegarde</h3></header>
+        <header><h3>Sauvegarde</h3><span class="indice">La base vit sur ce poste, et nulle part ailleurs</span></header>
         <div class="corps">
-          <div class="grille deux">
-            <div>
-              <div class="etiquette-champ" style="margin-bottom:8px">Code d’accès</div>
-              <div class="champs">
-                <div class="champ c12"><label for="ancien-code">Code actuel</label><input type="password" id="ancien-code" autocomplete="current-password"></div>
-                <div class="champ c12"><label for="nouveau-code">Nouveau code</label><input type="password" id="nouveau-code" autocomplete="new-password"></div>
-                <div class="champ c12"><button class="b primaire" id="btn-changer-code">Changer le code</button></div>
-              </div>
-            </div>
-            <div>
-              <div class="etiquette-champ" style="margin-bottom:8px">Sauvegarde</div>
-              <p class="aide" style="margin-bottom:12px">
-                La base vit dans le navigateur de ce poste. Elle ne suit pas d’un ordinateur à l’autre, et
-                « effacer les données de navigation » l’effacerait. Une sauvegarde par semaine, déposée sur une clé
-                ou dans le dossier partagé, et rien n’est jamais perdu.
-              </p>
-              <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button class="b primaire" id="btn-sauvegarder"><svg><use href="#i-telecharger"/></svg>Sauvegarder tout</button>
-                <button class="b" id="btn-restaurer"><svg><use href="#i-televerser"/></svg>Restaurer</button>
-              </div>
-              <div id="reglages-stockage" style="margin-top:14px"></div>
-            </div>
+          <p class="aide" style="margin-bottom:14px;max-width:64ch">
+            Les dossiers, les carnets et les réglages vivent dans le navigateur de cet ordinateur. Ils ne suivent
+            pas d’un poste à l’autre, et « effacer les données de navigation » les effacerait. Une sauvegarde par
+            semaine, déposée sur une clé ou dans le dossier partagé, et rien n’est jamais perdu.
+          </p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="b primaire" id="btn-sauvegarder"><svg><use href="#i-telecharger"/></svg>Sauvegarder tout</button>
+            <button class="b" id="btn-restaurer"><svg><use href="#i-televerser"/></svg>Restaurer</button>
           </div>
+          <div id="reglages-stockage" style="margin-top:14px"></div>
         </div>
       </div>
 

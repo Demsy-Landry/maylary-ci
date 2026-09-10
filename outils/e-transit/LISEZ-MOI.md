@@ -28,17 +28,13 @@ perdre des données en silence.
 
 ## Première ouverture
 
-L'application demande de choisir un **code d'accès**. Il se change ensuite dans
-Réglages. Il n'y a pas de récupération : le noter quelque part.
+L'application s'ouvre directement, sans mot de passe. Sur un poste de bureau,
+un code à retaper chaque matin n'aurait rien protégé de plus que la session
+Windows : c'est elle qui garde l'accès à l'ordinateur.
 
-Ce code ferme la porte, il ne blinde pas le coffre. Quiconque a le fichier et
-sait s'y prendre peut lire la base. Il empêche qu'on ouvre l'application par
-curiosité sur un poste laissé sans surveillance ; la vraie protection reste la
-session Windows.
-
-Ensuite l'application propose de **charger le tarif douanier** : 6 298
-positions, quelques secondes, une connexion. Une fois descendu, le tarif vit
-dans la base du poste et l'application fonctionne entièrement hors ligne.
+Au premier lancement, l'application propose de **charger le tarif douanier** :
+6 298 positions, quelques secondes, une connexion. Une fois descendu, le tarif
+vit dans la base du poste et l'application fonctionne entièrement hors ligne.
 
 ---
 
@@ -60,7 +56,7 @@ dans la base du poste et l'application fonctionne entièrement hors ligne.
 - **Historique** consultable, recherche, duplication d'un dossier.
 - **Carnet d'adresses** : importateurs, fournisseurs, transporteurs.
 - **Réglages** : identité de la société, logo, tarif, toutes les listes de
-  référence, postes de facturation mémorisés, code d'accès, sauvegarde.
+  référence, postes de facturation mémorisés, sauvegarde.
 
 ## Ce qu'elle ne fait pas
 
@@ -105,7 +101,7 @@ Les sources sont dans `source/`, un fichier par sujet :
 | `style.css` | l'habillage, les animations, l'impression |
 | `reference.js` | les listes semées au premier démarrage |
 | `liquidation.js` | le calcul des droits et taxes |
-| `base.js` | la base locale, le tarif, le code d'accès |
+| `base.js` | la base locale et le tarif |
 | `pdf.js` | le devis et la note de liquidation |
 | `interface.js` | tout le reste |
 

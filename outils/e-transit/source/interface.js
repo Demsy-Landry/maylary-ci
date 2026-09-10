@@ -261,14 +261,16 @@
   /* ================================================================ départ */
 
   function demarrer() {
+    var texte = $('#chargement-texte');
     BASE.ouvrir()
       .then(function () { return BASE.semer(window.REFERENCE); })
+      .then(function () { return BASE.oublierAncienCodeAcces(); })
       .then(chargerContexte)
-      .then(function () { return BASE.codeAccesDefini(); })
-      .then(preparerAcces)
+      .then(ouvrirApplication)
       .catch(function (e) {
-        $('#acces-message').innerHTML = '';
-        $('#acces-message').appendChild(el('div', { class: 'acces-erreur', texte: e.message }));
+        // Sans base, il n'y a rien à afficher : on dit pourquoi, en clair.
+        $('#chargement').classList.add('en-panne');
+        texte.textContent = e.message;
       });
   }
 
@@ -302,46 +304,11 @@
     });
   }
 
-  function preparerAcces(defini) {
-    var titre = $('#acces-titre'), sous = $('#acces-sous'), bouton = $('#acces-bouton');
-    // Le bouton n'ouvre qu'une fois la base prête : avant, il n'y a rien à
-    // vérifier, et un clic n'aurait donné qu'un refus incompréhensible.
-    bouton.disabled = false;
-    bouton.textContent = 'Entrer';
-    document.body.setAttribute('data-acces-pret', 'oui');
-    if (!defini) {
-      titre.textContent = 'Première ouverture';
-      sous.textContent = 'Choisissez le code d’accès de ce poste. Notez-le : il n’y a pas de récupération.';
-      $('#champ-confirmation').style.display = '';
-      bouton.textContent = 'Enregistrer et entrer';
-    }
-    peindreLogo($('#acces-logo'), 190, 62);
-    $('#marque-nom').textContent = etat.societe.nom || 'E-TRANSIT';
-    $('#form-acces').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var code = $('#acces-code').value;
-      $('#acces-message').innerHTML = '';
-      if (!defini) {
-        if (code.length < 4) return refuserAcces('Choisissez un code d’au moins quatre caractères.');
-        if (code !== $('#acces-code2').value) return refuserAcces('Les deux codes ne sont pas identiques.');
-        BASE.definirCodeAcces(code).then(entrer);
-        return;
-      }
-      BASE.verifierCodeAcces(code).then(function (ok) {
-        if (ok) entrer(); else { refuserAcces('Code incorrect.'); $('#acces-code').select(); }
-      });
-    });
-    setTimeout(function () { $('#acces-code').focus(); }, 120);
-  }
-
-  function refuserAcces(texte) {
-    $('#acces-message').innerHTML = '';
-    $('#acces-message').appendChild(el('div', { class: 'acces-erreur', texte: texte }));
-  }
-
-  function entrer() {
-    $('#ecran-acces').style.display = 'none';
+  function ouvrirApplication() {
+    $('#chargement').classList.add('parti');
+    setTimeout(function () { $('#chargement').style.display = 'none'; }, 260);
     $('#application').classList.add('visible');
+    document.body.setAttribute('data-pret', 'oui');
     construire();
   }
 
@@ -350,6 +317,7 @@
   function construire() {
     peindreLogo($('#rail-logo'), 128, 40);
     $('#rail-nom').textContent = etat.societe.nom || 'E-TRANSIT';
+    $('#banniere-nom').textContent = etat.societe.nom || 'E-TRANSIT';
 
     $$('#navigation button').forEach(function (b) {
       b.addEventListener('click', function () { aller(b.dataset.page); });
@@ -1834,18 +1802,6 @@
 
     $('#btn-ajouter-modele').addEventListener('click', function () { formulaireModeleDevis(null); });
 
-    $('#btn-changer-code').addEventListener('click', function () {
-      var ancien = $('#ancien-code').value, nouveau = $('#nouveau-code').value;
-      if (nouveau.length < 4) { message('Le nouveau code doit faire au moins quatre caractères.', 'attention'); return; }
-      BASE.verifierCodeAcces(ancien).then(function (ok) {
-        if (!ok) { message('Code actuel incorrect.', 'erreur'); return; }
-        BASE.definirCodeAcces(nouveau).then(function () {
-          $('#ancien-code').value = ''; $('#nouveau-code').value = '';
-          message('Code d’accès changé.', 'succes');
-        });
-      });
-    });
-
     $('#btn-sauvegarder').addEventListener('click', function () {
       BASE.exporterTout(false).then(function (p) {
         telecharger('sauvegarde-e-transit-' + aujourdhui() + '.json', JSON.stringify(p));
@@ -1996,6 +1952,7 @@
           etat.societe[c[0]] = this.value;
           BASE.poserParametre('societe', etat.societe).then(function () {
             $('#rail-nom').textContent = etat.societe.nom || 'E-TRANSIT';
+            $('#banniere-nom').textContent = etat.societe.nom || 'E-TRANSIT';
           });
         }
       });

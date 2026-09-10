@@ -121,82 +121,74 @@ a { color: var(--accent); }
   }
 }
 
-/* ================================================================= accès */
+/* ============================================================= ouverture */
+/* Le temps que la base réponde — une fraction de seconde en temps normal.
+   S'il y a un empêchement, ce panneau porte le message plutôt que de laisser
+   une page blanche. */
 
-#ecran-acces {
+#chargement {
   position: fixed;
   inset: 0;
   z-index: 60;
-  display: grid;
-  grid-template-columns: 1.15fr .85fr;
-  background: var(--marine);
-  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fond);
+  transition: opacity 240ms ease;
+}
+#chargement.parti { opacity: 0; pointer-events: none; }
+#chargement .fenetre {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  color: var(--gris);
+  font-size: 13.5px;
+}
+#chargement .rotatif { color: var(--accent); line-height: 0; }
+#chargement.en-panne .rotatif { animation: none; color: var(--ambre); }
+#chargement.en-panne .fenetre {
+  max-width: 460px;
+  padding: 18px 20px;
+  background: var(--ambre-pale);
+  color: var(--ambre);
+  border-radius: var(--rayon);
+  line-height: 1.5;
+  align-items: flex-start;
+  font-weight: 600;
 }
 
-.acces-scene {
+/* ============================================================== bandeau */
+/* La scène du port, en tête du tableau de bord. */
+
+.banniere {
   position: relative;
   overflow: hidden;
-  background:
-    radial-gradient(120% 90% at 20% 0%, #1d4a7c 0%, #102b4c 45%, #0a1c33 100%);
+  border-radius: var(--rayon);
+  height: 200px;
+  margin-bottom: 16px;
+  background: var(--marine);
+  box-shadow: var(--ombre);
+  animation: monte 340ms both;
 }
-.acces-scene svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-
-.acces-scene .marque {
+.banniere svg.scene, .banniere > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.banniere .dedans {
   position: absolute;
-  left: 48px;
-  top: 44px;
+  left: 26px;
+  top: 24px;
   z-index: 2;
-  max-width: 380px;
+  max-width: 62%;
+  color: #fff;
 }
-.acces-scene .marque .nom {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: .01em;
-  margin-bottom: 6px;
-}
-.acces-scene .marque .accroche {
-  color: #a9c6e6;
-  font-size: 14.5px;
-  line-height: 1.55;
-}
-.acces-scene .signature {
+.banniere .dedans .nom { font-size: 24px; font-weight: 700; letter-spacing: .015em; margin-bottom: 5px; }
+.banniere .dedans .accroche { color: #a9c6e6; font-size: 13px; line-height: 1.5; }
+.banniere .signature {
   position: absolute;
-  left: 48px;
-  bottom: 34px;
+  left: 26px;
+  bottom: 16px;
   z-index: 2;
-  font-size: 11.5px;
+  font-size: 10.5px;
   color: #7fa2c8;
-  letter-spacing: .06em;
-}
-
-.acces-panneau {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 48px 52px;
-  background: #fff;
-  color: var(--encre);
-}
-.acces-panneau h2 { font-size: 22px; margin-bottom: 6px; }
-.acces-panneau .sous { color: var(--gris); margin-bottom: 26px; }
-.acces-panneau .champ { margin-bottom: 14px; }
-.acces-panneau input[type=password],
-.acces-panneau input[type=text] {
-  width: 100%;
-  font-size: 19px;
-  letter-spacing: .16em;
-  text-align: center;
-  padding: 14px 12px;
-}
-.acces-erreur {
-  background: var(--rouge-pale);
-  color: var(--rouge);
-  border: 1px solid #f3c9c5;
-  border-radius: var(--rayon-petit);
-  padding: 10px 12px;
-  font-size: 13px;
-  margin-bottom: 12px;
-  animation: monte 200ms both;
+  letter-spacing: .07em;
 }
 
 /* ============================================================== structure */
@@ -743,8 +735,6 @@ table.t td input:focus, table.t td select:focus { border-color: var(--accent-vif
   .rail .identite .texte, .rail nav button span.libelle, .rail .pied { display: none; }
   .rail .identite { justify-content: center; padding: 16px 8px; }
   .rail nav button { justify-content: center; padding: 11px 0; }
-  #ecran-acces { grid-template-columns: 1fr; }
-  .acces-scene { display: none; }
 }
 @media (max-width: 860px) {
   .grille.deux, .grille.trois, .grille.quatre { grid-template-columns: 1fr; }
@@ -753,7 +743,11 @@ table.t td input:focus, table.t td select:focus { border-color: var(--accent-vif
   .barre { padding: 11px 14px; flex-wrap: wrap; }
   .barre .actions { width: 100%; }
   .total-vedette .montant { font-size: 30px; }
-  .acces-panneau { padding: 32px 22px; }
+  .banniere { height: 160px; }
+  .banniere .dedans { max-width: 100%; left: 18px; top: 18px; }
+  .banniere .dedans .nom { font-size: 20px; }
+  .banniere .dedans .accroche { font-size: 12px; }
+  .banniere .signature { left: 18px; }
 
   /* Sur un écran étroit, les commandes d'un en-tête passent à la ligne et
      prennent toute la largeur plutôt que de pousser la page de côté. */
