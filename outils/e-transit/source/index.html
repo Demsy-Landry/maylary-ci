@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cotation E-Transit — droits, taxes et devis</title>
+<meta name="description" content="Chiffrage des droits et taxes de douane et établissement des devis clients. E-Transit, Abidjan.">
+<style>/*@css style.css*/</style>
+</head>
+<body>
+
+<!-- ================================================== bibliothèque d'icônes -->
+<svg style="display:none" aria-hidden="true"><defs>
+<symbol id="i-bord" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+<symbol id="i-declaration" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></symbol>
+<symbol id="i-articles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8 12 3 3 8l9 5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></symbol>
+<symbol id="i-calcul" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h2M12 11h2M16 11h.01M8 15h2M12 15h2M16 15v4M8 19h6"/></symbol>
+<symbol id="i-historique" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 8v4l3 2"/></symbol>
+<symbol id="i-carnet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4a2 2 0 0 1 2-2h12v20H6a2 2 0 0 1-2-2z"/><path d="M4 8h3M4 12h3M4 16h3"/><circle cx="13" cy="9" r="2.2"/><path d="M9.5 16c.6-1.8 2-2.6 3.5-2.6s2.9.8 3.5 2.6"/></symbol>
+<symbol id="i-reglages" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H7a1.7 1.7 0 0 0 1-1.5V1a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V7a1.7 1.7 0 0 0 1.5 1H23a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" transform="translate(0.5 0.5) scale(0.96)"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-poubelle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></symbol>
+<symbol id="i-copie" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+<symbol id="i-pdf" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 15h1.5a1.5 1.5 0 0 0 0-3H9v6M15 12h-2v6M13 15h1.8"/></symbol>
+<symbol id="i-imprimer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></symbol>
+<symbol id="i-recherche" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></symbol>
+<symbol id="i-sync" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.2 6.5L3 16"/><path d="M3 12a9 9 0 0 1 15.2-6.5L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></symbol>
+<symbol id="i-alerte" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></symbol>
+<symbol id="i-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-croix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+<symbol id="i-telecharger" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></symbol>
+<symbol id="i-televerser" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/></symbol>
+<symbol id="i-navire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 19c1.6 0 1.6 1.4 3.2 1.4S6.8 19 8.4 19s1.6 1.4 3.2 1.4S13.2 19 14.8 19s1.6 1.4 3.2 1.4S19.6 19 22 19"/><path d="M4 17V9l8-3 8 3v8"/><path d="M12 6V3M9 12h6"/></symbol>
+<symbol id="i-balance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10"/><path d="M5 7h14M8 7l-4 8h8zM16 7l4 8h-8z"/></symbol>
+<symbol id="i-billet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/></symbol>
+<symbol id="i-dossier" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+</defs></svg>
+
+<!-- ============================================================== accès -->
+<div id="ecran-acces">
+  <div class="acces-scene">
+    <!-- Le port au petit matin : la grue tourne, le porte-conteneurs entre,
+         l'avion passe. Dessin vectoriel, il reste net sur n'importe quel écran. -->
+    <svg viewBox="0 0 700 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#20527f"/><stop offset="42%" stop-color="#163a63"/><stop offset="100%" stop-color="#0b2242"/>
+        </linearGradient>
+        <linearGradient id="eau" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#123c67"/><stop offset="100%" stop-color="#071729"/>
+        </linearGradient>
+        <radialGradient id="aube" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#f0b76b" stop-opacity=".30"/>
+          <stop offset="55%" stop-color="#c9834a" stop-opacity=".12"/>
+          <stop offset="100%" stop-color="#c9834a" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="refletDoux" cx="50%" cy="0%" r="100%">
+          <stop offset="0%" stop-color="#8fc0f0" stop-opacity=".22"/>
+          <stop offset="100%" stop-color="#8fc0f0" stop-opacity="0"/>
+        </radialGradient>
+        <clipPath id="souslEau"><rect x="0" y="634" width="700" height="366"/></clipPath>
+      </defs>
+
+      <rect width="700" height="1000" fill="url(#ciel)"/>
+
+      <!-- lueur de l'aube derrière le port, sans bord franc -->
+      <ellipse cx="470" cy="600" rx="420" ry="300" fill="url(#aube)"/>
+
+      <g fill="#d7e8fb" opacity=".5">
+        <circle cx="90" cy="86" r="1.4"/><circle cx="228" cy="52" r="1"/><circle cx="356" cy="120" r="1.2"/>
+        <circle cx="512" cy="64" r="1"/><circle cx="620" cy="104" r="1.5"/><circle cx="668" cy="42" r="1"/>
+        <circle cx="150" cy="168" r="1"/><circle cx="430" cy="196" r="1.1"/><circle cx="290" cy="240" r="1"/>
+        <circle cx="596" cy="228" r="1.2"/>
+      </g>
+
+      <!-- l'avion traverse le ciel -->
+      <g style="animation: traverse 30s linear infinite">
+        <g transform="translate(0,200) scale(1.05)" fill="#9dc0e6" opacity=".75">
+          <path d="M0 0 34 6 44 2 40 8 66 10 40 12 44 18 34 14 0 20 12 10z"/>
+        </g>
+      </g>
+
+      <!-- silhouette de la ville, au loin -->
+      <g fill="#0e2c4e" opacity=".95">
+        <rect x="0" y="470" width="42" height="180"/><rect x="48" y="430" width="30" height="220"/>
+        <rect x="84" y="502" width="46" height="148"/><rect x="136" y="452" width="24" height="198"/>
+        <rect x="166" y="510" width="36" height="140"/>
+        <rect x="556" y="462" width="34" height="188"/><rect x="596" y="498" width="50" height="152"/>
+        <rect x="652" y="474" width="48" height="176"/>
+      </g>
+      <g fill="#e7c26a" opacity=".5">
+        <rect x="56" y="452" width="5" height="7"/><rect x="66" y="472" width="5" height="7"/>
+        <rect x="56" y="500" width="5" height="7"/><rect x="94" y="524" width="5" height="7"/>
+        <rect x="110" y="552" width="5" height="7"/><rect x="604" y="520" width="5" height="7"/>
+        <rect x="624" y="548" width="5" height="7"/><rect x="664" y="496" width="5" height="7"/>
+      </g>
+
+      <!-- grues portuaires -->
+      <g stroke="#5c8bbe" stroke-width="5" fill="none" stroke-linecap="round">
+        <g transform="translate(78,392)">
+          <path d="M0 258V44M46 258V44M-26 44h150"/>
+          <path d="M24 44V16"/>
+          <path d="M110 44v46" stroke-width="3.5" style="animation: pulse 3.6s ease-in-out infinite"/>
+          <rect x="98" y="90" width="26" height="17" fill="#c1743a" stroke="none" style="animation: pulse 3.6s ease-in-out infinite"/>
+        </g>
+        <g transform="translate(448,416)" opacity=".62">
+          <path d="M0 234V38M40 234V38M-22 38h132"/>
+          <path d="M20 38V14"/>
+          <path d="M96 38v40" stroke-width="3.5"/>
+        </g>
+      </g>
+
+      <!-- conteneurs empilés sur le quai, en retrait derrière le navire -->
+      <g opacity=".82">
+        <rect x="18" y="586" width="48" height="22" fill="#2f6ea8"/><rect x="70" y="586" width="48" height="22" fill="#c1743a"/>
+        <rect x="122" y="586" width="48" height="22" fill="#3f8a6a"/>
+        <rect x="44" y="562" width="48" height="22" fill="#a5483f"/><rect x="96" y="562" width="48" height="22" fill="#2f6ea8"/>
+        <rect x="70" y="538" width="48" height="22" fill="#3f8a6a"/>
+      </g>
+
+      <!-- quai -->
+      <rect x="0" y="610" width="700" height="18" fill="#0a2039"/>
+      <rect x="0" y="628" width="700" height="6" fill="#071729" opacity=".7"/>
+
+      <!-- eau -->
+      <rect x="0" y="634" width="700" height="366" fill="url(#eau)"/>
+
+      <!-- porte-conteneurs, à quai -->
+      <g style="animation: flotte 8s ease-in-out infinite">
+        <g transform="translate(190,660)">
+          <g>
+            <rect x="14" y="-22" width="40" height="20" fill="#2f6ea8"/><rect x="58" y="-22" width="40" height="20" fill="#c1743a"/>
+            <rect x="102" y="-22" width="40" height="20" fill="#3f8a6a"/><rect x="146" y="-22" width="40" height="20" fill="#a5483f"/>
+            <rect x="190" y="-22" width="40" height="20" fill="#2f6ea8"/><rect x="234" y="-22" width="40" height="20" fill="#3f8a6a"/>
+            <rect x="36" y="-44" width="40" height="20" fill="#a5483f"/><rect x="124" y="-44" width="40" height="20" fill="#2f6ea8"/>
+            <rect x="212" y="-44" width="40" height="20" fill="#c1743a"/>
+          </g>
+          <rect x="276" y="-56" width="34" height="54" fill="#e8eef6" opacity=".9"/>
+          <rect x="281" y="-49" width="24" height="9" fill="#16406c"/>
+          <rect x="281" y="-34" width="24" height="7" fill="#16406c" opacity=".7"/>
+          <path d="M0 0h318l-22 40H14z" fill="#16406c"/>
+          <path d="M0 0h318v7H0z" fill="#3d7cb5" opacity=".55"/>
+        </g>
+      </g>
+
+      <!-- reflets et vaguelettes -->
+      <g clip-path="url(#souslEau)">
+        <g stroke="#3877b3" stroke-width="2.5" fill="none" opacity=".45">
+          <g style="animation: vaguelette 6s linear infinite">
+            <path d="M-70 712q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
+            <path d="M-70 764q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
+            <path d="M-70 820q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
+            <path d="M-70 880q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
+            <path d="M-70 944q34-9 68 0t68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0 68 0"/>
+          </g>
+        </g>
+        <!-- le reflet du navire s'étale sur l'eau, sans bord franc -->
+        <ellipse cx="349" cy="700" rx="190" ry="110" fill="url(#refletDoux)" opacity=".55"/>
+      </g>
+    </svg>
+
+    <div class="marque">
+      <div class="nom" id="marque-nom">E-TRANSIT</div>
+      <div class="accroche">Chiffrage des droits et taxes de douane, et devis client.<br>Le calcul de la Douane, à la virgule, avant le dépôt.</div>
+    </div>
+    <div class="signature">BY DEMS’INC — DEMSY LANDRY</div>
+  </div>
+
+  <div class="acces-panneau">
+    <div id="acces-logo" style="margin-bottom:22px"></div>
+    <h2 id="acces-titre">Accès à l’application</h2>
+    <p class="sous" id="acces-sous">Saisissez le code d’accès du poste.</p>
+    <div id="acces-message"></div>
+    <form id="form-acces" autocomplete="off">
+      <div class="champ">
+        <label for="acces-code">Code d’accès</label>
+        <input type="password" id="acces-code" autocomplete="current-password" placeholder="••••••" required>
+      </div>
+      <div class="champ" id="champ-confirmation" style="display:none">
+        <label for="acces-code2">Confirmez le code</label>
+        <input type="password" id="acces-code2" autocomplete="new-password" placeholder="••••••">
+      </div>
+      <button class="b primaire" type="submit" style="width:100%;justify-content:center;padding:12px" id="acces-bouton" disabled>Ouverture de la base…</button>
+    </form>
+    <p class="aide" style="margin-top:18px" id="acces-aide">
+      Ce code empêche l’ouverture de l’application sur un poste laissé sans surveillance.
+      Il ne chiffre pas les données : la vraie protection reste la session Windows du poste.
+    </p>
+  </div>
+</div>
+
+<!-- ======================================================== application -->
+<div id="application">
+
+  <aside class="rail">
+    <div class="identite">
+      <div id="rail-logo"></div>
+      <div class="texte">
+        <div class="nom" id="rail-nom">E-TRANSIT</div>
+        <div class="role">Cotation douanière</div>
+      </div>
+    </div>
+    <nav id="navigation">
+      <button data-page="bord" class="actif"><svg><use href="#i-bord"/></svg><span class="libelle">Tableau de bord</span></button>
+      <button data-page="declaration"><svg><use href="#i-declaration"/></svg><span class="libelle">Déclaration</span></button>
+      <button data-page="articles"><svg><use href="#i-articles"/></svg><span class="libelle">Articles</span><span class="pastille" id="pastille-articles">0</span></button>
+      <button data-page="liquidation"><svg><use href="#i-calcul"/></svg><span class="libelle">Liquidation et devis</span></button>
+      <button data-page="historique"><svg><use href="#i-historique"/></svg><span class="libelle">Historique</span><span class="pastille" id="pastille-historique">0</span></button>
+      <button data-page="carnet"><svg><use href="#i-carnet"/></svg><span class="libelle">Carnet d’adresses</span></button>
+      <button data-page="reglages"><svg><use href="#i-reglages"/></svg><span class="libelle">Réglages</span></button>
+    </nav>
+    <div class="pied">
+      <div class="etat"><span class="point" id="point-tec"></span><span id="etat-tec">Tarif non chargé</span></div>
+      <div>By Dems’Inc — Demsy Landry</div>
+    </div>
+  </aside>
+
+  <main class="zone">
+    <header class="barre sans-impression">
+      <div>
+        <div class="titre" id="barre-titre">Tableau de bord</div>
+        <div class="fil" id="barre-fil">—</div>
+      </div>
+      <div class="actions" id="barre-actions"></div>
+    </header>
+
+    <!-- ------------------------------------------------ tableau de bord -->
+    <section class="page" id="page-bord">
+      <div class="grille quatre echelonne" id="vignettes-bord"></div>
+
+      <div class="grille deux" style="margin-top:16px">
+        <div class="carte">
+          <header>
+            <h3>Dossiers récents</h3>
+            <div class="actions"><button class="b petit discret" data-aller="historique">Tout voir</button></div>
+          </header>
+          <div class="corps serre"><div id="bord-recents"></div></div>
+        </div>
+        <div class="carte">
+          <header><h3>État de l’application</h3></header>
+          <div class="corps"><div id="bord-etat"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------- déclaration -->
+    <section class="page masquee" id="page-declaration">
+      <div class="carte">
+        <header>
+          <h3>Dossier</h3>
+          <span class="indice" id="declaration-indice">Nouveau dossier</span>
+          <div class="actions">
+            <button class="b petit" id="btn-nouveau-dossier"><svg><use href="#i-plus"/></svg>Nouveau</button>
+          </div>
+        </header>
+        <div class="corps">
+          <div class="champs">
+            <div class="champ c3"><label for="d-numero">Numéro de dossier</label><input id="d-numero" readonly></div>
+            <div class="champ c3"><label for="d-date">Date</label><input type="date" id="d-date"></div>
+            <div class="champ c3"><label for="d-statut">Statut</label>
+              <select id="d-statut">
+                <option value="brouillon">Brouillon</option>
+                <option value="devis_envoye">Devis envoyé</option>
+                <option value="accepte">Accepté</option>
+                <option value="declare">Déclaré</option>
+                <option value="clos">Clos</option>
+                <option value="abandonne">Abandonné</option>
+              </select>
+            </div>
+            <div class="champ c3"><label for="d-reference">Référence client <span class="facultatif">facultatif</span></label><input id="d-reference" placeholder="Bon de commande, dossier interne…"></div>
+          </div>
+
+          <div class="section-titre">Cadre A — bureau et régime</div>
+          <div class="champs">
+            <div class="champ c5"><label for="d-bureau"><span class="case">1</span> Bureau de douane</label>
+              <select id="d-bureau"></select></div>
+            <div class="champ c2"><label for="d-bureau-code">Code bureau</label><input id="d-bureau-code" placeholder="à saisir"></div>
+            <div class="champ c5"><label for="d-regime"><span class="case">37</span> Régime douanier</label>
+              <select id="d-regime"></select></div>
+            <div class="champ c12"><div id="d-regime-mention"></div></div>
+            <div class="champ c4"><label for="d-numero-declaration">N° de déclaration <span class="facultatif">si déjà déposée</span></label><input id="d-numero-declaration" placeholder="Année / bureau / n°"></div>
+            <div class="champ c4"><label for="d-bureau-entree"><span class="case">29</span> Bureau d’entrée</label><input id="d-bureau-entree"></div>
+            <div class="champ c4"><label for="d-lieu-marchandises"><span class="case">30</span> Lieu des marchandises</label><input id="d-lieu-marchandises" placeholder="Terminal, magasin, parc…"></div>
+          </div>
+
+          <div class="section-titre">Parties</div>
+          <div class="champs">
+            <div class="champ c6">
+              <label for="d-importateur-nom"><span class="case">8</span> Importateur / destinataire</label>
+              <div style="display:flex;gap:7px">
+                <input id="d-importateur-nom" placeholder="Raison sociale" style="flex:1">
+                <button class="b petit" id="btn-choisir-importateur" title="Choisir dans le carnet"><svg><use href="#i-carnet"/></svg></button>
+                <button class="b petit" id="btn-enregistrer-importateur" title="Enregistrer au carnet"><svg><use href="#i-plus"/></svg></button>
+              </div>
+            </div>
+            <div class="champ c3"><label for="d-importateur-contribuable">Compte contribuable</label><input id="d-importateur-contribuable"></div>
+            <div class="champ c3"><label for="d-importateur-code">Code importateur</label><input id="d-importateur-code"></div>
+            <div class="champ c6"><label for="d-importateur-adresse">Adresse</label><input id="d-importateur-adresse"></div>
+            <div class="champ c3"><label for="d-importateur-telephone">Téléphone</label><input id="d-importateur-telephone"></div>
+            <div class="champ c3"><label for="d-importateur-courriel">Courriel</label><input id="d-importateur-courriel" type="email"></div>
+
+            <div class="champ c6">
+              <label for="d-fournisseur-nom"><span class="case">2</span> Fournisseur / exportateur</label>
+              <div style="display:flex;gap:7px">
+                <input id="d-fournisseur-nom" placeholder="Raison sociale" style="flex:1">
+                <button class="b petit" id="btn-choisir-fournisseur" title="Choisir dans le carnet"><svg><use href="#i-carnet"/></svg></button>
+                <button class="b petit" id="btn-enregistrer-fournisseur" title="Enregistrer au carnet"><svg><use href="#i-plus"/></svg></button>
+              </div>
+            </div>
+            <div class="champ c6"><label for="d-fournisseur-adresse">Adresse du fournisseur</label><input id="d-fournisseur-adresse"></div>
+
+            <div class="champ c6"><label for="d-declarant"><span class="case">14</span> Déclarant</label><input id="d-declarant"></div>
+            <div class="champ c3"><label for="d-declarant-agrement">N° d’agrément</label><input id="d-declarant-agrement"></div>
+            <div class="champ c3"><label for="d-declarant-repere">Répertoire</label><input id="d-declarant-repere" placeholder="facultatif"></div>
+          </div>
+
+          <div class="section-titre">Origine, provenance, transport</div>
+          <div class="champs">
+            <div class="champ c4"><label for="d-provenance"><span class="case">15</span> Pays d’expédition</label><select id="d-provenance"></select></div>
+            <div class="champ c4"><label for="d-origine"><span class="case">34</span> Pays d’origine par défaut</label><select id="d-origine"></select></div>
+            <div class="champ c4"><label for="d-regime-origine">Régime d’origine</label><select id="d-regime-origine"></select></div>
+            <div class="champ c12"><div id="d-origine-avis"></div></div>
+
+            <div class="champ c3"><label for="d-mode"><span class="case">25</span> Mode de transport</label><select id="d-mode"></select></div>
+            <div class="champ c5"><label for="d-navire"><span class="case">18</span> Navire / vol / véhicule</label><input id="d-navire" placeholder="Nom du navire, n° de vol…"></div>
+            <div class="champ c4"><label for="d-voyage">N° de voyage</label><input id="d-voyage"></div>
+            <div class="champ c4"><label for="d-connaissement">Titre de transport</label><input id="d-connaissement" placeholder="B/L, LTA, CMR"></div>
+            <div class="champ c4"><label for="d-manifeste">Manifeste</label><input id="d-manifeste"></div>
+            <div class="champ c4"><label for="d-date-arrivee">Date d’arrivée <span class="facultatif">prévue</span></label><input type="date" id="d-date-arrivee"></div>
+          </div>
+
+          <div class="section-titre">Facture, valeur, transport payé</div>
+          <div class="champs">
+            <div class="champ c3"><label for="d-facture">N° de facture</label><input id="d-facture"></div>
+            <div class="champ c3"><label for="d-date-facture">Date de facture</label><input type="date" id="d-date-facture"></div>
+            <div class="champ c3"><label for="d-devise"><span class="case">22</span> Devise de la facture</label><select id="d-devise"></select></div>
+            <div class="champ c3"><label for="d-taux-change">Taux de change vers XOF</label><input id="d-taux-change" class="nombre" inputmode="decimal"></div>
+            <div class="champ c12"><div id="d-devise-avis"></div></div>
+
+            <div class="champ c3"><label for="d-incoterm"><span class="case">20</span> Incoterm</label><select id="d-incoterm"></select></div>
+            <div class="champ c3"><label for="d-incoterm-lieu">Lieu convenu</label><input id="d-incoterm-lieu" placeholder="Port, ville"></div>
+            <div class="champ c3"><label for="d-fret">Fret total <span class="facultatif">devise facture</span></label><input id="d-fret" class="nombre" inputmode="decimal" value="0"></div>
+            <div class="champ c3"><label for="d-assurance">Assurance totale <span class="case">XOF</span></label><input id="d-assurance" class="nombre" inputmode="decimal" value="0"></div>
+            <div class="champ c12">
+              <p class="aide">La prime d’assurance est souscrite localement : elle est retenue en francs CFA et n’est jamais convertie par le taux de change. Le fret, lui, est saisi dans la devise de la facture puis converti.</p>
+            </div>
+          </div>
+
+          <div class="section-titre">Colis et conteneurs</div>
+          <div class="champs">
+            <div class="champ c2"><label for="d-nb-colis"><span class="case">6</span> Nombre de colis</label><input id="d-nb-colis" class="nombre" inputmode="numeric" value="0"></div>
+            <div class="champ c4"><label for="d-nature-colis"><span class="case">31</span> Nature des colis</label><select id="d-nature-colis"></select></div>
+            <div class="champ c3"><label for="d-marques">Marques et numéros</label><input id="d-marques"></div>
+            <div class="champ c3"><label for="d-poids-brut-manifeste">Poids brut au manifeste <span class="facultatif">kg</span></label><input id="d-poids-brut-manifeste" class="nombre" inputmode="decimal"></div>
+            <div class="champ c12">
+              <div class="etiquette-champ" style="margin-bottom:6px">Conteneurs</div>
+              <div class="tableau-cadre">
+                <table class="t" id="table-conteneurs">
+                  <thead><tr><th style="width:34%">N° de conteneur</th><th style="width:28%">Type</th><th style="width:28%">Plomb</th><th style="width:10%"></th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <button class="b petit discret" id="btn-ajouter-conteneur" style="margin-top:8px"><svg><use href="#i-plus"/></svg>Ajouter un conteneur</button>
+            </div>
+          </div>
+
+          <div class="section-titre">Documents joints</div>
+          <div class="corps" style="padding:0"><div id="d-documents" class="grille trois" style="gap:8px"></div></div>
+
+          <div class="section-titre">Observations</div>
+          <div class="champs">
+            <div class="champ c12"><textarea id="d-observations" placeholder="Notes internes, particularités du dossier, engagements pris au client…"></textarea></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- --------------------------------------------------------- articles -->
+    <section class="page masquee" id="page-articles">
+      <div id="articles-avis"></div>
+      <div class="carte">
+        <header>
+          <h3>Articles de la déclaration</h3>
+          <span class="indice" id="articles-indice">—</span>
+          <div class="actions">
+            <button class="b petit" id="btn-importer-articles"><svg><use href="#i-televerser"/></svg>Importer</button>
+            <button class="b petit primaire" id="btn-ajouter-article"><svg><use href="#i-plus"/></svg>Ajouter un article</button>
+          </div>
+        </header>
+        <div class="corps serre">
+          <div class="tableau-cadre">
+            <table class="t" id="table-articles">
+              <thead>
+                <tr>
+                  <th style="width:34px">N°</th>
+                  <th style="min-width:190px">Position tarifaire <span style="font-weight:400;text-transform:none">(case 33)</span></th>
+                  <th style="min-width:210px">Désignation (case 31)</th>
+                  <th style="width:82px">Origine</th>
+                  <th style="width:74px" class="num">Quantité</th>
+                  <th style="width:64px">Unité</th>
+                  <th style="width:92px" class="num">Poids brut (kg)</th>
+                  <th style="width:92px" class="num">Poids net (kg)</th>
+                  <th style="width:112px" class="num">Valeur article</th>
+                  <th style="width:78px" class="num">DD %</th>
+                  <th style="width:78px" class="num">Exo. %</th>
+                  <th style="width:38px"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="6">Totaux</td>
+                  <td class="num" id="total-poids-brut">0</td>
+                  <td class="num" id="total-poids-net">0</td>
+                  <td class="num" id="total-valeur">0</td>
+                  <td colspan="3"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="carte">
+        <header><h3>Comment remplir la position tarifaire</h3></header>
+        <div class="corps">
+          <p class="aide">
+            Deux façons de faire, au choix. <strong>Écrire</strong> directement le code — 8517.62.00.00 ou 8517620000, les points
+            se placent tout seuls. Ou <strong>chercher</strong> : tapez un mot de la marchandise (« téléphone », « ciment », « pneu »)
+            et la liste des positions correspondantes s’ouvre, avec leur taux.
+          </p>
+          <p class="aide" style="margin-top:8px">
+            Quand la position existe dans le tarif chargé, le taux de droit se remplit tout seul et la ligne reste blanche.
+            Quand elle n’y est pas, <strong>aucun taux n’est proposé</strong> : la case reste vide et la ligne passe en ambre, jusqu’à
+            ce que vous saisissiez le taux vous-même. L’application ne devine jamais un taux de douane.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ----------------------------------------------------- liquidation -->
+    <section class="page masquee" id="page-liquidation">
+      <div id="liquidation-avis"></div>
+      <div id="liquidation-contenu"></div>
+    </section>
+
+    <!-- ------------------------------------------------------ historique -->
+    <section class="page masquee" id="page-historique">
+      <div class="carte">
+        <header>
+          <h3>Historique des cotations</h3>
+          <div class="actions">
+            <div style="position:relative">
+              <input id="historique-recherche" placeholder="Client, numéro, navire, référence…" style="width:100%;max-width:280px;padding-left:32px">
+              <svg style="position:absolute;left:9px;top:9px;width:15px;height:15px;color:var(--gris)"><use href="#i-recherche"/></svg>
+            </div>
+            <select id="historique-statut" style="width:auto">
+              <option value="">Tous les statuts</option>
+              <option value="brouillon">Brouillon</option>
+              <option value="devis_envoye">Devis envoyé</option>
+              <option value="accepte">Accepté</option>
+              <option value="declare">Déclaré</option>
+              <option value="clos">Clos</option>
+              <option value="abandonne">Abandonné</option>
+            </select>
+            <button class="b petit" id="btn-exporter-historique"><svg><use href="#i-telecharger"/></svg>Exporter</button>
+          </div>
+        </header>
+        <div class="corps serre"><div id="historique-liste"></div></div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------------- carnet -->
+    <section class="page masquee" id="page-carnet">
+      <div class="grille deux">
+        <div class="carte">
+          <header><h3>Importateurs</h3>
+            <div class="actions"><button class="b petit primaire" data-carnet-ajout="importateurs"><svg><use href="#i-plus"/></svg>Ajouter</button></div>
+          </header>
+          <div class="corps serre"><div id="carnet-importateurs"></div></div>
+        </div>
+        <div class="carte">
+          <header><h3>Fournisseurs</h3>
+            <div class="actions"><button class="b petit primaire" data-carnet-ajout="fournisseurs"><svg><use href="#i-plus"/></svg>Ajouter</button></div>
+          </header>
+          <div class="corps serre"><div id="carnet-fournisseurs"></div></div>
+        </div>
+      </div>
+      <div class="carte">
+        <header><h3>Transporteurs et compagnies</h3>
+          <div class="actions"><button class="b petit primaire" data-carnet-ajout="transporteurs"><svg><use href="#i-plus"/></svg>Ajouter</button></div>
+        </header>
+        <div class="corps serre"><div id="carnet-transporteurs"></div></div>
+      </div>
+    </section>
+
+    <!-- -------------------------------------------------------- réglages -->
+    <section class="page masquee" id="page-reglages">
+      <div class="carte">
+        <header><h3>Identité de la société</h3><span class="indice">Ce bloc figure en tête des devis et des impressions</span></header>
+        <div class="corps">
+          <div class="grille deux" style="align-items:start">
+            <div>
+              <div class="etiquette-champ" style="margin-bottom:7px">Logo</div>
+              <div class="depot-logo" id="depot-logo">
+                <div id="apercu-logo"></div>
+              </div>
+              <input type="file" id="fichier-logo" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none">
+              <div style="display:flex;gap:8px;margin-top:9px">
+                <button class="b petit" id="btn-choisir-logo"><svg><use href="#i-televerser"/></svg>Choisir un fichier</button>
+                <button class="b petit danger" id="btn-retirer-logo">Retirer</button>
+              </div>
+              <p class="aide" style="margin-top:9px">
+                PNG, JPEG, WebP ou SVG. Un fond transparent rend mieux sur les documents.
+                Le logo est enregistré dans la base de l’application : il suit les devis et les impressions.
+              </p>
+            </div>
+            <div class="champs" id="champs-societe"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carte">
+        <header><h3>Tarif douanier</h3><span class="indice" id="reglages-tec-indice">—</span>
+          <div class="actions">
+            <button class="b petit" id="btn-exporter-tec"><svg><use href="#i-telecharger"/></svg>Exporter</button>
+            <button class="b petit" id="btn-importer-tec"><svg><use href="#i-televerser"/></svg>Importer un fichier</button>
+            <button class="b petit primaire" id="btn-sync-tec"><svg><use href="#i-sync"/></svg>Mettre à jour</button>
+          </div>
+        </header>
+        <div class="corps">
+          <div id="tec-etat"></div>
+          <div class="champs" style="margin-top:14px">
+            <div class="champ c9"><label for="reglages-source-tec">Adresse de la source du tarif</label><input id="reglages-source-tec"></div>
+            <div class="champ c3" style="justify-content:flex-end"><button class="b" id="btn-remettre-source">Remettre par défaut</button></div>
+          </div>
+          <div class="section-titre">Taux personnels</div>
+          <p class="aide" style="margin-bottom:10px">
+            Positions que vous ajoutez vous-même, ou taux que vous préférez à celui du tarif chargé.
+            Ils sont proposés en premier dans la recherche et signalés comme personnels.
+          </p>
+          <div class="tableau-cadre">
+            <table class="t" id="table-taux-personnels">
+              <thead><tr><th style="width:150px">Position</th><th>Désignation</th><th style="width:100px" class="num">Taux DD %</th><th style="width:80px">Unité</th><th style="width:40px"></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <button class="b petit discret" id="btn-ajouter-taux" style="margin-top:8px"><svg><use href="#i-plus"/></svg>Ajouter une position</button>
+        </div>
+      </div>
+
+      <div class="carte">
+        <header><h3>Listes de référence</h3><span class="indice">Tout est modifiable et complétable</span></header>
+        <div class="corps">
+          <div class="champs">
+            <div class="champ c4"><label for="choix-liste">Liste à modifier</label><select id="choix-liste"></select></div>
+            <div class="champ c8" style="justify-content:flex-end">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="b petit" id="btn-ajouter-entree"><svg><use href="#i-plus"/></svg>Ajouter une entrée</button>
+                <button class="b petit danger" id="btn-restaurer-liste">Restaurer la liste d’origine</button>
+              </div>
+            </div>
+          </div>
+          <div class="tableau-cadre" style="margin-top:12px"><div id="editeur-liste"></div></div>
+        </div>
+      </div>
+
+      <div class="carte">
+        <header><h3>Devis</h3></header>
+        <div class="corps">
+          <div class="champs">
+            <div class="champ c3"><label for="reglages-validite">Validité du devis (jours)</label><input id="reglages-validite" class="nombre" inputmode="numeric"></div>
+            <div class="champ c3"><label for="reglages-tva-honoraires">TVA sur honoraires (%)</label><input id="reglages-tva-honoraires" class="nombre" inputmode="decimal"></div>
+            <div class="champ c12"><label for="reglages-conditions">Conditions générales figurant au devis</label><textarea id="reglages-conditions" rows="4"></textarea></div>
+          </div>
+          <div class="section-titre">Postes de facturation mémorisés</div>
+          <p class="aide" style="margin-bottom:10px">
+            Vos lignes habituelles, avec ou sans montant. Celles qui portent un montant le proposent d’office sur
+            chaque nouveau devis ; vous pouvez toujours le corriger dossier par dossier.
+          </p>
+          <div class="tableau-cadre">
+            <table class="t" id="table-modeles-devis">
+              <thead><tr><th>Intitulé</th><th style="width:130px">Nature</th><th style="width:130px" class="num">Montant XOF</th><th style="width:110px">Proposer d’office</th><th style="width:40px"></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <button class="b petit discret" id="btn-ajouter-modele" style="margin-top:8px"><svg><use href="#i-plus"/></svg>Ajouter un poste</button>
+        </div>
+      </div>
+
+      <div class="carte">
+        <header><h3>Sécurité et sauvegarde</h3></header>
+        <div class="corps">
+          <div class="grille deux">
+            <div>
+              <div class="etiquette-champ" style="margin-bottom:8px">Code d’accès</div>
+              <div class="champs">
+                <div class="champ c12"><label for="ancien-code">Code actuel</label><input type="password" id="ancien-code" autocomplete="current-password"></div>
+                <div class="champ c12"><label for="nouveau-code">Nouveau code</label><input type="password" id="nouveau-code" autocomplete="new-password"></div>
+                <div class="champ c12"><button class="b primaire" id="btn-changer-code">Changer le code</button></div>
+              </div>
+            </div>
+            <div>
+              <div class="etiquette-champ" style="margin-bottom:8px">Sauvegarde</div>
+              <p class="aide" style="margin-bottom:12px">
+                La base vit dans le navigateur de ce poste. Elle ne suit pas d’un ordinateur à l’autre, et
+                « effacer les données de navigation » l’effacerait. Une sauvegarde par semaine, déposée sur une clé
+                ou dans le dossier partagé, et rien n’est jamais perdu.
+              </p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="b primaire" id="btn-sauvegarder"><svg><use href="#i-telecharger"/></svg>Sauvegarder tout</button>
+                <button class="b" id="btn-restaurer"><svg><use href="#i-televerser"/></svg>Restaurer</button>
+              </div>
+              <div id="reglages-stockage" style="margin-top:14px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="carte">
+        <header><h3>Règles de calcul appliquées</h3><span class="indice">Ce que fait l’application, dans l’ordre</span></header>
+        <div class="corps"><div id="reglages-regles"></div></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="voile masquee" id="voile"><div class="modale" id="modale"></div></div>
+<div id="messages"></div>
+<input type="file" id="fichier-generique" style="display:none">
+
+<script>/*@js reference.js*/</script>
+<script>/*@js liquidation.js*/</script>
+<script>/*@js base.js*/</script>
+<script>/*@js jspdf*/</script>
+<script>/*@js pdf.js*/</script>
+<script>/*@js interface.js*/</script>
+</body>
+</html>
