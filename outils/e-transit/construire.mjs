@@ -92,11 +92,18 @@ function versionEnLigne() {
     /<style>\/\*@css style\.css\*\/<\/style>/,
     '<link rel="stylesheet" href="style.css">'
   );
-  page = page.replace(/<script>\/\*@js jspdf\*\/<\/script>/, '<script src="jspdf.js"></script>');
-  page = page.replace(/<script>\/\*@js reference\.js\*\/<\/script>/, '<script src="app.js"></script>');
+  // jsPDF doit être là avant le code qui s'en sert : on le pose sur le premier
+  // marqueur, et le code de l'application sur le suivant. Les autres marqueurs
+  // disparaissent — tout est déjà dans app.js.
+  page = page.replace(/<script>\/\*@js jspdf\*\/<\/script>\n?/, '');
+  page = page.replace(
+    /<script>\/\*@js reference\.js\*\/<\/script>/,
+    '<script src="jspdf.js"></script>\n<script src="app.js"></script>'
+  );
   for (const nom of CODE.slice(1)) {
     page = page.replace(new RegExp(`<script>/\\*@js ${nom.replace('.', '\\.')}\\*/</script>\\n?`), '');
   }
+  if (/@js /.test(page)) throw new Error('Un marqueur de script est resté dans la version en ligne.');
 
   // Ce qu'il faut pour qu'un téléphone la traite comme une application, et
   // pour qu'aucun moteur de recherche ne la référence.
