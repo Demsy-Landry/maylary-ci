@@ -147,15 +147,24 @@ a { color: var(--accent); }
 #chargement .rotatif { color: var(--accent); line-height: 0; }
 #chargement.en-panne .rotatif { animation: none; color: var(--ambre); }
 #chargement.en-panne .fenetre {
-  max-width: 460px;
-  padding: 18px 20px;
+  max-width: 500px;
+  margin: 20px;
+  padding: 20px 22px;
   background: var(--ambre-pale);
   color: var(--ambre);
+  border: 1px solid #f4dcb5;
   border-radius: var(--rayon);
-  line-height: 1.5;
+  line-height: 1.55;
   align-items: flex-start;
-  font-weight: 600;
+  font-size: 13.5px;
 }
+#chargement.en-panne .titre {
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 7px;
+}
+/* Le message porte ses propres retours à la ligne. */
+#chargement.en-panne .texte { white-space: pre-line; }
 
 /* ============================================================== bandeau */
 /* La scène du port, en tête du tableau de bord. */

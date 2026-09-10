@@ -268,9 +268,19 @@
       .then(chargerContexte)
       .then(ouvrirApplication)
       .catch(function (e) {
-        // Sans base, il n'y a rien à afficher : on dit pourquoi, en clair.
-        $('#chargement').classList.add('en-panne');
-        texte.textContent = e.message;
+        // Sans base, il n'y a rien à afficher : on dit pourquoi, en clair, et
+        // on dit quoi faire. Une attente sans fin n'apprend rien à personne.
+        var voile = $('#chargement');
+        voile.classList.add('en-panne');
+        var fenetre = texte.parentNode;
+        fenetre.innerHTML = '';
+        var alerte = icone('alerte');
+        alerte.setAttribute('style', 'width:22px;height:22px;flex:none;margin-top:1px');
+        fenetre.appendChild(alerte);
+        fenetre.appendChild(el('div', {}, [
+          el('div', { class: 'titre', texte: 'L’application ne peut pas s’ouvrir ici' }),
+          el('div', { class: 'texte', texte: e.message })
+        ]));
       });
   }
 

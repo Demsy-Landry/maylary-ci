@@ -32,16 +32,41 @@ window.BASE = (function () {
     modeles_devis:   { keyPath: 'id' }
   };
 
+  var MESSAGE_SANS_BASE =
+    "Cette application a besoin d\u2019enregistrer les dossiers sur l\u2019appareil, et cet " +
+    "appareil ne l\u2019autorise pas.\n\n" +
+    "C\u2019est le cas d\u2019un iPhone ou d\u2019un iPad qui ouvre le fichier depuis un aper\u00e7u, " +
+    "d\u2019une fen\u00eatre de navigation priv\u00e9e, et de Firefox pour un fichier ouvert depuis " +
+    "le disque.\n\n" +
+    "Copiez le fichier sur l\u2019ordinateur et ouvrez-le avec Microsoft Edge ou Google Chrome.";
+
   function ouvrir() {
     if (bd) return Promise.resolve(bd);
     return new Promise(function (resoudre, rejeter) {
       if (typeof indexedDB === 'undefined') {
-        rejeter(new Error(
-          "Ce navigateur n'autorise pas de base locale sur un fichier ouvert depuis le disque. " +
-          "Ouvrez l'application avec Microsoft Edge ou Google Chrome."
-        ));
+        rejeter(new Error(MESSAGE_SANS_BASE));
         return;
       }
+
+      // Certains navigateurs n'ouvrent pas la base et ne refusent pas non plus :
+      // ils ne répondent jamais. Sans garde-fou, l'application attend
+      // indéfiniment sans rien dire à personne.
+      var repondu = false;
+      var minuterie = setTimeout(function () {
+        if (repondu) return;
+        repondu = true;
+        rejeter(new Error(MESSAGE_SANS_BASE));
+      }, 6000);
+
+      function fini(action) {
+        return function () {
+          if (repondu) return;
+          repondu = true;
+          clearTimeout(minuterie);
+          action();
+        };
+      }
+
       var requete = indexedDB.open(NOM, VERSION);
       requete.onupgradeneeded = function () {
         var base = requete.result;
@@ -54,14 +79,13 @@ window.BASE = (function () {
           });
         });
       };
-      requete.onsuccess = function () { bd = requete.result; resoudre(bd); };
-      requete.onerror = function () {
+      requete.onsuccess = fini(function () { bd = requete.result; resoudre(bd); });
+      requete.onerror = fini(function () { rejeter(new Error(MESSAGE_SANS_BASE)); });
+      requete.onblocked = fini(function () {
         rejeter(new Error(
-          "Base locale inaccessible (" + (requete.error && requete.error.name) + "). " +
-          "Sur Firefox, une page ouverte depuis le disque n'y a pas droit : utilisez Edge ou Chrome."
+          "Une autre fenêtre de l'application est déjà ouverte. Fermez-la, puis rechargez cette page."
         ));
-      };
-      requete.onblocked = function () { rejeter(new Error("Une autre fenêtre de l'application est ouverte. Fermez-la puis rechargez.")); };
+      });
     });
   }
 
