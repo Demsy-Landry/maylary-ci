@@ -1546,11 +1546,29 @@ window.PDF = (function () {
     }, genre === 'erreur' ? 7000 : 4000);
   }
 
-  function avis(genre, titre, texte) {
+  /* Un avertissement qui dit quoi faire sans donner le moyen de le faire
+   * oblige à chercher ailleurs. Quand il y a un geste à poser, le bouton est
+   * dans l'avis. */
+  function avis(genre, titre, texte, action) {
+    var corps = el('div', {}, [el('strong', { texte: titre + ' ' }), el('span', { texte: texte })]);
+    if (action) {
+      corps.appendChild(el('div', { style: 'margin-top:9px' }, [
+        el('button', {
+          class: 'b petit', onclick: action.faire,
+          // Fond blanc et texte à la couleur de l'avis : lisible sur l'ambre
+          // comme sur le bleu, sans avoir à décliner le bouton par genre.
+          style: 'background:#fff;border-color:currentColor;color:inherit;font-weight:700'
+        }, [icone(action.icone || 'sync'), document.createTextNode(action.libelle)])
+      ]));
+    }
     return el('div', { class: 'avis ' + genre }, [
       icone(genre === 'succes' ? 'ok' : (genre === 'info' ? 'info' : 'alerte')),
-      el('div', {}, [el('strong', { texte: titre + ' ' }), el('span', { texte: texte })])
+      corps
     ]);
+  }
+
+  function actionChargerTarif() {
+    return { libelle: 'Charger le tarif maintenant', icone: 'sync', faire: lancerSyncTec };
   }
 
   /* Compteur qui monte : sur un tableau de bord, un chiffre qui s'installe se
@@ -2168,14 +2186,22 @@ window.PDF = (function () {
   /* ============================================================ articles */
 
   function brancherArticles() {
-    $('#btn-ajouter-article').addEventListener('click', function () {
+    function ajouterArticle() {
       etat.dossier.articles.push(articleVierge());
       peindreArticles();
       marquerModifie();
       var lignes = $$('#table-articles tbody tr');
       var derniere = lignes[lignes.length - 1];
-      if (derniere) { derniere.scrollIntoView({ block: 'center', behavior: 'smooth' }); var i = derniere.querySelector('input'); if (i) i.focus(); }
-    });
+      if (!derniere) return;
+      derniere.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      var champ = derniere.querySelector('input');
+      if (champ) champ.focus();
+    }
+    // Deux boutons pour le même geste : celui d'en-tête à l'arrivée, celui du
+    // bas quand on vient de finir de remplir une fiche — sur téléphone, la
+    // fiche fait un écran entier et l'en-tête est loin.
+    $('#btn-ajouter-article').addEventListener('click', ajouterArticle);
+    $('#btn-ajouter-article-bas').addEventListener('click', ajouterArticle);
     $('#btn-importer-articles').addEventListener('click', importerArticles);
   }
 
@@ -2280,9 +2306,11 @@ window.PDF = (function () {
     var sansPoids = d.articles.filter(function (a) { return nb(a.valeur) > 0 && nb(a.poids_brut) <= 0; }).length;
 
     if (etat.tec.length === 0) {
-      z.appendChild(avis('attention', 'Tarif non chargé.',
-        'Aucune position n’est disponible à la recherche : les codes et les taux devront être tapés à la main. ' +
-        'Réglages → Tarif douanier → Mettre à jour.'));
+      z.appendChild(avis('attention', 'Le tarif douanier n’est pas encore chargé.',
+        'Sans lui, la recherche par mot-clé ne renvoie rien et aucun taux n’est proposé : chaque code et chaque ' +
+        'taux devraient être tapés à la main. Le chargement prend quelques secondes et ne se fait qu’une fois — ' +
+        'ensuite l’application s’en sert sans connexion.',
+        actionChargerTarif()));
     }
     if (horsTarif > 0) {
       z.appendChild(avis('attention', horsTarif + ' position' + (horsTarif > 1 ? 's' : '') + ' hors tarif.',
@@ -2376,6 +2404,20 @@ window.PDF = (function () {
 
     function peindreResultats(q) {
       liste.innerHTML = '';
+      if (etat.tec.length === 0 && etat.tauxPersonnels.length === 0) {
+        var invite = el('div', { class: 'rien' }, [
+          el('div', { style: 'font-weight:650;color:var(--ambre)', texte: 'Le tarif n’est pas encore chargé.' }),
+          el('div', { style: 'margin-top:6px', texte: 'Il n’y a donc rien à chercher. Vous pouvez écrire le code directement, ou charger le tarif — quelques secondes, une seule fois.' }),
+          el('button', {
+            class: 'b petit primaire', style: 'margin-top:10px',
+            onmousedown: function (e) { e.preventDefault(); },
+            onclick: function () { fermer(); lancerSyncTec(); }
+          }, [icone('sync'), document.createTextNode('Charger le tarif')])
+        ]);
+        liste.appendChild(invite);
+        liste.classList.remove('masquee');
+        return;
+      }
       if (resultats.length === 0) {
         var codeNormalise = normaliserCode(q);
         liste.appendChild(el('div', { class: 'rien' }, [
@@ -2944,9 +2986,10 @@ window.PDF = (function () {
     var z = $('#bord-etat');
     z.innerHTML = '';
     if (etat.tec.length === 0) {
-      z.appendChild(avis('attention', 'Tarif douanier non chargé.',
-        'Les positions ne peuvent pas être recherchées et aucun taux ne sera proposé. ' +
-        'Un clic sur « Mettre à jour » dans les Réglages suffit — ensuite l’application fonctionne hors ligne.'));
+      z.appendChild(avis('attention', 'Le tarif douanier n’est pas encore chargé.',
+        'Les 6 298 positions se téléchargent en quelques secondes, une seule fois. Ensuite l’application ' +
+        's’en sert sans connexion.',
+        actionChargerTarif()));
     } else {
       z.appendChild(avis('succes', fr(etat.tec.length) + ' positions tarifaires en base.',
         'Chargées le ' + frDate(etat.tecChargeLe) + '. L’application fonctionne sans réseau.'));

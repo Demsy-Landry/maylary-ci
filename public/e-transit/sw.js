@@ -7,7 +7,7 @@
  * toujours à jour quand la connexion est là, et elle s'ouvre quand même
  * quand elle ne l'est pas.
  */
-const VERSION = 'e-transit-2026-09-10-mtv818lu';
+const VERSION = 'e-transit-2026-09-10-mtv84m1n';
 const COQUILLE = ['./', './index.html', './style.css', './app.js', './jspdf.js',
   './manifest.webmanifest', './icone-192.png', './icone-512.png', './icone-180.png'];
 
