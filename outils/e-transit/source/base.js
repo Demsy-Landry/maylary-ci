@@ -18,7 +18,7 @@ window.BASE = (function () {
   'use strict';
 
   var NOM = 'etransit-cotation';
-  var VERSION = 1;
+  var VERSION = 2;
   var bd = null;
 
   var MAGASINS = {
@@ -29,7 +29,12 @@ window.BASE = (function () {
     transporteurs:   { keyPath: 'id', index: { nom: 'nom' } },
     tec:             { keyPath: 'code' },
     taux_personnels: { keyPath: 'code' },
-    modeles_devis:   { keyPath: 'id' }
+    modeles_devis:   { keyPath: 'id' },
+    /* Les taux de change retenus par la Douane. Ce ne sont pas des cours de
+     * marché : la Douane publie sa propre table, et c'est elle qui fait foi
+     * pour la valeur en douane. Un cours de banque centrale donnerait une
+     * valeur CAF fausse, donc des droits faux. */
+    taux_change:     { keyPath: 'code' }
   };
 
   /* Le motif n'est pas le m\u00eame selon d'o\u00f9 l'application est ouverte, et la
@@ -191,6 +196,22 @@ window.BASE = (function () {
     });
   }
 
+  /* ----------------------------------------------- taux de change douaniers */
+
+  function tauxChange() {
+    return tout('taux_change');
+  }
+
+  function poserTauxChange(code, taux, dateEffet, source) {
+    return ecrire('taux_change', {
+      code: code,
+      taux: taux,
+      date_effet: dateEffet || '',
+      source: source || '',
+      pose_le: new Date().toISOString()
+    });
+  }
+
   /* -------------------------------------------------- listes de référence */
   /* Les listes vivent en base, pas dans le code : E-Transit peut en ajouter,
    * en corriger, en retirer. L'amorce livrée avec l'application ne sert qu'au
@@ -338,7 +359,7 @@ window.BASE = (function () {
 
   function exporterTout(avecTarif) {
     var magasins = ['parametres', 'dossiers', 'importateurs', 'fournisseurs',
-      'transporteurs', 'taux_personnels', 'modeles_devis'];
+      'transporteurs', 'taux_personnels', 'modeles_devis', 'taux_change'];
     if (avecTarif) magasins.push('tec');
     return Promise.all(magasins.map(tout)).then(function (resultats) {
       var paquet = { application: 'Cotation E-Transit', version: VERSION, exporte_le: new Date().toISOString(), donnees: {} };
@@ -365,6 +386,7 @@ window.BASE = (function () {
     liste: liste, poserListe: poserListe, semer: semer, LISTES: LISTES,
     oublierAncienCodeAcces: oublierAncienCodeAcces,
     oublierResponsableParDefaut: oublierResponsableParDefaut,
+    tauxChange: tauxChange, poserTauxChange: poserTauxChange,
     numeroSuivant: numeroSuivant, identifiant: identifiant,
     sourceTec: sourceTec, SOURCE_TEC_DEFAUT: SOURCE_TEC_DEFAUT,
     synchroniserTec: synchroniserTec, importerTecDepuisTexte: importerTecDepuisTexte,

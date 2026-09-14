@@ -20,6 +20,7 @@
     validite: 15,
     tvaHonoraires: 0.18,
     modelesDevis: [],
+    tauxChange: [],
     page: 'bord',
     sauvegardeEnAttente: null
   };
@@ -235,10 +236,152 @@
 
   function articleVierge() {
     return {
+      id: BASE.identifiant(),
+      parent: null,
       position: '', designation: '', designation_tec: '', origine: '',
       quantite: '', unite: '', poids_brut: '', poids_net: '', valeur: '',
       taux_dd_pct: '', exoneration_pct: 0,
       verifie_en_base: false, taux_dd_saisi: false
+    };
+  }
+
+  /* ------------------------------------------------- éclatement des lignes */
+  /* Le FDI et le RFCV reprennent la position que le fournisseur a écrite, pour
+   * aller vite. C'est au déclarant de reclasser, et une ligne du fournisseur
+   * cache souvent plusieurs articles qui ne relèvent pas de la même position.
+   * Éclater, c'est séparer ces articles : la ligne 1 devient une ligne mère,
+   * et 1.1, 1.2, 1.3… portent chacune leur code et leur taux.
+   *
+   * Une ligne mère ne se liquide pas : elle ne fait que regrouper. Ce sont ses
+   * sous-lignes qui portent la valeur — sinon la marchandise serait comptée
+   * deux fois. */
+
+  function normaliserArticles(articles) {
+    var connus = {};
+    (articles || []).forEach(function (a) {
+      if (!a.id) a.id = BASE.identifiant();
+      connus[a.id] = true;
+    });
+    // Une sous-ligne dont la mère a disparu remonte au premier niveau plutôt
+    // que de sortir de l'affichage sans que personne ne le voie.
+    (articles || []).forEach(function (a) {
+      if (a.parent && !connus[a.parent]) a.parent = null;
+    });
+    return articles;
+  }
+
+  /* Parcours dans l'ordre d'affichage, avec le numéro de chaque ligne. */
+  function articlesOrdonnes(articles) {
+    var enfants = {};
+    articles.forEach(function (a) {
+      var cle = a.parent || '';
+      (enfants[cle] = enfants[cle] || []).push(a);
+    });
+    var sortie = [];
+    (function descendre(cle, prefixe, profondeur) {
+      (enfants[cle] || []).forEach(function (a, i) {
+        var numero = prefixe ? prefixe + '.' + (i + 1) : String(i + 1);
+        sortie.push({
+          article: a,
+          numero: numero,
+          profondeur: profondeur,
+          mere: !!(enfants[a.id] && enfants[a.id].length)
+        });
+        descendre(a.id, numero, profondeur + 1);
+      });
+    })('', '', 0);
+    return sortie;
+  }
+
+  function lignesLiquidables() {
+    return articlesOrdonnes(etat.dossier.articles).filter(function (r) { return !r.mere; });
+  }
+
+  function eclaterLigne(article) {
+    var d = etat.dossier;
+    var deja = d.articles.some(function (a) { return a.parent === article.id; });
+    var index = d.articles.indexOf(article);
+
+    function heriter(avecValeurs) {
+      var e = articleVierge();
+      e.parent = article.id;
+      e.position = article.position;
+      e.designation_tec = article.designation_tec;
+      e.verifie_en_base = article.verifie_en_base;
+      e.origine = article.origine;
+      e.unite = article.unite;
+      e.taux_dd_pct = article.taux_dd_pct;
+      e.taux_dd_saisi = article.taux_dd_saisi;
+      e.exoneration_pct = article.exoneration_pct;
+      if (avecValeurs) {
+        e.designation = article.designation;
+        e.quantite = article.quantite;
+        e.poids_brut = article.poids_brut;
+        e.poids_net = article.poids_net;
+        e.valeur = article.valeur;
+      }
+      return e;
+    }
+
+    if (!deja) {
+      // Premier éclatement : la ligne mère garde le repère du fournisseur et
+      // ce qu'elle portait passe entier dans la première sous-ligne. Rien ne
+      // se perd au moment de la coupe ; la répartition vient après.
+      article.total_origine = {
+        valeur: nb(article.valeur),
+        poids_brut: nb(article.poids_brut),
+        poids_net: nb(article.poids_net),
+        quantite: nb(article.quantite)
+      };
+      d.articles.splice(index + 1, 0, heriter(true), heriter(false));
+      article.quantite = '';
+      article.poids_brut = '';
+      article.poids_net = '';
+      article.valeur = '';
+    } else {
+      // Sous-lignes suivantes : on insère après la dernière de la famille.
+      var dernier = index;
+      d.articles.forEach(function (a, i) { if (a.parent === article.id && i > dernier) dernier = i; });
+      d.articles.splice(dernier + 1, 0, heriter(false));
+    }
+    peindreArticles();
+    marquerModifie();
+  }
+
+  function supprimerArticle(article) {
+    var d = etat.dossier;
+    // Supprimer une mère emporte ses sous-lignes : les laisser derrière
+    // laisserait des valeurs dans la liquidation sans rien à l'écran.
+    var aRetirer = {};
+    (function marquer(id) {
+      aRetirer[id] = true;
+      d.articles.forEach(function (a) { if (a.parent === id) marquer(a.id); });
+    })(article.id);
+    d.articles = d.articles.filter(function (a) { return !aRetirer[a.id]; });
+    if (d.articles.length === 0) d.articles = [articleVierge()];
+    peindreArticles();
+    marquerModifie();
+  }
+
+  /* Écart entre ce que la ligne mère portait et ce que ses sous-lignes
+   * totalisent. C'est le contrôle qui rattrape une valeur oubliée en route. */
+  function ecartEclatement(article) {
+    var origine = article.total_origine;
+    if (!origine) return null;
+    var enfants = etat.dossier.articles.filter(function (a) { return a.parent === article.id; });
+    if (!enfants.length) return null;
+    var somme = { valeur: 0, poids_brut: 0, poids_net: 0 };
+    enfants.forEach(function (e) {
+      somme.valeur += nb(e.valeur);
+      somme.poids_brut += nb(e.poids_brut);
+      somme.poids_net += nb(e.poids_net);
+    });
+    return {
+      valeur: somme.valeur - nb(origine.valeur),
+      poids_brut: somme.poids_brut - nb(origine.poids_brut),
+      poids_net: somme.poids_net - nb(origine.poids_net),
+      origine: origine,
+      somme: somme
     };
   }
 
@@ -316,6 +459,7 @@
           BASE.parametre('taux_tva_honoraires', 0.18),
           BASE.tout('modeles_devis'),
           BASE.tout('taux_personnels'),
+          BASE.tauxChange(),
           BASE.tout('tec')
         ])
     ).then(function (r) {
@@ -329,7 +473,8 @@
       etat.tvaHonoraires = r[k + 5];
       etat.modelesDevis = r[k + 6] || [];
       etat.tauxPersonnels = r[k + 7] || [];
-      etat.tec = r[k + 8] || [];
+      etat.tauxChange = r[k + 8] || [];
+      etat.tec = r[k + 9] || [];
     });
   }
 
@@ -420,6 +565,7 @@
     if (page === 'liquidation') {
       bouton('Imprimer', 'imprimer', function () { window.print(); });
       bouton('Note de liquidation', 'pdf', function () { sortirPdf('note'); });
+      bouton('Feuille SYDAM', 'declaration', function () { sortirPdf('sydam'); });
       bouton('Devis PDF', 'pdf', function () { sortirPdf('devis'); }, 'primaire');
     }
     if (page === 'bord') {
@@ -580,16 +726,32 @@
     });
   }
 
+  function tauxDouanierDe(code) {
+    return etat.tauxChange.filter(function (t) { return t.code === code; })[0] || null;
+  }
+
   function surChangementDevise() {
     var d = etat.dossier;
     var m = (etat.listes.monnaies || []).filter(function (x) { return x.code === d.devise; })[0];
+    var champ = $('#d-taux-change');
+
     if (m && m.parite !== null && m.parite !== undefined) {
+      // Parité fixe : elle ne se discute pas et ne se saisit pas.
       d.taux_change = m.parite;
-      $('#d-taux-change').value = m.parite;
-      $('#d-taux-change').readOnly = true;
+      champ.value = m.parite;
+      champ.readOnly = true;
     } else {
-      $('#d-taux-change').readOnly = false;
-      if (nb(d.taux_change) <= 1 && d.devise !== 'XOF') { d.taux_change = ''; $('#d-taux-change').value = ''; }
+      champ.readOnly = false;
+      var douanier = tauxDouanierDe(d.devise);
+      if (douanier && nb(douanier.taux) > 0) {
+        // Le taux de la table douanière est proposé, et reste corrigeable :
+        // c'est celui de la déclaration en cours qui fait foi.
+        d.taux_change = douanier.taux;
+        champ.value = douanier.taux;
+      } else if (nb(d.taux_change) <= 1 && d.devise !== 'XOF') {
+        d.taux_change = '';
+        champ.value = '';
+      }
     }
     peindreAvisDevise();
     peindreArticles();
@@ -607,10 +769,23 @@
         '1 ' + m.code + ' = ' + fr(m.parite, 3) + ' XOF. C’est un ancrage légal, pas un cours du jour : ' +
         'il ne bouge pas et ne vient d’aucune source extérieure.'));
     } else {
-      z.appendChild(avis(nb(d.taux_change) > 0 ? 'info' : 'attention',
-        nb(d.taux_change) > 0 ? 'Taux saisi.' : 'Taux à saisir.',
-        'Le ' + m.code + ' n’a pas de parité fixe avec le franc CFA. Reportez le taux retenu par la Douane à la date ' +
-        'de la déclaration — l’application n’en invente aucun.'));
+      var douanier = tauxDouanierDe(d.devise);
+      if (douanier && nb(douanier.taux) > 0) {
+        z.appendChild(avis('info', 'Taux douanier repris de votre table.',
+          '1 ' + m.code + ' = ' + fr(nb(douanier.taux), 4) + ' XOF' +
+          (douanier.date_effet ? ', en vigueur depuis le ' + frDate(douanier.date_effet) : '') +
+          (douanier.source ? ' — source : ' + douanier.source : '') +
+          '. Corrigez-le si la déclaration relève d’un autre taux.'));
+      } else {
+        z.appendChild(avis(nb(d.taux_change) > 0 ? 'info' : 'attention',
+          nb(d.taux_change) > 0 ? 'Taux saisi à la main.' : 'Taux à saisir.',
+          'Le ' + m.code + ' n’a pas de parité fixe avec le franc CFA et ne figure pas dans votre table de taux ' +
+          'douaniers. Reportez le taux retenu par la Douane à la date de la déclaration — l’application n’en ' +
+          'invente aucun, et n’ira jamais chercher un cours de marché : la Douane publie sa propre table, et ' +
+          'c’est elle qui fait la valeur en douane.',
+          { libelle: 'Enregistrer ce taux dans la table', icone: 'plus',
+            faire: function () { formulaireTauxChange({ code: d.devise }); } }));
+      }
     }
   }
 
@@ -745,66 +920,125 @@
     $('#btn-importer-articles').addEventListener('click', importerArticles);
   }
 
+  var resumesEclatement = {};
+
   function peindreArticles() {
     var corps = $('#table-articles tbody');
     corps.innerHTML = '';
+    resumesEclatement = {};
     var d = etat.dossier;
     var devise = d.devise || 'XOF';
+    normaliserArticles(d.articles);
+    var rangees = articlesOrdonnes(d.articles);
 
-    d.articles.forEach(function (a, i) {
+    rangees.forEach(function (r) {
+      var a = r.article;
       var tr = el('tr');
-      tr.classList.toggle('attention', !!a.position && !a.verifie_en_base);
+      tr.classList.toggle('attention', !r.mere && !!a.position && !a.verifie_en_base);
+      if (r.mere) tr.classList.add('ligne-mere');
+      if (r.profondeur > 0) tr.classList.add('sous-ligne');
 
-      tr.appendChild(el('td', { class: 'num', style: 'color:var(--gris);font-weight:600', texte: String(i + 1) }));
-      tr.appendChild(el('td', {}, [construireComboPosition(a, tr)]));
-      tr.appendChild(el('td', {}, [champTexte(a, 'designation', 'Désignation commerciale')]));
+      var tdNumero = el('td', { class: 'num numero-ligne' });
+      tdNumero.style.paddingLeft = (6 + r.profondeur * 12) + 'px';
+      tdNumero.appendChild(el('span', { texte: r.numero }));
+      tr.appendChild(tdNumero);
 
-      var selOrigine = el('select');
-      remplirSelect(selOrigine, optionsPays().map(function (o) { return { valeur: o.valeur, libelle: o.valeur }; }), a.origine, { vide: '—' });
-      selOrigine.title = 'Pays d’origine de l’article';
-      selOrigine.addEventListener('change', function () { a.origine = this.value; marquerModifie(); });
-      tr.appendChild(el('td', {}, [selOrigine]));
+      if (r.mere) {
+        // Une ligne mère ne porte plus de valeur : elle annonce ce qu'elle
+        // regroupe, et laisse ses sous-lignes parler.
+        tr.appendChild(el('td', {}, [
+          el('div', { style: 'font-weight:600;font-variant-numeric:tabular-nums', texte: a.position || '—' }),
+          el('span', { class: 'etiq gris', texte: 'position du fournisseur' })
+        ]));
+        var resume = construireResumeEclatement(a);
+        resumesEclatement[a.id] = resume;
+        tr.appendChild(el('td', { colspan: '9' }, [
+          el('div', {}, [champTexte(a, 'designation', 'Libellé de la ligne d’origine')]),
+          resume
+        ]));
+      } else {
+        tr.appendChild(el('td', {}, [construireComboPosition(a, tr)]));
+        tr.appendChild(el('td', {}, [champTexte(a, 'designation', 'Désignation commerciale')]));
 
-      tr.appendChild(el('td', {}, [champNombre(a, 'quantite')]));
+        var selOrigine = el('select');
+        remplirSelect(selOrigine, optionsPays().map(function (o) { return { valeur: o.valeur, libelle: o.valeur }; }), a.origine, { vide: '—' });
+        selOrigine.title = 'Pays d’origine de l’article';
+        selOrigine.addEventListener('change', function () { a.origine = this.value; marquerModifie(); });
+        tr.appendChild(el('td', {}, [selOrigine]));
 
-      var selUnite = el('select');
-      remplirSelect(selUnite, (etat.listes.unites || []).map(function (u) { return { valeur: u.code, libelle: u.code }; }), a.unite, { vide: '—' });
-      selUnite.addEventListener('change', function () { a.unite = this.value; marquerModifie(); });
-      tr.appendChild(el('td', {}, [selUnite]));
+        tr.appendChild(el('td', {}, [champNombre(a, 'quantite')]));
 
-      tr.appendChild(el('td', {}, [champNombre(a, 'poids_brut', recalculerTotaux)]));
-      tr.appendChild(el('td', {}, [champNombre(a, 'poids_net', recalculerTotaux)]));
-      tr.appendChild(el('td', {}, [champNombre(a, 'valeur', recalculerTotaux)]));
+        var selUnite = el('select');
+        remplirSelect(selUnite, (etat.listes.unites || []).map(function (u) { return { valeur: u.code, libelle: u.code }; }), a.unite, { vide: '—' });
+        selUnite.addEventListener('change', function () { a.unite = this.value; marquerModifie(); });
+        tr.appendChild(el('td', {}, [selUnite]));
 
-      var tdTaux = el('td', {}, [champNombre(a, 'taux_dd_pct', function () {
-        a.taux_dd_saisi = true;
-        marquerModifie();
-      })]);
-      tdTaux.firstChild.placeholder = 'à saisir';
-      tdTaux.firstChild.title = a.verifie_en_base
-        ? 'Taux issu du tarif chargé. Vous pouvez le corriger.'
-        : 'Position absente du tarif : aucun taux n’est proposé, saisissez-le.';
-      tr.appendChild(tdTaux);
+        tr.appendChild(el('td', {}, [champNombre(a, 'poids_brut', recalculerTotaux)]));
+        tr.appendChild(el('td', {}, [champNombre(a, 'poids_net', recalculerTotaux)]));
+        tr.appendChild(el('td', {}, [champNombre(a, 'valeur', recalculerTotaux)]));
 
-      tr.appendChild(el('td', {}, [champNombre(a, 'exoneration_pct')]));
+        var tdTaux = el('td', {}, [champNombre(a, 'taux_dd_pct', function () {
+          a.taux_dd_saisi = true;
+          marquerModifie();
+        })]);
+        tdTaux.firstChild.placeholder = 'à saisir';
+        tdTaux.firstChild.title = a.verifie_en_base
+          ? 'Taux issu du tarif chargé. Vous pouvez le corriger.'
+          : 'Position absente du tarif : aucun taux n’est proposé, saisissez-le.';
+        tr.appendChild(tdTaux);
 
-      tr.appendChild(el('td', {}, [el('button', {
-        class: 'icone danger', title: 'Supprimer la ligne',
-        onclick: function () {
-          if (d.articles.length === 1) { d.articles[0] = articleVierge(); }
-          else d.articles.splice(i, 1);
-          peindreArticles(); marquerModifie();
-        }
-      }, [icone('poubelle')])]));
+        tr.appendChild(el('td', {}, [champNombre(a, 'exoneration_pct')]));
+      }
+
+      var actions = el('td', { class: 'actions-ligne' }, [
+        el('button', {
+          class: 'icone', title: r.mere ? 'Ajouter une sous-ligne' : 'Éclater cette ligne en sous-lignes',
+          onclick: function () { eclaterLigne(a); }
+        }, [icone('eclater')]),
+        el('button', {
+          class: 'icone danger',
+          title: r.mere ? 'Supprimer la ligne et ses sous-lignes' : 'Supprimer la ligne',
+          onclick: function () { supprimerArticle(a); }
+        }, [icone('poubelle')])
+      ]);
+      tr.appendChild(actions);
 
       corps.appendChild(tr);
     });
 
-    $('#articles-indice').textContent = d.articles.length + ' ligne' + (d.articles.length > 1 ? 's' : '') +
+    var liquidables = rangees.filter(function (r) { return !r.mere; }).length;
+    var meres = rangees.length - liquidables;
+    $('#articles-indice').textContent =
+      liquidables + ' ligne' + (liquidables > 1 ? 's' : '') + ' à liquider' +
+      (meres ? ' · ' + meres + ' ligne' + (meres > 1 ? 's éclatées' : ' éclatée') : '') +
       ' · valeurs en ' + devise;
     recalculerTotaux();
     peindreAvisArticles();
     rafraichirPastilles();
+  }
+
+  /* Ce que la ligne mère portait, ce que ses sous-lignes totalisent, et
+   * l'écart entre les deux — affiché en clair sous la ligne mère. */
+  function construireResumeEclatement(article) {
+    var e = ecartEclatement(article);
+    var zone = el('div', { style: 'margin-top:7px;font-size:11.5px;display:flex;flex-wrap:wrap;gap:4px 16px' });
+    if (!e) {
+      zone.appendChild(el('span', { style: 'color:var(--gris)', texte: 'Ligne éclatée : ce sont les sous-lignes qui se liquident.' }));
+      return zone;
+    }
+    function bloc(libelle, origine, somme, ecart, decimales) {
+      var juste = Math.abs(ecart) < 0.005;
+      return el('span', { style: 'color:' + (juste ? 'var(--gris)' : 'var(--rouge)') }, [
+        el('strong', { texte: libelle + ' ' }),
+        document.createTextNode(fr(somme, decimales) + ' / ' + fr(origine, decimales)),
+        juste ? null : el('strong', { texte: '  écart ' + (ecart > 0 ? '+' : '') + fr(ecart, decimales) })
+      ]);
+    }
+    zone.appendChild(el('span', { style: 'color:var(--gris)', texte: 'Sous-lignes / ligne d’origine :' }));
+    zone.appendChild(bloc('Valeur', e.origine.valeur, e.somme.valeur, e.valeur, 2));
+    zone.appendChild(bloc('Poids brut', e.origine.poids_brut, e.somme.poids_brut, e.poids_brut, 2));
+    zone.appendChild(bloc('Poids net', e.origine.poids_net, e.somme.poids_net, e.poids_net, 2));
+    return zone;
   }
 
   function champTexte(objet, cle, placeholder) {
@@ -829,21 +1063,70 @@
   function recalculerTotaux() {
     var d = etat.dossier;
     var pb = 0, pn = 0, v = 0;
-    d.articles.forEach(function (a) { pb += nb(a.poids_brut); pn += nb(a.poids_net); v += nb(a.valeur); });
+    // Les lignes mères sont exclues : leur contenu est déjà dans les
+    // sous-lignes, les compter reviendrait à doubler la marchandise.
+    lignesLiquidables().forEach(function (r) {
+      var a = r.article;
+      pb += nb(a.poids_brut); pn += nb(a.poids_net); v += nb(a.valeur);
+    });
     $('#total-poids-brut').textContent = fr(pb, 2);
     $('#total-poids-net').textContent = fr(pn, 2);
     $('#total-valeur').textContent = fr(v, 2) + ' ' + (d.devise || '');
+    rafraichirControlesEclatement();
+    peindreAvisArticles();
+  }
+
+  /* Remplace le contenu des résumés de lignes mères sans redessiner le
+   * tableau : un redessin en pleine saisie ferait perdre le curseur. */
+  function rafraichirControlesEclatement() {
+    Object.keys(resumesEclatement).forEach(function (id) {
+      var noeud = resumesEclatement[id];
+      if (!noeud || !noeud.parentNode) return;
+      var article = etat.dossier.articles.filter(function (a) { return a.id === id; })[0];
+      if (!article) return;
+      var neuf = construireResumeEclatement(article);
+      noeud.parentNode.replaceChild(neuf, noeud);
+      resumesEclatement[id] = neuf;
+    });
   }
 
   function peindreAvisArticles() {
     var z = $('#articles-avis');
     z.innerHTML = '';
     var d = etat.dossier;
-    var sansTaux = d.articles.filter(function (a) {
+    // Seules les lignes qui se liquident sont contrôlées : une ligne mère n'a
+    // ni taux ni poids, et le lui reprocher n'aurait pas de sens.
+    var aLiquider = lignesLiquidables().map(function (r) { return r.article; });
+    var sansTaux = aLiquider.filter(function (a) {
       return (a.designation || a.position) && (a.taux_dd_pct === '' || a.taux_dd_pct === null || a.taux_dd_pct === undefined);
     }).length;
-    var horsTarif = d.articles.filter(function (a) { return a.position && !a.verifie_en_base; }).length;
-    var sansPoids = d.articles.filter(function (a) { return nb(a.valeur) > 0 && nb(a.poids_brut) <= 0; }).length;
+    var horsTarif = aLiquider.filter(function (a) { return a.position && !a.verifie_en_base; }).length;
+    var sansPoids = aLiquider.filter(function (a) { return nb(a.valeur) > 0 && nb(a.poids_brut) <= 0; }).length;
+
+    // L'écart d'éclatement passe avant tout le reste : c'est de la marchandise
+    // qui disparaît ou qui se duplique, pas une case mal remplie.
+    var ecarts = [];
+    articlesOrdonnes(d.articles).forEach(function (r) {
+      if (!r.mere) return;
+      var e = ecartEclatement(r.article);
+      if (!e) return;
+      if (Math.abs(e.valeur) >= 0.005 || Math.abs(e.poids_brut) >= 0.005) {
+        ecarts.push({ numero: r.numero, ecart: e });
+      }
+    });
+    ecarts.forEach(function (x) {
+      var morceaux = [];
+      if (Math.abs(x.ecart.valeur) >= 0.005) {
+        morceaux.push('valeur ' + (x.ecart.valeur > 0 ? '+' : '') + fr(x.ecart.valeur, 2));
+      }
+      if (Math.abs(x.ecart.poids_brut) >= 0.005) {
+        morceaux.push('poids brut ' + (x.ecart.poids_brut > 0 ? '+' : '') + fr(x.ecart.poids_brut, 2) + ' kg');
+      }
+      z.appendChild(avis('erreur', 'Ligne ' + x.numero + " : l’éclatement ne retombe pas juste.",
+        'Les sous-lignes totalisent ' + morceaux.join(' et ') + ' par rapport à la ligne d’origine. ' +
+        'Une marchandise a été oubliée en route, ou comptée deux fois. La liquidation se fera sur les sous-lignes ' +
+        'telles qu’elles sont — corrigez avant de déposer.'));
+    });
 
     if (etat.tec.length === 0) {
       z.appendChild(avis('attention', 'Le tarif douanier n’est pas encore chargé.',
@@ -1132,13 +1415,19 @@
     var regime = regimeCourant();
     if (!regime) throw new L.Refus('Aucun régime douanier choisi.');
 
-    var lignes = d.articles
-      .filter(function (a) { return a.designation || a.position || nb(a.valeur) > 0; })
-      .map(function (a, i) {
+    // Une ligne mère ne se liquide pas : elle regroupe ses sous-lignes, et ce
+    // sont elles qui portent la valeur. La compter doublerait la marchandise.
+    var lignes = lignesLiquidables()
+      .filter(function (r) {
+        var a = r.article;
+        return a.designation || a.position || nb(a.valeur) > 0;
+      })
+      .map(function (r) {
+        var a = r.article;
         var pct = a.taux_dd_pct;
         return {
-          numero: i + 1,
-          designation: a.designation || a.designation_tec || ('Article ' + (i + 1)),
+          numero: r.numero,
+          designation: a.designation || a.designation_tec || ('Article ' + r.numero),
           position: a.position,
           designation_tec: a.designation_tec,
           unite: a.unite,
@@ -1149,7 +1438,9 @@
           taux_dd: (pct === '' || pct === null || pct === undefined) ? null : nb(pct) / 100,
           exoneration: nb(a.exoneration_pct) / 100,
           fob_xof: nb(a.valeur) * taux,
-          poids_brut_kg: nb(a.poids_brut)
+          fob_devise: nb(a.valeur),
+          poids_brut_kg: nb(a.poids_brut),
+          poids_net_kg: nb(a.poids_net)
         };
       });
 
@@ -1467,13 +1758,17 @@
       regime_libelle: regime.libelle || '',
       bureau_nom: d.bureau_nom,
       mode_libelle: ((etat.listes.modes || []).filter(function (m) { return m.code === d.mode; })[0] || {}).libelle || '',
+      nature_colis_libelle: ((etat.listes.colis || []).filter(function (c) { return c.code === d.nature_colis; })[0] || {}).libelle || '',
       provenance_nom: nomPays(d.provenance),
-      origine_nom: nomPays(d.origine)
+      origine_nom: nomPays(d.origine),
+      type_declaration: regime.sens === 'export' ? 'EX' : (regime.sens === 'transit' ? 'T' : 'IM')
     });
+    contexte.documents = etat.listes.documents;
     try {
-      var r = genre === 'devis'
-        ? PDF.devis(infos, d.liquidation, d.chiffrage, contexte)
-        : PDF.note(infos, d.liquidation, contexte);
+      var r;
+      if (genre === 'devis') r = PDF.devis(infos, d.liquidation, d.chiffrage, contexte);
+      else if (genre === 'sydam') r = PDF.feuilleSydam(infos, d.liquidation, contexte);
+      else r = PDF.note(infos, d.liquidation, contexte);
       r.doc.save(r.nom);
       message(r.nom + ' généré.', 'succes');
     } catch (e) {
@@ -1896,6 +2191,7 @@
     $('#btn-restaurer-liste').addEventListener('click', restaurerListe);
 
     $('#btn-ajouter-modele').addEventListener('click', function () { formulaireModeleDevis(null); });
+    brancherTauxChange();
 
     $('#btn-sauvegarder').addEventListener('click', function () {
       BASE.exporterTout(false).then(function (p) {
@@ -2085,6 +2381,7 @@
     }
     peindreEditeurListe();
     peindreModelesDevis();
+    peindreTauxChange();
 
     // Devis.
     $('#reglages-validite').value = etat.validite;
@@ -2156,6 +2453,123 @@
           .then(function () { fermerModale(); peindreTauxPersonnels(); message('Taux personnel enregistré.', 'succes'); });
       } }
     ]);
+  }
+
+  /* ------------------------------------------------ taux de change douaniers */
+
+  function peindreTauxChange() {
+    var corps = $('#table-taux-change tbody');
+    if (!corps) return;
+    corps.innerHTML = '';
+    var monnaies = {};
+    (etat.listes.monnaies || []).forEach(function (m) { monnaies[m.code] = m; });
+    var entrees = etat.tauxChange.slice().sort(function (a, b) { return a.code.localeCompare(b.code); });
+
+    $('#reglages-taux-indice').textContent = entrees.length
+      ? entrees.length + ' monnaie' + (entrees.length > 1 ? 's' : '')
+      : 'aucun taux enregistré';
+
+    if (!entrees.length) {
+      corps.appendChild(el('tr', {}, [el('td', {
+        colspan: '6', style: 'color:var(--gris);padding:14px',
+        texte: 'Aucun taux enregistré. Les monnaies à parité fixe — franc CFA, euro — n’en ont pas besoin ; ' +
+               'toutes les autres demanderont une saisie à chaque déclaration tant que la table est vide.'
+      })]));
+      return;
+    }
+    entrees.forEach(function (t) {
+      var m = monnaies[t.code];
+      var tr = el('tr');
+      tr.appendChild(el('td', { style: 'font-weight:700', texte: t.code }));
+      tr.appendChild(el('td', { texte: m ? m.nom : '—' }));
+      tr.appendChild(el('td', { class: 'num', style: 'font-weight:650', texte: fr(nb(t.taux), 4) }));
+      tr.appendChild(el('td', { texte: t.date_effet ? frDate(t.date_effet) : '—' }));
+      tr.appendChild(el('td', { style: 'color:var(--gris)', texte: t.source || '—' }));
+      tr.appendChild(el('td', {}, [
+        el('button', { class: 'icone', title: 'Modifier', onclick: function () { formulaireTauxChange(t); } }, [icone('declaration')]),
+        el('button', { class: 'icone danger', title: 'Retirer', onclick: function () {
+          BASE.supprimer('taux_change', t.code)
+            .then(BASE.tauxChange)
+            .then(function (l) { etat.tauxChange = l; peindreTauxChange(); });
+        } }, [icone('poubelle')])
+      ]));
+      corps.appendChild(tr);
+    });
+  }
+
+  function formulaireTauxChange(entree) {
+    var v = Object.assign({ code: '', taux: '', date_effet: aujourdhui(), source: '' }, entree || {});
+    var corps = el('div', { class: 'champs' });
+
+    var sel = el('select');
+    // Les monnaies à parité fixe sont écartées : leur taux est un ancrage
+    // légal, pas une valeur à reporter.
+    var choix = (etat.listes.monnaies || [])
+      .filter(function (m) { return m.parite === null || m.parite === undefined; })
+      .map(function (m) { return { valeur: m.code, libelle: m.code + ' — ' + m.nom }; });
+    remplirSelect(sel, choix, v.code, { vide: '— choisir la monnaie —' });
+
+    var iTaux = el('input', { class: 'nombre', inputmode: 'decimal', value: v.taux || '', placeholder: 'ex. 605,1234' });
+    var iDate = el('input', { type: 'date', value: v.date_effet || '' });
+    var iSource = el('input', { value: v.source || '', placeholder: 'GUCE, avis de la Douane, n° de bulletin…' });
+
+    corps.appendChild(el('div', { class: 'champ c12' }, [el('label', { texte: 'Monnaie' }), sel]));
+    corps.appendChild(el('div', { class: 'champ c6' }, [el('label', { texte: '1 unité de cette monnaie vaut, en XOF' }), iTaux]));
+    corps.appendChild(el('div', { class: 'champ c6' }, [el('label', { texte: 'En vigueur à partir du' }), iDate]));
+    corps.appendChild(el('div', { class: 'champ c12' }, [el('label', { texte: 'Source' }), iSource]));
+    corps.appendChild(el('div', { class: 'champ c12' }, [el('p', { class: 'aide', texte:
+      'Portez le taux tel que la Douane le publie. C’est lui qui construit la valeur en douane : un chiffre ' +
+      'approché ici se retrouve dans le droit de douane, dans la TVA, et dans le devis remis au client.' })]));
+
+    modale(entree && entree.taux !== undefined ? 'Modifier le taux' : 'Nouveau taux de change douanier', corps, [
+      { libelle: 'Annuler', action: fermerModale },
+      { libelle: 'Enregistrer', genre: 'primaire', action: function () {
+        if (!sel.value) { message('Choisissez la monnaie.', 'attention'); return; }
+        if (nb(iTaux.value) <= 0) { message('Le taux doit être un nombre supérieur à zéro.', 'attention'); return; }
+        var avant = (entree && entree.code && entree.code !== sel.value)
+          ? BASE.supprimer('taux_change', entree.code) : Promise.resolve();
+        avant
+          .then(function () { return BASE.poserTauxChange(sel.value, nb(iTaux.value), iDate.value, iSource.value.trim()); })
+          .then(BASE.tauxChange)
+          .then(function (l) {
+            etat.tauxChange = l;
+            fermerModale();
+            peindreTauxChange();
+            if (etat.dossier && etat.dossier.devise === sel.value) surChangementDevise();
+            message('Taux enregistré. Il sera proposé d’office pour le ' + sel.value + '.', 'succes');
+          });
+      } }
+    ]);
+  }
+
+  function brancherTauxChange() {
+    $('#btn-ajouter-taux-change').addEventListener('click', function () { formulaireTauxChange(null); });
+    $('#btn-exporter-taux').addEventListener('click', function () {
+      if (!etat.tauxChange.length) { message('La table est vide.', 'attention'); return; }
+      telecharger('taux-change-douaniers-' + aujourdhui() + '.json', JSON.stringify({
+        source: 'Cotation E-Transit', exporte_le: new Date().toISOString(), taux: etat.tauxChange
+      }, null, 2));
+      message(etat.tauxChange.length + ' taux exportés.', 'succes');
+    });
+    $('#btn-importer-taux').addEventListener('click', function () {
+      lireFichier('.json,application/json').then(function (f) {
+        if (!f) return;
+        var charge;
+        try { charge = JSON.parse(f.contenu); }
+        catch { message('Ce fichier n’est pas lisible.', 'erreur'); return; }
+        var liste = Array.isArray(charge) ? charge : charge.taux;
+        if (!Array.isArray(liste) || !liste.length) { message('Aucun taux dans ce fichier.', 'attention'); return; }
+        var valides = liste.filter(function (t) { return t && t.code && nb(t.taux) > 0; });
+        if (!valides.length) { message('Aucun taux exploitable : il faut un code monnaie et un taux positif.', 'erreur'); return; }
+        BASE.ecrireLot('taux_change', valides.map(function (t) {
+          return { code: t.code, taux: nb(t.taux), date_effet: t.date_effet || '', source: t.source || 'Fichier importé', pose_le: new Date().toISOString() };
+        })).then(BASE.tauxChange).then(function (l) {
+          etat.tauxChange = l;
+          peindreTauxChange();
+          message(valides.length + ' taux importés' + (valides.length < liste.length ? ', ' + (liste.length - valides.length) + ' écartés faute de code ou de taux' : '') + '.', 'succes');
+        });
+      });
+    });
   }
 
   /* ------------------------------------------------------ éditeur de liste */

@@ -10,7 +10,7 @@
   Les données saisies restent dans la base locale du navigateur de ce poste.
   Sauvegarde régulière depuis Réglages → Sauvegarder tout.
 
-  Construit le 2026-09-10. By Dems'Inc — Demsy Landry.
+  Construit le 2026-09-14. By Dems'Inc — Demsy Landry.
   Contient jsPDF (MIT, https://github.com/parallax/jsPDF).
 -->
 
@@ -549,6 +549,49 @@ table.t td input:focus, table.t td select:focus { border-color: var(--accent-vif
 .vide svg { width: 46px; height: 46px; opacity: .3; margin-bottom: 10px; }
 .vide .titre { font-weight: 650; color: var(--encre-douce); margin-bottom: 4px; }
 
+/* ------------------------------------------------- lignes et sous-lignes */
+/* Une ligne mère regroupe, elle ne se liquide pas. Elle se distingue donc à
+   l'œil : fond gris, numéro en gras, et ses sous-lignes décalées sous elle. */
+
+table.t tbody tr.ligne-mere { background: var(--carte-douce); }
+table.t tbody tr.ligne-mere:hover { background: #eef2f7; }
+table.t tbody tr.ligne-mere td { border-bottom-color: var(--trait-fort); }
+table.t tbody tr.ligne-mere .numero-ligne span {
+  background: var(--encre-douce);
+  color: #fff;
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-weight: 700;
+}
+table.t tbody tr.sous-ligne .numero-ligne span {
+  color: var(--accent);
+  font-weight: 700;
+}
+table.t tbody tr.sous-ligne td:first-child { position: relative; }
+table.t tbody tr.sous-ligne td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 9px; top: 0; bottom: 50%;
+  border-left: 1.5px solid var(--trait-fort);
+  border-bottom: 1.5px solid var(--trait-fort);
+  width: 7px;
+  border-bottom-left-radius: 5px;
+}
+td.actions-ligne { white-space: nowrap; text-align: right; }
+
+@media (max-width: 760px) {
+  table.t.t-empilee tbody tr.ligne-mere {
+    background: var(--carte-douce);
+    border-color: var(--trait-fort);
+  }
+  table.t.t-empilee tbody tr.sous-ligne {
+    margin-left: 14px;
+    border-left: 3px solid var(--accent-pale);
+  }
+  table.t.t-empilee tbody tr.sous-ligne td:first-child::before { display: none; }
+  table.t.t-empilee tbody td.actions-ligne { justify-content: flex-end; gap: 4px; }
+}
+
 /* ---------------------------------------------------------------- pastilles */
 
 .etiq {
@@ -960,6 +1003,7 @@ table.t td input:focus, table.t td select:focus { border-color: var(--accent-vif
 <symbol id="i-navire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 19c1.6 0 1.6 1.4 3.2 1.4S6.8 19 8.4 19s1.6 1.4 3.2 1.4S13.2 19 14.8 19s1.6 1.4 3.2 1.4S19.6 19 22 19"/><path d="M4 17V9l8-3 8 3v8"/><path d="M12 6V3M9 12h6"/></symbol>
 <symbol id="i-balance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10"/><path d="M5 7h14M8 7l-4 8h8zM16 7l4 8h-8z"/></symbol>
 <symbol id="i-billet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/></symbol>
+<symbol id="i-eclater" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6a3 3 0 0 0 3 3h13"/><path d="M4 13v3a3 3 0 0 0 3 3h13"/><path d="m17 9 3 4-3 4"/><path d="m17 16 3 3-3 3" opacity="0"/></symbol>
 <symbol id="i-dossier" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
 </defs></svg>
 
@@ -1452,6 +1496,30 @@ table.t td input:focus, table.t td select:focus { border-color: var(--accent-vif
       </div>
 
       <div class="carte">
+        <header><h3>Taux de change douaniers</h3><span class="indice" id="reglages-taux-indice">—</span>
+          <div class="actions">
+            <button class="b petit" id="btn-exporter-taux"><svg><use href="#i-telecharger"/></svg>Exporter</button>
+            <button class="b petit" id="btn-importer-taux"><svg><use href="#i-televerser"/></svg>Importer</button>
+            <button class="b petit primaire" id="btn-ajouter-taux-change"><svg><use href="#i-plus"/></svg>Ajouter un taux</button>
+          </div>
+        </header>
+        <div class="corps">
+          <p class="aide" style="margin-bottom:12px;max-width:74ch">
+            La Douane publie sa propre table de taux, et c’est elle qui fait la valeur en douane. Un cours de banque
+            ou de marché donnerait une valeur CAF fausse, donc des droits faux : l’application n’en ira jamais
+            chercher. Reportez ici les taux du GUCE, avec leur date d’entrée en vigueur ; ils seront proposés
+            d’office à chaque déclaration, et resteront corrigeables dossier par dossier.
+          </p>
+          <div class="tableau-cadre">
+            <table class="t" id="table-taux-change">
+              <thead><tr><th style="width:90px">Monnaie</th><th>Libellé</th><th style="width:130px" class="num">1 unité = XOF</th><th style="width:120px">En vigueur le</th><th>Source</th><th style="width:40px"></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="carte">
         <header><h3>Listes de référence</h3><span class="indice">Tout est modifiable et complétable</span></header>
         <div class="corps">
           <div class="champs">
@@ -1554,23 +1622,117 @@ window.REFERENCE = (function () {
    * elle ne bouge jamais et ne vient d'aucune API de change. Les monnaies
    * sans parité fixe demandent un taux saisi, celui du jour de la facture. */
   var MONNAIES = [
-    { code: 'XOF', nom: 'Franc CFA (BCEAO)',       parite: 1,        courant: true },
-    { code: 'EUR', nom: 'Euro',                    parite: 655.957,  courant: true },
-    { code: 'USD', nom: 'Dollar des États-Unis',   parite: null,     courant: true },
-    { code: 'CNY', nom: 'Yuan chinois',            parite: null,     courant: true },
-    { code: 'XAF', nom: 'Franc CFA (BEAC)',        parite: 1,        courant: false },
-    { code: 'GBP', nom: 'Livre sterling',          parite: null,     courant: false },
-    { code: 'AED', nom: 'Dirham des Émirats',      parite: null,     courant: false },
-    { code: 'MAD', nom: 'Dirham marocain',         parite: null,     courant: false },
-    { code: 'TND', nom: 'Dinar tunisien',          parite: null,     courant: false },
-    { code: 'TRY', nom: 'Livre turque',            parite: null,     courant: false },
-    { code: 'GHS', nom: 'Cedi ghanéen',            parite: null,     courant: false },
-    { code: 'NGN', nom: 'Naira nigérian',          parite: null,     courant: false },
-    { code: 'ZAR', nom: 'Rand sud-africain',       parite: null,     courant: false },
-    { code: 'INR', nom: 'Roupie indienne',         parite: null,     courant: false },
-    { code: 'JPY', nom: 'Yen japonais',            parite: null,     courant: false },
-    { code: 'CHF', nom: 'Franc suisse',            parite: null,     courant: false },
-    { code: 'CAD', nom: 'Dollar canadien',         parite: null,     courant: false }
+    /* --- parités fixes, ancrages légaux : elles ne bougent pas -------- */
+    { code: 'XOF', nom: 'Franc CFA (BCEAO)',            parite: 1,       courant: true },
+    { code: 'EUR', nom: 'Euro',                         parite: 655.957, courant: true },
+    { code: 'XAF', nom: 'Franc CFA (BEAC)',             parite: 1,       courant: false },
+    /* Le franc comorien et le franc Pacifique sont arrimés à l'euro, mais
+     * leur parité avec le franc CFA est une valeur dérivée, pas un ancrage
+     * publié. Plutôt que d'en livrer une arrondie, on les traite comme les
+     * autres : le taux se saisit. */
+    { code: 'KMF', nom: 'Franc comorien',               parite: null, courant: false },
+    { code: 'XPF', nom: 'Franc Pacifique',              parite: null, courant: false },
+
+    /* --- monnaies courantes des fournisseurs et des acheteurs --------- */
+    { code: 'USD', nom: 'Dollar des États-Unis',        parite: null, courant: true },
+    { code: 'CNY', nom: 'Yuan renminbi chinois',        parite: null, courant: true },
+    { code: 'AED', nom: 'Dirham des Émirats arabes unis', parite: null, courant: true },
+    { code: 'GBP', nom: 'Livre sterling',               parite: null, courant: true },
+    { code: 'INR', nom: 'Roupie indienne',              parite: null, courant: true },
+    { code: 'TRY', nom: 'Livre turque',                 parite: null, courant: true },
+    { code: 'MAD', nom: 'Dirham marocain',              parite: null, courant: true },
+    { code: 'GHS', nom: 'Cedi ghanéen',                 parite: null, courant: true },
+    { code: 'NGN', nom: 'Naira nigérian',               parite: null, courant: true },
+
+    /* --- Afrique ------------------------------------------------------ */
+    { code: 'DZD', nom: 'Dinar algérien',               parite: null, courant: false },
+    { code: 'AOA', nom: 'Kwanza angolais',              parite: null, courant: false },
+    { code: 'BIF', nom: 'Franc burundais',              parite: null, courant: false },
+    { code: 'BWP', nom: 'Pula botswanais',              parite: null, courant: false },
+    { code: 'CDF', nom: 'Franc congolais',              parite: null, courant: false },
+    { code: 'CVE', nom: 'Escudo cap-verdien',           parite: null, courant: false },
+    { code: 'DJF', nom: 'Franc de Djibouti',            parite: null, courant: false },
+    { code: 'EGP', nom: 'Livre égyptienne',             parite: null, courant: false },
+    { code: 'ERN', nom: 'Nakfa érythréen',              parite: null, courant: false },
+    { code: 'ETB', nom: 'Birr éthiopien',               parite: null, courant: false },
+    { code: 'GMD', nom: 'Dalasi gambien',               parite: null, courant: false },
+    { code: 'GNF', nom: 'Franc guinéen',                parite: null, courant: false },
+    { code: 'KES', nom: 'Shilling kényan',              parite: null, courant: false },
+    { code: 'LRD', nom: 'Dollar libérien',              parite: null, courant: false },
+    { code: 'LSL', nom: 'Loti lesothan',                parite: null, courant: false },
+    { code: 'LYD', nom: 'Dinar libyen',                 parite: null, courant: false },
+    { code: 'MGA', nom: 'Ariary malgache',              parite: null, courant: false },
+    { code: 'MRU', nom: 'Ouguiya mauritanien',          parite: null, courant: false },
+    { code: 'MUR', nom: 'Roupie mauricienne',           parite: null, courant: false },
+    { code: 'MWK', nom: 'Kwacha malawien',              parite: null, courant: false },
+    { code: 'MZN', nom: 'Metical mozambicain',          parite: null, courant: false },
+    { code: 'NAD', nom: 'Dollar namibien',              parite: null, courant: false },
+    { code: 'RWF', nom: 'Franc rwandais',               parite: null, courant: false },
+    { code: 'SCR', nom: 'Roupie seychelloise',          parite: null, courant: false },
+    { code: 'SDG', nom: 'Livre soudanaise',             parite: null, courant: false },
+    { code: 'SLE', nom: 'Leone sierra-léonais',         parite: null, courant: false },
+    { code: 'SOS', nom: 'Shilling somalien',            parite: null, courant: false },
+    { code: 'SSP', nom: 'Livre sud-soudanaise',         parite: null, courant: false },
+    { code: 'STN', nom: 'Dobra de Sao Tomé-et-Principe', parite: null, courant: false },
+    { code: 'SZL', nom: 'Lilangeni swazi',              parite: null, courant: false },
+    { code: 'TND', nom: 'Dinar tunisien',               parite: null, courant: false },
+    { code: 'TZS', nom: 'Shilling tanzanien',           parite: null, courant: false },
+    { code: 'UGX', nom: 'Shilling ougandais',           parite: null, courant: false },
+    { code: 'ZAR', nom: 'Rand sud-africain',            parite: null, courant: false },
+    { code: 'ZMW', nom: 'Kwacha zambien',               parite: null, courant: false },
+    { code: 'ZWG', nom: 'Or du Zimbabwe (ZiG)',         parite: null, courant: false },
+
+    /* --- Asie et Moyen-Orient ----------------------------------------- */
+    { code: 'BDT', nom: 'Taka bangladais',              parite: null, courant: false },
+    { code: 'BHD', nom: 'Dinar bahreïni',               parite: null, courant: false },
+    { code: 'HKD', nom: 'Dollar de Hong Kong',          parite: null, courant: false },
+    { code: 'IDR', nom: 'Roupie indonésienne',          parite: null, courant: false },
+    { code: 'ILS', nom: 'Shekel israélien',             parite: null, courant: false },
+    { code: 'IQD', nom: 'Dinar irakien',                parite: null, courant: false },
+    { code: 'IRR', nom: 'Rial iranien',                 parite: null, courant: false },
+    { code: 'JOD', nom: 'Dinar jordanien',              parite: null, courant: false },
+    { code: 'JPY', nom: 'Yen japonais',                 parite: null, courant: false },
+    { code: 'KRW', nom: 'Won sud-coréen',               parite: null, courant: false },
+    { code: 'KWD', nom: 'Dinar koweïtien',              parite: null, courant: false },
+    { code: 'LBP', nom: 'Livre libanaise',              parite: null, courant: false },
+    { code: 'LKR', nom: 'Roupie srilankaise',           parite: null, courant: false },
+    { code: 'MYR', nom: 'Ringgit malaisien',            parite: null, courant: false },
+    { code: 'OMR', nom: 'Rial omanais',                 parite: null, courant: false },
+    { code: 'PHP', nom: 'Peso philippin',               parite: null, courant: false },
+    { code: 'PKR', nom: 'Roupie pakistanaise',          parite: null, courant: false },
+    { code: 'QAR', nom: 'Riyal qatari',                 parite: null, courant: false },
+    { code: 'SAR', nom: 'Riyal saoudien',               parite: null, courant: false },
+    { code: 'SGD', nom: 'Dollar de Singapour',          parite: null, courant: false },
+    { code: 'THB', nom: 'Baht thaïlandais',             parite: null, courant: false },
+    { code: 'TWD', nom: 'Dollar de Taïwan',             parite: null, courant: false },
+    { code: 'VND', nom: 'Dong vietnamien',              parite: null, courant: false },
+
+    /* --- Europe hors zone euro ---------------------------------------- */
+    { code: 'BGN', nom: 'Lev bulgare',                  parite: null, courant: false },
+    { code: 'CHF', nom: 'Franc suisse',                 parite: null, courant: false },
+    { code: 'CZK', nom: 'Couronne tchèque',             parite: null, courant: false },
+    { code: 'DKK', nom: 'Couronne danoise',             parite: null, courant: false },
+    { code: 'HUF', nom: 'Forint hongrois',              parite: null, courant: false },
+    { code: 'ISK', nom: 'Couronne islandaise',          parite: null, courant: false },
+    { code: 'NOK', nom: 'Couronne norvégienne',         parite: null, courant: false },
+    { code: 'PLN', nom: 'Zloty polonais',               parite: null, courant: false },
+    { code: 'RON', nom: 'Leu roumain',                  parite: null, courant: false },
+    { code: 'RSD', nom: 'Dinar serbe',                  parite: null, courant: false },
+    { code: 'RUB', nom: 'Rouble russe',                 parite: null, courant: false },
+    { code: 'SEK', nom: 'Couronne suédoise',            parite: null, courant: false },
+    { code: 'UAH', nom: 'Hryvnia ukrainienne',          parite: null, courant: false },
+
+    /* --- Amériques et Océanie ----------------------------------------- */
+    { code: 'ARS', nom: 'Peso argentin',                parite: null, courant: false },
+    { code: 'AUD', nom: 'Dollar australien',            parite: null, courant: false },
+    { code: 'BRL', nom: 'Réal brésilien',               parite: null, courant: false },
+    { code: 'CAD', nom: 'Dollar canadien',              parite: null, courant: false },
+    { code: 'CLP', nom: 'Peso chilien',                 parite: null, courant: false },
+    { code: 'COP', nom: 'Peso colombien',               parite: null, courant: false },
+    { code: 'MXN', nom: 'Peso mexicain',                parite: null, courant: false },
+    { code: 'NZD', nom: 'Dollar néo-zélandais',         parite: null, courant: false },
+    { code: 'PEN', nom: 'Sol péruvien',                 parite: null, courant: false },
+    { code: 'UYU', nom: 'Peso uruguayen',               parite: null, courant: false }
   ];
 
   /* ------------------------------------------------------------------- pays */
@@ -2023,7 +2185,9 @@ window.LIQUIDATION = (function () {
         taux_dd_saisi: !!l.taux_dd_saisi,
         quantite: nombre(l.quantite),
         fob_xof: f(fob),
+        fob_devise: nombre(l.fob_devise),
         poids_brut_kg: poids,
+        poids_net_kg: nombre(l.poids_net_kg),
         poids_stat_kg: Math.round(poidsStat * 1000) / 1000,
         fret_xof: f(fret),
         assurance_xof: f(assurance),
@@ -2133,7 +2297,7 @@ window.BASE = (function () {
   'use strict';
 
   var NOM = 'etransit-cotation';
-  var VERSION = 1;
+  var VERSION = 2;
   var bd = null;
 
   var MAGASINS = {
@@ -2144,7 +2308,12 @@ window.BASE = (function () {
     transporteurs:   { keyPath: 'id', index: { nom: 'nom' } },
     tec:             { keyPath: 'code' },
     taux_personnels: { keyPath: 'code' },
-    modeles_devis:   { keyPath: 'id' }
+    modeles_devis:   { keyPath: 'id' },
+    /* Les taux de change retenus par la Douane. Ce ne sont pas des cours de
+     * marché : la Douane publie sa propre table, et c'est elle qui fait foi
+     * pour la valeur en douane. Un cours de banque centrale donnerait une
+     * valeur CAF fausse, donc des droits faux. */
+    taux_change:     { keyPath: 'code' }
   };
 
   /* Le motif n'est pas le m\u00eame selon d'o\u00f9 l'application est ouverte, et la
@@ -2306,6 +2475,22 @@ window.BASE = (function () {
     });
   }
 
+  /* ----------------------------------------------- taux de change douaniers */
+
+  function tauxChange() {
+    return tout('taux_change');
+  }
+
+  function poserTauxChange(code, taux, dateEffet, source) {
+    return ecrire('taux_change', {
+      code: code,
+      taux: taux,
+      date_effet: dateEffet || '',
+      source: source || '',
+      pose_le: new Date().toISOString()
+    });
+  }
+
   /* -------------------------------------------------- listes de référence */
   /* Les listes vivent en base, pas dans le code : E-Transit peut en ajouter,
    * en corriger, en retirer. L'amorce livrée avec l'application ne sert qu'au
@@ -2453,7 +2638,7 @@ window.BASE = (function () {
 
   function exporterTout(avecTarif) {
     var magasins = ['parametres', 'dossiers', 'importateurs', 'fournisseurs',
-      'transporteurs', 'taux_personnels', 'modeles_devis'];
+      'transporteurs', 'taux_personnels', 'modeles_devis', 'taux_change'];
     if (avecTarif) magasins.push('tec');
     return Promise.all(magasins.map(tout)).then(function (resultats) {
       var paquet = { application: 'Cotation E-Transit', version: VERSION, exporte_le: new Date().toISOString(), donnees: {} };
@@ -2480,6 +2665,7 @@ window.BASE = (function () {
     liste: liste, poserListe: poserListe, semer: semer, LISTES: LISTES,
     oublierAncienCodeAcces: oublierAncienCodeAcces,
     oublierResponsableParDefaut: oublierResponsableParDefaut,
+    tauxChange: tauxChange, poserTauxChange: poserTauxChange,
     numeroSuivant: numeroSuivant, identifiant: identifiant,
     sourceTec: sourceTec, SOURCE_TEC_DEFAUT: SOURCE_TEC_DEFAUT,
     synchroniserTec: synchroniserTec, importerTecDepuisTexte: importerTecDepuisTexte,
@@ -3338,9 +3524,235 @@ window.PDF = (function () {
     return { doc: doc, nom: nomFichier('Liquidation', dossier) };
   }
 
+  /* ------------------------------------------------- feuille de saisie SYDAM */
+  /* Ce document ne sert qu'à une chose : être posé à côté de l'écran pendant
+   * la saisie. Chaque valeur porte le numéro de la case du document
+   * administratif unique où elle va. On ne recalcule rien à la Douane, on
+   * recopie — et ce qui n'est pas connu porte un tiret, jamais une valeur
+   * de remplissage. */
+
+  function grilleCases(doc, y, cases, parLigne, largeurTotale) {
+    parLigne = parLigne || 3;
+    var largeur = (largeurTotale || UTILE) / parLigne;
+    var hauteur = 11;
+    var colonne = 0;
+    var yDebut = y;
+
+    cases.forEach(function (c) {
+      var etendue = Math.min(c.large || 1, parLigne);
+      if (colonne + etendue > parLigne) { colonne = 0; y += hauteur; }
+      if (y + hauteur > HAUTEUR - 24) {
+        doc.addPage();
+        y = MARGE; yDebut = y; colonne = 0;
+      }
+      var x = MARGE + colonne * largeur;
+      var l = largeur * etendue;
+
+      doc.setDrawColor(TRAIT[0], TRAIT[1], TRAIT[2]);
+      doc.rect(x, y, l, hauteur);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.8);
+      doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+      doc.text((c.case ? 'CASE ' + c.case + ' · ' : '') + c.libelle.toUpperCase(), x + 1.8, y + 3.4, { maxWidth: l - 3.6 });
+
+      doc.setFont('helvetica', c.gras === false ? 'normal' : 'bold');
+      doc.setFontSize(8.4);
+      var valeur = (c.valeur === null || c.valeur === undefined || c.valeur === '') ? '—' : String(c.valeur);
+      doc.setTextColor(valeur === '—' ? GRIS[0] : ENCRE[0], valeur === '—' ? GRIS[1] : ENCRE[1], valeur === '—' ? GRIS[2] : ENCRE[2]);
+      doc.text(valeur, x + 1.8, y + 8.4, { maxWidth: l - 3.6 });
+
+      colonne += etendue;
+    });
+    void yDebut;
+    return y + hauteur + 5;
+  }
+
+  function titreSection(doc, y, texte) {
+    if (y + 12 > HAUTEUR - 24) { doc.addPage(); y = MARGE; }
+    doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+    doc.rect(MARGE, y, UTILE, 6, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(255, 255, 255);
+    doc.text(texte.toUpperCase(), MARGE + 2.5, y + 4.2);
+    return y + 9;
+  }
+
+  function feuilleSydam(dossier, liquidation, contexte) {
+    var doc = creer();
+    var y = entete(doc, contexte, 'FEUILLE DE SAISIE SYDAM',
+      'Dossier ' + (dossier.numero || '—') + (dossier.numero_declaration ? ' · décl. ' + dossier.numero_declaration : ''));
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
+    doc.text(
+      'Document de travail : chaque valeur porte le numéro de la case du DAU où elle se saisit. ' +
+      'Un tiret signifie que la donnée n’a pas été renseignée — il n’y a rien à recopier.',
+      MARGE, y, { maxWidth: UTILE }
+    );
+    y += 7;
+
+    var g = liquidation.globaux;
+    var devise = dossier.devise || 'XOF';
+    var taux = LIQ().nombre(dossier.taux_change) || 1;
+
+    /* ------------------------------------------------------------- cadre A */
+    y = titreSection(doc, y, 'Cadre A — bureau, régime, déclarant');
+    y = grilleCases(doc, y, [
+      { case: '1', libelle: 'Type de déclaration', valeur: dossier.type_declaration || (dossier.regime_code ? dossier.regime_code.charAt(0) === '1' || dossier.regime_code.charAt(0) === '3' ? 'EX' : 'IM' : '—') },
+      { case: 'A', libelle: 'Bureau de douane', valeur: [dossier.bureau_code, dossier.bureau_nom].filter(Boolean).join(' · '), large: 2 },
+      { case: '37', libelle: 'Régime douanier', valeur: dossier.regime_code, },
+      { case: '37', libelle: 'Libellé du régime', valeur: dossier.regime_libelle, large: 2, gras: false },
+      { case: '7', libelle: 'N° de déclaration', valeur: dossier.numero_declaration },
+      { case: '—', libelle: 'Date de déclaration', valeur: dossier.date ? new Date(dossier.date).toLocaleDateString('fr-FR') : '' },
+      { case: '—', libelle: 'Référence dossier', valeur: dossier.numero }
+    ], 3);
+
+    /* -------------------------------------------------------------- parties */
+    y = titreSection(doc, y, 'Parties');
+    y = grilleCases(doc, y, [
+      { case: '2', libelle: 'Exportateur / fournisseur', valeur: dossier.fournisseur_nom, large: 3 },
+      { case: '2', libelle: 'Adresse du fournisseur', valeur: dossier.fournisseur_adresse, large: 3, gras: false },
+      { case: '8', libelle: 'Importateur / destinataire', valeur: dossier.importateur_nom, large: 2 },
+      { case: '8', libelle: 'Compte contribuable', valeur: dossier.importateur_contribuable },
+      { case: '8', libelle: 'Adresse de l’importateur', valeur: dossier.importateur_adresse, large: 2, gras: false },
+      { case: '8', libelle: 'Code importateur', valeur: dossier.importateur_code },
+      { case: '14', libelle: 'Déclarant', valeur: dossier.declarant, large: 2 },
+      { case: '14', libelle: 'N° d’agrément', valeur: dossier.declarant_agrement }
+    ], 3);
+
+    /* ------------------------------------------------ origine et transport */
+    y = titreSection(doc, y, 'Origine, provenance et transport');
+    y = grilleCases(doc, y, [
+      { case: '15', libelle: 'Pays d’expédition', valeur: [dossier.provenance, dossier.provenance_nom].filter(Boolean).join(' · ') },
+      { case: '34', libelle: 'Pays d’origine (par défaut)', valeur: [dossier.origine, dossier.origine_nom].filter(Boolean).join(' · ') },
+      { case: '25', libelle: 'Mode de transport', valeur: [dossier.mode, dossier.mode_libelle].filter(Boolean).join(' · ') },
+      { case: '18', libelle: 'Identité du moyen de transport', valeur: dossier.navire, large: 2 },
+      { case: '18', libelle: 'N° de voyage', valeur: dossier.voyage },
+      { case: '40', libelle: 'Titre de transport', valeur: dossier.connaissement },
+      { case: '40', libelle: 'Manifeste', valeur: dossier.manifeste },
+      { case: '29', libelle: 'Bureau d’entrée', valeur: dossier.bureau_entree },
+      { case: '30', libelle: 'Lieu des marchandises', valeur: dossier.lieu_marchandises, large: 2 },
+      { case: '—', libelle: 'Date d’arrivée', valeur: dossier.date_arrivee ? new Date(dossier.date_arrivee).toLocaleDateString('fr-FR') : '' }
+    ], 3);
+
+    /* ------------------------------------------------------ valeur et colis */
+    y = titreSection(doc, y, 'Valeur, transport payé et colis');
+    y = grilleCases(doc, y, [
+      { case: '22', libelle: 'Devise de la facture', valeur: devise },
+      { case: '23', libelle: 'Taux de change appliqué', valeur: devise === 'XOF' ? '1' : fr(taux, 4) },
+      { case: '22', libelle: 'Montant total facturé', valeur: fr(g.fob_total_xof / (taux || 1), 2) + ' ' + devise },
+      { case: '20', libelle: 'Incoterm et lieu', valeur: [dossier.incoterm, dossier.incoterm_lieu].filter(Boolean).join(' ') },
+      { case: '—', libelle: 'N° et date de facture', valeur: [dossier.facture, dossier.date_facture ? new Date(dossier.date_facture).toLocaleDateString('fr-FR') : ''].filter(Boolean).join(' du ') },
+      { case: '12', libelle: 'Valeur FOB totale (XOF)', valeur: fr(g.fob_total_xof) },
+      { case: '12', libelle: 'Fret total (XOF)', valeur: fr(g.fret_total_xof) },
+      { case: '12', libelle: 'Assurance totale (XOF)', valeur: fr(g.assurance_total_xof) },
+      { case: '12', libelle: 'Valeur en douane CAF (XOF)', valeur: fr(g.caf_total_xof) },
+      { case: '6', libelle: 'Nombre total de colis', valeur: dossier.nb_colis },
+      { case: '31', libelle: 'Nature des colis', valeur: [dossier.nature_colis, dossier.nature_colis_libelle].filter(Boolean).join(' · ') },
+      { case: '31', libelle: 'Marques et numéros', valeur: dossier.marques },
+      { case: '35', libelle: 'Masse brute totale (kg)', valeur: fr(g.poids_brut_total_kg, 2) },
+      { case: '5', libelle: 'Nombre d’articles', valeur: liquidation.lignes.length },
+      { case: '—', libelle: 'Conteneurs', valeur: (dossier.conteneurs || []).map(function (c) { return c.numero; }).filter(Boolean).join(', ') }
+    ], 3);
+
+    /* ------------------------------------------------------------- articles */
+    y = titreSection(doc, y, 'Articles — une fiche par article à saisir');
+    liquidation.lignes.forEach(function (l) {
+      if (y + 34 > HAUTEUR - 24) { doc.addPage(); y = MARGE; }
+      doc.setFillColor(FOND_ENTETE[0], FOND_ENTETE[1], FOND_ENTETE[2]);
+      doc.rect(MARGE, y, UTILE, 6, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(ENCRE[0], ENCRE[1], ENCRE[2]);
+      doc.text('Article ' + l.numero + (l.verifie_en_base ? '' : '   —   position hors tarif chargé, taux saisi à la main'), MARGE + 2.5, y + 4.2);
+      y += 6;
+
+      y = grilleCases(doc, y, [
+        { case: '32', libelle: 'N° d’article', valeur: l.numero },
+        { case: '33', libelle: 'Code SH', valeur: l.position },
+        { case: '34', libelle: 'Pays d’origine', valeur: l.origine },
+        { case: '31', libelle: 'Désignation', valeur: l.designation, large: 3, gras: false },
+        { case: '35', libelle: 'Masse brute (kg)', valeur: fr(l.poids_brut_kg, 2) },
+        { case: '38', libelle: 'Masse nette (kg)', valeur: fr(l.poids_net_kg, 2) },
+        { case: '41', libelle: 'Unités complémentaires', valeur: l.quantite ? fr(l.quantite, 2) + ' ' + (l.unite || '') : '' },
+        { case: '42', libelle: 'Prix de l’article (' + devise + ')', valeur: fr(l.fob_devise || (l.fob_xof / (taux || 1)), 2) },
+        { case: '45', libelle: 'Ajustement — fret + assurance (XOF)', valeur: fr(l.fret_xof + l.assurance_xof) },
+        { case: '46', libelle: 'Valeur statistique CAF (XOF)', valeur: fr(l.caf_xof) },
+        { case: '—', libelle: 'Poids statistique (kg)', valeur: fr(l.poids_stat_kg, 2) },
+        { case: '36', libelle: 'Préférence / exonération', valeur: l.exoneration > 0 ? fr(l.exoneration * 100, 0) + ' %' : '' },
+        { case: '47', libelle: 'Taux de droit appliqué', valeur: fr(l.taux_dd_applique * 100, 2) + ' %' }
+      ], 3);
+
+      // Case 47 de l'article : type, base, taux, montant.
+      var lignesTaxes = l.taxes.map(function (t) {
+        return { cellules: [t.code, fr(t.base_xof), fr(t.taux * 100, t.taux < 0.01 ? 2 : 1) + ' %', fr(t.montant_xof)] };
+      });
+      lignesTaxes.push({
+        __total: true,
+        cellules: ['Total article', '', '', fr(l.taxes.reduce(function (s, t) { return s + t.montant_xof; }, 0))]
+      });
+      y = tableau(doc, y, [
+        { titre: 'Case 47 — type', largeur: 30 },
+        { titre: 'Base d’imposition', largeur: 40, aligne: 'right' },
+        { titre: 'Quotité', largeur: 26, aligne: 'right' },
+        { titre: 'Montant (XOF)', largeur: 40, aligne: 'right' }
+      ], lignesTaxes, { hauteurLigne: 5.4, taille: 7.4 });
+    });
+
+    /* ----------------------------------------------------- case 47 globale */
+    y = titreSection(doc, y, 'Case 47 — récapitulatif de la déclaration');
+    var t = liquidation.totaux_taxes;
+    var libelles = {};
+    (contexte.taxes || []).forEach(function (x) { libelles[x.code] = x.libelle; });
+    var recap = Object.keys(t).map(function (code) {
+      var taxe = (contexte.taxes || []).filter(function (x) { return x.code === code; })[0] || {};
+      return {
+        cellules: [
+          code,
+          libelles[code] || '',
+          taxe.niveau === 'declaration' ? 'une fois par déclaration' : 'somme des articles',
+          fr(t[code])
+        ]
+      };
+    });
+    recap.push({ __total: true, cellules: ['', 'TOTAL DES DROITS ET TAXES', '', fr(liquidation.total_a_payer_xof)] });
+    y = tableau(doc, y, [
+      { titre: 'Type', largeur: 24 },
+      { titre: 'Imposition', largeur: UTILE - 24 - 52 - 42 },
+      { titre: 'Niveau', largeur: 52 },
+      { titre: 'Montant (XOF)', largeur: 42, aligne: 'right' }
+    ], recap, { hauteurLigne: 6 });
+
+    /* -------------------------------------------------------- documents 44 */
+    var docs = (contexte.documents || []).filter(function (x) { return (dossier.documents || {})[x.code]; });
+    y = titreSection(doc, y, 'Case 44 — documents joints et mentions spéciales');
+    if (docs.length) {
+      y = paragraphe(doc, y, docs.map(function (x) { return x.code + ' — ' + x.libelle; }).join('   ·   '), { couleur: ENCRE });
+    } else {
+      y = paragraphe(doc, y, 'Aucun document coché au dossier.');
+    }
+    if (dossier.observations) y = paragraphe(doc, y, 'Observations : ' + dossier.observations);
+    if (liquidation.regime && liquidation.regime.mention) y = paragraphe(doc, y, liquidation.regime.mention);
+
+    var horsTarif = liquidation.lignes.filter(function (l) { return !l.verifie_en_base; }).length;
+    if (horsTarif) {
+      y = paragraphe(doc, y,
+        'Réserve : ' + horsTarif + ' position' + (horsTarif > 1 ? 's ont' : ' a') + ' été liquidée' +
+        (horsTarif > 1 ? 's' : '') + ' avec un taux saisi à la main, faute de correspondance dans le tarif chargé. ' +
+        'À confirmer avant dépôt.',
+        { couleur: [176, 106, 0], gras: true });
+    }
+
+    piedDePage(doc, contexte);
+    return { doc: doc, nom: nomFichier('Feuille-SYDAM', dossier) };
+  }
+
   function LIQ() { return window.LIQUIDATION; }
 
-  return { devis: devis, note: note, fr: fr };
+  return { devis: devis, note: note, feuilleSydam: feuilleSydam, fr: fr };
 })();
 </script>
 <script>/* L'interface.
@@ -3365,6 +3777,7 @@ window.PDF = (function () {
     validite: 15,
     tvaHonoraires: 0.18,
     modelesDevis: [],
+    tauxChange: [],
     page: 'bord',
     sauvegardeEnAttente: null
   };
@@ -3580,10 +3993,152 @@ window.PDF = (function () {
 
   function articleVierge() {
     return {
+      id: BASE.identifiant(),
+      parent: null,
       position: '', designation: '', designation_tec: '', origine: '',
       quantite: '', unite: '', poids_brut: '', poids_net: '', valeur: '',
       taux_dd_pct: '', exoneration_pct: 0,
       verifie_en_base: false, taux_dd_saisi: false
+    };
+  }
+
+  /* ------------------------------------------------- éclatement des lignes */
+  /* Le FDI et le RFCV reprennent la position que le fournisseur a écrite, pour
+   * aller vite. C'est au déclarant de reclasser, et une ligne du fournisseur
+   * cache souvent plusieurs articles qui ne relèvent pas de la même position.
+   * Éclater, c'est séparer ces articles : la ligne 1 devient une ligne mère,
+   * et 1.1, 1.2, 1.3… portent chacune leur code et leur taux.
+   *
+   * Une ligne mère ne se liquide pas : elle ne fait que regrouper. Ce sont ses
+   * sous-lignes qui portent la valeur — sinon la marchandise serait comptée
+   * deux fois. */
+
+  function normaliserArticles(articles) {
+    var connus = {};
+    (articles || []).forEach(function (a) {
+      if (!a.id) a.id = BASE.identifiant();
+      connus[a.id] = true;
+    });
+    // Une sous-ligne dont la mère a disparu remonte au premier niveau plutôt
+    // que de sortir de l'affichage sans que personne ne le voie.
+    (articles || []).forEach(function (a) {
+      if (a.parent && !connus[a.parent]) a.parent = null;
+    });
+    return articles;
+  }
+
+  /* Parcours dans l'ordre d'affichage, avec le numéro de chaque ligne. */
+  function articlesOrdonnes(articles) {
+    var enfants = {};
+    articles.forEach(function (a) {
+      var cle = a.parent || '';
+      (enfants[cle] = enfants[cle] || []).push(a);
+    });
+    var sortie = [];
+    (function descendre(cle, prefixe, profondeur) {
+      (enfants[cle] || []).forEach(function (a, i) {
+        var numero = prefixe ? prefixe + '.' + (i + 1) : String(i + 1);
+        sortie.push({
+          article: a,
+          numero: numero,
+          profondeur: profondeur,
+          mere: !!(enfants[a.id] && enfants[a.id].length)
+        });
+        descendre(a.id, numero, profondeur + 1);
+      });
+    })('', '', 0);
+    return sortie;
+  }
+
+  function lignesLiquidables() {
+    return articlesOrdonnes(etat.dossier.articles).filter(function (r) { return !r.mere; });
+  }
+
+  function eclaterLigne(article) {
+    var d = etat.dossier;
+    var deja = d.articles.some(function (a) { return a.parent === article.id; });
+    var index = d.articles.indexOf(article);
+
+    function heriter(avecValeurs) {
+      var e = articleVierge();
+      e.parent = article.id;
+      e.position = article.position;
+      e.designation_tec = article.designation_tec;
+      e.verifie_en_base = article.verifie_en_base;
+      e.origine = article.origine;
+      e.unite = article.unite;
+      e.taux_dd_pct = article.taux_dd_pct;
+      e.taux_dd_saisi = article.taux_dd_saisi;
+      e.exoneration_pct = article.exoneration_pct;
+      if (avecValeurs) {
+        e.designation = article.designation;
+        e.quantite = article.quantite;
+        e.poids_brut = article.poids_brut;
+        e.poids_net = article.poids_net;
+        e.valeur = article.valeur;
+      }
+      return e;
+    }
+
+    if (!deja) {
+      // Premier éclatement : la ligne mère garde le repère du fournisseur et
+      // ce qu'elle portait passe entier dans la première sous-ligne. Rien ne
+      // se perd au moment de la coupe ; la répartition vient après.
+      article.total_origine = {
+        valeur: nb(article.valeur),
+        poids_brut: nb(article.poids_brut),
+        poids_net: nb(article.poids_net),
+        quantite: nb(article.quantite)
+      };
+      d.articles.splice(index + 1, 0, heriter(true), heriter(false));
+      article.quantite = '';
+      article.poids_brut = '';
+      article.poids_net = '';
+      article.valeur = '';
+    } else {
+      // Sous-lignes suivantes : on insère après la dernière de la famille.
+      var dernier = index;
+      d.articles.forEach(function (a, i) { if (a.parent === article.id && i > dernier) dernier = i; });
+      d.articles.splice(dernier + 1, 0, heriter(false));
+    }
+    peindreArticles();
+    marquerModifie();
+  }
+
+  function supprimerArticle(article) {
+    var d = etat.dossier;
+    // Supprimer une mère emporte ses sous-lignes : les laisser derrière
+    // laisserait des valeurs dans la liquidation sans rien à l'écran.
+    var aRetirer = {};
+    (function marquer(id) {
+      aRetirer[id] = true;
+      d.articles.forEach(function (a) { if (a.parent === id) marquer(a.id); });
+    })(article.id);
+    d.articles = d.articles.filter(function (a) { return !aRetirer[a.id]; });
+    if (d.articles.length === 0) d.articles = [articleVierge()];
+    peindreArticles();
+    marquerModifie();
+  }
+
+  /* Écart entre ce que la ligne mère portait et ce que ses sous-lignes
+   * totalisent. C'est le contrôle qui rattrape une valeur oubliée en route. */
+  function ecartEclatement(article) {
+    var origine = article.total_origine;
+    if (!origine) return null;
+    var enfants = etat.dossier.articles.filter(function (a) { return a.parent === article.id; });
+    if (!enfants.length) return null;
+    var somme = { valeur: 0, poids_brut: 0, poids_net: 0 };
+    enfants.forEach(function (e) {
+      somme.valeur += nb(e.valeur);
+      somme.poids_brut += nb(e.poids_brut);
+      somme.poids_net += nb(e.poids_net);
+    });
+    return {
+      valeur: somme.valeur - nb(origine.valeur),
+      poids_brut: somme.poids_brut - nb(origine.poids_brut),
+      poids_net: somme.poids_net - nb(origine.poids_net),
+      origine: origine,
+      somme: somme
     };
   }
 
@@ -3661,6 +4216,7 @@ window.PDF = (function () {
           BASE.parametre('taux_tva_honoraires', 0.18),
           BASE.tout('modeles_devis'),
           BASE.tout('taux_personnels'),
+          BASE.tauxChange(),
           BASE.tout('tec')
         ])
     ).then(function (r) {
@@ -3674,7 +4230,8 @@ window.PDF = (function () {
       etat.tvaHonoraires = r[k + 5];
       etat.modelesDevis = r[k + 6] || [];
       etat.tauxPersonnels = r[k + 7] || [];
-      etat.tec = r[k + 8] || [];
+      etat.tauxChange = r[k + 8] || [];
+      etat.tec = r[k + 9] || [];
     });
   }
 
@@ -3765,6 +4322,7 @@ window.PDF = (function () {
     if (page === 'liquidation') {
       bouton('Imprimer', 'imprimer', function () { window.print(); });
       bouton('Note de liquidation', 'pdf', function () { sortirPdf('note'); });
+      bouton('Feuille SYDAM', 'declaration', function () { sortirPdf('sydam'); });
       bouton('Devis PDF', 'pdf', function () { sortirPdf('devis'); }, 'primaire');
     }
     if (page === 'bord') {
@@ -3925,16 +4483,32 @@ window.PDF = (function () {
     });
   }
 
+  function tauxDouanierDe(code) {
+    return etat.tauxChange.filter(function (t) { return t.code === code; })[0] || null;
+  }
+
   function surChangementDevise() {
     var d = etat.dossier;
     var m = (etat.listes.monnaies || []).filter(function (x) { return x.code === d.devise; })[0];
+    var champ = $('#d-taux-change');
+
     if (m && m.parite !== null && m.parite !== undefined) {
+      // Parité fixe : elle ne se discute pas et ne se saisit pas.
       d.taux_change = m.parite;
-      $('#d-taux-change').value = m.parite;
-      $('#d-taux-change').readOnly = true;
+      champ.value = m.parite;
+      champ.readOnly = true;
     } else {
-      $('#d-taux-change').readOnly = false;
-      if (nb(d.taux_change) <= 1 && d.devise !== 'XOF') { d.taux_change = ''; $('#d-taux-change').value = ''; }
+      champ.readOnly = false;
+      var douanier = tauxDouanierDe(d.devise);
+      if (douanier && nb(douanier.taux) > 0) {
+        // Le taux de la table douanière est proposé, et reste corrigeable :
+        // c'est celui de la déclaration en cours qui fait foi.
+        d.taux_change = douanier.taux;
+        champ.value = douanier.taux;
+      } else if (nb(d.taux_change) <= 1 && d.devise !== 'XOF') {
+        d.taux_change = '';
+        champ.value = '';
+      }
     }
     peindreAvisDevise();
     peindreArticles();
@@ -3952,10 +4526,23 @@ window.PDF = (function () {
         '1 ' + m.code + ' = ' + fr(m.parite, 3) + ' XOF. C’est un ancrage légal, pas un cours du jour : ' +
         'il ne bouge pas et ne vient d’aucune source extérieure.'));
     } else {
-      z.appendChild(avis(nb(d.taux_change) > 0 ? 'info' : 'attention',
-        nb(d.taux_change) > 0 ? 'Taux saisi.' : 'Taux à saisir.',
-        'Le ' + m.code + ' n’a pas de parité fixe avec le franc CFA. Reportez le taux retenu par la Douane à la date ' +
-        'de la déclaration — l’application n’en invente aucun.'));
+      var douanier = tauxDouanierDe(d.devise);
+      if (douanier && nb(douanier.taux) > 0) {
+        z.appendChild(avis('info', 'Taux douanier repris de votre table.',
+          '1 ' + m.code + ' = ' + fr(nb(douanier.taux), 4) + ' XOF' +
+          (douanier.date_effet ? ', en vigueur depuis le ' + frDate(douanier.date_effet) : '') +
+          (douanier.source ? ' — source : ' + douanier.source : '') +
+          '. Corrigez-le si la déclaration relève d’un autre taux.'));
+      } else {
+        z.appendChild(avis(nb(d.taux_change) > 0 ? 'info' : 'attention',
+          nb(d.taux_change) > 0 ? 'Taux saisi à la main.' : 'Taux à saisir.',
+          'Le ' + m.code + ' n’a pas de parité fixe avec le franc CFA et ne figure pas dans votre table de taux ' +
+          'douaniers. Reportez le taux retenu par la Douane à la date de la déclaration — l’application n’en ' +
+          'invente aucun, et n’ira jamais chercher un cours de marché : la Douane publie sa propre table, et ' +
+          'c’est elle qui fait la valeur en douane.',
+          { libelle: 'Enregistrer ce taux dans la table', icone: 'plus',
+            faire: function () { formulaireTauxChange({ code: d.devise }); } }));
+      }
     }
   }
 
@@ -4090,66 +4677,125 @@ window.PDF = (function () {
     $('#btn-importer-articles').addEventListener('click', importerArticles);
   }
 
+  var resumesEclatement = {};
+
   function peindreArticles() {
     var corps = $('#table-articles tbody');
     corps.innerHTML = '';
+    resumesEclatement = {};
     var d = etat.dossier;
     var devise = d.devise || 'XOF';
+    normaliserArticles(d.articles);
+    var rangees = articlesOrdonnes(d.articles);
 
-    d.articles.forEach(function (a, i) {
+    rangees.forEach(function (r) {
+      var a = r.article;
       var tr = el('tr');
-      tr.classList.toggle('attention', !!a.position && !a.verifie_en_base);
+      tr.classList.toggle('attention', !r.mere && !!a.position && !a.verifie_en_base);
+      if (r.mere) tr.classList.add('ligne-mere');
+      if (r.profondeur > 0) tr.classList.add('sous-ligne');
 
-      tr.appendChild(el('td', { class: 'num', style: 'color:var(--gris);font-weight:600', texte: String(i + 1) }));
-      tr.appendChild(el('td', {}, [construireComboPosition(a, tr)]));
-      tr.appendChild(el('td', {}, [champTexte(a, 'designation', 'Désignation commerciale')]));
+      var tdNumero = el('td', { class: 'num numero-ligne' });
+      tdNumero.style.paddingLeft = (6 + r.profondeur * 12) + 'px';
+      tdNumero.appendChild(el('span', { texte: r.numero }));
+      tr.appendChild(tdNumero);
 
-      var selOrigine = el('select');
-      remplirSelect(selOrigine, optionsPays().map(function (o) { return { valeur: o.valeur, libelle: o.valeur }; }), a.origine, { vide: '—' });
-      selOrigine.title = 'Pays d’origine de l’article';
-      selOrigine.addEventListener('change', function () { a.origine = this.value; marquerModifie(); });
-      tr.appendChild(el('td', {}, [selOrigine]));
+      if (r.mere) {
+        // Une ligne mère ne porte plus de valeur : elle annonce ce qu'elle
+        // regroupe, et laisse ses sous-lignes parler.
+        tr.appendChild(el('td', {}, [
+          el('div', { style: 'font-weight:600;font-variant-numeric:tabular-nums', texte: a.position || '—' }),
+          el('span', { class: 'etiq gris', texte: 'position du fournisseur' })
+        ]));
+        var resume = construireResumeEclatement(a);
+        resumesEclatement[a.id] = resume;
+        tr.appendChild(el('td', { colspan: '9' }, [
+          el('div', {}, [champTexte(a, 'designation', 'Libellé de la ligne d’origine')]),
+          resume
+        ]));
+      } else {
+        tr.appendChild(el('td', {}, [construireComboPosition(a, tr)]));
+        tr.appendChild(el('td', {}, [champTexte(a, 'designation', 'Désignation commerciale')]));
 
-      tr.appendChild(el('td', {}, [champNombre(a, 'quantite')]));
+        var selOrigine = el('select');
+        remplirSelect(selOrigine, optionsPays().map(function (o) { return { valeur: o.valeur, libelle: o.valeur }; }), a.origine, { vide: '—' });
+        selOrigine.title = 'Pays d’origine de l’article';
+        selOrigine.addEventListener('change', function () { a.origine = this.value; marquerModifie(); });
+        tr.appendChild(el('td', {}, [selOrigine]));
 
-      var selUnite = el('select');
-      remplirSelect(selUnite, (etat.listes.unites || []).map(function (u) { return { valeur: u.code, libelle: u.code }; }), a.unite, { vide: '—' });
-      selUnite.addEventListener('change', function () { a.unite = this.value; marquerModifie(); });
-      tr.appendChild(el('td', {}, [selUnite]));
+        tr.appendChild(el('td', {}, [champNombre(a, 'quantite')]));
 
-      tr.appendChild(el('td', {}, [champNombre(a, 'poids_brut', recalculerTotaux)]));
-      tr.appendChild(el('td', {}, [champNombre(a, 'poids_net', recalculerTotaux)]));
-      tr.appendChild(el('td', {}, [champNombre(a, 'valeur', recalculerTotaux)]));
+        var selUnite = el('select');
+        remplirSelect(selUnite, (etat.listes.unites || []).map(function (u) { return { valeur: u.code, libelle: u.code }; }), a.unite, { vide: '—' });
+        selUnite.addEventListener('change', function () { a.unite = this.value; marquerModifie(); });
+        tr.appendChild(el('td', {}, [selUnite]));
 
-      var tdTaux = el('td', {}, [champNombre(a, 'taux_dd_pct', function () {
-        a.taux_dd_saisi = true;
-        marquerModifie();
-      })]);
-      tdTaux.firstChild.placeholder = 'à saisir';
-      tdTaux.firstChild.title = a.verifie_en_base
-        ? 'Taux issu du tarif chargé. Vous pouvez le corriger.'
-        : 'Position absente du tarif : aucun taux n’est proposé, saisissez-le.';
-      tr.appendChild(tdTaux);
+        tr.appendChild(el('td', {}, [champNombre(a, 'poids_brut', recalculerTotaux)]));
+        tr.appendChild(el('td', {}, [champNombre(a, 'poids_net', recalculerTotaux)]));
+        tr.appendChild(el('td', {}, [champNombre(a, 'valeur', recalculerTotaux)]));
 
-      tr.appendChild(el('td', {}, [champNombre(a, 'exoneration_pct')]));
+        var tdTaux = el('td', {}, [champNombre(a, 'taux_dd_pct', function () {
+          a.taux_dd_saisi = true;
+          marquerModifie();
+        })]);
+        tdTaux.firstChild.placeholder = 'à saisir';
+        tdTaux.firstChild.title = a.verifie_en_base
+          ? 'Taux issu du tarif chargé. Vous pouvez le corriger.'
+          : 'Position absente du tarif : aucun taux n’est proposé, saisissez-le.';
+        tr.appendChild(tdTaux);
 
-      tr.appendChild(el('td', {}, [el('button', {
-        class: 'icone danger', title: 'Supprimer la ligne',
-        onclick: function () {
-          if (d.articles.length === 1) { d.articles[0] = articleVierge(); }
-          else d.articles.splice(i, 1);
-          peindreArticles(); marquerModifie();
-        }
-      }, [icone('poubelle')])]));
+        tr.appendChild(el('td', {}, [champNombre(a, 'exoneration_pct')]));
+      }
+
+      var actions = el('td', { class: 'actions-ligne' }, [
+        el('button', {
+          class: 'icone', title: r.mere ? 'Ajouter une sous-ligne' : 'Éclater cette ligne en sous-lignes',
+          onclick: function () { eclaterLigne(a); }
+        }, [icone('eclater')]),
+        el('button', {
+          class: 'icone danger',
+          title: r.mere ? 'Supprimer la ligne et ses sous-lignes' : 'Supprimer la ligne',
+          onclick: function () { supprimerArticle(a); }
+        }, [icone('poubelle')])
+      ]);
+      tr.appendChild(actions);
 
       corps.appendChild(tr);
     });
 
-    $('#articles-indice').textContent = d.articles.length + ' ligne' + (d.articles.length > 1 ? 's' : '') +
+    var liquidables = rangees.filter(function (r) { return !r.mere; }).length;
+    var meres = rangees.length - liquidables;
+    $('#articles-indice').textContent =
+      liquidables + ' ligne' + (liquidables > 1 ? 's' : '') + ' à liquider' +
+      (meres ? ' · ' + meres + ' ligne' + (meres > 1 ? 's éclatées' : ' éclatée') : '') +
       ' · valeurs en ' + devise;
     recalculerTotaux();
     peindreAvisArticles();
     rafraichirPastilles();
+  }
+
+  /* Ce que la ligne mère portait, ce que ses sous-lignes totalisent, et
+   * l'écart entre les deux — affiché en clair sous la ligne mère. */
+  function construireResumeEclatement(article) {
+    var e = ecartEclatement(article);
+    var zone = el('div', { style: 'margin-top:7px;font-size:11.5px;display:flex;flex-wrap:wrap;gap:4px 16px' });
+    if (!e) {
+      zone.appendChild(el('span', { style: 'color:var(--gris)', texte: 'Ligne éclatée : ce sont les sous-lignes qui se liquident.' }));
+      return zone;
+    }
+    function bloc(libelle, origine, somme, ecart, decimales) {
+      var juste = Math.abs(ecart) < 0.005;
+      return el('span', { style: 'color:' + (juste ? 'var(--gris)' : 'var(--rouge)') }, [
+        el('strong', { texte: libelle + ' ' }),
+        document.createTextNode(fr(somme, decimales) + ' / ' + fr(origine, decimales)),
+        juste ? null : el('strong', { texte: '  écart ' + (ecart > 0 ? '+' : '') + fr(ecart, decimales) })
+      ]);
+    }
+    zone.appendChild(el('span', { style: 'color:var(--gris)', texte: 'Sous-lignes / ligne d’origine :' }));
+    zone.appendChild(bloc('Valeur', e.origine.valeur, e.somme.valeur, e.valeur, 2));
+    zone.appendChild(bloc('Poids brut', e.origine.poids_brut, e.somme.poids_brut, e.poids_brut, 2));
+    zone.appendChild(bloc('Poids net', e.origine.poids_net, e.somme.poids_net, e.poids_net, 2));
+    return zone;
   }
 
   function champTexte(objet, cle, placeholder) {
@@ -4174,21 +4820,70 @@ window.PDF = (function () {
   function recalculerTotaux() {
     var d = etat.dossier;
     var pb = 0, pn = 0, v = 0;
-    d.articles.forEach(function (a) { pb += nb(a.poids_brut); pn += nb(a.poids_net); v += nb(a.valeur); });
+    // Les lignes mères sont exclues : leur contenu est déjà dans les
+    // sous-lignes, les compter reviendrait à doubler la marchandise.
+    lignesLiquidables().forEach(function (r) {
+      var a = r.article;
+      pb += nb(a.poids_brut); pn += nb(a.poids_net); v += nb(a.valeur);
+    });
     $('#total-poids-brut').textContent = fr(pb, 2);
     $('#total-poids-net').textContent = fr(pn, 2);
     $('#total-valeur').textContent = fr(v, 2) + ' ' + (d.devise || '');
+    rafraichirControlesEclatement();
+    peindreAvisArticles();
+  }
+
+  /* Remplace le contenu des résumés de lignes mères sans redessiner le
+   * tableau : un redessin en pleine saisie ferait perdre le curseur. */
+  function rafraichirControlesEclatement() {
+    Object.keys(resumesEclatement).forEach(function (id) {
+      var noeud = resumesEclatement[id];
+      if (!noeud || !noeud.parentNode) return;
+      var article = etat.dossier.articles.filter(function (a) { return a.id === id; })[0];
+      if (!article) return;
+      var neuf = construireResumeEclatement(article);
+      noeud.parentNode.replaceChild(neuf, noeud);
+      resumesEclatement[id] = neuf;
+    });
   }
 
   function peindreAvisArticles() {
     var z = $('#articles-avis');
     z.innerHTML = '';
     var d = etat.dossier;
-    var sansTaux = d.articles.filter(function (a) {
+    // Seules les lignes qui se liquident sont contrôlées : une ligne mère n'a
+    // ni taux ni poids, et le lui reprocher n'aurait pas de sens.
+    var aLiquider = lignesLiquidables().map(function (r) { return r.article; });
+    var sansTaux = aLiquider.filter(function (a) {
       return (a.designation || a.position) && (a.taux_dd_pct === '' || a.taux_dd_pct === null || a.taux_dd_pct === undefined);
     }).length;
-    var horsTarif = d.articles.filter(function (a) { return a.position && !a.verifie_en_base; }).length;
-    var sansPoids = d.articles.filter(function (a) { return nb(a.valeur) > 0 && nb(a.poids_brut) <= 0; }).length;
+    var horsTarif = aLiquider.filter(function (a) { return a.position && !a.verifie_en_base; }).length;
+    var sansPoids = aLiquider.filter(function (a) { return nb(a.valeur) > 0 && nb(a.poids_brut) <= 0; }).length;
+
+    // L'écart d'éclatement passe avant tout le reste : c'est de la marchandise
+    // qui disparaît ou qui se duplique, pas une case mal remplie.
+    var ecarts = [];
+    articlesOrdonnes(d.articles).forEach(function (r) {
+      if (!r.mere) return;
+      var e = ecartEclatement(r.article);
+      if (!e) return;
+      if (Math.abs(e.valeur) >= 0.005 || Math.abs(e.poids_brut) >= 0.005) {
+        ecarts.push({ numero: r.numero, ecart: e });
+      }
+    });
+    ecarts.forEach(function (x) {
+      var morceaux = [];
+      if (Math.abs(x.ecart.valeur) >= 0.005) {
+        morceaux.push('valeur ' + (x.ecart.valeur > 0 ? '+' : '') + fr(x.ecart.valeur, 2));
+      }
+      if (Math.abs(x.ecart.poids_brut) >= 0.005) {
+        morceaux.push('poids brut ' + (x.ecart.poids_brut > 0 ? '+' : '') + fr(x.ecart.poids_brut, 2) + ' kg');
+      }
+      z.appendChild(avis('erreur', 'Ligne ' + x.numero + " : l’éclatement ne retombe pas juste.",
+        'Les sous-lignes totalisent ' + morceaux.join(' et ') + ' par rapport à la ligne d’origine. ' +
+        'Une marchandise a été oubliée en route, ou comptée deux fois. La liquidation se fera sur les sous-lignes ' +
+        'telles qu’elles sont — corrigez avant de déposer.'));
+    });
 
     if (etat.tec.length === 0) {
       z.appendChild(avis('attention', 'Le tarif douanier n’est pas encore chargé.',
@@ -4477,13 +5172,19 @@ window.PDF = (function () {
     var regime = regimeCourant();
     if (!regime) throw new L.Refus('Aucun régime douanier choisi.');
 
-    var lignes = d.articles
-      .filter(function (a) { return a.designation || a.position || nb(a.valeur) > 0; })
-      .map(function (a, i) {
+    // Une ligne mère ne se liquide pas : elle regroupe ses sous-lignes, et ce
+    // sont elles qui portent la valeur. La compter doublerait la marchandise.
+    var lignes = lignesLiquidables()
+      .filter(function (r) {
+        var a = r.article;
+        return a.designation || a.position || nb(a.valeur) > 0;
+      })
+      .map(function (r) {
+        var a = r.article;
         var pct = a.taux_dd_pct;
         return {
-          numero: i + 1,
-          designation: a.designation || a.designation_tec || ('Article ' + (i + 1)),
+          numero: r.numero,
+          designation: a.designation || a.designation_tec || ('Article ' + r.numero),
           position: a.position,
           designation_tec: a.designation_tec,
           unite: a.unite,
@@ -4494,7 +5195,9 @@ window.PDF = (function () {
           taux_dd: (pct === '' || pct === null || pct === undefined) ? null : nb(pct) / 100,
           exoneration: nb(a.exoneration_pct) / 100,
           fob_xof: nb(a.valeur) * taux,
-          poids_brut_kg: nb(a.poids_brut)
+          fob_devise: nb(a.valeur),
+          poids_brut_kg: nb(a.poids_brut),
+          poids_net_kg: nb(a.poids_net)
         };
       });
 
@@ -4812,13 +5515,17 @@ window.PDF = (function () {
       regime_libelle: regime.libelle || '',
       bureau_nom: d.bureau_nom,
       mode_libelle: ((etat.listes.modes || []).filter(function (m) { return m.code === d.mode; })[0] || {}).libelle || '',
+      nature_colis_libelle: ((etat.listes.colis || []).filter(function (c) { return c.code === d.nature_colis; })[0] || {}).libelle || '',
       provenance_nom: nomPays(d.provenance),
-      origine_nom: nomPays(d.origine)
+      origine_nom: nomPays(d.origine),
+      type_declaration: regime.sens === 'export' ? 'EX' : (regime.sens === 'transit' ? 'T' : 'IM')
     });
+    contexte.documents = etat.listes.documents;
     try {
-      var r = genre === 'devis'
-        ? PDF.devis(infos, d.liquidation, d.chiffrage, contexte)
-        : PDF.note(infos, d.liquidation, contexte);
+      var r;
+      if (genre === 'devis') r = PDF.devis(infos, d.liquidation, d.chiffrage, contexte);
+      else if (genre === 'sydam') r = PDF.feuilleSydam(infos, d.liquidation, contexte);
+      else r = PDF.note(infos, d.liquidation, contexte);
       r.doc.save(r.nom);
       message(r.nom + ' généré.', 'succes');
     } catch (e) {
@@ -5241,6 +5948,7 @@ window.PDF = (function () {
     $('#btn-restaurer-liste').addEventListener('click', restaurerListe);
 
     $('#btn-ajouter-modele').addEventListener('click', function () { formulaireModeleDevis(null); });
+    brancherTauxChange();
 
     $('#btn-sauvegarder').addEventListener('click', function () {
       BASE.exporterTout(false).then(function (p) {
@@ -5430,6 +6138,7 @@ window.PDF = (function () {
     }
     peindreEditeurListe();
     peindreModelesDevis();
+    peindreTauxChange();
 
     // Devis.
     $('#reglages-validite').value = etat.validite;
@@ -5501,6 +6210,123 @@ window.PDF = (function () {
           .then(function () { fermerModale(); peindreTauxPersonnels(); message('Taux personnel enregistré.', 'succes'); });
       } }
     ]);
+  }
+
+  /* ------------------------------------------------ taux de change douaniers */
+
+  function peindreTauxChange() {
+    var corps = $('#table-taux-change tbody');
+    if (!corps) return;
+    corps.innerHTML = '';
+    var monnaies = {};
+    (etat.listes.monnaies || []).forEach(function (m) { monnaies[m.code] = m; });
+    var entrees = etat.tauxChange.slice().sort(function (a, b) { return a.code.localeCompare(b.code); });
+
+    $('#reglages-taux-indice').textContent = entrees.length
+      ? entrees.length + ' monnaie' + (entrees.length > 1 ? 's' : '')
+      : 'aucun taux enregistré';
+
+    if (!entrees.length) {
+      corps.appendChild(el('tr', {}, [el('td', {
+        colspan: '6', style: 'color:var(--gris);padding:14px',
+        texte: 'Aucun taux enregistré. Les monnaies à parité fixe — franc CFA, euro — n’en ont pas besoin ; ' +
+               'toutes les autres demanderont une saisie à chaque déclaration tant que la table est vide.'
+      })]));
+      return;
+    }
+    entrees.forEach(function (t) {
+      var m = monnaies[t.code];
+      var tr = el('tr');
+      tr.appendChild(el('td', { style: 'font-weight:700', texte: t.code }));
+      tr.appendChild(el('td', { texte: m ? m.nom : '—' }));
+      tr.appendChild(el('td', { class: 'num', style: 'font-weight:650', texte: fr(nb(t.taux), 4) }));
+      tr.appendChild(el('td', { texte: t.date_effet ? frDate(t.date_effet) : '—' }));
+      tr.appendChild(el('td', { style: 'color:var(--gris)', texte: t.source || '—' }));
+      tr.appendChild(el('td', {}, [
+        el('button', { class: 'icone', title: 'Modifier', onclick: function () { formulaireTauxChange(t); } }, [icone('declaration')]),
+        el('button', { class: 'icone danger', title: 'Retirer', onclick: function () {
+          BASE.supprimer('taux_change', t.code)
+            .then(BASE.tauxChange)
+            .then(function (l) { etat.tauxChange = l; peindreTauxChange(); });
+        } }, [icone('poubelle')])
+      ]));
+      corps.appendChild(tr);
+    });
+  }
+
+  function formulaireTauxChange(entree) {
+    var v = Object.assign({ code: '', taux: '', date_effet: aujourdhui(), source: '' }, entree || {});
+    var corps = el('div', { class: 'champs' });
+
+    var sel = el('select');
+    // Les monnaies à parité fixe sont écartées : leur taux est un ancrage
+    // légal, pas une valeur à reporter.
+    var choix = (etat.listes.monnaies || [])
+      .filter(function (m) { return m.parite === null || m.parite === undefined; })
+      .map(function (m) { return { valeur: m.code, libelle: m.code + ' — ' + m.nom }; });
+    remplirSelect(sel, choix, v.code, { vide: '— choisir la monnaie —' });
+
+    var iTaux = el('input', { class: 'nombre', inputmode: 'decimal', value: v.taux || '', placeholder: 'ex. 605,1234' });
+    var iDate = el('input', { type: 'date', value: v.date_effet || '' });
+    var iSource = el('input', { value: v.source || '', placeholder: 'GUCE, avis de la Douane, n° de bulletin…' });
+
+    corps.appendChild(el('div', { class: 'champ c12' }, [el('label', { texte: 'Monnaie' }), sel]));
+    corps.appendChild(el('div', { class: 'champ c6' }, [el('label', { texte: '1 unité de cette monnaie vaut, en XOF' }), iTaux]));
+    corps.appendChild(el('div', { class: 'champ c6' }, [el('label', { texte: 'En vigueur à partir du' }), iDate]));
+    corps.appendChild(el('div', { class: 'champ c12' }, [el('label', { texte: 'Source' }), iSource]));
+    corps.appendChild(el('div', { class: 'champ c12' }, [el('p', { class: 'aide', texte:
+      'Portez le taux tel que la Douane le publie. C’est lui qui construit la valeur en douane : un chiffre ' +
+      'approché ici se retrouve dans le droit de douane, dans la TVA, et dans le devis remis au client.' })]));
+
+    modale(entree && entree.taux !== undefined ? 'Modifier le taux' : 'Nouveau taux de change douanier', corps, [
+      { libelle: 'Annuler', action: fermerModale },
+      { libelle: 'Enregistrer', genre: 'primaire', action: function () {
+        if (!sel.value) { message('Choisissez la monnaie.', 'attention'); return; }
+        if (nb(iTaux.value) <= 0) { message('Le taux doit être un nombre supérieur à zéro.', 'attention'); return; }
+        var avant = (entree && entree.code && entree.code !== sel.value)
+          ? BASE.supprimer('taux_change', entree.code) : Promise.resolve();
+        avant
+          .then(function () { return BASE.poserTauxChange(sel.value, nb(iTaux.value), iDate.value, iSource.value.trim()); })
+          .then(BASE.tauxChange)
+          .then(function (l) {
+            etat.tauxChange = l;
+            fermerModale();
+            peindreTauxChange();
+            if (etat.dossier && etat.dossier.devise === sel.value) surChangementDevise();
+            message('Taux enregistré. Il sera proposé d’office pour le ' + sel.value + '.', 'succes');
+          });
+      } }
+    ]);
+  }
+
+  function brancherTauxChange() {
+    $('#btn-ajouter-taux-change').addEventListener('click', function () { formulaireTauxChange(null); });
+    $('#btn-exporter-taux').addEventListener('click', function () {
+      if (!etat.tauxChange.length) { message('La table est vide.', 'attention'); return; }
+      telecharger('taux-change-douaniers-' + aujourdhui() + '.json', JSON.stringify({
+        source: 'Cotation E-Transit', exporte_le: new Date().toISOString(), taux: etat.tauxChange
+      }, null, 2));
+      message(etat.tauxChange.length + ' taux exportés.', 'succes');
+    });
+    $('#btn-importer-taux').addEventListener('click', function () {
+      lireFichier('.json,application/json').then(function (f) {
+        if (!f) return;
+        var charge;
+        try { charge = JSON.parse(f.contenu); }
+        catch { message('Ce fichier n’est pas lisible.', 'erreur'); return; }
+        var liste = Array.isArray(charge) ? charge : charge.taux;
+        if (!Array.isArray(liste) || !liste.length) { message('Aucun taux dans ce fichier.', 'attention'); return; }
+        var valides = liste.filter(function (t) { return t && t.code && nb(t.taux) > 0; });
+        if (!valides.length) { message('Aucun taux exploitable : il faut un code monnaie et un taux positif.', 'erreur'); return; }
+        BASE.ecrireLot('taux_change', valides.map(function (t) {
+          return { code: t.code, taux: nb(t.taux), date_effet: t.date_effet || '', source: t.source || 'Fichier importé', pose_le: new Date().toISOString() };
+        })).then(BASE.tauxChange).then(function (l) {
+          etat.tauxChange = l;
+          peindreTauxChange();
+          message(valides.length + ' taux importés' + (valides.length < liste.length ? ', ' + (liste.length - valides.length) + ' écartés faute de code ou de taux' : '') + '.', 'succes');
+        });
+      });
+    });
   }
 
   /* ------------------------------------------------------ éditeur de liste */

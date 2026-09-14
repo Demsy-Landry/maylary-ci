@@ -475,7 +475,233 @@ window.PDF = (function () {
     return { doc: doc, nom: nomFichier('Liquidation', dossier) };
   }
 
+  /* ------------------------------------------------- feuille de saisie SYDAM */
+  /* Ce document ne sert qu'à une chose : être posé à côté de l'écran pendant
+   * la saisie. Chaque valeur porte le numéro de la case du document
+   * administratif unique où elle va. On ne recalcule rien à la Douane, on
+   * recopie — et ce qui n'est pas connu porte un tiret, jamais une valeur
+   * de remplissage. */
+
+  function grilleCases(doc, y, cases, parLigne, largeurTotale) {
+    parLigne = parLigne || 3;
+    var largeur = (largeurTotale || UTILE) / parLigne;
+    var hauteur = 11;
+    var colonne = 0;
+    var yDebut = y;
+
+    cases.forEach(function (c) {
+      var etendue = Math.min(c.large || 1, parLigne);
+      if (colonne + etendue > parLigne) { colonne = 0; y += hauteur; }
+      if (y + hauteur > HAUTEUR - 24) {
+        doc.addPage();
+        y = MARGE; yDebut = y; colonne = 0;
+      }
+      var x = MARGE + colonne * largeur;
+      var l = largeur * etendue;
+
+      doc.setDrawColor(TRAIT[0], TRAIT[1], TRAIT[2]);
+      doc.rect(x, y, l, hauteur);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(5.8);
+      doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+      doc.text((c.case ? 'CASE ' + c.case + ' · ' : '') + c.libelle.toUpperCase(), x + 1.8, y + 3.4, { maxWidth: l - 3.6 });
+
+      doc.setFont('helvetica', c.gras === false ? 'normal' : 'bold');
+      doc.setFontSize(8.4);
+      var valeur = (c.valeur === null || c.valeur === undefined || c.valeur === '') ? '—' : String(c.valeur);
+      doc.setTextColor(valeur === '—' ? GRIS[0] : ENCRE[0], valeur === '—' ? GRIS[1] : ENCRE[1], valeur === '—' ? GRIS[2] : ENCRE[2]);
+      doc.text(valeur, x + 1.8, y + 8.4, { maxWidth: l - 3.6 });
+
+      colonne += etendue;
+    });
+    void yDebut;
+    return y + hauteur + 5;
+  }
+
+  function titreSection(doc, y, texte) {
+    if (y + 12 > HAUTEUR - 24) { doc.addPage(); y = MARGE; }
+    doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+    doc.rect(MARGE, y, UTILE, 6, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    doc.setTextColor(255, 255, 255);
+    doc.text(texte.toUpperCase(), MARGE + 2.5, y + 4.2);
+    return y + 9;
+  }
+
+  function feuilleSydam(dossier, liquidation, contexte) {
+    var doc = creer();
+    var y = entete(doc, contexte, 'FEUILLE DE SAISIE SYDAM',
+      'Dossier ' + (dossier.numero || '—') + (dossier.numero_declaration ? ' · décl. ' + dossier.numero_declaration : ''));
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.5);
+    doc.setTextColor(GRIS[0], GRIS[1], GRIS[2]);
+    doc.text(
+      'Document de travail : chaque valeur porte le numéro de la case du DAU où elle se saisit. ' +
+      'Un tiret signifie que la donnée n’a pas été renseignée — il n’y a rien à recopier.',
+      MARGE, y, { maxWidth: UTILE }
+    );
+    y += 7;
+
+    var g = liquidation.globaux;
+    var devise = dossier.devise || 'XOF';
+    var taux = LIQ().nombre(dossier.taux_change) || 1;
+
+    /* ------------------------------------------------------------- cadre A */
+    y = titreSection(doc, y, 'Cadre A — bureau, régime, déclarant');
+    y = grilleCases(doc, y, [
+      { case: '1', libelle: 'Type de déclaration', valeur: dossier.type_declaration || (dossier.regime_code ? dossier.regime_code.charAt(0) === '1' || dossier.regime_code.charAt(0) === '3' ? 'EX' : 'IM' : '—') },
+      { case: 'A', libelle: 'Bureau de douane', valeur: [dossier.bureau_code, dossier.bureau_nom].filter(Boolean).join(' · '), large: 2 },
+      { case: '37', libelle: 'Régime douanier', valeur: dossier.regime_code, },
+      { case: '37', libelle: 'Libellé du régime', valeur: dossier.regime_libelle, large: 2, gras: false },
+      { case: '7', libelle: 'N° de déclaration', valeur: dossier.numero_declaration },
+      { case: '—', libelle: 'Date de déclaration', valeur: dossier.date ? new Date(dossier.date).toLocaleDateString('fr-FR') : '' },
+      { case: '—', libelle: 'Référence dossier', valeur: dossier.numero }
+    ], 3);
+
+    /* -------------------------------------------------------------- parties */
+    y = titreSection(doc, y, 'Parties');
+    y = grilleCases(doc, y, [
+      { case: '2', libelle: 'Exportateur / fournisseur', valeur: dossier.fournisseur_nom, large: 3 },
+      { case: '2', libelle: 'Adresse du fournisseur', valeur: dossier.fournisseur_adresse, large: 3, gras: false },
+      { case: '8', libelle: 'Importateur / destinataire', valeur: dossier.importateur_nom, large: 2 },
+      { case: '8', libelle: 'Compte contribuable', valeur: dossier.importateur_contribuable },
+      { case: '8', libelle: 'Adresse de l’importateur', valeur: dossier.importateur_adresse, large: 2, gras: false },
+      { case: '8', libelle: 'Code importateur', valeur: dossier.importateur_code },
+      { case: '14', libelle: 'Déclarant', valeur: dossier.declarant, large: 2 },
+      { case: '14', libelle: 'N° d’agrément', valeur: dossier.declarant_agrement }
+    ], 3);
+
+    /* ------------------------------------------------ origine et transport */
+    y = titreSection(doc, y, 'Origine, provenance et transport');
+    y = grilleCases(doc, y, [
+      { case: '15', libelle: 'Pays d’expédition', valeur: [dossier.provenance, dossier.provenance_nom].filter(Boolean).join(' · ') },
+      { case: '34', libelle: 'Pays d’origine (par défaut)', valeur: [dossier.origine, dossier.origine_nom].filter(Boolean).join(' · ') },
+      { case: '25', libelle: 'Mode de transport', valeur: [dossier.mode, dossier.mode_libelle].filter(Boolean).join(' · ') },
+      { case: '18', libelle: 'Identité du moyen de transport', valeur: dossier.navire, large: 2 },
+      { case: '18', libelle: 'N° de voyage', valeur: dossier.voyage },
+      { case: '40', libelle: 'Titre de transport', valeur: dossier.connaissement },
+      { case: '40', libelle: 'Manifeste', valeur: dossier.manifeste },
+      { case: '29', libelle: 'Bureau d’entrée', valeur: dossier.bureau_entree },
+      { case: '30', libelle: 'Lieu des marchandises', valeur: dossier.lieu_marchandises, large: 2 },
+      { case: '—', libelle: 'Date d’arrivée', valeur: dossier.date_arrivee ? new Date(dossier.date_arrivee).toLocaleDateString('fr-FR') : '' }
+    ], 3);
+
+    /* ------------------------------------------------------ valeur et colis */
+    y = titreSection(doc, y, 'Valeur, transport payé et colis');
+    y = grilleCases(doc, y, [
+      { case: '22', libelle: 'Devise de la facture', valeur: devise },
+      { case: '23', libelle: 'Taux de change appliqué', valeur: devise === 'XOF' ? '1' : fr(taux, 4) },
+      { case: '22', libelle: 'Montant total facturé', valeur: fr(g.fob_total_xof / (taux || 1), 2) + ' ' + devise },
+      { case: '20', libelle: 'Incoterm et lieu', valeur: [dossier.incoterm, dossier.incoterm_lieu].filter(Boolean).join(' ') },
+      { case: '—', libelle: 'N° et date de facture', valeur: [dossier.facture, dossier.date_facture ? new Date(dossier.date_facture).toLocaleDateString('fr-FR') : ''].filter(Boolean).join(' du ') },
+      { case: '12', libelle: 'Valeur FOB totale (XOF)', valeur: fr(g.fob_total_xof) },
+      { case: '12', libelle: 'Fret total (XOF)', valeur: fr(g.fret_total_xof) },
+      { case: '12', libelle: 'Assurance totale (XOF)', valeur: fr(g.assurance_total_xof) },
+      { case: '12', libelle: 'Valeur en douane CAF (XOF)', valeur: fr(g.caf_total_xof) },
+      { case: '6', libelle: 'Nombre total de colis', valeur: dossier.nb_colis },
+      { case: '31', libelle: 'Nature des colis', valeur: [dossier.nature_colis, dossier.nature_colis_libelle].filter(Boolean).join(' · ') },
+      { case: '31', libelle: 'Marques et numéros', valeur: dossier.marques },
+      { case: '35', libelle: 'Masse brute totale (kg)', valeur: fr(g.poids_brut_total_kg, 2) },
+      { case: '5', libelle: 'Nombre d’articles', valeur: liquidation.lignes.length },
+      { case: '—', libelle: 'Conteneurs', valeur: (dossier.conteneurs || []).map(function (c) { return c.numero; }).filter(Boolean).join(', ') }
+    ], 3);
+
+    /* ------------------------------------------------------------- articles */
+    y = titreSection(doc, y, 'Articles — une fiche par article à saisir');
+    liquidation.lignes.forEach(function (l) {
+      if (y + 34 > HAUTEUR - 24) { doc.addPage(); y = MARGE; }
+      doc.setFillColor(FOND_ENTETE[0], FOND_ENTETE[1], FOND_ENTETE[2]);
+      doc.rect(MARGE, y, UTILE, 6, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      doc.setTextColor(ENCRE[0], ENCRE[1], ENCRE[2]);
+      doc.text('Article ' + l.numero + (l.verifie_en_base ? '' : '   —   position hors tarif chargé, taux saisi à la main'), MARGE + 2.5, y + 4.2);
+      y += 6;
+
+      y = grilleCases(doc, y, [
+        { case: '32', libelle: 'N° d’article', valeur: l.numero },
+        { case: '33', libelle: 'Code SH', valeur: l.position },
+        { case: '34', libelle: 'Pays d’origine', valeur: l.origine },
+        { case: '31', libelle: 'Désignation', valeur: l.designation, large: 3, gras: false },
+        { case: '35', libelle: 'Masse brute (kg)', valeur: fr(l.poids_brut_kg, 2) },
+        { case: '38', libelle: 'Masse nette (kg)', valeur: fr(l.poids_net_kg, 2) },
+        { case: '41', libelle: 'Unités complémentaires', valeur: l.quantite ? fr(l.quantite, 2) + ' ' + (l.unite || '') : '' },
+        { case: '42', libelle: 'Prix de l’article (' + devise + ')', valeur: fr(l.fob_devise || (l.fob_xof / (taux || 1)), 2) },
+        { case: '45', libelle: 'Ajustement — fret + assurance (XOF)', valeur: fr(l.fret_xof + l.assurance_xof) },
+        { case: '46', libelle: 'Valeur statistique CAF (XOF)', valeur: fr(l.caf_xof) },
+        { case: '—', libelle: 'Poids statistique (kg)', valeur: fr(l.poids_stat_kg, 2) },
+        { case: '36', libelle: 'Préférence / exonération', valeur: l.exoneration > 0 ? fr(l.exoneration * 100, 0) + ' %' : '' },
+        { case: '47', libelle: 'Taux de droit appliqué', valeur: fr(l.taux_dd_applique * 100, 2) + ' %' }
+      ], 3);
+
+      // Case 47 de l'article : type, base, taux, montant.
+      var lignesTaxes = l.taxes.map(function (t) {
+        return { cellules: [t.code, fr(t.base_xof), fr(t.taux * 100, t.taux < 0.01 ? 2 : 1) + ' %', fr(t.montant_xof)] };
+      });
+      lignesTaxes.push({
+        __total: true,
+        cellules: ['Total article', '', '', fr(l.taxes.reduce(function (s, t) { return s + t.montant_xof; }, 0))]
+      });
+      y = tableau(doc, y, [
+        { titre: 'Case 47 — type', largeur: 30 },
+        { titre: 'Base d’imposition', largeur: 40, aligne: 'right' },
+        { titre: 'Quotité', largeur: 26, aligne: 'right' },
+        { titre: 'Montant (XOF)', largeur: 40, aligne: 'right' }
+      ], lignesTaxes, { hauteurLigne: 5.4, taille: 7.4 });
+    });
+
+    /* ----------------------------------------------------- case 47 globale */
+    y = titreSection(doc, y, 'Case 47 — récapitulatif de la déclaration');
+    var t = liquidation.totaux_taxes;
+    var libelles = {};
+    (contexte.taxes || []).forEach(function (x) { libelles[x.code] = x.libelle; });
+    var recap = Object.keys(t).map(function (code) {
+      var taxe = (contexte.taxes || []).filter(function (x) { return x.code === code; })[0] || {};
+      return {
+        cellules: [
+          code,
+          libelles[code] || '',
+          taxe.niveau === 'declaration' ? 'une fois par déclaration' : 'somme des articles',
+          fr(t[code])
+        ]
+      };
+    });
+    recap.push({ __total: true, cellules: ['', 'TOTAL DES DROITS ET TAXES', '', fr(liquidation.total_a_payer_xof)] });
+    y = tableau(doc, y, [
+      { titre: 'Type', largeur: 24 },
+      { titre: 'Imposition', largeur: UTILE - 24 - 52 - 42 },
+      { titre: 'Niveau', largeur: 52 },
+      { titre: 'Montant (XOF)', largeur: 42, aligne: 'right' }
+    ], recap, { hauteurLigne: 6 });
+
+    /* -------------------------------------------------------- documents 44 */
+    var docs = (contexte.documents || []).filter(function (x) { return (dossier.documents || {})[x.code]; });
+    y = titreSection(doc, y, 'Case 44 — documents joints et mentions spéciales');
+    if (docs.length) {
+      y = paragraphe(doc, y, docs.map(function (x) { return x.code + ' — ' + x.libelle; }).join('   ·   '), { couleur: ENCRE });
+    } else {
+      y = paragraphe(doc, y, 'Aucun document coché au dossier.');
+    }
+    if (dossier.observations) y = paragraphe(doc, y, 'Observations : ' + dossier.observations);
+    if (liquidation.regime && liquidation.regime.mention) y = paragraphe(doc, y, liquidation.regime.mention);
+
+    var horsTarif = liquidation.lignes.filter(function (l) { return !l.verifie_en_base; }).length;
+    if (horsTarif) {
+      y = paragraphe(doc, y,
+        'Réserve : ' + horsTarif + ' position' + (horsTarif > 1 ? 's ont' : ' a') + ' été liquidée' +
+        (horsTarif > 1 ? 's' : '') + ' avec un taux saisi à la main, faute de correspondance dans le tarif chargé. ' +
+        'À confirmer avant dépôt.',
+        { couleur: [176, 106, 0], gras: true });
+    }
+
+    piedDePage(doc, contexte);
+    return { doc: doc, nom: nomFichier('Feuille-SYDAM', dossier) };
+  }
+
   function LIQ() { return window.LIQUIDATION; }
 
-  return { devis: devis, note: note, fr: fr };
+  return { devis: devis, note: note, feuilleSydam: feuilleSydam, fr: fr };
 })();

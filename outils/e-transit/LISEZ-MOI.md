@@ -80,12 +80,23 @@ vit dans la base du poste et l'application fonctionne entièrement hors ligne.
 - **Articles** : position tarifaire **écrite ou cherchée** dans le tarif — le
   taux de droit se remplit tout seul quand la position existe, et **reste vide
   quand elle n'existe pas**. L'application ne devine jamais un taux.
+- **Éclatement de ligne** : le FDI et le RFCV reprennent la position écrite par
+  le fournisseur, pour aller vite. C'est au déclarant de reclasser. Un bouton
+  sépare une ligne en 1.1, 1.2, 1.3… sans limite, chacune avec son code et son
+  taux. La ligne mère ne se liquide plus — elle regroupe — et l'application
+  contrôle en permanence que les sous-lignes retombent sur ce que la ligne
+  d'origine portait, en valeur comme en poids.
+- **Taux de change douaniers** : une table tenue en base, datée et sourcée,
+  proposée d'office à chaque déclaration et corrigeable dossier par dossier.
+- **Feuille de saisie SYDAM** : un PDF où chaque valeur porte le numéro de la
+  case du DAU où elle se saisit, une fiche par article, avec le bloc case 47.
 - **Liquidation** : CAF, répartition du fret au poids brut et de l'assurance à
   la valeur, DD, RST, PCS, PUA, PCC, TVA par article, puis RPI et timbre une
   fois par déclaration.
 - **Devis client** : les droits et taxes, plus les honoraires et débours
   d'E-Transit, avec la TVA sur les seuls honoraires.
-- **PDF** : le devis en portrait, la note de liquidation en paysage.
+- **PDF** : le devis en portrait, la note de liquidation en paysage, la
+  feuille de saisie SYDAM en portrait.
 - **Historique** consultable, recherche, duplication d'un dossier.
 - **Carnet d'adresses** : importateurs, fournisseurs, transporteurs.
 - **Réglages** : identité de la société, logo, tarif, toutes les listes de
@@ -173,6 +184,23 @@ autonome le jour où E-Transit le voudra.
 
 ---
 
+## Les taux de change
+
+**L'application n'ira jamais chercher un cours de change sur internet**, et
+c'est délibéré. La valeur en douane se construit sur le taux que **la Douane**
+retient, pas sur un cours de marché ni sur celui d'une banque centrale. Un
+cours emprunté ailleurs donnerait une valeur CAF fausse, donc un droit de
+douane faux, une TVA fausse, et un devis faux.
+
+Réglages → **Taux de change douaniers** : on y porte le taux du GUCE, sa date
+d'entrée en vigueur et sa source. Il est ensuite proposé d'office dès qu'on
+choisit la monnaie, et reste corrigeable si la déclaration relève d'un autre
+taux. La table s'exporte et s'importe, pour poser toute une période d'un coup.
+
+Trois monnaies échappent à cette table : le franc CFA, l'euro et le franc CFA
+BEAC. Leur parité est un **ancrage légal fixe** — 1 EUR = 655,957 XOF — elle ne
+bouge pas, et le champ est verrouillé.
+
 ## Les règles de calcul
 
 Elles sont la transcription exacte de la fonction de liquidation qui tourne en
@@ -192,6 +220,7 @@ Si les deux divergent un jour, c'est un défaut, pas une variante.
 | RPI | max(FOB total × 0,75 % ; 100 000) — **une fois par déclaration** |
 | TS | 20 000 forfaitaires — **une fois par déclaration** |
 | Exportation | le timbre seul |
+| Lignes éclatées | la ligne mère ne se liquide pas ; seules ses sous-lignes portent la valeur |
 
 Chaque taxe est arrondie au franc dès son calcul, et l'assiette de la TVA se
 construit avec les montants déjà arrondis, comme le fait le système douanier.

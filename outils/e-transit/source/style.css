@@ -527,6 +527,49 @@ table.t td input:focus, table.t td select:focus { border-color: var(--accent-vif
 .vide svg { width: 46px; height: 46px; opacity: .3; margin-bottom: 10px; }
 .vide .titre { font-weight: 650; color: var(--encre-douce); margin-bottom: 4px; }
 
+/* ------------------------------------------------- lignes et sous-lignes */
+/* Une ligne mère regroupe, elle ne se liquide pas. Elle se distingue donc à
+   l'œil : fond gris, numéro en gras, et ses sous-lignes décalées sous elle. */
+
+table.t tbody tr.ligne-mere { background: var(--carte-douce); }
+table.t tbody tr.ligne-mere:hover { background: #eef2f7; }
+table.t tbody tr.ligne-mere td { border-bottom-color: var(--trait-fort); }
+table.t tbody tr.ligne-mere .numero-ligne span {
+  background: var(--encre-douce);
+  color: #fff;
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-weight: 700;
+}
+table.t tbody tr.sous-ligne .numero-ligne span {
+  color: var(--accent);
+  font-weight: 700;
+}
+table.t tbody tr.sous-ligne td:first-child { position: relative; }
+table.t tbody tr.sous-ligne td:first-child::before {
+  content: "";
+  position: absolute;
+  left: 9px; top: 0; bottom: 50%;
+  border-left: 1.5px solid var(--trait-fort);
+  border-bottom: 1.5px solid var(--trait-fort);
+  width: 7px;
+  border-bottom-left-radius: 5px;
+}
+td.actions-ligne { white-space: nowrap; text-align: right; }
+
+@media (max-width: 760px) {
+  table.t.t-empilee tbody tr.ligne-mere {
+    background: var(--carte-douce);
+    border-color: var(--trait-fort);
+  }
+  table.t.t-empilee tbody tr.sous-ligne {
+    margin-left: 14px;
+    border-left: 3px solid var(--accent-pale);
+  }
+  table.t.t-empilee tbody tr.sous-ligne td:first-child::before { display: none; }
+  table.t.t-empilee tbody td.actions-ligne { justify-content: flex-end; gap: 4px; }
+}
+
 /* ---------------------------------------------------------------- pastilles */
 
 .etiq {

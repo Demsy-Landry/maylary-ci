@@ -4,7 +4,7 @@
   Ouvrir l'adresse au navigateur, puis « Ajouter à l'écran d'accueil » sur
   téléphone. Les dossiers restent sur l'appareil : un téléphone et un
   ordinateur gardent chacun les leurs.
-  Construit le 2026-09-10. By Dems'Inc — Demsy Landry.
+  Construit le 2026-09-14. By Dems'Inc — Demsy Landry.
 -->
 
 <html lang="fr">
@@ -51,6 +51,7 @@
 <symbol id="i-navire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 19c1.6 0 1.6 1.4 3.2 1.4S6.8 19 8.4 19s1.6 1.4 3.2 1.4S13.2 19 14.8 19s1.6 1.4 3.2 1.4S19.6 19 22 19"/><path d="M4 17V9l8-3 8 3v8"/><path d="M12 6V3M9 12h6"/></symbol>
 <symbol id="i-balance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10"/><path d="M5 7h14M8 7l-4 8h8zM16 7l4 8h-8z"/></symbol>
 <symbol id="i-billet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/></symbol>
+<symbol id="i-eclater" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6a3 3 0 0 0 3 3h13"/><path d="M4 13v3a3 3 0 0 0 3 3h13"/><path d="m17 9 3 4-3 4"/><path d="m17 16 3 3-3 3" opacity="0"/></symbol>
 <symbol id="i-dossier" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
 </defs></svg>
 
@@ -539,6 +540,30 @@
             </table>
           </div>
           <button class="b petit discret" id="btn-ajouter-taux" style="margin-top:8px"><svg><use href="#i-plus"/></svg>Ajouter une position</button>
+        </div>
+      </div>
+
+      <div class="carte">
+        <header><h3>Taux de change douaniers</h3><span class="indice" id="reglages-taux-indice">—</span>
+          <div class="actions">
+            <button class="b petit" id="btn-exporter-taux"><svg><use href="#i-telecharger"/></svg>Exporter</button>
+            <button class="b petit" id="btn-importer-taux"><svg><use href="#i-televerser"/></svg>Importer</button>
+            <button class="b petit primaire" id="btn-ajouter-taux-change"><svg><use href="#i-plus"/></svg>Ajouter un taux</button>
+          </div>
+        </header>
+        <div class="corps">
+          <p class="aide" style="margin-bottom:12px;max-width:74ch">
+            La Douane publie sa propre table de taux, et c’est elle qui fait la valeur en douane. Un cours de banque
+            ou de marché donnerait une valeur CAF fausse, donc des droits faux : l’application n’en ira jamais
+            chercher. Reportez ici les taux du GUCE, avec leur date d’entrée en vigueur ; ils seront proposés
+            d’office à chaque déclaration, et resteront corrigeables dossier par dossier.
+          </p>
+          <div class="tableau-cadre">
+            <table class="t" id="table-taux-change">
+              <thead><tr><th style="width:90px">Monnaie</th><th>Libellé</th><th style="width:130px" class="num">1 unité = XOF</th><th style="width:120px">En vigueur le</th><th>Source</th><th style="width:40px"></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
