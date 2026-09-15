@@ -557,6 +557,13 @@ table.t tbody tr.sous-ligne td:first-child::before {
 }
 td.actions-ligne { white-space: nowrap; text-align: right; }
 
+/* Le bouton de recherche assistée, collé au champ de position. */
+button.icone.bouton-ia { color: var(--accent); flex: none; }
+button.icone.bouton-ia:hover { background: var(--accent-pale); color: var(--accent-vif); }
+@media (max-width: 760px) {
+  table.t.t-empilee tbody td .cellule-position { width: 100%; }
+}
+
 @media (max-width: 760px) {
   table.t.t-empilee tbody tr.ligne-mere {
     background: var(--carte-douce);

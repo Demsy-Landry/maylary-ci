@@ -1,26 +1,33 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { servirAvecCors } from '../_partage/cors.ts';
+import {
+  clesAttendues,
+  confronterAuCorpus,
+  proposer,
+  secret,
+  type Parametres,
+} from '../_partage/classification.ts';
 
 /*
- * Classification tarifaire assistée.
+ * Classification tarifaire assistée — la porte du Déclarant.
  *
- * Le modèle propose un code et le raisonnement qui le soutient. Il ne donne
- * jamais le taux : le code proposé est confronté au corpus TEC juste après, et
- * c'est le corpus qui répond — ou personne. Un modèle qui invente un code
- * inventerait aussi son taux, et un taux inventé coûte un redressement au
- * client.
+ * Le moteur lui-même a déménagé dans `_partage/classification.ts` le jour où
+ * une deuxième application s'en est servie : la cotation E-Transit. Deux copies
+ * de la consigne auraient fini par diverger, et la même marchandise décrite
+ * pareil aurait rendu deux codes différents selon la porte d'entrée. Il ne
+ * reste donc ici que ce qui est propre à cette porte : qui a le droit
+ * d'entrer, combien de fois par jour, et sous quel nom la recherche est
+ * inscrite.
  *
- * Deux fournisseurs, une seule sortie. Le choix se règle en base et ne change
- * rien à la fiabilité : elle vient de la vérification en corpus, pas du modèle.
- * C'est précisément pourquoi la bascule peut être un réglage et non un choix
- * d'architecture.
+ * Ce qui ne change pas : le modèle propose, le corpus tranche. Le taux ne peut
+ * venir que de la confrontation au TEC officiel, jamais du modèle. Un modèle
+ * qui invente un code inventerait aussi son taux, et un taux inventé coûte un
+ * redressement au client.
  *
  * Aucune erreur interne ne ressort d'ici. Un message d'erreur peut contenir la
  * valeur qui l'a provoquée — une clé mal collée, par exemple — et se retrouver
- * dans un journal ou une réponse HTTP. Le corps d'erreur renvoyé par le
- * fournisseur, lui, décrit la requête et jamais l'en-tête d'authentification :
- * il est remonté, parce que sans lui un refus ne dit rien.
+ * dans un journal ou une réponse HTTP.
  */
 
 // Les en-têtes d'autorisation sont posés par `servirAvecCors`, qui
@@ -35,145 +42,6 @@ const json = (corps: unknown, status = 200) =>
     status,
     headers: { ...CORS, 'Content-Type': 'application/json' },
   });
-
-const CONSIGNE = `Tu es expert en classification tarifaire, spécialiste du Système Harmonisé et du Tarif Extérieur Commun CEDEAO/UEMOA appliqué en Côte d'Ivoire.
-
-Méthode obligatoire, dans cet ordre :
-1. Identifier la matière constitutive, la fonction et l'usage de la marchandise.
-2. Repérer la section du Système Harmonisé, puis le chapitre.
-3. Lire les notes de section et de chapitre, notamment leurs exclusions.
-4. Appliquer les Règles Générales Interprétatives dans l'ordre : RGI 1 d'abord (textes des positions et notes), puis RGI 2 à 6 seulement si RGI 1 ne tranche pas.
-5. Retenir la position à quatre chiffres.
-6. Descendre à la sous-position à six chiffres, puis à la ligne tarifaire nationale à dix chiffres au format UEMOA.
-7. Citer explicitement la ou les RGI qui ont tranché, et les notes utilisées.
-
-Règles absolues :
-- Ne donne JAMAIS de taux de droit de douane, ni de pourcentage, ni de catégorie tarifaire. Ce n'est pas ton rôle : le taux est lu dans le tarif officiel après ta réponse.
-- Si la description est trop vague pour trancher, dis-le dans "question" et laisse "code_hs" à null plutôt que de deviner.
-- Le code doit être au format 0000.00.00.00.
-
-Réponds uniquement en JSON valide, sans texte autour et sans balises de code :
-{"code_hs":"0000.00.00.00 ou null","section":"Section N — intitulé","chapitre":"Chapitre NN — intitulé","position":"0000 — intitulé","sous_position":"0000.00 — intitulé","caracteristiques":"matière, fonction, composition, usage retenus","raisonnement_rgi":"RGI appliquées et notes utilisées, en français, concis","notes_declarant":"documents exigibles, restrictions, pièges de classement","question":"la précision manquante, ou null"}`;
-
-/**
- * Un copier-coller depuis un affichage replié ramène des retours à la ligne au
- * milieu de la clé. On les retire, sinon l'en-tête HTTP est refusé et le
- * message d'erreur cite la clé en clair.
- */
-const secret = (nom: string) => (Deno.env.get(nom) ?? '').replace(/\s+/g, '');
-
-interface Refus {
-  statut: number;
-  genre: string | null;
-  motif: string | null;
-  /** Nom du secret utilisé, jamais sa valeur — pour savoir laquelle a refusé. */
-  cle?: string;
-}
-
-interface Proposition {
-  texte: string;
-  arret: string | null;
-  cle?: string;
-}
-
-/** Ce que les deux fournisseurs rendent en commun : du texte, ou un refus. */
-type Reponse = { ok: true; valeur: Proposition } | { ok: false; refus: Refus };
-
-async function lireRefus(reponse: Response): Promise<Refus> {
-  let genre: string | null = null;
-  let motif: string | null = null;
-  try {
-    const corps = await reponse.json();
-    const noeud = corps?.error ?? corps;
-    genre = noeud?.type ?? noeud?.status ?? null;
-    motif = noeud?.message ?? null;
-  } catch {
-    motif = null;
-  }
-  return { statut: reponse.status, genre, motif };
-}
-
-async function interrogerAnthropic(modele: string, description: string): Promise<Reponse> {
-  const appel = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': secret('ANTHROPIC_API_KEY'),
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: modele,
-      max_tokens: 4000,
-      system: CONSIGNE,
-      messages: [{ role: 'user', content: `Classe cette marchandise : ${description}` }],
-    }),
-  });
-
-  if (!appel.ok) return { ok: false, refus: { ...(await lireRefus(appel)), cle: 'ANTHROPIC_API_KEY' } };
-
-  const corps = await appel.json();
-  // La réponse peut commencer par un bloc de raisonnement : on concatène les
-  // blocs de texte plutôt que de lire le premier, qui n'est pas toujours le JSON.
-  const texte: string = (corps?.content ?? [])
-    .filter((b: { type?: string }) => b?.type === 'text')
-    .map((b: { text?: string }) => b.text ?? '')
-    .join('');
-  return { ok: true, valeur: { texte, arret: corps?.stop_reason ?? null, cle: 'ANTHROPIC_API_KEY' } };
-}
-
-/**
- * Clés Google essayées dans l'ordre. La première est le compte principal, la
- * seconde un compte de secours au palier gratuit. On ne bascule que sur un
- * épuisement de quota : sur une clé invalide ou une requête mal formée,
- * réessayer avec une autre clé masquerait le vrai défaut derrière un second
- * refus identique.
- */
-const CLES_GOOGLE = ['GOOGLE_API_KEY', 'GOOGLE_API_KEY2'];
-
-const quotaEpuise = (refus: Refus) =>
-  refus.statut === 429 ||
-  refus.genre === 'RESOURCE_EXHAUSTED' ||
-  (refus.statut === 403 && /quota/i.test(refus.motif ?? ''));
-
-async function interrogerGoogle(modele: string, description: string): Promise<Reponse> {
-  const disponibles = CLES_GOOGLE.filter((nom) => secret(nom).length > 0);
-  let dernier: Refus = { statut: 503, genre: null, motif: 'Aucune clé Google configurée.' };
-
-  for (const nom of disponibles) {
-    const appel = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(modele)}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'x-goog-api-key': secret(nom), 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: CONSIGNE }] },
-          contents: [
-            { role: 'user', parts: [{ text: `Classe cette marchandise : ${description}` }] },
-          ],
-          // Le mode JSON natif évite d'avoir à extraire le JSON d'un texte
-          // enrobé — l'échec de lecture le plus fréquent côté modèle.
-          generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 4000 },
-        }),
-      },
-    );
-
-    if (appel.ok) {
-      const corps = await appel.json();
-      const candidat = corps?.candidates?.[0];
-      const texte: string = (candidat?.content?.parts ?? [])
-        .map((p: { text?: string }) => p?.text ?? '')
-        .join('');
-      return { ok: true, valeur: { texte, arret: candidat?.finishReason ?? null, cle: nom } };
-    }
-
-    dernier = await lireRefus(appel);
-    dernier.cle = nom;
-    if (!quotaEpuise(dernier)) break;
-    console.error('quota epuise', nom, '- bascule sur la cle suivante');
-  }
-
-  return { ok: false, refus: dernier };
-}
 
 servirAvecCors(async (req: Request) => {
   try {
@@ -208,22 +76,18 @@ servirAvecCors(async (req: Request) => {
       .from('app_e08c374bc4_parametres_classification')
       .select('*')
       .limit(1)
-      .single();
+      .single<Parametres>();
 
     if (!parametres?.actif) {
       return json({ erreur: 'La classification assistée est momentanément désactivée.' }, 503);
     }
 
-    const fournisseur: string = parametres.fournisseur ?? 'google';
-    const modele: string =
-      fournisseur === 'anthropic' ? parametres.modele_anthropic : parametres.modele_google;
-
-    const clesPossibles = fournisseur === 'anthropic' ? ['ANTHROPIC_API_KEY'] : CLES_GOOGLE;
-    if (!clesPossibles.some((nom) => secret(nom).length > 0)) {
+    const attendues = clesAttendues(parametres.fournisseur ?? 'google');
+    if (!attendues.some((nom) => secret(nom).length > 0)) {
       return json(
         {
           erreur: "La clé de classification n'est pas configurée. Contactez Maylary.",
-          cles_attendues: clesPossibles,
+          cles_attendues: attendues,
         },
         503,
       );
@@ -250,81 +114,11 @@ servirAvecCors(async (req: Request) => {
     }
 
     // --- Le modèle propose ---
-    const reponse =
-      fournisseur === 'anthropic'
-        ? await interrogerAnthropic(modele, description)
-        : await interrogerGoogle(modele, description);
-
-    if (!reponse.ok) {
-      console.error('fournisseur', fournisseur, reponse.refus.statut, reponse.refus.genre);
-      return json(
-        {
-          erreur: 'Le service de classification est indisponible. Réessayez dans un instant.',
-          fournisseur,
-          cle_amont: reponse.refus.cle ?? null,
-          statut_amont: reponse.refus.statut,
-          genre_amont: reponse.refus.genre,
-          motif_amont: reponse.refus.motif,
-        },
-        502,
-      );
-    }
-
-    let propose: Record<string, unknown>;
-    try {
-      const { texte } = reponse.valeur;
-      const debut = texte.indexOf('{');
-      const fin = texte.lastIndexOf('}');
-      propose = JSON.parse(debut >= 0 && fin > debut ? texte.slice(debut, fin + 1) : texte);
-    } catch {
-      console.error('reponse non json', fournisseur, reponse.valeur.arret);
-      return json(
-        {
-          erreur: "La réponse n'a pas pu être interprétée. Reformulez la description.",
-          arret_amont: reponse.valeur.arret,
-        },
-        502,
-      );
-    }
-
-    const brut = typeof propose.code_hs === 'string' ? propose.code_hs : '';
-    const chiffres = brut.replace(/\D/g, '');
-    const code =
-      chiffres.length === 10
-        ? `${chiffres.slice(0, 4)}.${chiffres.slice(4, 6)}.${chiffres.slice(6, 8)}.${chiffres.slice(8, 10)}`
-        : null;
+    const issue = await proposer(parametres, description);
+    if (!issue.ok) return json(issue.corps, issue.statut);
 
     // --- Le corpus confirme, ou refuse ---
-    // Tout se joue ici : le taux ne peut venir que de cette ligne.
-    const { data: verification } = await supabase.rpc('app_e08c374bc4_tec_verifier', {
-      p_code: code ?? '',
-    });
-    const trouve = verification?.trouve === true;
-
-    const resultat = {
-      description,
-      code_propose: code,
-      section: propose.section ?? null,
-      chapitre: propose.chapitre ?? null,
-      position_sh: propose.position ?? null,
-      sous_position: propose.sous_position ?? null,
-      caracteristiques: propose.caracteristiques ?? null,
-      raisonnement_rgi: propose.raisonnement_rgi ?? null,
-      notes_declarant: propose.notes_declarant ?? null,
-      question: propose.question ?? null,
-      fournisseur,
-      modele,
-      verifie_en_base: trouve,
-      designation_tec: trouve ? verification.designation : null,
-      unite_us: trouve ? verification.unite_us : null,
-      taux_dd: trouve ? verification.taux_dd_pourcent : null,
-      mention: trouve
-        ? verification.mention
-        : (verification?.mention_utilisateur ??
-          "Le code proposé n'a pas pu être confirmé dans la base TEC officielle. Aucun taux n'est affiché."),
-      code_proche_indicatif: trouve ? null : (verification?.code_proche_indicatif ?? null),
-      tarif: verification?.tarif ?? null,
-    };
+    const resultat = await confronterAuCorpus(supabase, description, issue);
 
     // L'écriture passe par la clé de service : une classification ne doit pas
     // pouvoir être fabriquée depuis le navigateur, sinon l'historique ne prouve
@@ -342,8 +136,8 @@ servirAvecCors(async (req: Request) => {
         caracteristiques: resultat.caracteristiques,
         raisonnement_rgi: resultat.raisonnement_rgi,
         notes_declarant: resultat.notes_declarant,
-        fournisseur,
-        modele,
+        fournisseur: resultat.fournisseur,
+        modele: resultat.modele,
         verifie_en_base: resultat.verifie_en_base,
         designation_tec: resultat.designation_tec,
         unite_us: resultat.unite_us,

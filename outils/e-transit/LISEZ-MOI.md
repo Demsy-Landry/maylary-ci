@@ -86,6 +86,12 @@ vit dans la base du poste et l'application fonctionne entièrement hors ligne.
   taux. La ligne mère ne se liquide plus — elle regroupe — et l'application
   contrôle en permanence que les sous-lignes retombent sur ce que la ligne
   d'origine portait, en valeur comme en poids.
+- **Recherche de position assistée** : décrire la marchandise en toutes lettres
+  et laisser le moteur de classification du Déclarant proposer la position, avec
+  le chapitre, les règles interprétatives qui ont tranché et les documents
+  exigibles. **Le moteur ne donne jamais de taux** : le code qu'il propose est
+  confronté au tarif officiel juste après, et c'est le tarif qui répond — ou
+  personne. Voir « La recherche de position assistée » plus bas.
 - **Taux de change douaniers** : une table tenue en base, datée et sourcée,
   proposée d'office à chaque déclaration et corrigeable dossier par dossier.
 - **Feuille de saisie SYDAM** : un PDF où chaque valeur porte le numéro de la
@@ -181,6 +187,61 @@ clé.
 L'adresse de la source se change dans Réglages, et un fichier de tarif peut
 être importé à la place — l'application peut donc devenir complètement
 autonome le jour où E-Transit le voudra.
+
+---
+
+## La recherche de position assistée
+
+Réglages → **Recherche de position assistée**.
+
+Sur chaque ligne d'article, à côté du champ de position, un petit bouton
+boussole ouvre une fenêtre où l'on décrit la marchandise en toutes lettres :
+matière, fonction, usage, composition. Le moteur rend une position, le
+chapitre, la sous-position, les règles générales interprétatives qui ont
+tranché, et ce qu'il faudra surveiller au dossier — homologation, autorisation,
+piège de classement. Un bouton pose le code sur la ligne.
+
+**Ce que le moteur ne fait jamais, c'est donner un taux.** On ne le lui demande
+pas et il n'en a pas le droit. Le code qu'il propose est confronté au tarif
+juste après, et deux choses seulement peuvent arriver :
+
+- **le code existe au tarif** → il s'affiche en vert, avec son intitulé
+  officiel et son taux de droit, et le taux se pose sur la ligne ;
+- **le code n'existe pas au tarif** → il s'affiche en ambre, **sans aucun
+  taux**, avec la mention qu'il n'a pas pu être confirmé. Le code se pose quand
+  même sur la ligne si on le veut, mais la case du taux reste vide et la ligne
+  passe en alerte tant qu'un taux n'a pas été écrit à la main. Un code voisin
+  est parfois donné à côté : c'est un repère pour aller lire le tarif au bon
+  endroit, ce n'est pas la position de la marchandise, et son taux n'est pas le
+  sien.
+
+C'est toute la règle de la maison, et elle ne se contourne pas : **jamais de
+taux estimé**. Un taux inventé sur un écran devient un chiffre sur lequel
+quelqu'un s'engage, et c'est un redressement pour le client.
+
+Un second onglet, **« Déjà cherché au Déclarant »**, reprend les recherches
+faites depuis le site MayLary avec le même compte : une position cherchée au
+bureau se retrouve ici, et l'inverse. C'est la même mémoire.
+
+### La clé de poste
+
+L'application n'a pas de comptes : elle vit sur un poste, sans inscription.
+Elle présente donc une **clé de poste** à la place d'un compte. La clé se
+fabrique côté MayLary — Admin → Le Déclarant → *Clés de poste* — et **elle ne
+s'affiche qu'une seule fois**, au moment où elle est créée : la base n'en garde
+que l'empreinte, jamais la clé. Perdue, elle ne se relit pas ; on en fabrique
+une autre et on révoque l'ancienne, c'est l'affaire de dix secondes.
+
+Elle se colle ensuite dans Réglages → Recherche de position assistée. Elle
+reste sur cet ordinateur-là. Pour un deuxième poste, une deuxième clé : on sait
+ainsi lequel consomme quoi, et on peut en couper un sans couper l'autre.
+
+Chaque clé porte son propre plafond de recherches par jour, et **les recherches
+consomment le quota du compte MayLary porteur de la clé** — c'est le même
+crédit que celui du Déclarant, pas un budget séparé.
+
+Sans clé, rien n'est bloqué : la recherche par mots-clés dans le tarif
+fonctionne comme avant, hors ligne. On perd le raisonnement, pas l'application.
 
 ---
 

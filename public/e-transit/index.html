@@ -4,7 +4,7 @@
   Ouvrir l'adresse au navigateur, puis « Ajouter à l'écran d'accueil » sur
   téléphone. Les dossiers restent sur l'appareil : un téléphone et un
   ordinateur gardent chacun les leurs.
-  Construit le 2026-09-14. By Dems'Inc — Demsy Landry.
+  Construit le 2026-09-15. By Dems'Inc — Demsy Landry.
 -->
 
 <html lang="fr">
@@ -52,6 +52,7 @@
 <symbol id="i-balance" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10"/><path d="M5 7h14M8 7l-4 8h8zM16 7l4 8h-8z"/></symbol>
 <symbol id="i-billet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 12h.01M18 12h.01"/></symbol>
 <symbol id="i-eclater" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v6a3 3 0 0 0 3 3h13"/><path d="M4 13v3a3 3 0 0 0 3 3h13"/><path d="m17 9 3 4-3 4"/><path d="m17 16 3 3-3 3" opacity="0"/></symbol>
+<symbol id="i-boussole" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5.2-5.2 2 2-5.2z"/></symbol>
 <symbol id="i-dossier" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
 </defs></svg>
 
@@ -540,6 +541,40 @@
             </table>
           </div>
           <button class="b petit discret" id="btn-ajouter-taux" style="margin-top:8px"><svg><use href="#i-plus"/></svg>Ajouter une position</button>
+        </div>
+      </div>
+
+      <div class="carte">
+        <header><h3>Recherche de position assistée</h3><span class="indice" id="reglages-ia-indice">—</span>
+          <div class="actions">
+            <button class="b petit" id="btn-tester-cle">Tester la clé</button>
+          </div>
+        </header>
+        <div class="corps">
+          <p class="aide" style="margin-bottom:12px;max-width:76ch">
+            La recherche de position par description s’appuie sur le moteur du Déclarant : même méthode — matière,
+            fonction, section, chapitre, notes, puis les Règles Générales Interprétatives dans l’ordre. Et même
+            règle de sortie : <strong>le modèle propose un code, jamais un taux</strong>. Le code est confronté au
+            tarif officiel juste après, et c’est cette confrontation seule qui autorise un taux à s’afficher.
+          </p>
+          <p class="aide" style="margin-bottom:14px;max-width:76ch">
+            Elle demande une <strong>clé de poste</strong>, délivrée par l’administration MayLary. Elle porte un
+            plafond quotidien, se révoque à distance, et rattache les classements à un compte — ce qui permet de
+            retrouver ici ce qui a été cherché au Déclarant, et l’inverse.
+          </p>
+          <div class="champs">
+            <div class="champ c8"><label for="reglages-cle-poste">Clé de poste</label>
+              <input id="reglages-cle-poste" type="password" autocomplete="off" placeholder="collez la clé ici"></div>
+            <div class="champ c4" style="justify-content:flex-end">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="b petit" id="btn-voir-cle">Afficher</button>
+                <button class="b petit danger" id="btn-retirer-cle">Retirer</button>
+              </div>
+            </div>
+            <div class="champ c12"><div id="reglages-ia-etat"></div></div>
+            <div class="champ c9"><label for="reglages-source-ia">Adresse du service</label><input id="reglages-source-ia"></div>
+            <div class="champ c3" style="justify-content:flex-end"><button class="b" id="btn-remettre-source-ia">Remettre par défaut</button></div>
+          </div>
         </div>
       </div>
 

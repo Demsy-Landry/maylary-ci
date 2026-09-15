@@ -983,6 +983,45 @@ window.BASE = (function () {
 
   var SOURCE_TEC_DEFAUT = 'https://oubowmftzxpruckjzwuq.supabase.co/functions/v1/app_e08c374bc4_tec_public';
 
+  /* --------------------------------------- classification assistée */
+  /* Le moteur est celui du Déclarant : même consigne, même vérification en
+   * corpus. Ce qui change, c'est la porte d'entrée — une clé de poste au lieu
+   * d'un compte. Elle ne s'obtient pas ici : elle est délivrée par
+   * l'administration MayLary, et se colle une fois dans les réglages. */
+  var SOURCE_IA_DEFAUT = 'https://oubowmftzxpruckjzwuq.supabase.co/functions/v1/app_e08c374bc4_classification_poste';
+
+  function sourceIa() {
+    return parametre('source_ia', SOURCE_IA_DEFAUT);
+  }
+
+  function appelerClassification(charge) {
+    return Promise.all([sourceIa(), parametre('cle_poste', '')]).then(function (r) {
+      var url = r[0];
+      var cle = r[1];
+      if (!cle) {
+        return Promise.reject(new Error(
+          'Aucune clé de poste enregistrée. Réglages → Recherche de position assistée.'
+        ));
+      }
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({ cle: cle }, charge))
+      }).then(function (reponse) {
+        return reponse.json().catch(function () { return {}; }).then(function (corps) {
+          if (!reponse.ok) {
+            var e = new Error(corps.erreur || ('Le service a répondu ' + reponse.status + '.'));
+            e.details = corps;
+            throw e;
+          }
+          return corps;
+        });
+      }, function () {
+        throw new Error('Le service de classification est injoignable. Vérifiez la connexion du poste.');
+      });
+    });
+  }
+
   function sourceTec() {
     return parametre('source_tec', SOURCE_TEC_DEFAUT);
   }
@@ -1085,6 +1124,8 @@ window.BASE = (function () {
     tauxChange: tauxChange, poserTauxChange: poserTauxChange,
     numeroSuivant: numeroSuivant, identifiant: identifiant,
     sourceTec: sourceTec, SOURCE_TEC_DEFAUT: SOURCE_TEC_DEFAUT,
+    sourceIa: sourceIa, SOURCE_IA_DEFAUT: SOURCE_IA_DEFAUT,
+    appelerClassification: appelerClassification,
     synchroniserTec: synchroniserTec, importerTecDepuisTexte: importerTecDepuisTexte,
     exporterTout: exporterTout, importerTout: importerTout
   };
@@ -2761,7 +2802,17 @@ window.PDF = (function () {
           resume
         ]));
       } else {
-        tr.appendChild(el('td', {}, [construireComboPosition(a, tr)]));
+        var combo = construireComboPosition(a, tr);
+        combo.style.flex = '1 1 auto';
+        combo.style.minWidth = '0';
+        var boutonIa = el('button', {
+          class: 'icone bouton-ia',
+          title: 'Chercher la position à partir d’une description',
+          onclick: function () { ouvrirRechercheIa(a, tr); }
+        }, [icone('boussole')]);
+        tr.appendChild(el('td', {}, [
+          el('div', { style: 'display:flex;gap:5px;align-items:center', class: 'cellule-position' }, [combo, boutonIa])
+        ]));
         tr.appendChild(el('td', {}, [champTexte(a, 'designation', 'Désignation commerciale')]));
 
         var selOrigine = el('select');
@@ -3114,6 +3165,253 @@ window.PDF = (function () {
     });
 
     return enveloppe;
+  }
+
+  /* ------------------------------------------- recherche de position par IA */
+  /* Le moteur est celui du Déclarant : même consigne, même méthode — matière,
+   * fonction, section, chapitre, notes, puis les Règles Générales
+   * Interprétatives dans l'ordre. Et surtout la même règle de sortie : le
+   * modèle propose un code, jamais un taux. Le code est confronté au tarif
+   * officiel juste après, et c'est cette confrontation seule qui autorise un
+   * taux à s'afficher. Un modèle qui inventerait un code inventerait aussi son
+   * taux, et un taux inventé se paye en redressement. */
+
+  function ouvrirRechercheIa(article, ligne) {
+    var corps = el('div');
+    var onglets = el('div', { style: 'display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap' });
+    var zone = el('div');
+    corps.appendChild(onglets);
+    corps.appendChild(zone);
+
+    var courant = 'decrire';
+    function bouton(cle, libelle) {
+      var b = el('button', {
+        class: 'b petit' + (courant === cle ? ' primaire' : ''),
+        texte: libelle,
+        onclick: function () { courant = cle; peindre(); }
+      });
+      return b;
+    }
+    function peindre() {
+      onglets.innerHTML = '';
+      onglets.appendChild(bouton('decrire', 'Décrire la marchandise'));
+      onglets.appendChild(bouton('historique', 'Déjà cherché au Déclarant'));
+      zone.innerHTML = '';
+      zone.appendChild(courant === 'decrire' ? panneauDecrire() : panneauHistorique());
+    }
+
+    /* ------------------------------------------------------- décrire */
+    function panneauDecrire() {
+      var p = el('div');
+      p.appendChild(el('p', { class: 'aide', texte:
+        'Décrivez la marchandise comme elle est : la matière, la fonction, l’usage, la composition. ' +
+        'Plus la description est précise, moins le classement hésite. « Routeur wifi domestique, ' +
+        'boîtier plastique, 4 ports ethernet » vaut mieux que « matériel informatique ».' }));
+      var saisie = el('textarea', {
+        rows: '4', style: 'margin-top:10px',
+        placeholder: 'Matière, fonction, usage, composition…'
+      });
+      if (article && article.designation) saisie.value = article.designation;
+      p.appendChild(saisie);
+
+      var resultat = el('div', { style: 'margin-top:14px' });
+      var lancer = el('button', { class: 'b primaire', style: 'margin-top:10px' },
+        [icone('recherche'), document.createTextNode('Chercher la position')]);
+
+      lancer.addEventListener('click', function () {
+        var description = saisie.value.trim();
+        if (description.length < 3) { message('Décrivez la marchandise en quelques mots.', 'attention'); return; }
+        lancer.disabled = true;
+        resultat.innerHTML = '';
+        resultat.appendChild(el('div', { style: 'display:flex;align-items:center;gap:10px;color:var(--gris)' }, [
+          (function () { var g = icone('sync'); g.setAttribute('class', 'rotatif'); return g; })(),
+          el('span', { texte: 'Classement en cours — matière, section, chapitre, notes, RGI…' })
+        ]));
+        BASE.appelerClassification({ description: description })
+          .then(function (r) {
+            resultat.innerHTML = '';
+            resultat.appendChild(construireResultatIa(r, article, ligne));
+          })
+          .catch(function (e) {
+            resultat.innerHTML = '';
+            resultat.appendChild(avis('erreur', 'Recherche impossible.', e.message));
+          })
+          .then(function () { lancer.disabled = false; });
+      });
+
+      p.appendChild(lancer);
+      p.appendChild(resultat);
+      return p;
+    }
+
+    /* --------------------------------------------------- historique */
+    function panneauHistorique() {
+      var p = el('div');
+      p.appendChild(el('p', { class: 'aide', texte:
+        'Les classements déjà faits, ici comme au Déclarant. Même compte, même historique : ' +
+        'un code cherché là-bas se retrouve ici, et l’inverse.' }));
+      var liste = el('div', { style: 'margin-top:12px' });
+      liste.appendChild(el('div', { class: 'aide', texte: 'Chargement…' }));
+      p.appendChild(liste);
+
+      BASE.appelerClassification({ action: 'historique', limite: 40 })
+        .then(function (r) {
+          var lignes = r.classifications || [];
+          liste.innerHTML = '';
+          if (!lignes.length) {
+            liste.appendChild(el('div', { class: 'vide' }, [
+              icone('recherche'),
+              el('div', { class: 'titre', texte: 'Aucun classement enregistré' }),
+              el('div', { texte: 'Décrivez une marchandise dans l’autre onglet pour commencer.' })
+            ]));
+            return;
+          }
+          lignes.forEach(function (c) {
+            liste.appendChild(el('div', {
+              style: 'padding:11px;border:1px solid var(--trait);border-radius:8px;margin-bottom:8px;cursor:pointer',
+              onclick: function () { reprendreCode(c, article, ligne); }
+            }, [
+              el('div', { style: 'display:flex;gap:10px;align-items:baseline;flex-wrap:wrap' }, [
+                el('span', { style: 'font-weight:700;font-variant-numeric:tabular-nums', texte: c.code_propose || '—' }),
+                el('span', { class: 'etiq ' + (c.verifie_en_base ? 'vert' : 'ambre'),
+                  texte: c.verifie_en_base ? 'confirmé au tarif' : 'non confirmé' }),
+                c.verifie_en_base && c.taux_dd !== null
+                  ? el('span', { class: 'etiq bleu', texte: 'DD ' + fr(Number(c.taux_dd), 2) + ' %' })
+                  : null,
+                el('span', { style: 'margin-left:auto;font-size:11.5px;color:var(--gris)', texte: frDate(c.cree_le) })
+              ]),
+              el('div', { style: 'font-size:12.5px;color:var(--encre-douce);margin-top:4px', texte: c.description }),
+              c.designation_tec
+                ? el('div', { style: 'font-size:11.5px;color:var(--gris);margin-top:2px', texte: c.designation_tec })
+                : null
+            ]));
+          });
+        })
+        .catch(function (e) {
+          liste.innerHTML = '';
+          liste.appendChild(avis('erreur', 'Historique indisponible.', e.message));
+        });
+      return p;
+    }
+
+    peindre();
+    modale('Chercher la position tarifaire', corps, [{ libelle: 'Fermer', action: fermerModale }]);
+  }
+
+  /* Le résultat, tel qu'il doit se lire : le code d'abord, puis ce qui le
+   * soutient, puis ce qui reste incertain. */
+  function construireResultatIa(r, article, ligne) {
+    var p = el('div');
+
+    if (!r.code_propose) {
+      p.appendChild(avis('attention', 'Pas de code proposé.',
+        r.question || 'La description ne permet pas de trancher. Précisez la matière, la fonction ou l’usage.'));
+      return p;
+    }
+
+    var confirme = !!r.verifie_en_base;
+    var entete = el('div', {
+      style: 'display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px;border-radius:10px;' +
+        'background:' + (confirme ? 'var(--vert-pale)' : 'var(--ambre-pale)')
+    }, [
+      el('span', {
+        style: 'font-size:22px;font-weight:750;font-variant-numeric:tabular-nums;color:' +
+          (confirme ? 'var(--vert)' : 'var(--ambre)'),
+        texte: r.code_propose
+      }),
+      el('span', { class: 'etiq ' + (confirme ? 'vert' : 'ambre'),
+        texte: confirme ? 'confirmé au tarif officiel' : 'non confirmé au tarif' }),
+      confirme && r.taux_dd !== null
+        ? el('span', { class: 'etiq bleu', texte: 'Droit de douane ' + fr(Number(r.taux_dd), 2) + ' %' })
+        : null
+    ]);
+    p.appendChild(entete);
+
+    if (!confirme) {
+      p.appendChild(el('div', { style: 'margin-top:10px' }, [
+        avis('attention', 'Aucun taux n’est affiché.', r.mention ||
+          'Le code proposé n’a pas été retrouvé dans le tarif chargé. Vérifiez-le avant de vous en servir.')
+      ]));
+      /* Le code voisin est un repère pour aller lire le tarif au bon endroit,
+       * rien de plus. On montre le code, jamais son taux : ce serait le taux
+       * d'une autre marchandise, et un taux affiché devient un taux sur lequel
+       * on s'engage. */
+      if (r.code_proche_indicatif) {
+        p.appendChild(el('div', {
+          style: 'margin-top:10px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;' +
+            'padding:10px 12px;border:1px dashed var(--bord);border-radius:9px'
+        }, [
+          el('span', { class: 'aide', texte: 'Code voisin en base, pour orientation seulement :' }),
+          el('span', {
+            style: 'font-weight:700;font-variant-numeric:tabular-nums',
+            texte: r.code_proche_indicatif
+          }),
+          el('span', { class: 'aide', texte: '— son taux n’est pas celui de votre marchandise.' })
+        ]));
+      }
+    }
+
+    function bloc(titre, contenu) {
+      if (!contenu) return null;
+      return el('div', { style: 'margin-top:12px' }, [
+        el('div', { style: 'font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent)', texte: titre }),
+        el('div', { style: 'font-size:13px;margin-top:3px;color:var(--encre-douce)', texte: contenu })
+      ]);
+    }
+    [['Désignation au tarif', r.designation_tec],
+     ['Chapitre', r.chapitre],
+     ['Position', r.position_sh],
+     ['Sous-position', r.sous_position],
+     ['Ce qui a été retenu', r.caracteristiques],
+     ['Règles appliquées', r.raisonnement_rgi],
+     ['À surveiller au dossier', r.notes_declarant]
+    ].forEach(function (x) { var b = bloc(x[0], x[1]); if (b) p.appendChild(b); });
+
+    if (r.question) {
+      p.appendChild(el('div', { style: 'margin-top:12px' }, [
+        avis('info', 'Précision demandée.', r.question)
+      ]));
+    }
+
+    var pied = el('div', { style: 'margin-top:16px;display:flex;gap:9px;flex-wrap:wrap;align-items:center' });
+    pied.appendChild(el('button', {
+      class: 'b primaire', onclick: function () { reprendreCode(r, article, ligne); }
+    }, [icone('ok'), document.createTextNode('Reprendre ce code sur la ligne')]));
+    if (typeof r.restant === 'number') {
+      pied.appendChild(el('span', { class: 'aide', texte: r.restant + ' recherche' + (r.restant > 1 ? 's' : '') + ' restante' + (r.restant > 1 ? 's' : '') + ' aujourd’hui' }));
+    }
+    p.appendChild(pied);
+
+    p.appendChild(el('p', { class: 'aide', style: 'margin-top:12px', texte:
+      'Le classement reste sous votre responsabilité. Le modèle propose et explique ; c’est le tarif officiel ' +
+      'qui confirme, et c’est le déclarant qui signe.' }));
+    return p;
+  }
+
+  /* On reprend le code, jamais un taux qui ne serait pas confirmé. */
+  function reprendreCode(r, article, ligne) {
+    if (!article) { fermerModale(); return; }
+    article.position = r.code_propose || '';
+    article.designation_tec = r.designation_tec || '';
+    article.verifie_en_base = !!r.verifie_en_base;
+    article.taux_dd_saisi = false;
+    if (r.verifie_en_base && r.taux_dd !== null && r.taux_dd !== undefined) {
+      article.taux_dd_pct = Math.round(Number(r.taux_dd) * 100) / 100;
+    } else {
+      // Non confirmé : la case reste vide et la ligne passe en ambre. C'est au
+      // déclarant de trancher, pas au modèle.
+      article.taux_dd_pct = '';
+    }
+    if (r.unite_us && !article.unite) article.unite = r.unite_us;
+    if (!article.designation) article.designation = r.description || r.designation_tec || '';
+    fermerModale();
+    peindreArticles();
+    marquerModifie();
+    if (ligne) void ligne;
+    message(r.verifie_en_base
+      ? 'Position ' + r.code_propose + ' reprise, taux confirmé au tarif.'
+      : 'Position ' + r.code_propose + ' reprise. Aucun taux : le code n’est pas au tarif chargé.',
+      r.verifie_en_base ? 'succes' : 'attention');
   }
 
   function fermerListesCombo() {
@@ -3996,6 +4294,7 @@ window.PDF = (function () {
 
     $('#btn-ajouter-modele').addEventListener('click', function () { formulaireModeleDevis(null); });
     brancherTauxChange();
+    brancherCleIa();
 
     $('#btn-sauvegarder').addEventListener('click', function () {
       BASE.exporterTout(false).then(function (p) {
@@ -4186,6 +4485,12 @@ window.PDF = (function () {
     peindreEditeurListe();
     peindreModelesDevis();
     peindreTauxChange();
+    BASE.parametre('cle_poste', '').then(function (c) {
+      $('#reglages-cle-poste').value = c || '';
+      peindreEtatIa(c ? { encours: true } : null);
+      if (c) testerCleIa();
+    });
+    BASE.sourceIa().then(function (u) { $('#reglages-source-ia').value = u; });
 
     // Devis.
     $('#reglages-validite').value = etat.validite;
@@ -4257,6 +4562,76 @@ window.PDF = (function () {
           .then(function () { fermerModale(); peindreTauxPersonnels(); message('Taux personnel enregistré.', 'succes'); });
       } }
     ]);
+  }
+
+  /* ------------------------------------------- clé de la recherche assistée */
+
+  function brancherCleIa() {
+    var champ = $('#reglages-cle-poste');
+
+    champ.addEventListener('change', function () {
+      var valeur = this.value.trim();
+      BASE.poserParametre('cle_poste', valeur).then(function () {
+        if (valeur) { message('Clé enregistrée. Vérifiez-la avec « Tester la clé ».', 'succes'); testerCleIa(); }
+        else peindreEtatIa(null);
+      });
+    });
+
+    $('#btn-voir-cle').addEventListener('click', function () {
+      var cache = champ.type === 'password';
+      champ.type = cache ? 'text' : 'password';
+      this.textContent = cache ? 'Masquer' : 'Afficher';
+    });
+
+    $('#btn-retirer-cle').addEventListener('click', function () {
+      champ.value = '';
+      BASE.poserParametre('cle_poste', '').then(function () {
+        peindreEtatIa(null);
+        message('Clé retirée de ce poste.', 'succes');
+      });
+    });
+
+    $('#btn-tester-cle').addEventListener('click', testerCleIa);
+
+    $('#reglages-source-ia').addEventListener('change', function () {
+      BASE.poserParametre('source_ia', this.value.trim() || BASE.SOURCE_IA_DEFAUT);
+    });
+    $('#btn-remettre-source-ia').addEventListener('click', function () {
+      $('#reglages-source-ia').value = BASE.SOURCE_IA_DEFAUT;
+      BASE.poserParametre('source_ia', BASE.SOURCE_IA_DEFAUT);
+    });
+  }
+
+  function testerCleIa() {
+    peindreEtatIa({ encours: true });
+    BASE.appelerClassification({ action: 'verifier' })
+      .then(function (r) { peindreEtatIa({ ok: true, info: r }); })
+      .catch(function (e) { peindreEtatIa({ ok: false, message: e.message }); });
+  }
+
+  function peindreEtatIa(etatCle) {
+    var z = $('#reglages-ia-etat');
+    var indice = $('#reglages-ia-indice');
+    if (!z) return;
+    z.innerHTML = '';
+    if (!etatCle) {
+      indice.textContent = 'aucune clé';
+      z.appendChild(avis('info', 'Aucune clé enregistrée.',
+        'La recherche par description reste indisponible. La recherche par mot-clé dans le tarif chargé, elle, ' +
+        'fonctionne sans clé et sans connexion.'));
+      return;
+    }
+    if (etatCle.encours) { indice.textContent = 'vérification…'; return; }
+    if (etatCle.ok) {
+      var i = etatCle.info || {};
+      indice.textContent = 'clé active';
+      z.appendChild(avis('succes', 'Clé reconnue — ' + (i.libelle || 'poste'),
+        (i.utilisees_aujourdhui || 0) + ' recherche' + ((i.utilisees_aujourdhui || 0) > 1 ? 's' : '') +
+        ' aujourd’hui sur ' + (i.plafond_jour || '—') + ' autorisées.'));
+    } else {
+      indice.textContent = 'clé refusée';
+      z.appendChild(avis('erreur', 'Clé refusée.', etatCle.message || 'Vérifiez-la auprès de MayLary.'));
+    }
   }
 
   /* ------------------------------------------------ taux de change douaniers */

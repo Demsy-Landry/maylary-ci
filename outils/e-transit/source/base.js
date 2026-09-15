@@ -287,6 +287,45 @@ window.BASE = (function () {
 
   var SOURCE_TEC_DEFAUT = 'https://oubowmftzxpruckjzwuq.supabase.co/functions/v1/app_e08c374bc4_tec_public';
 
+  /* --------------------------------------- classification assistée */
+  /* Le moteur est celui du Déclarant : même consigne, même vérification en
+   * corpus. Ce qui change, c'est la porte d'entrée — une clé de poste au lieu
+   * d'un compte. Elle ne s'obtient pas ici : elle est délivrée par
+   * l'administration MayLary, et se colle une fois dans les réglages. */
+  var SOURCE_IA_DEFAUT = 'https://oubowmftzxpruckjzwuq.supabase.co/functions/v1/app_e08c374bc4_classification_poste';
+
+  function sourceIa() {
+    return parametre('source_ia', SOURCE_IA_DEFAUT);
+  }
+
+  function appelerClassification(charge) {
+    return Promise.all([sourceIa(), parametre('cle_poste', '')]).then(function (r) {
+      var url = r[0];
+      var cle = r[1];
+      if (!cle) {
+        return Promise.reject(new Error(
+          'Aucune clé de poste enregistrée. Réglages → Recherche de position assistée.'
+        ));
+      }
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({ cle: cle }, charge))
+      }).then(function (reponse) {
+        return reponse.json().catch(function () { return {}; }).then(function (corps) {
+          if (!reponse.ok) {
+            var e = new Error(corps.erreur || ('Le service a répondu ' + reponse.status + '.'));
+            e.details = corps;
+            throw e;
+          }
+          return corps;
+        });
+      }, function () {
+        throw new Error('Le service de classification est injoignable. Vérifiez la connexion du poste.');
+      });
+    });
+  }
+
   function sourceTec() {
     return parametre('source_tec', SOURCE_TEC_DEFAUT);
   }
@@ -389,6 +428,8 @@ window.BASE = (function () {
     tauxChange: tauxChange, poserTauxChange: poserTauxChange,
     numeroSuivant: numeroSuivant, identifiant: identifiant,
     sourceTec: sourceTec, SOURCE_TEC_DEFAUT: SOURCE_TEC_DEFAUT,
+    sourceIa: sourceIa, SOURCE_IA_DEFAUT: SOURCE_IA_DEFAUT,
+    appelerClassification: appelerClassification,
     synchroniserTec: synchroniserTec, importerTecDepuisTexte: importerTecDepuisTexte,
     exporterTout: exporterTout, importerTout: importerTout
   };

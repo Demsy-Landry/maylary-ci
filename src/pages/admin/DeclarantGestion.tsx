@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminNav from '@/components/AdminNav';
+import ClesDePosteCard from '@/components/admin/ClesDePosteCard';
 import {
   supabase,
   PROFILES_TABLE,
@@ -443,7 +444,12 @@ export default function DeclarantGestion() {
               </p>
             </section>
 
-            {/* 3. Qui consomme, qui est abonné. */}
+            {/* 3. Les clés de poste — le Déclarant sans compte. */}
+            <section>
+              <ClesDePosteCard />
+            </section>
+
+            {/* 4. Qui consomme, qui est abonné. */}
             <section className="grid gap-6 lg:grid-cols-2">
               <div>
                 <h2 className="trait-anime font-display text-base font-bold text-foreground">
