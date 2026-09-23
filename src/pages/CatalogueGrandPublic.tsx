@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useState, type MouseEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import PublicHeaderGP from '@/components/PublicHeaderGP';
 import SiteFooter from '@/components/SiteFooter';
@@ -31,86 +31,139 @@ type FiltreOrigine = 'tous' | OrigineProduit;
 export default function CatalogueGrandPublic() {
   useReferencement(PAGES["/boutique"]);
 
+  // Combien de produits par page. La vitrine ne charge JAMAIS tout le catalogue
+  // d'un coup : à des milliers d'articles, cela figerait le téléphone et, passé
+  // 1000 lignes, la base couperait en silence — des produits disparaîtraient.
+  // On charge une page, puis « Voir plus » va chercher la suivante.
+  const PAGE = 48;
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [categories, setCategories] = useState<CategorieGP[]>([]);
   const [produits, setProduits] = useState<Produit[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chargementPlus, setChargementPlus] = useState(false);
+  const [aPlus, setAPlus] = useState(false);
   const [search, setSearch] = useState(searchParams.get('q') ?? '');
   const [filtreOrigine, setFiltreOrigine] = useState<FiltreOrigine>('tous');
+  // Résultats de recherche venus de la base (null = pas de recherche en cours).
+  const [resultatsRecherche, setResultatsRecherche] = useState<Produit[] | null>(null);
+  const [rechercheEnCours, setRechercheEnCours] = useState(false);
 
   useEffect(() => {
     const q = searchParams.get('q');
     if (q !== null) setSearch(q);
   }, [searchParams]);
 
+  // Les grilles de gros sont chargées SEULEMENT pour les produits réellement
+  // affichés — jamais toutes les grilles du catalogue. On les rattache à leur
+  // produit pour la carte « à partir de » et l'ajout rapide au bon palier.
+  const attacherPaliers = useCallback(async (liste: Produit[]): Promise<Produit[]> => {
+    if (liste.length === 0) return liste;
+    const { data } = await supabase
+      .from(PALIERS_PRIX_PUBLIC_VIEW)
+      .select('produit_id, quantite_min, prix_unitaire_fcfa')
+      .in('produit_id', liste.map((p) => p.id))
+      .order('quantite_min');
+    const grilles = new Map<string, { quantite_min: number; prix_unitaire_fcfa: number }[]>();
+    for (const ligne of (data ?? []) as {
+      produit_id: string;
+      quantite_min: number;
+      prix_unitaire_fcfa: number;
+    }[]) {
+      const arr = grilles.get(ligne.produit_id) ?? [];
+      arr.push({
+        quantite_min: Number(ligne.quantite_min),
+        prix_unitaire_fcfa: Number(ligne.prix_unitaire_fcfa),
+      });
+      grilles.set(ligne.produit_id, arr);
+    }
+    return liste.map((p) => ({ ...p, paliers: grilles.get(p.id) ?? [] }));
+  }, []);
+
+  // Une page de produits, filtrée et paginée DANS LA BASE. `depuis` = combien
+  // sont déjà chargés ; la base ne renvoie que la tranche suivante.
+  const chargerPage = useCallback(
+    async (depuis: number): Promise<Produit[]> => {
+      let requete = supabase
+        .from(PRODUITS_PUBLIC_VIEW)
+        .select('*')
+        .eq('espace', 'grand_public')
+        .eq('actif', true);
+      if (filtreOrigine !== 'tous') requete = requete.eq('origine', filtreOrigine);
+      const { data } = await requete
+        .order('created_at', { ascending: false })
+        .range(depuis, depuis + PAGE - 1);
+      const page = await attacherPaliers((data as Produit[]) ?? []);
+      setAPlus(page.length === PAGE);
+      return page;
+    },
+    [filtreOrigine, attacherPaliers],
+  );
+
+  // Les catégories : peu nombreuses, chargées une fois, indépendamment des
+  // produits affichés (sinon une catégorie hors de la première page
+  // disparaîtrait de la barre).
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      const [categoriesRes, produitsRes, paliersRes] = await Promise.all([
-        supabase
-          .from(CATEGORIES_GP_TABLE)
-          .select('*')
-          .eq('actif', true)
-          .order('ordre_affichage'),
-        supabase
+    void supabase
+      .from(CATEGORIES_GP_TABLE)
+      .select('*')
+      .eq('actif', true)
+      .order('ordre_affichage')
+      .then(({ data }) => setCategories((data as CategorieGP[]) ?? []));
+  }, []);
+
+  // La grille : première page, rechargée quand le filtre d'origine change.
+  useEffect(() => {
+    let vivant = true;
+    setLoading(true);
+    void chargerPage(0).then((page) => {
+      if (!vivant) return;
+      setProduits(page);
+      setLoading(false);
+    });
+    return () => {
+      vivant = false;
+    };
+  }, [chargerPage]);
+
+  const voirPlus = async () => {
+    setChargementPlus(true);
+    const suite = await chargerPage(produits.length);
+    setProduits((prev) => [...prev, ...suite]);
+    setChargementPlus(false);
+  };
+
+  // La recherche interroge la BASE sur tout le catalogue (pas seulement ce qui
+  // est déjà chargé), avec un petit délai pour ne pas lancer une requête à
+  // chaque touche. L'index trigramme sur le nom la garde instantanée à
+  // n'importe quelle taille de catalogue.
+  useEffect(() => {
+    const q = search.trim();
+    if (!q) {
+      setResultatsRecherche(null);
+      setRechercheEnCours(false);
+      return;
+    }
+    setRechercheEnCours(true);
+    const minuterie = setTimeout(() => {
+      void (async () => {
+        let requete = supabase
           .from(PRODUITS_PUBLIC_VIEW)
           .select('*')
           .eq('espace', 'grand_public')
-          .eq('actif', true),
-        supabase
-          .from(PALIERS_PRIX_PUBLIC_VIEW)
-          .select('produit_id, quantite_min, prix_unitaire_fcfa')
-          .order('quantite_min'),
-      ]);
-      setCategories((categoriesRes.data as CategorieGP[]) ?? []);
+          .eq('actif', true)
+          .ilike('nom', `%${q}%`);
+        if (filtreOrigine !== 'tous') requete = requete.eq('origine', filtreOrigine);
+        const { data } = await requete.order('created_at', { ascending: false }).limit(48);
+        const res = await attacherPaliers((data as Produit[]) ?? []);
+        setResultatsRecherche(res);
+        setRechercheEnCours(false);
+      })();
+    }, 300);
+    return () => clearTimeout(minuterie);
+  }, [search, filtreOrigine, attacherPaliers]);
 
-      // Les grilles de gros arrivent à part : on les rattache à leur produit
-      // pour que la carte affiche « à partir de » et que le panier applique le
-      // bon palier dès l'ajout rapide.
-      const grilles = new Map<string, { quantite_min: number; prix_unitaire_fcfa: number }[]>();
-      for (const ligne of (paliersRes.data ?? []) as {
-        produit_id: string;
-        quantite_min: number;
-        prix_unitaire_fcfa: number;
-      }[]) {
-        const liste = grilles.get(ligne.produit_id) ?? [];
-        liste.push({
-          quantite_min: Number(ligne.quantite_min),
-          prix_unitaire_fcfa: Number(ligne.prix_unitaire_fcfa),
-        });
-        grilles.set(ligne.produit_id, liste);
-      }
-      setProduits(
-        ((produitsRes.data as Produit[]) ?? []).map((p) => ({
-          ...p,
-          paliers: grilles.get(p.id) ?? [],
-        })),
-      );
-      setLoading(false);
-    };
-    load();
-  }, []);
-
-  const produitsCountByCategorie = (categorieId: string) =>
-    produits.filter((p) => p.categorie_gp_id === categorieId).length;
-
-  /** Une catégorie encore vide n'a rien à montrer : on ne l'affiche pas. */
-  const categoriesVisibles = useMemo(
-    () => categories.filter((c) => produitsCountByCategorie(c.id) > 0),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [categories, produits],
-  );
-
-  const produitsFiltres = useMemo(
-    () => (filtreOrigine === 'tous' ? produits : produits.filter((p) => p.origine === filtreOrigine)),
-    [produits, filtreOrigine],
-  );
-
-  const searchResults = useMemo(() => {
-    if (!search.trim()) return [];
-    const q = search.trim().toLowerCase();
-    return produitsFiltres.filter((p) => p.nom.toLowerCase().includes(q));
-  }, [search, produitsFiltres]);
+  const searchResults = resultatsRecherche ?? [];
 
   const filtres: { valeur: FiltreOrigine; libelle: string }[] = [
     { valeur: 'tous', libelle: 'Tous les produits' },
@@ -172,9 +225,17 @@ export default function CatalogueGrandPublic() {
         ) : search.trim() ? (
           <div>
             <p className="mb-3 text-sm text-muted-foreground">
-              {searchResults.length} résultat(s) pour « {search} »
+              {rechercheEnCours && resultatsRecherche === null
+                ? 'Recherche…'
+                : `${searchResults.length} résultat(s) pour « ${search} »`}
             </p>
-            {searchResults.length === 0 ? (
+            {rechercheEnCours && resultatsRecherche === null ? (
+              <div className="cascade grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <Skeleton key={i} className="h-56 w-full" />
+                ))}
+              </div>
+            ) : searchResults.length === 0 ? (
               /* Une recherche vide n'est pas une impasse : c'est le moment où
                  la maison a quelque chose à offrir que la boutique n'a pas.
                  Le catalogue en ligne est une vitrine ; le métier, c'est
@@ -217,7 +278,7 @@ export default function CatalogueGrandPublic() {
         ) : (
           <>
             <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:flex-wrap sm:px-0">
-              {categoriesVisibles.map((c) => (
+              {categories.map((c) => (
                 <Link
                   key={c.id}
                   to={`/boutique/categorie/${c.id}`}
@@ -233,40 +294,46 @@ export default function CatalogueGrandPublic() {
                   <span className="whitespace-nowrap text-sm font-medium text-foreground group-hover:text-primary">
                     {c.nom}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({produitsCountByCategorie(c.id)})
-                  </span>
                 </Link>
               ))}
-              {categoriesVisibles.length === 0 && (
+              {categories.length === 0 && (
                 <p className="col-span-full rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
                   La boutique est en cours de préparation, revenez bientôt.
                 </p>
               )}
             </div>
 
-            {produitsFiltres.length > 0 ? (
+            {produits.length > 0 ? (
               <div className="mt-6">
                 <h2 className="mb-4 text-lg font-semibold text-foreground">
                   {filtreOrigine === 'tous'
                     ? 'Tous les produits'
                     : ORIGINE_PRODUIT_LABELS[filtreOrigine]}
                   <span className="ml-2 text-sm font-normal text-muted-foreground">
-                    ({produitsFiltres.length})
+                    ({produits.length}
+                    {aPlus ? '+' : ''})
                   </span>
                 </h2>
                 <div className="cascade grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
-                  {produitsFiltres.map((p) => (
+                  {produits.map((p) => (
                     <ProductCardGP key={p.id} produit={p} />
                   ))}
                 </div>
+
+                {/* La suite du catalogue ne se charge qu'à la demande : la page
+                    reste légère même avec des milliers d'articles. */}
+                {aPlus && (
+                  <div className="mt-6 flex justify-center">
+                    <Button variant="outline" onClick={() => void voirPlus()} disabled={chargementPlus}>
+                      {chargementPlus ? 'Chargement…' : 'Voir plus de produits'}
+                    </Button>
+                  </div>
+                )}
               </div>
             ) : (
-              produits.length > 0 && (
-                <p className="mt-6 rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
-                  Aucun produit dans cette sélection pour le moment.
-                </p>
-              )
+              <p className="mt-6 rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
+                Aucun produit dans cette sélection pour le moment.
+              </p>
             )}
           </>
         )}
